@@ -1,0 +1,16 @@
+name: coinlib
+description: A library for Peercoin and other related cryptocoins.
+version: 1.0.0
+repository: https://github.com/peercoin/coinlib
+
+environment:
+  sdk: '>=2.19.2 <3.0.0'
+
+dev_dependencies:
+  build_runner: ^2.3.3
+  lints: ^2.0.0
+  test: ^1.21.0
+dependencies:
+  hex: ^0.2.0
+  path: ^1.8.3
+  wasm: ^0.1.0+1
