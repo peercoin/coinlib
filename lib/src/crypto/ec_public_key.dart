@@ -1,4 +1,3 @@
-
 import 'dart:typed_data';
 
 /// Represents an ECC public key on the secp256k1 curve that has an associated
@@ -19,4 +18,3 @@ class ECPublicKey {
   }
 
 }
-

@@ -52,4 +52,3 @@ RUN ${WASI_SDK_PATH}/bin/wasm-ld \
   # Need to include another library from clang that isn't included either
   # See https://github.com/WebAssembly/wasi-libc/issues/98
   ${WASI_SDK_PATH}/lib/clang/15.0.7/lib/wasi/libclang_rt.builtins-wasm32.a
-

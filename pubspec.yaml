@@ -7,10 +7,20 @@ environment:
   sdk: '>=2.19.2 <3.0.0'
 
 dev_dependencies:
-  build_runner: ^2.3.3
+  ffigen: ^6.0.0
   lints: ^2.0.0
   test: ^1.21.0
+
 dependencies:
+  ffi: ^1.2.1
   hex: ^0.2.0
   path: ^1.8.3
-  wasm: ^0.1.0+1
+  wasm_interop: ^2.0.1
+
+ffigen:
+  name: NativeSecp256k1
+  description: Raw generated bindings to secp256k1
+  output: 'lib/src/generated/secp256k1.ffi.g.dart'
+  headers:
+    entry-points:
+      - 'headers/secp256k1.h'

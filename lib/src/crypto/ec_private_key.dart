@@ -1,6 +1,4 @@
-
 import 'dart:typed_data';
-
 import 'package:coinlib/src/bindings/secp256k1.dart';
 import 'package:coinlib/src/crypto/ec_public_key.dart';
 
@@ -25,4 +23,3 @@ class ECPrivateKey {
   get pubkey => _pubkeyCache ??= ECPublicKey(secp256k1.privToPubKey(data));
 
 }
-
