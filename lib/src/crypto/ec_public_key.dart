@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:coinlib/src/common/hex.dart';
 
 /// Represents an ECC public key on the secp256k1 curve that has an associated
 /// private key
@@ -16,5 +17,7 @@ class ECPublicKey {
       );
     }
   }
+
+  get hex => bytesToHex(data);
 
 }

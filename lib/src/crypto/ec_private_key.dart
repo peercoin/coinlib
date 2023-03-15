@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:coinlib/src/bindings/secp256k1.dart';
+import 'package:coinlib/src/common/hex.dart';
 import 'package:coinlib/src/crypto/ec_public_key.dart';
 
 /// Represents an ECC private key for use with the secp256k1 curve
@@ -17,6 +18,8 @@ class ECPrivateKey {
       );
     }
   }
+
+  ECPrivateKey.fromHex(String hex) : this(hexToBytes(hex));
 
   ECPublicKey? _pubkeyCache;
   /// The public key associated with this private key

@@ -14,7 +14,7 @@ dev_dependencies:
 dependencies:
   ffi: ^1.2.1
   hex: ^0.2.0
-  path: ^1.8.3
+  path: ^1.8.0
   wasm_interop: ^2.0.1
 
 ffigen:
