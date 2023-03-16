@@ -4,7 +4,10 @@ FROM debian:bullseye
 RUN apt-get update -y \
   && apt-get install -y autoconf libtool build-essential git
 
-# Clone libsecp256k1
+# Clone libsecp256k1.
+# Could use secp256k1 already in code-base but this makes the dockerfile more
+# independent and avoids complexity of copying everything into the correct
+# context. It's not a large library to download.
 RUN git clone https://github.com/bitcoin-core/secp256k1
 WORKDIR /secp256k1
 
