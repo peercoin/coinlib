@@ -1,0 +1,36 @@
+name: coinlib_flutter
+description: A flutter wrapper for coinlib
+version: 1.0.0
+homepage:
+# Remove when publishing
+publish_to: none
+
+environment:
+  sdk: '>=2.19.2 <3.0.0'
+  flutter: ">=2.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  plugin_platform_interface: ^2.0.2
+  # TODO: Reference published coinlib package when it has been
+  coinlib:
+    path: ../coinlib
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  plugin:
+    platforms:
+      # TODO: These are not provided yet
+      android:
+        ffiPlugin: true
+      ios:
+        ffiPlugin: true
+      linux:
+        ffiPlugin: true
+      macos:
+        ffiPlugin: true
