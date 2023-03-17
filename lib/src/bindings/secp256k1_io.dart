@@ -16,7 +16,7 @@ String _libraryPath() {
   if (Platform.isLinux || Platform.isAndroid) {
     libName = "lib$_name.so";
   } else if (Platform.isMacOS || Platform.isIOS) {
-    libName = "$_name.framework/$_name";
+    libName = "lib$_name.dylib";
   } else if (Platform.isWindows) {
     libName = "$_name.dll";
   } else {

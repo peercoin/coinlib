@@ -1,13 +1,6 @@
 import 'dart:io';
 import "package:path/path.dart" show dirname;
-
-final thisDir = dirname(Platform.script.path);
-
-Future<bool> cmdAvailable(String cmd) async {
-  final result = await Process.run(cmd, ["--version"]);
-  final out = result.stdout as String;
-  return out.toLowerCase().startsWith(cmd);
-}
+import "util.dart";
 
 /// Determine if podman is available, if not try docker
 Future<String> getDockerCmd() async {
@@ -20,19 +13,6 @@ Future<String> getDockerCmd() async {
     print("Could not find podman or docker to use for wasm build");
     exit(1);
   }
-
-}
-
-Future<int> execWithStdio(
-  String executable,
-  List<String> arguments,
-) async {
-
-  final process = await Process.start(
-    executable, arguments, mode: ProcessStartMode.inheritStdio,
-  );
-
-  return await process.exitCode;
 
 }
 

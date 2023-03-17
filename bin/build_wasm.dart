@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'docker_util.dart';
+import 'util.dart';
 
 /// Run Dockerfile to generate wasm file and then convert into a dart file with
 /// the wasm as a Uint8List static variable
@@ -20,7 +21,7 @@ void main() async {
   print("Using $cmd to run dockerfile");
 
   // Create temporary directory to receive wasm file
-  final tmpDir = Directory.systemTemp.createTempSync("coinlibBuild").path;
+  final tmpDir = createTmpDir();
   print("Temporary build artifacts at $tmpDir");
 
   // Build secp256k1 to wasm and copy wasm file to tempdir
