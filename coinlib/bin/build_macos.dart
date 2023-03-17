@@ -12,7 +12,7 @@ void main() async {
   final libDir = "$tmpDir/secp256k1";
 
   var exitCode = await execWithStdio(
-    "cp", ["-r", "$thisDir/../src/secp256k1", libDir]
+    "cp", ["-r", "$thisDir/../src/secp256k1", libDir],
   );
   if (exitCode != 0) {
     print("Could not copy secp256k1 to temporary build directory");
@@ -37,7 +37,7 @@ void main() async {
       // Build for arm and x86 architectures
       "CFLAGS=-O2 -arch x86_64 -arch arm64"
     ],
-    workingDir: libDir
+    workingDir: libDir,
   );
   if (exitCode != 0) {
     print("Failed to configure secp256k1");

@@ -14,9 +14,7 @@ Future<bool> cmdAvailable(String cmd) async {
 }
 
 Future<int> execWithStdio(
-  String executable,
-  List<String> arguments,
-  { String? workingDir }
+  String executable, List<String> arguments, { String? workingDir, }
 ) async {
 
   final process = await Process.start(

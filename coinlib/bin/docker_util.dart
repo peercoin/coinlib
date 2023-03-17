@@ -1,5 +1,4 @@
 import 'dart:io';
-import "package:path/path.dart" show dirname;
 import "util.dart";
 
 /// Determine if podman is available, if not try docker
