@@ -1,0 +1,5 @@
+flutter/ephemeral
+# These should be included in ephemeral but aren't: https://github.com/flutter/flutter/issues/119544
+flutter/generated_plugin_registrant.cc
+flutter/generated_plugin_registrant.h
+flutter/generated_plugins.cmake

@@ -25,12 +25,12 @@ dev_dependencies:
 flutter:
   plugin:
     platforms:
+      linux:
+        ffiPlugin: true
       # TODO: These are not provided yet
       android:
         ffiPlugin: true
       ios:
-        ffiPlugin: true
-      linux:
         ffiPlugin: true
       macos:
         ffiPlugin: true
