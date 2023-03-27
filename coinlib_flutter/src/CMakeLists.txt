@@ -9,33 +9,32 @@ project(coinlib_library VERSION 1.0.0 LANGUAGES C)
 
 include(ExternalProject)
 
-set(
-  SECP256K1_OUTDIR
-  ${CMAKE_BINARY_DIR}/secp256k1/output
-)
+set(SECP256K1_PREFIX ${CMAKE_BINARY_DIR}/secp256k1)
+set(SECP256K1_CFLAGS "-O2 ${CMAKE_C_FLAGS}")
 
 ExternalProject_Add(
 
-  secp256k1_external
+  secp256k1
 
   GIT_REPOSITORY https://github.com/bitcoin-core/secp256k1
-  GIT_TAG 21ffe4b22a9683cf24ae0763359e401d1284cc7a
-  SOURCE_DIR "${CMAKE_BINARY_DIR}/secp256k1/src"
+  GIT_TAG bdf39000b9c6a0818e7149ccb500873d079e6e85 # v0.3.0 with cmake system
 
-  CONFIGURE_COMMAND ./autogen.sh
-  COMMAND ./configure --prefix=${SECP256K1_OUTDIR}
-    --enable-module-recovery --disable-tests
-    --disable-exhaustive-tests --disable-benchmark
-    CFLAGS=-O2
+  PREFIX ${SECP256K1_PREFIX}
 
-  BUILD_COMMAND make
-  INSTALL_COMMAND make install
+  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${SECP256K1_PREFIX}
+    -DSECP256K1_ENABLE_MODULE_RECOVERY=ON
+    -DSECP256K1_BUILD_TESTS=OFF
+    -DSECP256K1_BUILD_EXHAUSTIVE_TESTS=OFF
+    -DSECP256K1_BUILD_BENCHMARK=OFF
+    -DCMAKE_C_FLAGS=${SECP256K1_CFLAGS}
 
-  # Remove versioned sonames to load library directly
-  COMMAND rm ${SECP256K1_OUTDIR}/lib/libsecp256k1.so
-  COMMAND mv ${SECP256K1_OUTDIR}/lib/libsecp256k1.so.1.0.0 ${SECP256K1_OUTDIR}/lib/libsecp256k1.so
+)
 
-  BUILD_IN_SOURCE TRUE
-
+# Move the versioned .so file to an unversioned .so file. This cannot be done in
+# ExternalProject_Add as it causes an error
+add_custom_command(
+  TARGET secp256k1
+  POST_BUILD
+  COMMAND mv ${SECP256K1_PREFIX}/lib/libsecp256k1.so.2.0.0 ${SECP256K1_PREFIX}/lib/libsecp256k1.so
 )
 

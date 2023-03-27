@@ -19,6 +19,6 @@ add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/../src" "${CMAKE_CURRENT_BINARY_DI
 set(coinlib_flutter_bundled_libraries
   # Defined in ../src/CMakeLists.txt.
   # This can be changed to accomodate different builds.
-  ${CMAKE_BINARY_DIR}/secp256k1/output/lib/libsecp256k1.so
+  ${CMAKE_BINARY_DIR}/secp256k1/lib/libsecp256k1.so
   PARENT_SCOPE
 )
