@@ -1,3 +1,6 @@
 // Relative import to be able to reuse the C sources.
 // See the comment in ../{projectName}}.podspec for more information.
-#include "../../src/coinlib_flutter.c"
+#include "../../../coinlib/src/secp256k1/src/secp256k1.c"
+#include "../../../coinlib/src/secp256k1/src/precompute_ecmult_gen.c"
+#include "../../../coinlib/src/secp256k1/src/precomputed_ecmult_gen.c"
+#include "../../../coinlib/src/secp256k1/src/precomputed_ecmult.c"

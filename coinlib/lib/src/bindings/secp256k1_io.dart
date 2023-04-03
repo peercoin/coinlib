@@ -12,25 +12,28 @@ const _name = "secp256k1";
 
 String _libraryPath() {
 
-  final String libName;
+  final String localLib, flutterLib;
   if (Platform.isLinux || Platform.isAndroid) {
-    libName = "lib$_name.so";
+    flutterLib = localLib = "lib$_name.so";
   } else if (Platform.isMacOS || Platform.isIOS) {
-    libName = "lib$_name.dylib";
+    // Dylib if built in build directory, or framework if using flutter
+    localLib = "lib$_name.dylib";
+    flutterLib = "$_name.framework/$_name";
   } else if (Platform.isWindows) {
-    libName = "$_name.dll";
+    // Not provided yet, so should fail to load unless added outside of library
+    flutterLib = localLib = "$_name.dll";
   } else {
     throw UnsupportedError('Unknown platform: ${Platform.operatingSystem}');
   }
 
   // Exists in build directory?
-  final libBuildPath = join(Directory.current.path, "build", libName);
+  final libBuildPath = join(Directory.current.path, "build", localLib);
   if (File(libBuildPath).existsSync()) {
     return libBuildPath;
   }
 
-  // Load from library name
-  return libName;
+  // Load from flutter library name
+  return flutterLib;
 
 }
 

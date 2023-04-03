@@ -4,14 +4,15 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'coinlib_flutter'
-  s.version          = '0.0.1'
-  s.summary          = 'A new Flutter FFI plugin project.'
+  s.module_name      = 'secp256k1'
+  s.version          = '0.2.0'
+  s.summary          = 'Cryptographic primitives from the secp256k1 library'
   s.description      = <<-DESC
-A new Flutter FFI plugin project.
+The secp256k1 library bundled into the flutter plugin via cocoapods.
                        DESC
-  s.homepage         = 'http://example.com'
+  s.homepage         = 'http://peercoin.net'
   s.license          = { :file => '../LICENSE' }
-  s.author           = { 'Your Company' => 'email@example.com' }
+  s.author           = 'Peercoin Developers'
 
   # This will ensure the source files in Classes/ are included in the native
   # builds of apps using this FFI plugin. Podspec does not support relative
