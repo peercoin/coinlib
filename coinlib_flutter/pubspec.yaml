@@ -27,9 +27,9 @@ flutter:
     platforms:
       linux:
         ffiPlugin: true
-      # TODO: These are not provided yet
       android:
         ffiPlugin: true
+      # TODO: These are not provided yet
       ios:
         ffiPlugin: true
       macos:
