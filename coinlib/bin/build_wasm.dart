@@ -10,8 +10,7 @@ void binaryFileToDart(String inPath, String outPath, String name) {
   final hexList = bytes.map((b) => "0x${b.toRadixString(16)}").join(",");
   final output = """\
 import 'dart:typed_data';
-final $name = Uint8List.fromList([$hexList]);
-  """;
+final $name = Uint8List.fromList([$hexList]);""";
   File(outPath).writeAsStringSync(output, flush: true);
 }
 
