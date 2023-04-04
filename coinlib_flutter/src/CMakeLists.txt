@@ -26,6 +26,7 @@ set(
   -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
   -DCMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM}
   -DCMAKE_SYSYEM_NAME=${CMAKE_SYSTEM_NAME}
+  -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
 )
 
 # The Android toolchain requires additional settings passed through
@@ -90,4 +91,3 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL Android)
   )
   add_dependencies(moveAndroid removeVersion)
 endif()
-
