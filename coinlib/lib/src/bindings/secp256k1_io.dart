@@ -51,7 +51,7 @@ class Secp256k1 implements Secp256k1Interface {
   final _privKeyArray = UnsignedCharHeapArray(Secp256k1Interface.privkeySize);
   final Pointer<secp256k1_pubkey> _pubKeyPtr = malloc();
   final _serializedPubKeyArray = UnsignedCharHeapArray(
-    Secp256k1Interface.compressedPubkeySize,
+    Secp256k1Interface.uncompressedPubkeySize,
   );
   final Pointer<Size> _sizeTPtr = malloc();
 
@@ -77,7 +77,7 @@ class Secp256k1 implements Secp256k1Interface {
   Future<void> load() async {}
 
   @override
-  Uint8List privToPubKey(Uint8List privKey) {
+  Uint8List privToPubKey(Uint8List privKey, bool compressed) {
 
     // Write private key into memory
     _privKeyArray.list.setAll(0, privKey);
@@ -91,15 +91,22 @@ class Secp256k1 implements Secp256k1Interface {
       throw Secp256k1Exception("Cannot compute public key from private key");
     }
 
-    // Parse public key ensuring the output length is set to 33
-    _sizeTPtr.value = 33;
+    // Parse public key
+
+    _sizeTPtr.value = compressed
+      ? Secp256k1Interface.compressedPubkeySize
+      : Secp256k1Interface.uncompressedPubkeySize;
+
+    final flags = compressed
+      ? Secp256k1Interface.compressedFlags
+      : Secp256k1Interface.uncompressedFlags;
+
     _lib.secp256k1_ec_pubkey_serialize(
-      _ctxPtr, _serializedPubKeyArray.ptr, _sizeTPtr, _pubKeyPtr,
-      Secp256k1Interface.compressionFlags,
+      _ctxPtr, _serializedPubKeyArray.ptr, _sizeTPtr, _pubKeyPtr, flags,
     );
 
     // Return copy of public key
-    return _serializedPubKeyArray.list.sublist(0);
+    return _serializedPubKeyArray.list.sublist(0, _sizeTPtr.value);
 
   }
 

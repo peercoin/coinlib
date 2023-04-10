@@ -1,28 +1,50 @@
 import 'package:coinlib/coinlib.dart';
+import 'package:coinlib/src/common/hex.dart';
 import 'package:test/test.dart';
+
+import '../vectors/keys.dart';
 
 void main() {
 
   setUpAll(() => loadCoinlib());
 
-  group(".pubkey", () {
+  group("ECPrivateKey", () {
 
-    test("converts private key to public key", () {
+    test("requires 32 bytes", () {
 
-      // TODO: Use more extensive fixtures. This is just a simple test to
-      // demonstrate WASM
-
-      final privKey = ECPrivateKey.fromHex(
-        "0000000000000000000000000000000000000000000000000000000000000001",
-      );
-      // Should work twice with cache
-      for (int i = 0; i < 2; i++) {
+      for (final failing in [
+        // Too small
+        "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e",
+        // Too large
+        "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20",
+      ]) {
         expect(
-          privKey.pubkey.hex,
-          "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+          () => ECPrivateKey.fromHex(failing),
+          throwsA(isA<ArgumentError>()),
         );
       }
 
+    });
+
+    test(".data", () {
+      for (final vector in keyPairVectors) {
+        expect(bytesToHex(vector.privateObj.data), vector.private);
+      }
+    });
+
+    test(".compressed", () {
+      for (final vector in keyPairVectors) {
+        expect(vector.privateObj.compressed, vector.compressed);
+      }
+    });
+
+    test(".pubkey", () {
+      for (final vector in keyPairVectors) {
+        // Should work twice with cache
+        for (int i = 0; i < 2; i++) {
+          expect(vector.privateObj.pubkey.hex, vector.public);
+        }
+      }
     });
 
   });
