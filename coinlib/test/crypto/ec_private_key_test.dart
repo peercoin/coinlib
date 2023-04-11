@@ -1,7 +1,6 @@
 import 'package:coinlib/coinlib.dart';
 import 'package:coinlib/src/common/hex.dart';
 import 'package:test/test.dart';
-
 import '../vectors/keys.dart';
 
 void main() {
