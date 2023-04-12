@@ -25,6 +25,53 @@ void main() {
 
     });
 
+    group(".fromWif", () {
+
+      test("constructs corresponding private key", () {
+        for (final vector in keyPairVectors) {
+
+          expectAsVector(ECPrivateKey key) {
+            expect(key.data, hexToBytes(vector.private));
+            expect(key.compressed, vector.compressed);
+          }
+
+          expectAsVector(ECPrivateKey.fromWif(vector.wif));
+          expectAsVector(ECPrivateKey.fromWif(vector.wif, version: vector.version));
+
+        }
+      });
+
+      test("throws InvalidWif for incorrect format", () {
+
+        for (final failing in [
+          // Wrong final byte for compressed
+          "KwFfpDsaF7yxCELuyrH9gP5XL7TAt5b9HPWC1xCQbmrxvhUSDecD",
+          // Too small
+          "yNgx2GS4gtpsqofv9mu8xN4ajx5hvs67v88NDsDNeBPzC3yfR",
+          // Too large
+          "2SaTkKRpDjKpNcZttqvWHJpSxsMUWcTFhZLKqdCdMAV1XrGkPFT2g6",
+        ]) {
+          expect(
+            () => ECPrivateKey.fromWif(failing),
+            throwsA(isA<InvalidWif>()),
+          );
+        }
+
+      });
+
+      test("throws WifVersionMismatch for wrong version", () {
+        for (final vector in keyPairVectors) {
+          expect(
+            () => ECPrivateKey.fromWif(
+              vector.wif, version: (vector.version+1) % 0xff,
+            ),
+            throwsA(isA<WifVersionMismatch>()),
+          );
+        }
+      });
+
+    });
+
     test(".data", () {
       for (final vector in keyPairVectors) {
         expect(bytesToHex(vector.privateObj.data), vector.private);
