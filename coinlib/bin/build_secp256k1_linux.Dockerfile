@@ -8,11 +8,12 @@ RUN apt-get update -y \
 # Could use secp256k1 already in code-base but this makes the dockerfile more
 # independent and avoids complexity of copying everything into the correct
 # context. It's not a large library to download.
-RUN git clone https://github.com/bitcoin-core/secp256k1
-WORKDIR /secp256k1
+# Use 0.3.1 release
+RUN git clone https://github.com/bitcoin-core/secp256k1 \
+  && cd secp256k1 \
+  && git checkout 346a053d4c442e08191f075c3932d03140579d47
 
-# Use 0.2.0 release
-RUN git checkout 21ffe4b22a9683cf24ae0763359e401d1284cc7a
+WORKDIR /secp256k1
 
 # Build shared library for linux
 RUN ./autogen.sh
@@ -27,4 +28,4 @@ RUN make
 # maintained.
 RUN make install
 RUN mkdir output
-RUN cp /usr/local/lib/libsecp256k1.so.1.0.0 output/libsecp256k1.so
+RUN cp /usr/local/lib/libsecp256k1.so.2.0.1 output/libsecp256k1.so

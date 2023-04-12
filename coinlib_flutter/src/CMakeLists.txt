@@ -1,7 +1,7 @@
-# The Flutter tooling requires that developers have CMake 3.10 or later
-# installed. You should not increase this version, as doing so will cause
-# the plugin to fail to compile for some customers of the plugin.
-cmake_minimum_required(VERSION 3.10)
+# The Flutter SDK has a minimum version of 3.10, but 3.13 is required for
+# secp256k1 and most users of this library should have 3.13. Ubuntu 18.04 only
+# has CMake 3.10 but this version is old.
+cmake_minimum_required(VERSION 3.13)
 
 project(coinlib_library VERSION 1.0.0 LANGUAGES C)
 
@@ -45,7 +45,7 @@ ExternalProject_Add(
   secp256k1
 
   GIT_REPOSITORY https://github.com/bitcoin-core/secp256k1
-  GIT_TAG bdf39000b9c6a0818e7149ccb500873d079e6e85 # v0.3.0 with cmake system
+  GIT_TAG 346a053d4c442e08191f075c3932d03140579d47 # v0.3.1 with cmake system
 
   PREFIX ${SECP256K1_PREFIX}
 
@@ -59,7 +59,7 @@ ExternalProject_Add(
 # Post-build processing of library file
 # Move output library to the correct place
 
-set(SECP256K1_VERSIONEDLIB ${SECP256K1_PREFIX}/lib/libsecp256k1.so.2.0.0)
+set(SECP256K1_VERSIONEDLIB ${SECP256K1_PREFIX}/lib/libsecp256k1.so.2.0.1)
 set(SECP255K1_FINALLIB ${SECP256K1_PREFIX}/lib/libsecp256k1.so)
 
 # Move any versioned .so file to an unversioned .so file.

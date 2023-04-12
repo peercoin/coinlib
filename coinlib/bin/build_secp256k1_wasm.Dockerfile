@@ -15,12 +15,11 @@ RUN wget -nv https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-
 RUN tar xvf $WASI_ARCHIVE
 RUN rm $WASI_ARCHIVE
 
-# Clone libsecp256k1
-RUN git clone https://github.com/bitcoin-core/secp256k1
+# Clone libsecp256k1 and use v0.3.1
+RUN git clone https://github.com/bitcoin-core/secp256k1 \
+  && cd secp256k1 \
+  && git checkout 346a053d4c442e08191f075c3932d03140579d47
 WORKDIR /secp256k1
-
-# Use 0.2.0 release
-RUN git checkout 21ffe4b22a9683cf24ae0763359e401d1284cc7a
 
 # Build using wasi-sdk
 RUN ./autogen.sh
