@@ -61,7 +61,7 @@ void main() async {
   // Copy framework to build directory
   final buildDir = "$thisDir/../build";
   Directory(buildDir).create();
-  final libFile = File("$libDir/build/lib/libsecp256k1.1.dylib");
+  final libFile = File("$libDir/build/lib/libsecp256k1.2.dylib");
   await libFile.copy("$buildDir/libsecp256k1.dylib");
   print("Created dylib in build directory");
 
