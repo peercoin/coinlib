@@ -72,6 +72,14 @@ void main() {
 
     });
 
+    test(".generate() gives new key each time", () {
+      final key1 = ECPrivateKey.generate();
+      final key2 = ECPrivateKey.generate(compressed: false);
+      expect(key1.compressed, true);
+      expect(key2.compressed, false);
+      expect(key1.data, isNot(equals(key2.data)));
+    });
+
     test(".data", () {
       for (final vector in keyPairVectors) {
         expect(bytesToHex(vector.privateObj.data), vector.private);

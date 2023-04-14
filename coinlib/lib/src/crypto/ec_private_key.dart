@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'package:coinlib/src/bindings/secp256k1.dart';
 import 'package:coinlib/src/common/hex.dart';
 import 'package:coinlib/src/crypto/ec_public_key.dart';
+import 'package:coinlib/src/crypto/random.dart';
 import 'package:coinlib/src/encode/base58.dart';
 
 class WifVersionMismatch implements Exception {}
@@ -9,6 +10,8 @@ class InvalidWif implements Exception {}
 
 /// Represents an ECC private key for use with the secp256k1 curve
 class ECPrivateKey {
+
+  static const privateKeyLength = 32;
 
   /// 32-byte private key scalar
   final Uint8List data;
@@ -18,9 +21,9 @@ class ECPrivateKey {
   /// Constructs a private key from a 32-byte scalar. The public key may be
   /// in the [compressed] format which is the default.
   ECPrivateKey(this.data, { this.compressed = true }) {
-    if (data.length != 32) {
+    if (data.length != privateKeyLength) {
       throw ArgumentError(
-        "Private key scalars should be 32-bytes",
+        "Private key scalars should be $privateKeyLength-bytes",
         "this.data",
       );
     }
@@ -50,6 +53,10 @@ class ECPrivateKey {
     return ECPrivateKey(data.sublist(1, 33), compressed: compressed);
 
   }
+
+  ECPrivateKey.generate({ bool compressed = true }) : this(
+    generateRandomBytes(privateKeyLength), compressed: compressed,
+  );
 
   ECPublicKey? _pubkeyCache;
   /// The public key associated with this private key

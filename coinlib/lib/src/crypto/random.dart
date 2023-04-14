@@ -4,6 +4,7 @@ import 'dart:typed_data';
 const int _sizeByte = 256;
 
 /// Generates random bytes using a CSPRNG
+/// Tested with the ent command
 Uint8List generateRandomBytes(int size) {
   final rng = Random.secure();
   final bytes = Uint8List(size);
