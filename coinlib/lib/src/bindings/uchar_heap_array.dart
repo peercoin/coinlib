@@ -19,5 +19,6 @@ class UnsignedCharHeapArray {
   }
 
   Uint8List get list => ptr.cast<Uint8>().asTypedList(size);
+  load(Uint8List data) => list.setAll(0, data);
 
 }

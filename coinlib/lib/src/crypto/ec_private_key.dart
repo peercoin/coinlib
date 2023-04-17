@@ -2,11 +2,13 @@ import 'dart:typed_data';
 import 'package:coinlib/src/bindings/secp256k1.dart';
 import 'package:coinlib/src/common/hex.dart';
 import 'package:coinlib/src/crypto/ec_public_key.dart';
+import 'package:coinlib/src/crypto/ecdsa_signature.dart';
 import 'package:coinlib/src/crypto/random.dart';
 import 'package:coinlib/src/encode/base58.dart';
 
 class WifVersionMismatch implements Exception {}
 class InvalidWif implements Exception {}
+class InvalidPrivateKey implements Exception {}
 
 /// Represents an ECC private key for use with the secp256k1 curve
 class ECPrivateKey {
@@ -19,7 +21,8 @@ class ECPrivateKey {
   final bool compressed;
 
   /// Constructs a private key from a 32-byte scalar. The public key may be
-  /// in the [compressed] format which is the default.
+  /// in the [compressed] format which is the default. [InvalidPrivateKey] will
+  /// be thrown if the private key is not within the secp256k1 order.
   ECPrivateKey(this.data, { this.compressed = true }) {
     if (data.length != privateKeyLength) {
       throw ArgumentError(
@@ -27,6 +30,7 @@ class ECPrivateKey {
         "this.data",
       );
     }
+    if (!secp256k1.privKeyVerify(data)) throw InvalidPrivateKey();
   }
 
   /// Constructs a private key from HEX encoded data. The public key may be in
@@ -54,7 +58,10 @@ class ECPrivateKey {
 
   }
 
+  /// Generates a private key using a CSPRING.
   ECPrivateKey.generate({ bool compressed = true }) : this(
+    // The chance that a random private key is outside the secp256k1 field order
+    // is extremely miniscule.
     generateRandomBytes(privateKeyLength), compressed: compressed,
   );
 
@@ -62,6 +69,13 @@ class ECPrivateKey {
   /// The public key associated with this private key
   get pubkey => _pubkeyCache ??= ECPublicKey(
     secp256k1.privToPubKey(data, compressed),
+  );
+
+  /// Takes a 32-byte message [hash] and produces an ECDSA signature using this
+  /// private key. The signature will be generated deterministically and shall
+  /// be the same for a given hash and key.
+  ECDSASignature signEcdsa(Uint8List hash) => ECDSASignature.fromCompact(
+    secp256k1.ecdsaSign(hash, data),
   );
 
 }

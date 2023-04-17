@@ -49,9 +49,14 @@ class Secp256k1 implements Secp256k1Interface {
   // it doesn't matter
   late Pointer<secp256k1_context> _ctxPtr;
   final _privKeyArray = UnsignedCharHeapArray(Secp256k1Interface.privkeySize);
+  final _hashArray = UnsignedCharHeapArray(Secp256k1Interface.hashSize);
   final Pointer<secp256k1_pubkey> _pubKeyPtr = malloc();
+  final Pointer<secp256k1_ecdsa_signature> _sigPtr = malloc();
   final _serializedPubKeyArray = UnsignedCharHeapArray(
     Secp256k1Interface.uncompressedPubkeySize,
+  );
+  final _serializedSigArray = UnsignedCharHeapArray(
+    Secp256k1Interface.sigSize,
   );
   final Pointer<Size> _sizeTPtr = malloc();
 
@@ -77,10 +82,15 @@ class Secp256k1 implements Secp256k1Interface {
   Future<void> load() async {}
 
   @override
+  bool privKeyVerify(Uint8List privKey) {
+    _privKeyArray.load(privKey);
+    return _lib.secp256k1_ec_seckey_verify(_ctxPtr, _privKeyArray.ptr) == 1;
+  }
+
+  @override
   Uint8List privToPubKey(Uint8List privKey, bool compressed) {
 
-    // Write private key into memory
-    _privKeyArray.list.setAll(0, privKey);
+    _privKeyArray.load(privKey);
 
     // Derive public key from private key
     if (
@@ -107,6 +117,30 @@ class Secp256k1 implements Secp256k1Interface {
 
     // Return copy of public key
     return _serializedPubKeyArray.list.sublist(0, _sizeTPtr.value);
+
+  }
+
+  @override
+  Uint8List ecdsaSign(Uint8List hash, Uint8List privKey) {
+
+    _privKeyArray.load(privKey);
+    _hashArray.load(hash);
+
+    // Sign
+    if (
+      _lib.secp256k1_ecdsa_sign(
+        _ctxPtr, _sigPtr, _hashArray.ptr, _privKeyArray.ptr, nullptr, nullptr,
+      ) != 1
+    ) {
+      throw Secp256k1Exception("Cannot sign message with private key");
+    }
+
+    // Serialize
+    _lib.secp256k1_ecdsa_signature_serialize_compact(
+      _ctxPtr, _serializedSigArray.ptr, _sigPtr,
+    );
+
+    return _serializedSigArray.list.sublist(0, Secp256k1Interface.sigSize);
 
   }
 
