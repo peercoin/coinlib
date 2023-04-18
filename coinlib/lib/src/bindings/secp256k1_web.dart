@@ -1,13 +1,12 @@
 import "dart:typed_data";
 import 'package:coinlib/src/crypto/random.dart';
-import "secp256k1_interface.dart";
+import 'heap_array_wasm.dart';
+import "secp256k1_base.dart";
 import 'package:wasm_interop/wasm_interop.dart';
 import 'package:coinlib/src/generated/secp256k1.wasm.g.dart';
 
 typedef ContextCreateFunction = int Function(int);
 typedef ContextRandomizeFunction = int Function(int, int);
-typedef MallocFunction = int Function(int);
-typedef FreeFunction = int Function(int);
 typedef EcSeckeyVerifyFunction = int Function(int, int);
 typedef EcPublickeyCreateFunction = int Function(int, int, int);
 typedef EcPublickeySerializeFunction = int Function(int, int, int, int, int);
@@ -15,46 +14,17 @@ typedef EcdsaSignFunction = int Function(int, int, int, int, int, int);
 typedef EcdsaSignatureSerializeCompactFunction = int Function(int, int, int);
 
 /// Loads and wraps WASM code to be run via the browser JS APIs
-class Secp256k1 implements Secp256k1Interface {
+class Secp256k1 extends Secp256k1Base<int, int, int, int,int, int>{
 
   static final int _ptrBytes = 4; // 32-bit architecture
-
-  bool _loaded = false;
-  late Instance _inst;
   late Uint8List _memory;
 
-  // Functions
-  late EcSeckeyVerifyFunction _ecSeckeyVerify;
-  late EcPublickeyCreateFunction _ecPubkeyCreate;
-  late EcPublickeySerializeFunction _ecPubkeySerialize;
-  late EcdsaSignFunction _ecdsaSign;
-  late EcdsaSignatureSerializeCompactFunction _ecdsaSignatureSerializeCompact;
-
-  // Memory pointers
-  late int _ctxPtr;
-  late int _privKeyPtr;
-  late int _hashPtr;
-  late int _sigPtr;
-  late int _pubKeyPtr;
-  late int _serializedPubKeyPtr; // Always compressed 33 bytes
-  late int _serializedSigPtr;
-  late int _sizeTPtr; // Used as pointer to size_t values
-
-  _requireLoad() {
-    if (!_loaded) throw Secp256k1Exception("load() not called");
-  }
-
-  _loadPrivKey(Uint8List privKey) {
-    _memory.setRange(_privKeyPtr, _privKeyPtr+Secp256k1Interface.privkeySize, privKey);
-  }
-
   @override
-  /// Must be called before web library is useable
-  Future<void> load() async {
+  Future<void> internalLoad() async {
 
-    if (_loaded) return;
+    // Load Instance
 
-    _inst = await Instance.fromBytesAsync(
+    final inst = await Instance.fromBytesAsync(
       secp256k1WasmData,
       // Dummy WASI imports. No file descriptor support provided.
       importMap: {
@@ -65,114 +35,65 @@ class Secp256k1 implements Secp256k1Interface {
         },
       },
     );
-    _memory = _inst.memories["memory"]!.buffer.asUint8List();
+    _memory = inst.memories["memory"]!.buffer.asUint8List();
 
-    // Member functions
-    _ecSeckeyVerify = _inst.functions["secp256k1_ec_seckey_verify"]!
+    // Set functions
+    extEcSeckeyVerify = inst.functions["secp256k1_ec_seckey_verify"]!
       as EcSeckeyVerifyFunction;
-    _ecPubkeyCreate = _inst.functions["secp256k1_ec_pubkey_create"]!
+    extEcSeckeyVerify = inst.functions["secp256k1_ec_seckey_verify"]!
+      as EcSeckeyVerifyFunction;
+    extEcPubkeyCreate = inst.functions["secp256k1_ec_pubkey_create"]!
       as EcPublickeyCreateFunction;
-    _ecPubkeySerialize = _inst.functions["secp256k1_ec_pubkey_serialize"]!
+    extEcPubkeySerialize = inst.functions["secp256k1_ec_pubkey_serialize"]!
       as EcPublickeySerializeFunction;
-    _ecdsaSign = _inst.functions["secp256k1_ecdsa_sign"]! as EcdsaSignFunction;
-    _ecdsaSignatureSerializeCompact =
-      _inst.functions["secp256k1_ecdsa_signature_serialize_compact"]!
+    extEcdsaSign = inst.functions["secp256k1_ecdsa_sign"]!
+      as EcdsaSignFunction;
+    extEcdsaSignatureSerializeCompact =
+      inst.functions["secp256k1_ecdsa_signature_serialize_compact"]!
       as EcdsaSignatureSerializeCompactFunction;
 
     // Local functions for loading purposes
-    final contextCreate = _inst.functions["secp256k1_context_create"]!
+    final contextCreate = inst.functions["secp256k1_context_create"]!
       as ContextCreateFunction;
-    final contextRandomize = _inst.functions["secp256k1_context_randomize"]!
+    final contextRandomize = inst.functions["secp256k1_context_randomize"]!
       as ContextRandomizeFunction;
-    final malloc = _inst.functions["malloc"]! as MallocFunction;
-    final free = _inst.functions["free"]! as FreeFunction;
 
-    // Allocate memory
-    _privKeyPtr = malloc(Secp256k1Interface.privkeySize);
-    _hashPtr = malloc(Secp256k1Interface.hashSize);
-    _sigPtr = malloc(Secp256k1Interface.sigSize);
-    _pubKeyPtr = malloc(Secp256k1Interface.pubkeySize);
-    _serializedPubKeyPtr = malloc(Secp256k1Interface.uncompressedPubkeySize);
-    _serializedSigPtr = malloc(Secp256k1Interface.sigSize);
-    _sizeTPtr = malloc(_ptrBytes);
+    final malloc = inst.functions["malloc"]! as MallocFunction;
+    final free = inst.functions["free"]! as FreeFunction;
+
+    // Heap arrays
+    final arrayFactory = HeapArrayWasmFactory(_memory, malloc, free);
+    privKeyArray = arrayFactory.create(Secp256k1Base.privkeySize);
+    hashArray = arrayFactory.create(Secp256k1Base.hashSize);
+    serializedPubKeyArray = arrayFactory.create(
+      Secp256k1Base.uncompressedPubkeySize,
+    );
+    serializedSigArray = arrayFactory.create(Secp256k1Base.sigSize);
+
+    // Other pointers
+    sigPtr = malloc(Secp256k1Base.sigSize);
+    pubKeyPtr = malloc(Secp256k1Base.pubkeySize);
+    sizeTPtr = malloc(_ptrBytes);
+    nullPtr = 0;
 
     // Create universal context and randomise it as recommended
     // Generate 32 random bytes in the module memory
-    _ctxPtr = contextCreate(Secp256k1Interface.contextNone);
+    ctxPtr = contextCreate(Secp256k1Base.contextNone);
 
     final randBytePtr = malloc(32);
     final randomBytes = generateRandomBytes(32);
     _memory.setAll(randBytePtr, randomBytes);
 
-    if (contextRandomize(_ctxPtr, randBytePtr) != 1) {
+    if (contextRandomize(ctxPtr, randBytePtr) != 1) {
       throw Secp256k1Exception("Secp256k1 context couldn't be randomised");
     }
 
     free(randBytePtr);
 
-    _loaded = true;
-
   }
 
   @override
-  bool privKeyVerify(Uint8List privKey) {
-    _requireLoad();
-    _loadPrivKey(privKey);
-    return _ecSeckeyVerify(_ctxPtr, _privKeyPtr) == 1;
-  }
-
-  @override
-  Uint8List privToPubKey(Uint8List privKey, bool compressed) {
-    _requireLoad();
-
-    _loadPrivKey(privKey);
-
-    // Derive public key from private key
-    if (_ecPubkeyCreate(_ctxPtr, _pubKeyPtr, _privKeyPtr) != 1) {
-      throw Secp256k1Exception("Cannot compute public key from private key");
-    }
-
-    // Set length via size_t value. Should be little endian.
-
-    final length = compressed
-      ? Secp256k1Interface.compressedPubkeySize
-      : Secp256k1Interface.uncompressedPubkeySize;
-
-    final flags = compressed
-      ? Secp256k1Interface.compressedFlags
-      : Secp256k1Interface.uncompressedFlags;
-
-    ByteData.view(_memory.buffer).setUint32(_sizeTPtr, length, Endian.little);
-
-    // Parse and return public key
-    _ecPubkeySerialize(
-      _ctxPtr, _serializedPubKeyPtr, _sizeTPtr, _pubKeyPtr, flags,
-    );
-
-    return _memory.sublist(_serializedPubKeyPtr, _serializedPubKeyPtr+length);
-
-  }
-
-  @override
-  Uint8List ecdsaSign(Uint8List hash, Uint8List privKey) {
-    _requireLoad();
-
-    // Write private key and hash into memory
-    _loadPrivKey(privKey);
-    _memory.setRange(_hashPtr, _hashPtr+Secp256k1Interface.hashSize, hash);
-
-    // Sign
-    if(_ecdsaSign(_ctxPtr, _sigPtr, _hashPtr, _privKeyPtr, 0, 0) != 1) {
-      throw Secp256k1Exception("Cannot sign message with private key");
-    }
-
-    // Serialize
-    _ecdsaSignatureSerializeCompact(_ctxPtr, _serializedSigPtr, _sigPtr);
-
-    return _memory.sublist(
-      _serializedSigPtr, _serializedSigPtr + Secp256k1Interface.sigSize,
-    );
-
-  }
+  set sizeT(int size)
+    => ByteData.view(_memory.buffer).setUint32(sizeTPtr, size, Endian.little);
 
 }

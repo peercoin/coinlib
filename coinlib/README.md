@@ -18,8 +18,8 @@ The library can be imported via:
 import 'package:coinlib/coinlib.dart';
 ```
 
-When running on web, the library must be asynchronously loaded by awaiting the
-`loadCoinlib()` function.
+The library must be asynchronously loaded by awaiting the `loadCoinlib()`
+function.
 
 ## Building Native and WebAssembly
 
