@@ -76,19 +76,16 @@ class Secp256k1 extends Secp256k1Base<int, int, int, int,int, int>{
     sizeTPtr = malloc(_ptrBytes);
     nullPtr = 0;
 
-    // Create universal context and randomise it as recommended
-    // Generate 32 random bytes in the module memory
+    // Create and randomise context with 32 bytes
     ctxPtr = contextCreate(Secp256k1Base.contextNone);
 
-    final randBytePtr = malloc(32);
     final randomBytes = generateRandomBytes(32);
-    _memory.setAll(randBytePtr, randomBytes);
+    final randArray = arrayFactory.create(32);
+    randArray.load(randomBytes);
 
-    if (contextRandomize(ctxPtr, randBytePtr) != 1) {
+    if (contextRandomize(ctxPtr, randArray.ptr) != 1) {
       throw Secp256k1Exception("Secp256k1 context couldn't be randomised");
     }
-
-    free(randBytePtr);
 
   }
 
