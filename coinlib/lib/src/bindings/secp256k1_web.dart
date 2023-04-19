@@ -10,8 +10,12 @@ typedef ContextRandomizeFunction = int Function(int, int);
 typedef EcSeckeyVerifyFunction = int Function(int, int);
 typedef EcPublickeyCreateFunction = int Function(int, int, int);
 typedef EcPublickeySerializeFunction = int Function(int, int, int, int, int);
+typedef EcPublickeyParseFunction = int Function(int, int, int, int);
 typedef EcdsaSignFunction = int Function(int, int, int, int, int, int);
 typedef EcdsaSignatureSerializeCompactFunction = int Function(int, int, int);
+typedef EcdsaSignatureParseCompactFunction = int Function(int, int, int);
+typedef EcdsaSignatureNormalizeFunction = int Function(int, int, int);
+typedef EcdsaSignatureVerifyFunction = int Function(int, int, int, int);
 
 /// Loads and wraps WASM code to be run via the browser JS APIs
 class Secp256k1 extends Secp256k1Base<int, int, int, int,int, int>{
@@ -38,19 +42,29 @@ class Secp256k1 extends Secp256k1Base<int, int, int, int,int, int>{
     _memory = inst.memories["memory"]!.buffer.asUint8List();
 
     // Set functions
-    extEcSeckeyVerify = inst.functions["secp256k1_ec_seckey_verify"]!
+    extEcSeckeyVerify = inst.functions["secp256k1_ec_seckey_verify"]
       as EcSeckeyVerifyFunction;
-    extEcSeckeyVerify = inst.functions["secp256k1_ec_seckey_verify"]!
+    extEcSeckeyVerify = inst.functions["secp256k1_ec_seckey_verify"]
       as EcSeckeyVerifyFunction;
-    extEcPubkeyCreate = inst.functions["secp256k1_ec_pubkey_create"]!
+    extEcPubkeyCreate = inst.functions["secp256k1_ec_pubkey_create"]
       as EcPublickeyCreateFunction;
-    extEcPubkeySerialize = inst.functions["secp256k1_ec_pubkey_serialize"]!
+    extEcPubkeySerialize = inst.functions["secp256k1_ec_pubkey_serialize"]
       as EcPublickeySerializeFunction;
-    extEcdsaSign = inst.functions["secp256k1_ecdsa_sign"]!
+    extEcPubkeyParse = inst.functions["secp256k1_ec_pubkey_parse"]
+      as EcPublickeyParseFunction;
+    extEcdsaSign = inst.functions["secp256k1_ecdsa_sign"]
       as EcdsaSignFunction;
-    extEcdsaSignatureSerializeCompact =
-      inst.functions["secp256k1_ecdsa_signature_serialize_compact"]!
+    extEcdsaSignatureSerializeCompact
+      = inst.functions["secp256k1_ecdsa_signature_serialize_compact"]
       as EcdsaSignatureSerializeCompactFunction;
+    extEcdsaSignatureParseCompact
+      = inst.functions["secp256k1_ecdsa_signature_parse_compact"]
+      as EcdsaSignatureParseCompactFunction;
+    extEcdsaSignatureNormalize
+      = inst.functions["secp256k1_ecdsa_signature_normalize"]
+      as EcdsaSignatureNormalizeFunction;
+    extEcdsaVerify = inst.functions["secp256k1_ecdsa_verify"]
+      as EcdsaSignatureVerifyFunction;
 
     // Local functions for loading purposes
     final contextCreate = inst.functions["secp256k1_context_create"]!

@@ -1,10 +1,10 @@
 import 'dart:typed_data';
 import 'package:coinlib/src/bindings/secp256k1.dart';
 import 'package:coinlib/src/common/hex.dart';
-import 'package:coinlib/src/crypto/ec_public_key.dart';
-import 'package:coinlib/src/crypto/ecdsa_signature.dart';
-import 'package:coinlib/src/crypto/random.dart';
 import 'package:coinlib/src/encode/base58.dart';
+import 'ec_public_key.dart';
+import 'ecdsa_signature.dart';
+import 'random.dart';
 
 class WifVersionMismatch implements Exception {}
 class InvalidWif implements Exception {}

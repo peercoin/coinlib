@@ -15,6 +15,7 @@ class KeyTestVector {
     required this.version,
   });
   get privateObj => ECPrivateKey.fromHex(private, compressed: compressed);
+  get publicObj => ECPublicKey.fromHex(public);
 }
 
 final keyPairVectors = [

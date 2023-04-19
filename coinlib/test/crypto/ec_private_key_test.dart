@@ -146,10 +146,12 @@ void main() {
         // exhaustive tests and this method is a wrapper around that.
         // Should be the same each time
         for (int x = 0; x < 2; x++) {
+          final sig = key.signEcdsa(msgHash);
           expect(
-            bytesToHex(key.signEcdsa(msgHash).compact),
+            bytesToHex(sig.compact),
             "a951b0cf98bd51c614c802a65a418fa42482dc5c45c9394e39c0d98773c51cd530104fdc36d91582b5757e1de73d982e803cc14d75e82c65daf924e38d27d834",
           );
+          expect(key.pubkey.verify(sig, msgHash), true);
         }
       });
 

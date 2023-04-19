@@ -56,9 +56,14 @@ class Secp256k1 extends Secp256k1Base<
     extEcSeckeyVerify = _lib.secp256k1_ec_seckey_verify;
     extEcPubkeyCreate = _lib.secp256k1_ec_pubkey_create;
     extEcPubkeySerialize = _lib.secp256k1_ec_pubkey_serialize;
+    extEcPubkeyParse = _lib.secp256k1_ec_pubkey_parse;
     extEcdsaSign = _lib.secp256k1_ecdsa_sign;
     extEcdsaSignatureSerializeCompact
       = _lib.secp256k1_ecdsa_signature_serialize_compact;
+    extEcdsaSignatureParseCompact
+      = _lib.secp256k1_ecdsa_signature_parse_compact;
+    extEcdsaSignatureNormalize = _lib.secp256k1_ecdsa_signature_normalize;
+    extEcdsaVerify = _lib.secp256k1_ecdsa_verify;
 
     // Set heap arrays
     privKeyArray = HeapArrayFfi(Secp256k1Base.privkeySize);

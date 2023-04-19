@@ -1,6 +1,8 @@
 
 import 'dart:typed_data';
 
+import 'package:coinlib/src/common/hex.dart';
+
 class ECDSASignature {
 
   static const compactLength = 64;
@@ -18,5 +20,9 @@ class ECDSASignature {
       );
     }
   }
+
+  /// Takes a HEX encoded 64-byte compact signature representation. See
+  /// [this.compact].
+  ECDSASignature.fromCompactHex(String hex) : this.fromCompact(hexToBytes(hex));
 
 }

@@ -28,12 +28,22 @@ abstract class Secp256k1Base<
   late int Function(
     CtxPtr, HeapArrayPtr, SizeTPtr, PubKeyPtr, int,
   ) extEcPubkeySerialize;
+  late int Function(CtxPtr, PubKeyPtr, HeapArrayPtr, int) extEcPubkeyParse;
   late int Function(
     CtxPtr, SignaturePtr, HeapArrayPtr, HeapArrayPtr, NullPtr, NullPtr,
   ) extEcdsaSign;
   late int Function(
     CtxPtr, HeapArrayPtr, SignaturePtr,
   ) extEcdsaSignatureSerializeCompact;
+  late int Function(
+    CtxPtr, SignaturePtr, HeapArrayPtr,
+  ) extEcdsaSignatureParseCompact;
+  late int Function(
+    CtxPtr, SignaturePtr, SignaturePtr,
+  ) extEcdsaSignatureNormalize;
+  late int Function(
+    CtxPtr, SignaturePtr, HeapArrayPtr, PubKeyPtr,
+  ) extEcdsaVerify;
 
   // Heap arrays
   late HeapArrayBase privKeyArray;
@@ -47,6 +57,33 @@ abstract class Secp256k1Base<
   late SizeTPtr sizeTPtr;
   late SignaturePtr sigPtr;
   late NullPtr nullPtr;
+
+  Uint8List _serializeSignatureFromPtr() {
+    extEcdsaSignatureSerializeCompact(ctxPtr, serializedSigArray.ptr, sigPtr);
+    return serializedSigArray.list.sublist(0);
+  }
+
+  void _parsePubkeyIntoPtr(Uint8List pubKey) {
+    serializedPubKeyArray.load(pubKey);
+    if (
+      extEcPubkeyParse(
+        ctxPtr, pubKeyPtr, serializedPubKeyArray.ptr, pubKey.length,
+      ) != 1
+    ) {
+      throw Secp256k1Exception("Invalid public key");
+    }
+  }
+
+  void _parseSignatureIntoPtr(Uint8List signature) {
+    serializedSigArray.load(signature);
+    if (
+      extEcdsaSignatureParseCompact(
+        ctxPtr, sigPtr, serializedSigArray.ptr,
+      ) != 1
+    ) {
+      throw Secp256k1Exception("Invalid compact signature");
+    }
+  }
 
   // This may be overriden by the subclass to load the library asynchronously
   Future<void> internalLoad() async {}
@@ -121,10 +158,29 @@ abstract class Secp256k1Base<
       throw Secp256k1Exception("Cannot sign message with private key");
     }
 
-    // Serialize
-    extEcdsaSignatureSerializeCompact(ctxPtr, serializedSigArray.ptr, sigPtr);
+    return _serializeSignatureFromPtr();
 
-    return serializedSigArray.list.sublist(0, Secp256k1Base.sigSize);
+  }
+
+  /// Takes a [signature] and returns an equally valid signature that has a low
+  /// s-value.
+  Uint8List ecdsaSignatureNormalize(Uint8List signature) {
+    _requireLoad();
+    _parseSignatureIntoPtr(signature);
+    extEcdsaSignatureNormalize(ctxPtr, sigPtr, sigPtr);
+    return _serializeSignatureFromPtr();
+  }
+
+  /// Verifys a compact [signature] against a 32-byte [hash] for a [pubKey] that
+  /// is either compressed or uncompressed in size
+  bool ecdsaVerify(Uint8List signature, Uint8List hash, Uint8List pubKey) {
+    _requireLoad();
+
+    _parseSignatureIntoPtr(signature);
+    _parsePubkeyIntoPtr(pubKey);
+    hashArray.load(hash);
+
+    return extEcdsaVerify(ctxPtr, sigPtr, hashArray.ptr, pubKeyPtr) == 1;
 
   }
 

@@ -1,5 +1,7 @@
 import 'dart:typed_data';
+import 'package:coinlib/src/bindings/secp256k1.dart';
 import 'package:coinlib/src/common/hex.dart';
+import 'ecdsa_signature.dart';
 
 /// Represents an ECC public key on the secp256k1 curve that has an associated
 /// private key
@@ -18,7 +20,21 @@ class ECPublicKey {
     }
   }
 
+  /// Constructs a public key from HEX encoded data that must represent a
+  /// 33-byte compressed key, or 65-byte uncompressed key
+  ECPublicKey.fromHex(String hex) : this(hexToBytes(hex));
+
   get hex => bytesToHex(data);
   get compressed => data.length == 33;
+
+  /// Takes a 32-byte message [signature] and [hash] and returns true if the
+  /// signature is valid for the public key and hash. This accepts malleable
+  /// signatures with high and low S-values.
+  bool verify(ECDSASignature signature, Uint8List hash)
+    => secp256k1.ecdsaVerify(
+      secp256k1.ecdsaSignatureNormalize(signature.compact),
+      hash,
+      data,
+    );
 
 }
