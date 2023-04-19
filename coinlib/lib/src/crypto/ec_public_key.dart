@@ -3,6 +3,8 @@ import 'package:coinlib/src/bindings/secp256k1.dart';
 import 'package:coinlib/src/common/hex.dart';
 import 'ecdsa_signature.dart';
 
+class InvalidPublicKey implements Exception {}
+
 /// Represents an ECC public key on the secp256k1 curve that has an associated
 /// private key
 class ECPublicKey {
@@ -11,13 +13,15 @@ class ECPublicKey {
   final Uint8List data;
 
   /// Constructs a public key from a 33-byte compressed or 65-byte uncompressed
-  /// representation
+  /// representation. [InvalidPublicKey] will be thrown if the public key is
+  /// invalid or in the wrong format.
   ECPublicKey(this.data) {
     if (data.length != 33 && data.length != 65) {
       throw ArgumentError(
         "Public keys should be 33 or 65 bytes", "this.data",
       );
     }
+    if (!secp256k1.pubKeyVerify(data)) throw InvalidPublicKey();
   }
 
   /// Constructs a public key from HEX encoded data that must represent a

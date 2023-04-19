@@ -108,6 +108,17 @@ abstract class Secp256k1Base<
     return extEcSeckeyVerify(ctxPtr, privKeyArray.ptr) == 1;
   }
 
+  /// Returns true if a compressed or uncompressed public key is valid.
+  bool pubKeyVerify(Uint8List pubKey) {
+    _requireLoad();
+    try {
+      _parsePubkeyIntoPtr(pubKey);
+    } on Secp256k1Exception {
+      return false;
+    }
+    return true;
+  }
+
   /// Converts a 32-byte [privKey] into a either a 33-byte compressed or a
   /// 65-byte uncompressed public key.
   Uint8List privToPubKey(Uint8List privKey, bool compressed) {
