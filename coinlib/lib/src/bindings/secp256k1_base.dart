@@ -21,6 +21,7 @@ abstract class Secp256k1Base<
   static const compressedPubkeySize = 33;
   static const uncompressedPubkeySize = 65;
   static const sigSize = 64;
+  static const derSigSize = 72;
 
   // Functions
   late int Function(CtxPtr, HeapArrayPtr) extEcSeckeyVerify;
@@ -42,6 +43,9 @@ abstract class Secp256k1Base<
     CtxPtr, SignaturePtr, SignaturePtr,
   ) extEcdsaSignatureNormalize;
   late int Function(
+    CtxPtr, HeapArrayPtr, SizeTPtr, SignaturePtr,
+  ) extEcdsaSignatureSerializeDer;
+  late int Function(
     CtxPtr, SignaturePtr, HeapArrayPtr, PubKeyPtr,
   ) extEcdsaVerify;
 
@@ -50,6 +54,7 @@ abstract class Secp256k1Base<
   late HeapArrayBase serializedPubKeyArray;
   late HeapArrayBase hashArray;
   late HeapArrayBase serializedSigArray;
+  late HeapArrayBase derSigArray;
 
   // Other pointers
   late CtxPtr ctxPtr;
@@ -162,6 +167,29 @@ abstract class Secp256k1Base<
 
   }
 
+  /// Takes a [signature] and returns an equally valid signature that has a low
+  /// s-value.
+  Uint8List ecdsaSignatureNormalize(Uint8List signature) {
+    _requireLoad();
+    _parseSignatureIntoPtr(signature);
+    extEcdsaSignatureNormalize(ctxPtr, sigPtr, sigPtr);
+    return _serializeSignatureFromPtr();
+  }
+
+  /// Takes a compact [signature] and returns a DER encoded signature
+  Uint8List ecdsaSignatureToDer(Uint8List signature) {
+    _requireLoad();
+
+    _parseSignatureIntoPtr(signature);
+    sizeT = derSigArray.list.length;
+
+    // Should always have space
+    extEcdsaSignatureSerializeDer(ctxPtr, derSigArray.ptr, sizeTPtr, sigPtr);
+
+    return derSigArray.list.sublist(0, sizeT);
+
+  }
+
   /// Constructs a signature in the compact format using a 32-byte message
   /// [hash] and 32-byte [privKey] scalar. The signature contains a 32-byte
   /// big-endian R value followed by a 32-byte big-endian low-S value.
@@ -185,15 +213,6 @@ abstract class Secp256k1Base<
 
   }
 
-  /// Takes a [signature] and returns an equally valid signature that has a low
-  /// s-value.
-  Uint8List ecdsaSignatureNormalize(Uint8List signature) {
-    _requireLoad();
-    _parseSignatureIntoPtr(signature);
-    extEcdsaSignatureNormalize(ctxPtr, sigPtr, sigPtr);
-    return _serializeSignatureFromPtr();
-  }
-
   /// Verifys a compact [signature] against a 32-byte [hash] for a [pubKey] that
   /// is either compressed or uncompressed in size
   bool ecdsaVerify(Uint8List signature, Uint8List hash, Uint8List pubKey) {
@@ -210,5 +229,9 @@ abstract class Secp256k1Base<
   /// Specialised sub-classes should override to set the value behind the
   /// sizeTPtr
   set sizeT(int size);
+
+  /// Specialised sub-classes should override to obtain the value behind the
+  /// sizeTPtr
+  int get sizeT;
 
 }

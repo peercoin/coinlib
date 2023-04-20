@@ -1,4 +1,5 @@
 import 'package:coinlib/coinlib.dart';
+import 'package:coinlib/src/common/hex.dart';
 import 'package:coinlib/src/crypto/ecdsa_signature.dart';
 import 'package:test/test.dart';
 
@@ -49,6 +50,18 @@ void main() {
           reason: sig,
         );
       }
+    });
+
+    test(".der", () {
+      // Takes a high s-value signature and returns the DER encoding
+      expect(
+        bytesToHex(
+          ECDSASignature.fromCompactHex(
+            "813ef79ccefa9a56f7ba805f0e478584fe5f0dd5f567bc09b5123ccbc9832365900e75ad233fcc908509dbff5922647db37c21f4afd3203ae8dc4ae7794b0f87",
+          ).der,
+        ),
+        "3046022100813ef79ccefa9a56f7ba805f0e478584fe5f0dd5f567bc09b5123ccbc9832365022100900e75ad233fcc908509dbff5922647db37c21f4afd3203ae8dc4ae7794b0f87",
+      );
     });
 
   });

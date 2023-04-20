@@ -15,6 +15,7 @@ typedef EcdsaSignFunction = int Function(int, int, int, int, int, int);
 typedef EcdsaSignatureSerializeCompactFunction = int Function(int, int, int);
 typedef EcdsaSignatureParseCompactFunction = int Function(int, int, int);
 typedef EcdsaSignatureNormalizeFunction = int Function(int, int, int);
+typedef EcdsaSignatureSerializeDer = int Function(int, int, int, int);
 typedef EcdsaSignatureVerifyFunction = int Function(int, int, int, int);
 
 /// Loads and wraps WASM code to be run via the browser JS APIs
@@ -63,6 +64,9 @@ class Secp256k1 extends Secp256k1Base<int, int, int, int,int, int>{
     extEcdsaSignatureNormalize
       = inst.functions["secp256k1_ecdsa_signature_normalize"]
       as EcdsaSignatureNormalizeFunction;
+    extEcdsaSignatureSerializeDer
+      = inst.functions["secp256k1_ecdsa_signature_serialize_der"]
+      as EcdsaSignatureSerializeDer;
     extEcdsaVerify = inst.functions["secp256k1_ecdsa_verify"]
       as EcdsaSignatureVerifyFunction;
 
@@ -83,6 +87,7 @@ class Secp256k1 extends Secp256k1Base<int, int, int, int,int, int>{
       Secp256k1Base.uncompressedPubkeySize,
     );
     serializedSigArray = arrayFactory.create(Secp256k1Base.sigSize);
+    derSigArray = arrayFactory.create(Secp256k1Base.derSigSize);
 
     // Other pointers
     sigPtr = malloc(Secp256k1Base.sigSize);
@@ -106,5 +111,9 @@ class Secp256k1 extends Secp256k1Base<int, int, int, int,int, int>{
   @override
   set sizeT(int size)
     => ByteData.view(_memory.buffer).setUint32(sizeTPtr, size, Endian.little);
+
+  @override
+  int get sizeT
+    => ByteData.view(_memory.buffer).getUint32(sizeTPtr, Endian.little);
 
 }

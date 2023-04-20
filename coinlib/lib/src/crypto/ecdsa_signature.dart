@@ -29,4 +29,7 @@ class ECDSASignature {
   /// [this.compact].
   ECDSASignature.fromCompactHex(String hex) : this.fromCompact(hexToBytes(hex));
 
+  /// Returns the DER encoding for the signature
+  Uint8List get der => secp256k1.ecdsaSignatureToDer(compact);
+
 }

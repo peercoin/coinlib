@@ -63,6 +63,8 @@ class Secp256k1 extends Secp256k1Base<
     extEcdsaSignatureParseCompact
       = _lib.secp256k1_ecdsa_signature_parse_compact;
     extEcdsaSignatureNormalize = _lib.secp256k1_ecdsa_signature_normalize;
+    extEcdsaSignatureSerializeDer =
+      _lib.secp256k1_ecdsa_signature_serialize_der;
     extEcdsaVerify = _lib.secp256k1_ecdsa_verify;
 
     // Set heap arrays
@@ -70,6 +72,7 @@ class Secp256k1 extends Secp256k1Base<
     serializedPubKeyArray = HeapArrayFfi(Secp256k1Base.uncompressedPubkeySize);
     hashArray = HeapArrayFfi(Secp256k1Base.hashSize);
     serializedSigArray = HeapArrayFfi(Secp256k1Base.sigSize);
+    derSigArray = HeapArrayFfi(Secp256k1Base.derSigSize);
 
     // Set other pointers
     // A finalizer could be added to free allocated memory but as this class will
@@ -97,5 +100,8 @@ class Secp256k1 extends Secp256k1Base<
 
   @override
   set sizeT(int size) => sizeTPtr.value = size;
+
+  @override
+  int get sizeT => sizeTPtr.value;
 
 }
