@@ -119,6 +119,18 @@ abstract class Secp256k1Base<
     return true;
   }
 
+  /// Returns true if the compact [signature] can be parsed with valid R and S
+  /// values
+  bool ecdsaCompactSignatureVerify(Uint8List signature) {
+    _requireLoad();
+    try {
+      _parseSignatureIntoPtr(signature);
+    } on Secp256k1Exception {
+      return false;
+    }
+    return true;
+  }
+
   /// Converts a 32-byte [privKey] into a either a 33-byte compressed or a
   /// 65-byte uncompressed public key.
   Uint8List privToPubKey(Uint8List privKey, bool compressed) {

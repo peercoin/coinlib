@@ -1,7 +1,8 @@
-
 import 'dart:typed_data';
-
+import 'package:coinlib/src/bindings/secp256k1.dart';
 import 'package:coinlib/src/common/hex.dart';
+
+class InvalidECDSASignature implements Exception {}
 
 class ECDSASignature {
 
@@ -18,6 +19,9 @@ class ECDSASignature {
         "Compact signatures should be $compactLength-bytes",
         "this.compact",
       );
+    }
+    if (!secp256k1.ecdsaCompactSignatureVerify(compact)) {
+      throw InvalidECDSASignature();
     }
   }
 
