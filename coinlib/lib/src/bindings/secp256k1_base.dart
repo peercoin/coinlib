@@ -46,6 +46,9 @@ abstract class Secp256k1Base<
     CtxPtr, HeapArrayPtr, SizeTPtr, SignaturePtr,
   ) extEcdsaSignatureSerializeDer;
   late int Function(
+    CtxPtr, SignaturePtr, HeapArrayPtr, int,
+  ) extEcdsaSignatureParseDer;
+  late int Function(
     CtxPtr, SignaturePtr, HeapArrayPtr, PubKeyPtr,
   ) extEcdsaVerify;
 
@@ -187,6 +190,25 @@ abstract class Secp256k1Base<
     extEcdsaSignatureSerializeDer(ctxPtr, derSigArray.ptr, sizeTPtr, sigPtr);
 
     return derSigArray.list.sublist(0, sizeT);
+
+  }
+
+  /// Takes a BIP66 DER ([der]) representation of a signature and returns the
+  /// compact representation
+  Uint8List ecdsaSignatureFromDer(Uint8List der) {
+    _requireLoad();
+
+    derSigArray.load(der);
+
+    if (
+      extEcdsaSignatureParseDer(
+        ctxPtr, sigPtr, derSigArray.ptr, der.length,
+      ) != 1
+    ) {
+      throw Secp256k1Exception("Invalid DER signature");
+    }
+
+    return _serializeSignatureFromPtr();
 
   }
 

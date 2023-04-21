@@ -16,6 +16,7 @@ typedef EcdsaSignatureSerializeCompactFunction = int Function(int, int, int);
 typedef EcdsaSignatureParseCompactFunction = int Function(int, int, int);
 typedef EcdsaSignatureNormalizeFunction = int Function(int, int, int);
 typedef EcdsaSignatureSerializeDer = int Function(int, int, int, int);
+typedef EcdsaSignatureParseDer = int Function(int, int, int, int);
 typedef EcdsaSignatureVerifyFunction = int Function(int, int, int, int);
 
 /// Loads and wraps WASM code to be run via the browser JS APIs
@@ -67,6 +68,9 @@ class Secp256k1 extends Secp256k1Base<int, int, int, int,int, int>{
     extEcdsaSignatureSerializeDer
       = inst.functions["secp256k1_ecdsa_signature_serialize_der"]
       as EcdsaSignatureSerializeDer;
+    extEcdsaSignatureParseDer
+      = inst.functions["secp256k1_ecdsa_signature_parse_der"]
+      as EcdsaSignatureParseDer;
     extEcdsaVerify = inst.functions["secp256k1_ecdsa_verify"]
       as EcdsaSignatureVerifyFunction;
 

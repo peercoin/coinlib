@@ -50,6 +50,7 @@ RUN ${WASI_SDK_PATH}/bin/wasm-ld \
   --export secp256k1_ecdsa_signature_normalize \
   --export secp256k1_ecdsa_verify \
   --export secp256k1_ecdsa_signature_serialize_der \
+  --export secp256k1_ecdsa_signature_parse_der \
   # The secp256k1 library object files
   src/libsecp256k1_la-secp256k1.o \
   src/libsecp256k1_precomputed_la-precomputed_ecmult.o \

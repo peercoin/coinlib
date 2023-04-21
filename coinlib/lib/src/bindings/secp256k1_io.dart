@@ -65,6 +65,7 @@ class Secp256k1 extends Secp256k1Base<
     extEcdsaSignatureNormalize = _lib.secp256k1_ecdsa_signature_normalize;
     extEcdsaSignatureSerializeDer =
       _lib.secp256k1_ecdsa_signature_serialize_der;
+    extEcdsaSignatureParseDer = _lib.secp256k1_ecdsa_signature_parse_der;
     extEcdsaVerify = _lib.secp256k1_ecdsa_verify;
 
     // Set heap arrays
