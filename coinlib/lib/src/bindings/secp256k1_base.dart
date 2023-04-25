@@ -9,7 +9,8 @@ class Secp256k1Exception implements Exception {
 }
 
 abstract class Secp256k1Base<
-  CtxPtr, HeapArrayPtr, PubKeyPtr, SizeTPtr, SignaturePtr, NullPtr
+  CtxPtr, HeapArrayPtr, PubKeyPtr, SizeTPtr, SignaturePtr,
+  RecoverableSignaturePtr, NullPtr
 > {
 
   static const contextNone = 1;
@@ -22,6 +23,7 @@ abstract class Secp256k1Base<
   static const uncompressedPubkeySize = 65;
   static const sigSize = 64;
   static const derSigSize = 72;
+  static const recSigSize = 65;
 
   // Functions
   late int Function(CtxPtr, HeapArrayPtr) extEcSeckeyVerify;
@@ -51,6 +53,12 @@ abstract class Secp256k1Base<
   late int Function(
     CtxPtr, SignaturePtr, HeapArrayPtr, PubKeyPtr,
   ) extEcdsaVerify;
+  late int Function(
+    CtxPtr, RecoverableSignaturePtr, HeapArrayPtr, int,
+  ) extEcdsaRecoverableSignatureParseCompact;
+  late int Function(
+    CtxPtr, PubKeyPtr, RecoverableSignaturePtr, HeapArrayPtr,
+  ) extEcdsaRecover;
 
   // Heap arrays
   late HeapArrayBase privKeyArray;
@@ -64,7 +72,27 @@ abstract class Secp256k1Base<
   late PubKeyPtr pubKeyPtr;
   late SizeTPtr sizeTPtr;
   late SignaturePtr sigPtr;
+  late RecoverableSignaturePtr recSigPtr;
   late NullPtr nullPtr;
+
+  Uint8List _serializePubKeyFromPtr(bool compressed) {
+
+    sizeT = compressed
+      ? Secp256k1Base.compressedPubkeySize
+      : Secp256k1Base.uncompressedPubkeySize;
+
+    final flags = compressed
+      ? Secp256k1Base.compressedFlags
+      : Secp256k1Base.uncompressedFlags;
+
+    extEcPubkeySerialize(
+      ctxPtr, serializedPubKeyArray.ptr, sizeTPtr, pubKeyPtr, flags,
+    );
+
+    // Return copy of public key
+    return serializedPubKeyArray.list.sublist(0, sizeT);
+
+  }
 
   Uint8List _serializeSignatureFromPtr() {
     extEcdsaSignatureSerializeCompact(ctxPtr, serializedSigArray.ptr, sigPtr);
@@ -93,6 +121,27 @@ abstract class Secp256k1Base<
     }
   }
 
+  void _parseRecoverableSignatureIntoPtr(Uint8List signature, int recid) {
+    serializedSigArray.load(signature);
+    if (
+      extEcdsaRecoverableSignatureParseCompact(
+        ctxPtr, recSigPtr, serializedSigArray.ptr, recid,
+      ) != 1
+    ) {
+      throw Secp256k1Exception("Invalid compact recoverable signature");
+    }
+  }
+
+  bool _noRaiseAfterRequireLoad(void Function() fn) {
+    _requireLoad();
+    try {
+      fn();
+    } on Secp256k1Exception {
+      return false;
+    }
+    return true;
+  }
+
   // This may be overriden by the subclass to load the library asynchronously
   Future<void> internalLoad() async {}
 
@@ -117,27 +166,20 @@ abstract class Secp256k1Base<
   }
 
   /// Returns true if a compressed or uncompressed public key is valid.
-  bool pubKeyVerify(Uint8List pubKey) {
-    _requireLoad();
-    try {
-      _parsePubkeyIntoPtr(pubKey);
-    } on Secp256k1Exception {
-      return false;
-    }
-    return true;
-  }
+  bool pubKeyVerify(Uint8List pubKey)
+    => _noRaiseAfterRequireLoad(() => _parsePubkeyIntoPtr(pubKey));
 
   /// Returns true if the compact [signature] can be parsed with valid R and S
   /// values
-  bool ecdsaCompactSignatureVerify(Uint8List signature) {
-    _requireLoad();
-    try {
-      _parseSignatureIntoPtr(signature);
-    } on Secp256k1Exception {
-      return false;
-    }
-    return true;
-  }
+  bool ecdsaCompactSignatureVerify(Uint8List signature)
+    => _noRaiseAfterRequireLoad(() => _parseSignatureIntoPtr(signature));
+
+  /// Returns true if the compact recoverable signature can be parsed given the
+  /// [signature] and [recid]
+  bool ecdsaCompactRecoverableSignatureVerify(Uint8List signature, int recid)
+    => _noRaiseAfterRequireLoad(
+      () => _parseRecoverableSignatureIntoPtr(signature, recid),
+    );
 
   /// Converts a 32-byte [privKey] into a either a 33-byte compressed or a
   /// 65-byte uncompressed public key.
@@ -151,22 +193,7 @@ abstract class Secp256k1Base<
       throw Secp256k1Exception("Cannot compute public key from private key");
     }
 
-    // Parse public key
-
-    int size = sizeT = compressed
-      ? Secp256k1Base.compressedPubkeySize
-      : Secp256k1Base.uncompressedPubkeySize;
-
-    final flags = compressed
-      ? Secp256k1Base.compressedFlags
-      : Secp256k1Base.uncompressedFlags;
-
-    extEcPubkeySerialize(
-      ctxPtr, serializedPubKeyArray.ptr, sizeTPtr, pubKeyPtr, flags,
-    );
-
-    // Return copy of public key
-    return serializedPubKeyArray.list.sublist(0, size);
+    return _serializePubKeyFromPtr(compressed);
 
   }
 
@@ -245,6 +272,26 @@ abstract class Secp256k1Base<
     hashArray.load(hash);
 
     return extEcdsaVerify(ctxPtr, sigPtr, hashArray.ptr, pubKeyPtr) == 1;
+
+  }
+
+  /// Takes a compact recoverable [signature] with [recid] and message [hash]
+  /// and recovers the associated public key. If [compressed] is true, the
+  /// public key will be compressed or else it shall be uncompressed. Will
+  /// return null if no public key can be extracted.
+  Uint8List? ecdaSignatureRecoverPubKey(
+    Uint8List signature, int recid, Uint8List hash, bool compressed,
+  ) {
+    _requireLoad();
+
+    _parseRecoverableSignatureIntoPtr(signature, recid);
+    hashArray.load(hash);
+
+    if (extEcdsaRecover(ctxPtr, pubKeyPtr, recSigPtr, hashArray.ptr) != 1) {
+      return null;
+    }
+
+    return _serializePubKeyFromPtr(compressed);
 
   }
 

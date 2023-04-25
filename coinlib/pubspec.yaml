@@ -25,4 +25,4 @@ ffigen:
   output: 'lib/src/generated/secp256k1.ffi.g.dart'
   headers:
     entry-points:
-      - 'src/secp256k1/include/secp256k1.h'
+      - 'src/secp256k1/include/secp256k1_recovery.h'

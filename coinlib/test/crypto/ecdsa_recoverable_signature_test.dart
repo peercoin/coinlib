@@ -1,0 +1,49 @@
+import 'package:coinlib/coinlib.dart';
+import 'package:coinlib/src/common/hex.dart';
+import 'package:test/test.dart';
+import '../vectors/signatures.dart';
+
+void main() {
+
+  group("ECDSARecoverableSignature", () {
+
+    setUpAll(loadCoinlib);
+
+    test("must be 65 bytes", () {
+      for (final failing in [
+        // Too small
+        "201faf14ade8fd0e1a3e7a426cec7c1298d64a7a647a6fdd5926fc745eda006e4a4bd7ad09896ddb98e7aac15bb0c09b4d95cb48a8099d946d36738c582853a8",
+        // Too large
+        "201faf14ade8fd0e1a3e7a426cec7c1298d64a7a647a6fdd5926fc745eda006e4a4bd7ad09896ddb98e7aac15bb0c09b4d95cb48a8099d946d36738c582853a876ff",
+      ]) {
+        expect(
+          () => ECDSARecoverableSignature.fromCompactHex(failing),
+          throwsA(isA<ArgumentError>()),
+        );
+      }
+
+    });
+
+    test("valid signature", () {
+      for (final vector in validRecoverableSigs) {
+        final recSig = ECDSARecoverableSignature.fromCompactHex(vector.compact);
+        expect(recSig.compressed, vector.compressed);
+        expect(recSig.recid, vector.recid);
+        expect(bytesToHex(recSig.signature), vector.signature);
+        expect(recSig.recover(hexToBytes(vector.hash))?.hex, vector.pubkey);
+      }
+    });
+
+    test("invalid signatures", () {
+      for (final sig in invalidSignatures) {
+        expect(
+          () => ECDSARecoverableSignature.fromCompactHex("20$sig"),
+          throwsA(isA<InvalidECDSARecoverableSignature>()),
+          reason: sig,
+        );
+      }
+    });
+
+  });
+
+}

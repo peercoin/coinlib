@@ -119,8 +119,11 @@ class NativeSecp256k1 {
   /// called at most once for every call of this function. If you need to avoid dynamic
   /// memory allocation entirely, see the functions in secp256k1_preallocated.h.
   ///
+  /// Cloning secp256k1_context_static is not possible, and should not be emulated by
+  /// the caller (e.g., using memcpy). Create a new context instead.
+  ///
   /// Returns: a newly created context object.
-  /// Args:    ctx: an existing context to copy
+  /// Args:    ctx: an existing context to copy (not secp256k1_context_static)
   ffi.Pointer<secp256k1_context> secp256k1_context_clone(
     ffi.Pointer<secp256k1_context> ctx,
   ) {
@@ -149,6 +152,7 @@ class NativeSecp256k1 {
   ///
   /// Args:   ctx: an existing context to destroy, constructed using
   /// secp256k1_context_create or secp256k1_context_clone
+  /// (i.e., not secp256k1_context_static).
   void secp256k1_context_destroy(
     ffi.Pointer<secp256k1_context> ctx,
   ) {
@@ -185,8 +189,8 @@ class NativeSecp256k1 {
   /// USE_EXTERNAL_DEFAULT_CALLBACKS is defined, which is the case if the build
   /// has been configured with --enable-external-default-callbacks. Then the
   /// following two symbols must be provided to link against:
-  /// - void secp256k1_default_illegal_callback_fn(const char* message, void* data);
-  /// - void secp256k1_default_error_callback_fn(const char* message, void* data);
+  /// - void secp256k1_default_illegal_callback_fn(const char *message, void *data);
+  /// - void secp256k1_default_error_callback_fn(const char *message, void *data);
   /// The library can call these default handlers even before a proper callback data
   /// pointer could have been set using secp256k1_context_set_illegal_callback or
   /// secp256k1_context_set_error_callback, e.g., when the creation of a context
@@ -1141,10 +1145,10 @@ class NativeSecp256k1 {
 
   /// Randomizes the context to provide enhanced protection against side-channel leakage.
   ///
-  /// Returns: 1: randomization successful (or called on copy of secp256k1_context_static)
+  /// Returns: 1: randomization successful
   /// 0: error
-  /// Args:    ctx:       pointer to a context object.
-  /// In:      seed32:    pointer to a 32-byte random seed (NULL resets to initial state)
+  /// Args:    ctx:       pointer to a context object (not secp256k1_context_static).
+  /// In:      seed32:    pointer to a 32-byte random seed (NULL resets to initial state).
   ///
   /// While secp256k1 code is written and tested to be constant-time no matter what
   /// secret values are, it is possible that a compiler may output code which is not,
@@ -1159,21 +1163,17 @@ class NativeSecp256k1 {
   /// functions that perform computations involving secret keys, e.g., signing and
   /// public key generation. It is possible to call this function more than once on
   /// the same context, and doing so before every few computations involving secret
-  /// keys is recommended as a defense-in-depth measure.
+  /// keys is recommended as a defense-in-depth measure. Randomization of the static
+  /// context secp256k1_context_static is not supported.
   ///
   /// Currently, the random seed is mainly used for blinding multiplications of a
   /// secret scalar with the elliptic curve base point. Multiplications of this
   /// kind are performed by exactly those API functions which are documented to
-  /// require a context that is not the secp256k1_context_static. As a rule of thumb,
+  /// require a context that is not secp256k1_context_static. As a rule of thumb,
   /// these are all functions which take a secret key (or a keypair) as an input.
   /// A notable exception to that rule is the ECDH module, which relies on a different
   /// kind of elliptic curve point multiplication and thus does not benefit from
   /// enhanced protection against side-channel leakage currently.
-  ///
-  /// It is safe call this function on a copy of secp256k1_context_static in writable
-  /// memory (e.g., obtained via secp256k1_context_clone). In that case, this
-  /// function is guaranteed to return 1, but the call will have no effect because
-  /// the static context (or a copy thereof) is not meant to be randomized.
   int secp256k1_context_randomize(
     ffi.Pointer<secp256k1_context> ctx,
     ffi.Pointer<ffi.UnsignedChar> seed32,
@@ -1280,6 +1280,197 @@ class NativeSecp256k1 {
           int,
           ffi.Pointer<ffi.UnsignedChar>,
           int)>();
+
+  /// Parse a compact ECDSA signature (64 bytes + recovery id).
+  ///
+  /// Returns: 1 when the signature could be parsed, 0 otherwise
+  /// Args: ctx:     a secp256k1 context object
+  /// Out:  sig:     a pointer to a signature object
+  /// In:   input64: a pointer to a 64-byte compact signature
+  /// recid:   the recovery id (0, 1, 2 or 3)
+  int secp256k1_ecdsa_recoverable_signature_parse_compact(
+    ffi.Pointer<secp256k1_context> ctx,
+    ffi.Pointer<secp256k1_ecdsa_recoverable_signature> sig,
+    ffi.Pointer<ffi.UnsignedChar> input64,
+    int recid,
+  ) {
+    return _secp256k1_ecdsa_recoverable_signature_parse_compact(
+      ctx,
+      sig,
+      input64,
+      recid,
+    );
+  }
+
+  late final _secp256k1_ecdsa_recoverable_signature_parse_compactPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<secp256k1_ecdsa_recoverable_signature>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              ffi.Int)>>('secp256k1_ecdsa_recoverable_signature_parse_compact');
+  late final _secp256k1_ecdsa_recoverable_signature_parse_compact =
+      _secp256k1_ecdsa_recoverable_signature_parse_compactPtr.asFunction<
+          int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<secp256k1_ecdsa_recoverable_signature>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              int)>();
+
+  /// Convert a recoverable signature into a normal signature.
+  ///
+  /// Returns: 1
+  /// Args: ctx:    a secp256k1 context object.
+  /// Out:  sig:    a pointer to a normal signature.
+  /// In:   sigin:  a pointer to a recoverable signature.
+  int secp256k1_ecdsa_recoverable_signature_convert(
+    ffi.Pointer<secp256k1_context> ctx,
+    ffi.Pointer<secp256k1_ecdsa_signature> sig,
+    ffi.Pointer<secp256k1_ecdsa_recoverable_signature> sigin,
+  ) {
+    return _secp256k1_ecdsa_recoverable_signature_convert(
+      ctx,
+      sig,
+      sigin,
+    );
+  }
+
+  late final _secp256k1_ecdsa_recoverable_signature_convertPtr = _lookup<
+          ffi.NativeFunction<
+              ffi.Int Function(
+                  ffi.Pointer<secp256k1_context>,
+                  ffi.Pointer<secp256k1_ecdsa_signature>,
+                  ffi.Pointer<secp256k1_ecdsa_recoverable_signature>)>>(
+      'secp256k1_ecdsa_recoverable_signature_convert');
+  late final _secp256k1_ecdsa_recoverable_signature_convert =
+      _secp256k1_ecdsa_recoverable_signature_convertPtr.asFunction<
+          int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<secp256k1_ecdsa_signature>,
+              ffi.Pointer<secp256k1_ecdsa_recoverable_signature>)>();
+
+  /// Serialize an ECDSA signature in compact format (64 bytes + recovery id).
+  ///
+  /// Returns: 1
+  /// Args: ctx:      a secp256k1 context object.
+  /// Out:  output64: a pointer to a 64-byte array of the compact signature.
+  /// recid:    a pointer to an integer to hold the recovery id.
+  /// In:   sig:      a pointer to an initialized signature object.
+  int secp256k1_ecdsa_recoverable_signature_serialize_compact(
+    ffi.Pointer<secp256k1_context> ctx,
+    ffi.Pointer<ffi.UnsignedChar> output64,
+    ffi.Pointer<ffi.Int> recid,
+    ffi.Pointer<secp256k1_ecdsa_recoverable_signature> sig,
+  ) {
+    return _secp256k1_ecdsa_recoverable_signature_serialize_compact(
+      ctx,
+      output64,
+      recid,
+      sig,
+    );
+  }
+
+  late final _secp256k1_ecdsa_recoverable_signature_serialize_compactPtr =
+      _lookup<
+              ffi.NativeFunction<
+                  ffi.Int Function(
+                      ffi.Pointer<secp256k1_context>,
+                      ffi.Pointer<ffi.UnsignedChar>,
+                      ffi.Pointer<ffi.Int>,
+                      ffi.Pointer<secp256k1_ecdsa_recoverable_signature>)>>(
+          'secp256k1_ecdsa_recoverable_signature_serialize_compact');
+  late final _secp256k1_ecdsa_recoverable_signature_serialize_compact =
+      _secp256k1_ecdsa_recoverable_signature_serialize_compactPtr.asFunction<
+          int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              ffi.Pointer<ffi.Int>,
+              ffi.Pointer<secp256k1_ecdsa_recoverable_signature>)>();
+
+  /// Create a recoverable ECDSA signature.
+  ///
+  /// Returns: 1: signature created
+  /// 0: the nonce generation function failed, or the secret key was invalid.
+  /// Args:    ctx:       pointer to a context object (not secp256k1_context_static).
+  /// Out:     sig:       pointer to an array where the signature will be placed.
+  /// In:      msghash32: the 32-byte message hash being signed.
+  /// seckey:    pointer to a 32-byte secret key.
+  /// noncefp:   pointer to a nonce generation function. If NULL,
+  /// secp256k1_nonce_function_default is used.
+  /// ndata:     pointer to arbitrary data used by the nonce generation function
+  /// (can be NULL for secp256k1_nonce_function_default).
+  int secp256k1_ecdsa_sign_recoverable(
+    ffi.Pointer<secp256k1_context> ctx,
+    ffi.Pointer<secp256k1_ecdsa_recoverable_signature> sig,
+    ffi.Pointer<ffi.UnsignedChar> msghash32,
+    ffi.Pointer<ffi.UnsignedChar> seckey,
+    secp256k1_nonce_function noncefp,
+    ffi.Pointer<ffi.Void> ndata,
+  ) {
+    return _secp256k1_ecdsa_sign_recoverable(
+      ctx,
+      sig,
+      msghash32,
+      seckey,
+      noncefp,
+      ndata,
+    );
+  }
+
+  late final _secp256k1_ecdsa_sign_recoverablePtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<secp256k1_ecdsa_recoverable_signature>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              secp256k1_nonce_function,
+              ffi.Pointer<ffi.Void>)>>('secp256k1_ecdsa_sign_recoverable');
+  late final _secp256k1_ecdsa_sign_recoverable =
+      _secp256k1_ecdsa_sign_recoverablePtr.asFunction<
+          int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<secp256k1_ecdsa_recoverable_signature>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              secp256k1_nonce_function,
+              ffi.Pointer<ffi.Void>)>();
+
+  /// Recover an ECDSA public key from a signature.
+  ///
+  /// Returns: 1: public key successfully recovered (which guarantees a correct signature).
+  /// 0: otherwise.
+  /// Args:    ctx:       pointer to a context object.
+  /// Out:     pubkey:    pointer to the recovered public key.
+  /// In:      sig:       pointer to initialized signature that supports pubkey recovery.
+  /// msghash32: the 32-byte message hash assumed to be signed.
+  int secp256k1_ecdsa_recover(
+    ffi.Pointer<secp256k1_context> ctx,
+    ffi.Pointer<secp256k1_pubkey> pubkey,
+    ffi.Pointer<secp256k1_ecdsa_recoverable_signature> sig,
+    ffi.Pointer<ffi.UnsignedChar> msghash32,
+  ) {
+    return _secp256k1_ecdsa_recover(
+      ctx,
+      pubkey,
+      sig,
+      msghash32,
+    );
+  }
+
+  late final _secp256k1_ecdsa_recoverPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<secp256k1_pubkey>,
+              ffi.Pointer<secp256k1_ecdsa_recoverable_signature>,
+              ffi.Pointer<ffi.UnsignedChar>)>>('secp256k1_ecdsa_recover');
+  late final _secp256k1_ecdsa_recover = _secp256k1_ecdsa_recoverPtr.asFunction<
+      int Function(
+          ffi.Pointer<secp256k1_context>,
+          ffi.Pointer<secp256k1_pubkey>,
+          ffi.Pointer<secp256k1_ecdsa_recoverable_signature>,
+          ffi.Pointer<ffi.UnsignedChar>)>();
 }
 
 class max_align_t extends ffi.Opaque {}
@@ -1374,6 +1565,24 @@ typedef secp256k1_nonce_function = ffi.Pointer<
             ffi.Pointer<ffi.UnsignedChar>,
             ffi.Pointer<ffi.Void>,
             ffi.UnsignedInt)>>;
+
+/// Opaque data structured that holds a parsed ECDSA signature,
+/// supporting pubkey recovery.
+///
+/// The exact representation of data inside is implementation defined and not
+/// guaranteed to be portable between different platforms or versions. It is
+/// however guaranteed to be 65 bytes in size, and can be safely copied/moved.
+/// If you need to convert to a format suitable for storage or transmission, use
+/// the secp256k1_ecdsa_signature_serialize_* and
+/// secp256k1_ecdsa_signature_parse_* functions.
+///
+/// Furthermore, it is guaranteed that identical signatures (including their
+/// recoverability) will have identical representation, so they can be
+/// memcmp'ed.
+class secp256k1_ecdsa_recoverable_signature extends ffi.Struct {
+  @ffi.Array.multi([65])
+  external ffi.Array<ffi.UnsignedChar> data;
+}
 
 const int NULL = 0;
 

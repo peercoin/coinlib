@@ -5,22 +5,15 @@ import "secp256k1_base.dart";
 import 'package:wasm_interop/wasm_interop.dart';
 import 'package:coinlib/src/generated/secp256k1.wasm.g.dart';
 
-typedef ContextCreateFunction = int Function(int);
-typedef ContextRandomizeFunction = int Function(int, int);
-typedef EcSeckeyVerifyFunction = int Function(int, int);
-typedef EcPublickeyCreateFunction = int Function(int, int, int);
-typedef EcPublickeySerializeFunction = int Function(int, int, int, int, int);
-typedef EcPublickeyParseFunction = int Function(int, int, int, int);
-typedef EcdsaSignFunction = int Function(int, int, int, int, int, int);
-typedef EcdsaSignatureSerializeCompactFunction = int Function(int, int, int);
-typedef EcdsaSignatureParseCompactFunction = int Function(int, int, int);
-typedef EcdsaSignatureNormalizeFunction = int Function(int, int, int);
-typedef EcdsaSignatureSerializeDer = int Function(int, int, int, int);
-typedef EcdsaSignatureParseDer = int Function(int, int, int, int);
-typedef EcdsaSignatureVerifyFunction = int Function(int, int, int, int);
+typedef IntFunc1 = int Function(int);
+typedef IntFunc2 = int Function(int, int);
+typedef IntFunc3 = int Function(int, int, int);
+typedef IntFunc4 = int Function(int, int, int, int);
+typedef IntFunc5 = int Function(int, int, int, int, int);
+typedef IntFunc6 = int Function(int, int, int, int, int, int);
 
 /// Loads and wraps WASM code to be run via the browser JS APIs
-class Secp256k1 extends Secp256k1Base<int, int, int, int,int, int>{
+class Secp256k1 extends Secp256k1Base<int, int, int, int,int, int, int> {
 
   static final int _ptrBytes = 4; // 32-bit architecture
   late Uint8List _memory;
@@ -45,40 +38,44 @@ class Secp256k1 extends Secp256k1Base<int, int, int, int,int, int>{
 
     // Set functions
     extEcSeckeyVerify = inst.functions["secp256k1_ec_seckey_verify"]
-      as EcSeckeyVerifyFunction;
+      as IntFunc2;
     extEcSeckeyVerify = inst.functions["secp256k1_ec_seckey_verify"]
-      as EcSeckeyVerifyFunction;
+      as IntFunc2;
     extEcPubkeyCreate = inst.functions["secp256k1_ec_pubkey_create"]
-      as EcPublickeyCreateFunction;
+      as IntFunc3;
     extEcPubkeySerialize = inst.functions["secp256k1_ec_pubkey_serialize"]
-      as EcPublickeySerializeFunction;
+      as IntFunc5;
     extEcPubkeyParse = inst.functions["secp256k1_ec_pubkey_parse"]
-      as EcPublickeyParseFunction;
+      as IntFunc4;
     extEcdsaSign = inst.functions["secp256k1_ecdsa_sign"]
-      as EcdsaSignFunction;
+      as IntFunc6;
     extEcdsaSignatureSerializeCompact
       = inst.functions["secp256k1_ecdsa_signature_serialize_compact"]
-      as EcdsaSignatureSerializeCompactFunction;
+      as IntFunc3;
     extEcdsaSignatureParseCompact
       = inst.functions["secp256k1_ecdsa_signature_parse_compact"]
-      as EcdsaSignatureParseCompactFunction;
+      as IntFunc3;
     extEcdsaSignatureNormalize
       = inst.functions["secp256k1_ecdsa_signature_normalize"]
-      as EcdsaSignatureNormalizeFunction;
+      as IntFunc3;
     extEcdsaSignatureSerializeDer
       = inst.functions["secp256k1_ecdsa_signature_serialize_der"]
-      as EcdsaSignatureSerializeDer;
+      as IntFunc4;
     extEcdsaSignatureParseDer
       = inst.functions["secp256k1_ecdsa_signature_parse_der"]
-      as EcdsaSignatureParseDer;
+      as IntFunc4;
     extEcdsaVerify = inst.functions["secp256k1_ecdsa_verify"]
-      as EcdsaSignatureVerifyFunction;
+      as IntFunc4;
+    extEcdsaRecoverableSignatureParseCompact
+      = inst.functions["secp256k1_ecdsa_recoverable_signature_parse_compact"]
+      as IntFunc4;
+    extEcdsaRecover = inst.functions["secp256k1_ecdsa_recover"] as IntFunc4;
 
     // Local functions for loading purposes
-    final contextCreate = inst.functions["secp256k1_context_create"]!
-      as ContextCreateFunction;
-    final contextRandomize = inst.functions["secp256k1_context_randomize"]!
-      as ContextRandomizeFunction;
+    final contextCreate = inst.functions["secp256k1_context_create"]
+      as IntFunc1;
+    final contextRandomize = inst.functions["secp256k1_context_randomize"]
+      as IntFunc2;
 
     final malloc = inst.functions["malloc"]! as MallocFunction;
     final free = inst.functions["free"]! as FreeFunction;
@@ -95,6 +92,7 @@ class Secp256k1 extends Secp256k1Base<int, int, int, int,int, int>{
 
     // Other pointers
     sigPtr = malloc(Secp256k1Base.sigSize);
+    recSigPtr = malloc(Secp256k1Base.recSigSize);
     pubKeyPtr = malloc(Secp256k1Base.pubkeySize);
     sizeTPtr = malloc(_ptrBytes);
     nullPtr = 0;
