@@ -101,6 +101,21 @@ void main() {
 
     });
 
+    test(".equal", () {
+      for (int i = 0; i < validPubKeys.length; i++) {
+        expect(
+          ECPublicKey.fromHex(validPubKeys[i]),
+          ECPublicKey.fromHex(validPubKeys[i]),
+        );
+        for (int j = 0; j < i; j++) {
+          expect(
+            ECPublicKey.fromHex(validPubKeys[i]),
+            isNot(equals(ECPublicKey.fromHex(validPubKeys[j]))),
+          );
+        }
+      }
+    });
+
   });
 
 }

@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:coinlib/src/bindings/secp256k1.dart';
 import 'package:coinlib/src/common/hex.dart';
+import 'package:collection/collection.dart';
 import 'ecdsa_signature.dart';
 
 class InvalidPublicKey implements Exception {}
@@ -40,5 +41,15 @@ class ECPublicKey {
       hash,
       data,
     );
+
+  @override
+  bool operator ==(Object other) {
+    if (other is ECPublicKey) return ListEquality().equals(data, other.data);
+    return false;
+  }
+
+  @override
+  int get hashCode => data[1] | data[2] << 8 | data[3] << 16 | data[4] << 24;
+
 
 }
