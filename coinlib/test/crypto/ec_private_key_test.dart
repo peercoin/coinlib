@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:coinlib/coinlib.dart';
 import 'package:coinlib/src/common/hex.dart';
 import 'package:test/test.dart';
@@ -72,7 +71,7 @@ void main() {
     group(".signEcdsa()", () {
 
       late ECPrivateKey key, keyMutated1, keyMutated2;
-      late Uint8List msgHash, msgMutated1, msgMutated2;
+      late Hash256 msgHash, msgMutated1, msgMutated2;
 
       setUpAll(() {
         key = ECPrivateKey.fromHex(
@@ -84,13 +83,16 @@ void main() {
         keyMutated2 = ECPrivateKey.fromHex(
           "8000000000000000000000000000000000000000000000000000000000000001",
         );
-        msgHash = hexToBytes(
+        final msgHashBytes = hexToBytes(
           "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
         );
-        msgMutated1 = msgHash.sublist(0);
-        msgMutated1[31] = 0x1e;
-        msgMutated2 = msgHash.sublist(0);
-        msgMutated2[0] = 0x01;
+        final msgMutated1Bytes = msgHashBytes.sublist(0);
+        msgMutated1Bytes[31] = 0x1e;
+        final msgMutated2Bytes = msgHashBytes.sublist(0);
+        msgMutated2Bytes[0] = 0x01;
+        msgHash = Hash256.fromHashBytes(msgHashBytes);
+        msgMutated1 = Hash256.fromHashBytes(msgMutated1Bytes);
+        msgMutated2 = Hash256.fromHashBytes(msgMutated2Bytes);
       });
 
       test("provides a correct signature", () {

@@ -3,6 +3,7 @@ import 'package:coinlib/src/bindings/secp256k1.dart';
 import 'package:coinlib/src/common/hex.dart';
 import 'ec_public_key.dart';
 import 'ecdsa_signature.dart';
+import 'hash.dart';
 import 'random.dart';
 
 class InvalidPrivateKey implements Exception {}
@@ -45,13 +46,13 @@ class ECPrivateKey {
   /// Takes a 32-byte message [hash] and produces an ECDSA signature using this
   /// private key. The signature will be generated deterministically and shall
   /// be the same for a given hash and key.
-  ECDSASignature signEcdsa(Uint8List hash) => ECDSASignature.fromCompact(
-    secp256k1.ecdsaSign(hash, data),
+  ECDSASignature signEcdsa(Hash256 hash) => ECDSASignature.fromCompact(
+    secp256k1.ecdsaSign(hash.bytes, data),
   );
 
   ECPublicKey? _pubkeyCache;
   /// The public key associated with this private key
-  get pubkey => _pubkeyCache ??= ECPublicKey(
+  ECPublicKey get pubkey => _pubkeyCache ??= ECPublicKey(
     secp256k1.privToPubKey(data, compressed),
   );
 

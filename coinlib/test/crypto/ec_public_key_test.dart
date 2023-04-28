@@ -54,7 +54,7 @@ void main() {
 
     group(".verify", () {
 
-      late Uint8List msgHash;
+      late Hash256 msgHash;
       late ECPublicKey pubKey;
 
       setUpAll(() {

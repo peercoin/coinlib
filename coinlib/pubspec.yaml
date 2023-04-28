@@ -12,6 +12,7 @@ dev_dependencies:
   test: ^1.21.0
 
 dependencies:
+  collection: ^1.17.1
   crypto: ^3.0.2
   dart_base_x: ^1.0.0
   ffi: ^1.2.1
