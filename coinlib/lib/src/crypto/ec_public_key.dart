@@ -2,8 +2,6 @@ import 'dart:typed_data';
 import 'package:coinlib/src/bindings/secp256k1.dart';
 import 'package:coinlib/src/common/hex.dart';
 import 'package:collection/collection.dart';
-import 'ecdsa_signature.dart';
-import 'hash.dart';
 
 class InvalidPublicKey implements Exception {}
 
@@ -32,16 +30,6 @@ class ECPublicKey {
 
   get hex => bytesToHex(data);
   get compressed => data.length == 33;
-
-  /// Takes a 32-byte message [signature] and [hash] and returns true if the
-  /// signature is valid for the public key and hash. This accepts malleable
-  /// signatures with high and low S-values.
-  bool verify(ECDSASignature signature, Hash256 hash)
-    => secp256k1.ecdsaVerify(
-      secp256k1.ecdsaSignatureNormalize(signature.compact),
-      hash.bytes,
-      data,
-    );
 
   @override
   bool operator ==(Object other) {

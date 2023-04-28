@@ -3,6 +3,10 @@ import 'package:coinlib/src/bindings/secp256k1.dart';
 import 'package:coinlib/src/bindings/secp256k1_base.dart';
 import 'package:coinlib/src/common/hex.dart';
 
+import 'ec_private_key.dart';
+import 'ec_public_key.dart';
+import 'hash.dart';
+
 class InvalidECDSASignature implements Exception {}
 
 class ECDSASignature {
@@ -50,6 +54,32 @@ class ECDSASignature {
   /// See [ECDSASignature.fromDer].
   factory ECDSASignature.fromDerHex(String hex)
     => ECDSASignature.fromDer(hexToBytes(hex));
+
+  /// Creates a signature using a private key ([privkey]) for a given [hash].
+  /// The signature will be generated deterministically and shall be the same
+  /// for a given hash and key.
+  factory ECDSASignature.sign(ECPrivateKey privkey, Hash256 hash) {
+
+    final sig = ECDSASignature.fromCompact(
+      secp256k1.ecdsaSign(hash.bytes, privkey.data),
+    );
+
+    // Verify signature to protect against computation errors. Cosmic rays etc.
+    if (!sig.verify(privkey.pubkey, hash)) throw InvalidECDSASignature();
+
+    return sig;
+
+  }
+
+  /// Takes a 32-byte message [hash] and [publickey] and returns true if the
+  /// signature is valid for the public key and hash. This accepts malleable
+  /// signatures with high and low S-values.
+  bool verify(ECPublicKey publickey, Hash256 hash)
+    => secp256k1.ecdsaVerify(
+      secp256k1.ecdsaSignatureNormalize(compact),
+      hash.bytes,
+      publickey.data,
+    );
 
   /// Returns the DER encoding for the signature
   Uint8List get der => secp256k1.ecdsaSignatureToDer(compact);
