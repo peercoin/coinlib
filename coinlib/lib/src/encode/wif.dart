@@ -1,9 +1,6 @@
-
 import 'dart:typed_data';
-
+import 'package:coinlib/src/crypto/ec_private_key.dart';
 import 'package:coinlib/src/encode/base58.dart';
-
-import 'ec_private_key.dart';
 
 class WifVersionMismatch implements Exception {}
 class InvalidWif implements Exception {}
