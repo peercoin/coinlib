@@ -8,9 +8,15 @@ class Secp256k1Exception implements Exception {
   String toString() => what;
 }
 
+class SigWithRecId {
+  final Uint8List signature;
+  final int recid;
+  SigWithRecId(this.signature, this.recid);
+}
+
 abstract class Secp256k1Base<
   CtxPtr, HeapArrayPtr, PubKeyPtr, SizeTPtr, SignaturePtr,
-  RecoverableSignaturePtr, NullPtr
+  RecoverableSignaturePtr, IntPtr, NullPtr
 > {
 
   static const contextNone = 1;
@@ -33,9 +39,6 @@ abstract class Secp256k1Base<
   ) extEcPubkeySerialize;
   late int Function(CtxPtr, PubKeyPtr, HeapArrayPtr, int) extEcPubkeyParse;
   late int Function(
-    CtxPtr, SignaturePtr, HeapArrayPtr, HeapArrayPtr, NullPtr, NullPtr,
-  ) extEcdsaSign;
-  late int Function(
     CtxPtr, HeapArrayPtr, SignaturePtr,
   ) extEcdsaSignatureSerializeCompact;
   late int Function(
@@ -51,11 +54,21 @@ abstract class Secp256k1Base<
     CtxPtr, SignaturePtr, HeapArrayPtr, int,
   ) extEcdsaSignatureParseDer;
   late int Function(
+    CtxPtr, SignaturePtr, HeapArrayPtr, HeapArrayPtr, NullPtr, NullPtr,
+  ) extEcdsaSign;
+  late int Function(
     CtxPtr, SignaturePtr, HeapArrayPtr, PubKeyPtr,
   ) extEcdsaVerify;
   late int Function(
+    CtxPtr, HeapArrayPtr, IntPtr, RecoverableSignaturePtr,
+  ) extEcdsaRecoverableSignatureSerializeCompact;
+  late int Function(
     CtxPtr, RecoverableSignaturePtr, HeapArrayPtr, int,
   ) extEcdsaRecoverableSignatureParseCompact;
+  late int Function(
+    CtxPtr, RecoverableSignaturePtr, HeapArrayPtr, HeapArrayPtr, NullPtr,
+    NullPtr,
+  ) extEcdsaSignRecoverable;
   late int Function(
     CtxPtr, PubKeyPtr, RecoverableSignaturePtr, HeapArrayPtr,
   ) extEcdsaRecover;
@@ -73,6 +86,7 @@ abstract class Secp256k1Base<
   late SizeTPtr sizeTPtr;
   late SignaturePtr sigPtr;
   late RecoverableSignaturePtr recSigPtr;
+  late IntPtr recIdPtr;
   late NullPtr nullPtr;
 
   Uint8List _serializePubKeyFromPtr(bool compressed) {
@@ -275,6 +289,27 @@ abstract class Secp256k1Base<
 
   }
 
+  SigWithRecId ecdsaSignRecoverable(Uint8List hash, Uint8List privKey) {
+    _requireLoad();
+
+    privKeyArray.load(privKey);
+    hashArray.load(hash);
+
+    if (
+      extEcdsaSignRecoverable(
+        ctxPtr, recSigPtr, hashArray.ptr, privKeyArray.ptr, nullPtr, nullPtr,
+      ) != 1
+    ) {
+      throw Secp256k1Exception("Cannot sign message with private key");
+    }
+
+    extEcdsaRecoverableSignatureSerializeCompact(
+      ctxPtr, serializedSigArray.ptr, recIdPtr, recSigPtr,
+    );
+    return SigWithRecId(serializedSigArray.list.sublist(0), internalRecId);
+
+  }
+
   /// Takes a compact recoverable [signature] with [recid] and message [hash]
   /// and recovers the associated public key. If [compressed] is true, the
   /// public key will be compressed or else it shall be uncompressed. Will
@@ -302,5 +337,9 @@ abstract class Secp256k1Base<
   /// Specialised sub-classes should override to obtain the value behind the
   /// sizeTPtr
   int get sizeT;
+
+  /// Specialised sub-classes should override to obtain the value behind the
+  /// recIdPtr
+  int get internalRecId;
 
 }

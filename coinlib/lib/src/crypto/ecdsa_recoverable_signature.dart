@@ -1,7 +1,8 @@
 import 'dart:typed_data';
 import 'package:coinlib/src/bindings/secp256k1.dart';
 import 'package:coinlib/src/common/hex.dart';
-
+import 'package:coinlib/src/crypto/ec_private_key.dart';
+import 'hash.dart';
 import 'ec_public_key.dart';
 
 class InvalidECDSARecoverableSignature implements Exception {}
@@ -36,8 +37,9 @@ class ECDSARecoverableSignature {
     }
 
     // Extract recid and public key compression from first byte
-    final recid = (compact[0] - 27) & 3;
-    final compressed = ((compact[0] - 27) & 4) != 0;
+    final bits = (compact[0] - 27);
+    final recid = bits & 3;
+    final compressed = (bits & 4) != 0;
     final signature = compact.sublist(1);
 
     if (!secp256k1.ecdsaCompactRecoverableSignatureVerify(signature, recid)) {
@@ -48,20 +50,42 @@ class ECDSARecoverableSignature {
 
   }
 
+  /// Creates a recoverable signature using a private key ([privkey]) for a
+  /// given [hash].
+  factory ECDSARecoverableSignature.sign(ECPrivateKey privkey, Hash256 hash) {
+
+    final sigAndId = secp256k1.ecdsaSignRecoverable(hash.bytes, privkey.data);
+    final recSig = ECDSARecoverableSignature._(
+      sigAndId.signature, sigAndId.recid, privkey.compressed,
+    );
+
+    // Verify signature to protect against computation errors. Cosmic rays etc.
+    if (privkey.pubkey != recSig.recover(hash)) {
+      throw InvalidECDSARecoverableSignature();
+    }
+
+    return recSig;
+
+  }
+
   /// Takes a HEX encoded 65-byte compact recoverable signature representation.
   /// See [ECDSARecoverableSignature.fromCompact].
   factory ECDSARecoverableSignature.fromCompactHex(String hex)
     => ECDSARecoverableSignature.fromCompact(hexToBytes(hex));
 
-  /// Given a 32-byte message [hash], returns a public key recovered from the
-  /// signature and hash. This can be compared against the expected public key
-  /// or public key hash to determine if the message was signed correctly.
+  /// Given a [hash], returns a public key recovered from the signature and
+  /// hash. This can be compared against the expected public key or public key
+  /// hash to determine if the message was signed correctly.
   /// If a public key cannot be extracted, null shall be returned.
-  ECPublicKey? recover(Uint8List hash) {
+  ECPublicKey? recover(Hash256 hash) {
     final pkBytes = secp256k1.ecdaSignatureRecoverPubKey(
-      signature, recid, hash, compressed,
+      signature, recid, hash.bytes, compressed,
     );
     return pkBytes != null ? ECPublicKey(pkBytes) : null;
   }
+
+  Uint8List get compact => Uint8List.fromList([
+    27 + recid + (compressed ? 4 : 0), ...signature,
+  ]);
 
 }

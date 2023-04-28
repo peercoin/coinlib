@@ -13,9 +13,10 @@ typedef IntFunc5 = int Function(int, int, int, int, int);
 typedef IntFunc6 = int Function(int, int, int, int, int, int);
 
 /// Loads and wraps WASM code to be run via the browser JS APIs
-class Secp256k1 extends Secp256k1Base<int, int, int, int,int, int, int> {
+class Secp256k1 extends Secp256k1Base<int, int, int, int,int, int, int, int> {
 
   static final int _ptrBytes = 4; // 32-bit architecture
+  static final int _intBytes = 8; // Allocate 8 bytes to be on the safe side
   late Uint8List _memory;
 
   @override
@@ -66,9 +67,15 @@ class Secp256k1 extends Secp256k1Base<int, int, int, int,int, int, int> {
       as IntFunc4;
     extEcdsaVerify = inst.functions["secp256k1_ecdsa_verify"]
       as IntFunc4;
+    extEcdsaRecoverableSignatureSerializeCompact
+      = inst.functions["secp256k1_ecdsa_recoverable_signature_serialize_compact"]
+      as IntFunc4;
     extEcdsaRecoverableSignatureParseCompact
       = inst.functions["secp256k1_ecdsa_recoverable_signature_parse_compact"]
       as IntFunc4;
+    extEcdsaSignRecoverable
+      = inst.functions["secp256k1_ecdsa_sign_recoverable"]
+      as IntFunc6;
     extEcdsaRecover = inst.functions["secp256k1_ecdsa_recover"] as IntFunc4;
 
     // Local functions for loading purposes
@@ -95,6 +102,7 @@ class Secp256k1 extends Secp256k1Base<int, int, int, int,int, int, int> {
     recSigPtr = malloc(Secp256k1Base.recSigSize);
     pubKeyPtr = malloc(Secp256k1Base.pubkeySize);
     sizeTPtr = malloc(_ptrBytes);
+    recIdPtr = malloc(_intBytes);
     nullPtr = 0;
 
     // Create and randomise context with 32 bytes
@@ -117,5 +125,10 @@ class Secp256k1 extends Secp256k1Base<int, int, int, int,int, int, int> {
   @override
   int get sizeT
     => ByteData.view(_memory.buffer).getUint32(sizeTPtr, Endian.little);
+
+  @override
+  // Given the little-endian architecture, it is safe to take the first byte as
+  // the desired recid.
+  int get internalRecId => _memory.buffer.asUint8List()[recIdPtr];
 
 }

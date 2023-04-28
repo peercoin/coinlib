@@ -34,13 +34,11 @@ class RecSigVector {
   final String compact;
   final bool compressed;
   final int recid;
-  final String hash;
   final String? pubkey;
   RecSigVector({
     required this.compact,
     required this.compressed,
     required this.recid,
-    required this.hash,
     required this.pubkey,
   });
   get signature => compact.substring(2);
@@ -52,7 +50,6 @@ final validRecoverableSigs = [
     compact: "201faf14ade8fd0e1a3e7a426cec7c1298d64a7a647a6fdd5926fc745eda006e4a4bd7ad09896ddb98e7aac15bb0c09b4d95cb48a8099d946d36738c582853a876",
     compressed: true,
     recid: 1,
-    hash: "56282d1366c4b5d34a259fff5bdfd44e7013fa8213bc713758fdeed212d62fe8",
     pubkey: "0335d4392797482c7531bf5c21464f8a4c64508b5feef83ba6e435dad04a3a35fe",
   ),
   // Uncompressed
@@ -60,7 +57,6 @@ final validRecoverableSigs = [
     compact: "1c1faf14ade8fd0e1a3e7a426cec7c1298d64a7a647a6fdd5926fc745eda006e4a4bd7ad09896ddb98e7aac15bb0c09b4d95cb48a8099d946d36738c582853a876",
     compressed: false,
     recid: 1,
-    hash: "56282d1366c4b5d34a259fff5bdfd44e7013fa8213bc713758fdeed212d62fe8",
     pubkey: "0435d4392797482c7531bf5c21464f8a4c64508b5feef83ba6e435dad04a3a35fe952f0c59b0bd8f99092657cdd3688ded3ce2cd0043e88424d475924c6424647b",
   ),
   // Good luck finding a signature with overflowing public key with recids 3 and 4
@@ -68,7 +64,6 @@ final validRecoverableSigs = [
     compact: "221faf14ade8fd0e1a3e7a426cec7c1298d64a7a647a6fdd5926fc745eda006e4a4bd7ad09896ddb98e7aac15bb0c09b4d95cb48a8099d946d36738c582853a876",
     compressed: true,
     recid: 3,
-    hash: "56282d1366c4b5d34a259fff5bdfd44e7013fa8213bc713758fdeed212d62fe8",
     pubkey: null,
   ),
   // A null signature (zeroed) will return a null public key
@@ -76,8 +71,22 @@ final validRecoverableSigs = [
     compact: "2000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
     compressed: true,
     recid: 1,
-    hash: "56282d1366c4b5d34a259fff5bdfd44e7013fa8213bc713758fdeed212d62fe8",
     pubkey: null,
+  ),
+];
+
+final validRecSigSigns = [
+  RecSigVector(
+    compact: "20f2f7cfb77e04c808556500d39008337e9b02a788045d03de0a727636b6497675383ed64a7023d4850f99985fa8fbd7528ca803685db3d8376f10720436d3ed84",
+    compressed: true,
+    recid: 1,
+    pubkey: "024289801366bcee6172b771cf5a7f13aaecd237a0b9a1ff9d769cabc2e6b70a34",
+  ),
+  RecSigVector(
+    compact: "1cf2f7cfb77e04c808556500d39008337e9b02a788045d03de0a727636b6497675383ed64a7023d4850f99985fa8fbd7528ca803685db3d8376f10720436d3ed84",
+    compressed: false,
+    recid: 1,
+    pubkey: "044289801366bcee6172b771cf5a7f13aaecd237a0b9a1ff9d769cabc2e6b70a34cec320a0565fb7caf11b1ca2f445f9b7b012dda5718b3cface369ee3a034ded6",
   ),
 ];
 

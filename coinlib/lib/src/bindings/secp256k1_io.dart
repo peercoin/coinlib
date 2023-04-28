@@ -46,6 +46,7 @@ class Secp256k1 extends Secp256k1Base<
   Pointer<Size>,
   Pointer<secp256k1_ecdsa_signature>,
   Pointer<secp256k1_ecdsa_recoverable_signature>,
+  Pointer<Int>,
   Pointer<Never>
 > {
 
@@ -68,8 +69,11 @@ class Secp256k1 extends Secp256k1Base<
       _lib.secp256k1_ecdsa_signature_serialize_der;
     extEcdsaSignatureParseDer = _lib.secp256k1_ecdsa_signature_parse_der;
     extEcdsaVerify = _lib.secp256k1_ecdsa_verify;
+    extEcdsaRecoverableSignatureSerializeCompact
+      = _lib.secp256k1_ecdsa_recoverable_signature_serialize_compact;
     extEcdsaRecoverableSignatureParseCompact
       = _lib.secp256k1_ecdsa_recoverable_signature_parse_compact;
+    extEcdsaSignRecoverable = _lib.secp256k1_ecdsa_sign_recoverable;
     extEcdsaRecover = _lib.secp256k1_ecdsa_recover;
 
     // Set heap arrays
@@ -87,6 +91,7 @@ class Secp256k1 extends Secp256k1Base<
     pubKeyPtr = malloc();
     sigPtr = malloc();
     recSigPtr = malloc();
+    recIdPtr = malloc();
     nullPtr = nullptr;
 
     // Create context
@@ -109,5 +114,8 @@ class Secp256k1 extends Secp256k1Base<
 
   @override
   int get sizeT => sizeTPtr.value;
+
+  @override
+  int get internalRecId => recIdPtr.value;
 
 }
