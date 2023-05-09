@@ -37,6 +37,9 @@ final base58InvalidVectors = [
   " 2n1XR4oJkmBdJMxhBGQGb96gQ88xUyGML1i",
   "2n1XR4oJkmBdJMxhB GQGb96gQ88xUyGML1i",
   "2n1XR4oJkmBdJMxhBGQGb96gQ88xUyGML1i ",
+  "3QJm",
+  "",
+  "x",
 ];
 
 final base58InvalidChecksumVectors = [
@@ -44,7 +47,5 @@ final base58InvalidChecksumVectors = [
   "1111111111111111111114oLvT",
   "1111111111111111111113oLvT2",
   "3QJmn",
-  "3QJm",
-  "",
 ];
 

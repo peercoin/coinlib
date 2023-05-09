@@ -4,8 +4,6 @@ import '../vectors/base58.dart';
 
 void main() {
 
-  setUpAll(() => loadCoinlib());
-
   group("base58Encode", () {
     test("encodes to expected string", () {
       for (final vector in base58ValidVectors) {

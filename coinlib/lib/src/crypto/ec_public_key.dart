@@ -32,10 +32,8 @@ class ECPublicKey {
   get compressed => data.length == 33;
 
   @override
-  bool operator ==(Object other) {
-    if (other is ECPublicKey) return ListEquality().equals(data, other.data);
-    return false;
-  }
+  bool operator ==(Object other)
+    => (other is ECPublicKey) && ListEquality().equals(data, other.data);
 
   @override
   int get hashCode => data[1] | data[2] << 8 | data[3] << 16 | data[4] << 24;

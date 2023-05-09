@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:coinlib/src/common/hex.dart';
+import 'package:collection/collection.dart';
 import 'package:crypto/crypto.dart' as crypto;
 import 'package:pointycastle/digests/ripemd160.dart';
 
@@ -16,9 +17,19 @@ _copyCheckBytes(Uint8List bytes, int length) {
   return Uint8List.fromList(bytes);
 }
 
-/// Encapsulates a 32-byte hash
-class Hash256 {
+abstract class Hash {
+  Uint8List get bytes;
+  @override
+  bool operator ==(Object other)
+    => (other is Hash) && ListEquality().equals(bytes, other.bytes);
+  @override
+  int get hashCode => bytes[1] | bytes[2] << 8 | bytes[3] << 16 | bytes[4] << 24;
+}
 
+/// Encapsulates a 32-byte hash
+class Hash256 extends Hash {
+
+  @override
   final Uint8List bytes;
 
   Hash256.fromHashBytes(Uint8List bytes)
@@ -28,8 +39,9 @@ class Hash256 {
 }
 
 /// Encapsulates a 20-byte hash
-class Hash160 {
+class Hash160 extends Hash {
 
+  @override
   final Uint8List bytes;
 
   Hash160.fromHashBytes(Uint8List bytes)

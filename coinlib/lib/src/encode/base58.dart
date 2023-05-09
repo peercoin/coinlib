@@ -29,7 +29,7 @@ Uint8List base58Decode(String b58) {
     }
 
     // Check room for checksum
-    if (fullData.length < 4) throw InvalidBase58Checksum();
+    if (fullData.length < 4) throw InvalidBase58();
 
     final data = fullData.sublist(0, fullData.length-4);
     final expChecksum = fullData.sublist(fullData.length-4);

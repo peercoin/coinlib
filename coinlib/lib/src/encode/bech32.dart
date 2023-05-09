@@ -1,7 +1,11 @@
 final alphabet = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
 
+/// Returns true if a bech32 hrp uses valid characters.
+bool hrpValid(String hrp)
+  => hrp.codeUnits.every((c) => c > 32 && c < 127);
+
 void _throwOnInvalidHrp(String hrp) {
-  if (hrp.codeUnits.any((c) => c < 33 || c > 126)) {
+  if (!hrpValid(hrp)) {
     throw InvalidBech32("$hrp is an invalid bech32 HRP");
   }
 }
@@ -31,6 +35,38 @@ int _polymod(String hrp, List<int> words)
 List<int> _checksum(String hrp, List<int> words, int checkConst) {
   final polymod = _polymod(hrp, [...words,0,0,0,0,0,0]) ^ checkConst;
   return List.generate(6, (i) => (polymod >> 5 * (5 - i)) & 31);
+}
+
+/// Converts [data] from "[from]" bits to "[to]" bits with optional padding
+/// ([pad]). Returns the new data or null if conversion was not possible.
+/// Used to convert to and from the 5-bit words for bech32.
+List<int>? convertBits(List<int> data, int from, int to, bool pad) {
+
+  var acc = 0;
+  var bits = 0;
+  List<int> result = [];
+  final maxv = (1 << to) - 1;
+
+  for (final v in data) {
+    if (v < 0 || (v >> from) != 0) return null;
+    acc = (acc << from) | v;
+    bits += from;
+    while (bits >= to) {
+      bits -= to;
+      result.add((acc >> bits) & maxv);
+    }
+  }
+
+  if (pad) {
+    if (bits > 0) {
+      result.add((acc << (to - bits)) & maxv);
+    }
+  } else if (bits >= from || ((acc << (to - bits)) & maxv) != 0) {
+    return null;
+  }
+
+  return result;
+
 }
 
 class InvalidBech32 implements Exception {
