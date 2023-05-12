@@ -206,6 +206,12 @@ void main() {
         "pc1sqqqsyqcyq5rqwzqfpg9scrgwpugpzysnzs23v9ccrydpk8qarc0jqgfzyvjz2f389qyd22c5",
         // Too short unknown segwit
         "pc1sqqwczah4",
+        // Bech32m for v=0
+        "pc1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqwhaxxz",
+        // Bech32 for v=1
+        "pc1pqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs46pwt",
+        // Unpadded bits
+        "pc1qqqqsyqcyq5rqwzqfpg9scrgwpugpzysnzs23v9ccrydpk8qarc0pcfzdx",
       ]) {
         expect(
           () => Address.fromString(invalid, NetworkParams.mainnet),
@@ -233,6 +239,14 @@ void main() {
     });
 
     expectArgumentError(void Function() f) => expect(f, throwsA(isA<ArgumentError>()));
+
+    test("invalid base58 version", () {
+      for (final v in [-1, 256]) {
+        expectArgumentError(
+          () => P2PKHAddress.fromPublicKey(pubkey, version: v),
+        );
+      }
+    });
 
     test("invalid version, program and hrp arguments", () {
 
