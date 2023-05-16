@@ -9,6 +9,7 @@ export 'package:coinlib/src/address.dart';
 export 'package:coinlib/src/encode/base58.dart';
 export 'package:coinlib/src/encode/bech32.dart';
 export 'package:coinlib/src/encode/wif.dart';
-export 'package:coinlib/src/networks/network_params.dart';
+export 'package:coinlib/src/network_params.dart';
+export 'package:coinlib/src/common/serial.dart';
 
 Future<void> loadCoinlib() => secp256k1.load();

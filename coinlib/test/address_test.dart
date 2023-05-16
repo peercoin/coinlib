@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:coinlib/coinlib.dart';
 import 'package:test/test.dart';
 
@@ -8,6 +6,7 @@ const wrongNetwork = NetworkParams(
   p2pkhPrefix: 0xfa,
   p2shPrefix: 0xfb,
   bech32Hrp: "wrong",
+  messagePrefix: "",
 );
 
 expectBase58Equal(Base58Address addr, Base58Address expected) {
@@ -64,7 +63,6 @@ expectValidAddress<T extends Address>(
     expectBech32Equal(b32Base, expected);
     expectBech32Equal(b32Sub, expected);
   }
-
 
 }
 

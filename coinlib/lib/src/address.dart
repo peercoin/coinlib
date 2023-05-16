@@ -2,7 +2,7 @@ import 'dart:typed_data';
 import 'package:coinlib/src/common/hex.dart';
 import 'package:coinlib/src/crypto/ec_public_key.dart';
 import 'package:coinlib/src/crypto/hash.dart';
-import 'package:coinlib/src/networks/network_params.dart';
+import 'package:coinlib/src/network_params.dart';
 import 'package:coinlib/src/encode/base58.dart';
 import 'package:coinlib/src/encode/bech32.dart';
 
