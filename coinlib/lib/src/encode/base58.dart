@@ -7,7 +7,7 @@ final _codec = BaseXCodec("123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstu
 class InvalidBase58 implements Exception {}
 class InvalidBase58Checksum implements Exception {}
 
-_checksum(Uint8List data) => sha256DoubleHash(data).bytes.sublist(0, 4);
+_checksum(Uint8List data) => sha256DoubleHash(data).u8List.sublist(0, 4);
 
 /// Encodes a checksumed base58 string
 String base58Encode(Uint8List data) {

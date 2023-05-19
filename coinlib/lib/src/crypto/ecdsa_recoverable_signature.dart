@@ -1,8 +1,8 @@
 import 'dart:typed_data';
 import 'package:coinlib/src/bindings/secp256k1.dart';
+import 'package:coinlib/src/common/bytes.dart';
 import 'package:coinlib/src/common/hex.dart';
 import 'package:coinlib/src/crypto/ec_private_key.dart';
-import 'hash.dart';
 import 'ec_public_key.dart';
 
 class InvalidECDSARecoverableSignature implements Exception {}
@@ -52,9 +52,9 @@ class ECDSARecoverableSignature {
 
   /// Creates a recoverable signature using a private key ([privkey]) for a
   /// given [hash].
-  factory ECDSARecoverableSignature.sign(ECPrivateKey privkey, Hash256 hash) {
+  factory ECDSARecoverableSignature.sign(ECPrivateKey privkey, Bytes32 hash) {
 
-    final sigAndId = secp256k1.ecdsaSignRecoverable(hash.bytes, privkey.data);
+    final sigAndId = secp256k1.ecdsaSignRecoverable(hash.u8List, privkey.data);
     final recSig = ECDSARecoverableSignature._(
       sigAndId.signature, sigAndId.recid, privkey.compressed,
     );
@@ -77,9 +77,9 @@ class ECDSARecoverableSignature {
   /// hash. This can be compared against the expected public key or public key
   /// hash to determine if the message was signed correctly.
   /// If a public key cannot be extracted, null shall be returned.
-  ECPublicKey? recover(Hash256 hash) {
+  ECPublicKey? recover(Bytes32 hash) {
     final pkBytes = secp256k1.ecdaSignatureRecoverPubKey(
-      signature, recid, hash.bytes, compressed,
+      signature, recid, hash.u8List, compressed,
     );
     return pkBytes != null ? ECPublicKey(pkBytes) : null;
   }

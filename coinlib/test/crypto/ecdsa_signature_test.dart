@@ -95,7 +95,7 @@ void main() {
     group(".sign()", () {
 
       late ECPrivateKey key, keyMutated1, keyMutated2;
-      late Hash256 msgHash, msgMutated1, msgMutated2;
+      late Bytes32 msgHash, msgMutated1, msgMutated2;
 
       setUpAll(() {
         key = ECPrivateKey.fromHex(
@@ -114,9 +114,9 @@ void main() {
         msgMutated1Bytes[31] = 0x1e;
         final msgMutated2Bytes = msgHashBytes.sublist(0);
         msgMutated2Bytes[0] = 0x01;
-        msgHash = Hash256.fromHashBytes(msgHashBytes);
-        msgMutated1 = Hash256.fromHashBytes(msgMutated1Bytes);
-        msgMutated2 = Hash256.fromHashBytes(msgMutated2Bytes);
+        msgHash = Bytes32.fromList(msgHashBytes);
+        msgMutated1 = Bytes32.fromList(msgMutated1Bytes);
+        msgMutated2 = Bytes32.fromList(msgMutated2Bytes);
       });
 
       test("provides a correct signature", () {
@@ -161,7 +161,7 @@ void main() {
 
     group(".verify", () {
 
-      late Hash256 msgHash;
+      late Bytes32 msgHash;
       late ECPublicKey pubKey;
 
       setUpAll(() {

@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:coinlib/src/common/bytes.dart';
 import 'package:coinlib/src/common/hex.dart';
 import 'package:coinlib/src/crypto/ec_public_key.dart';
 import 'package:coinlib/src/crypto/hash.dart';
@@ -45,7 +46,7 @@ abstract class Address {
 abstract class Base58Address implements Address {
 
   /// The 160bit public key or redeemScript hash for the base58 address
-  final Hash160 hash;
+  final Bytes20 hash;
   /// The network and address type version of the address
   final int version;
   String? _encodedCache;
@@ -66,9 +67,9 @@ abstract class Base58Address implements Address {
 
     late Base58Address addr;
     if (version == network.p2pkhPrefix) {
-      addr = P2PKHAddress.fromHash(Hash160.fromHashBytes(payload), version: version);
+      addr = P2PKHAddress.fromHash(Bytes20.fromList(payload), version: version);
     } else if (version == network.p2shPrefix) {
-      addr = P2SHAddress.fromHash(Hash160.fromHashBytes(payload), version: version);
+      addr = P2SHAddress.fromHash(Bytes20.fromList(payload), version: version);
     } else {
       throw InvalidAddressNetwork();
     }
@@ -80,7 +81,7 @@ abstract class Base58Address implements Address {
 
   @override
   toString() => _encodedCache ??= base58Encode(
-    Uint8List.fromList([version, ...hash.bytes]),
+    Uint8List.fromList([version, ...hash.u8List]),
   );
 
 }
@@ -88,7 +89,7 @@ abstract class Base58Address implements Address {
 class P2PKHAddress extends Base58Address {
 
   /// Takes a [hash] directly for a P2PKH address
-  P2PKHAddress.fromHash(Hash160 hash, { required int version })
+  P2PKHAddress.fromHash(Bytes20 hash, { required int version })
     : super._(hash, version);
 
   /// Constructs a P2PKH address from a given [pubkey].
@@ -99,7 +100,7 @@ class P2PKHAddress extends Base58Address {
 
 class P2SHAddress extends Base58Address {
   /// Constructs a P2SH address from the redeemScript [hash].
-  P2SHAddress.fromHash(Hash160 hash, { required int version })
+  P2SHAddress.fromHash(Bytes20 hash, { required int version })
     : super._(hash, version);
 }
 
@@ -175,11 +176,11 @@ abstract class Bech32Address implements Address {
       // Version 0 signals P2WPKH or P2WSH
       if (program.length == 20) {
         addr = P2WPKHAddress.fromHash(
-          Hash160.fromHashBytes(bytes), hrp: bech32.hrp,
+          Bytes20.fromList(bytes), hrp: bech32.hrp,
         );
       } else if (program.length == 32) {
         addr = P2WSHAddress.fromHash(
-          Hash256.fromHashBytes(bytes), hrp: bech32.hrp,
+          Bytes32.fromList(bytes), hrp: bech32.hrp,
         );
       } else {
         throw InvalidAddress();
@@ -213,26 +214,26 @@ abstract class Bech32Address implements Address {
 class P2WPKHAddress extends Bech32Address {
 
   /// Constructs a P2WPKH address directly from the [hash]
-  P2WPKHAddress.fromHash(Hash160 hash, { required String hrp })
-    : super._(0, hash.bytes, hrp);
+  P2WPKHAddress.fromHash(Bytes20 hash, { required String hrp })
+    : super._(0, hash.u8List, hrp);
 
   /// Constructs a P2WPKH address from a [pubkey]
   P2WPKHAddress.fromPublicKey(ECPublicKey pubkey, { required String hrp })
     : this.fromHash(hash160(pubkey.data), hrp: hrp);
 
   /// Obtains the 160bit hash of the public key
-  Hash160 get hash => Hash160.fromHashBytes(program);
+  Bytes20 get hash => Bytes20.fromList(program);
 
 }
 
 class P2WSHAddress extends Bech32Address {
 
   /// Constructs a P2WSH address from the script [hash]
-  P2WSHAddress.fromHash(Hash256 hash, { required String hrp })
-    : super._(0, hash.bytes, hrp);
+  P2WSHAddress.fromHash(Bytes32 hash, { required String hrp })
+    : super._(0, hash.u8List, hrp);
 
   /// Obtains the hash for the script
-  Hash256 get hash => Hash256.fromHashBytes(program);
+  Bytes32 get hash => Bytes32.fromList(program);
 
 }
 

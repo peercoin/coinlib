@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:coinlib/src/address.dart';
+import 'package:coinlib/src/common/bytes.dart';
 import 'package:coinlib/src/common/serial.dart';
 import 'ec_private_key.dart';
 import 'hash.dart';
@@ -22,7 +23,7 @@ class MagicHash with Writable {
     _writeUtf8(writer, message);
   }
 
-  Hash256 get hash => sha256DoubleHash(toBytes());
+  Bytes32 get hash => sha256DoubleHash(toBytes());
 
 }
 
@@ -61,7 +62,7 @@ class MessageSignature {
     required String prefix,
   }) {
 
-    late Hash160 pkHash;
+    late Bytes20 pkHash;
     if (address is P2PKHAddress) {
       pkHash = address.hash;
     } else if (address is P2WPKHAddress) {

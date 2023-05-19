@@ -84,7 +84,7 @@ void main() {
         "P8bB9yPr3vVByqfmM5KXftyGckAtAdu6f8",
         NetworkParams.mainnet,
         P2PKHAddress.fromHash(
-          Hash160.fromHashHex("0000000000000000000000000000000000000000"),
+          Bytes20.fromHex("0000000000000000000000000000000000000000"),
           version: NetworkParams.mainnet.p2pkhPrefix,
         ),
       );
@@ -105,7 +105,7 @@ void main() {
         "pUtBBpAznHgPW9TDtWJcDo7qGXQJqnf1W9",
         NetworkParams.mainnet,
         P2SHAddress.fromHash(
-          Hash160.fromHashHex("ffffffffffffffffffffffffffffffffffffffff"),
+          Bytes20.fromHex("ffffffffffffffffffffffffffffffffffffffff"),
           version: NetworkParams.mainnet.p2shPrefix,
         ),
       );
@@ -118,7 +118,7 @@ void main() {
         "pc1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqmtd2rq",
         NetworkParams.mainnet,
         P2WPKHAddress.fromHash(
-          Hash160.fromHashHex("0000000000000000000000000000000000000000"),
+          Bytes20.fromHex("0000000000000000000000000000000000000000"),
           hrp: NetworkParams.mainnet.bech32Hrp,
         ),
       );
@@ -139,7 +139,7 @@ void main() {
         "pc1qlllllllllllllllllllllllllllllllllllllllllllllllllllsm5knxw",
         NetworkParams.mainnet,
         P2WSHAddress.fromHash(
-          Hash256.fromHashHex(
+          Bytes32.fromHex(
             "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
           ),
           hrp: NetworkParams.mainnet.bech32Hrp,
