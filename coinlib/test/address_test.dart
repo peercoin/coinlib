@@ -292,7 +292,10 @@ void main() {
 
       expectValidAddress(
         "${longHrp}1sqqqs3t97ut",
-        NetworkParams(wifPrefix: 0, p2shPrefix: 0, p2pkhPrefix: 0, bech32Hrp: longHrp),
+        NetworkParams(
+          wifPrefix: 0, p2shPrefix: 0, p2pkhPrefix: 0, bech32Hrp: longHrp,
+          messagePrefix: "",
+        ),
         addr,
       );
 
