@@ -1,4 +1,5 @@
 import 'package:coinlib/coinlib.dart';
+import 'package:coinlib/src/common/hex.dart';
 import 'package:test/test.dart';
 
 const wrongNetwork = NetworkParams(
@@ -20,10 +21,10 @@ expectBech32Equal(Bech32Address addr, Bech32Address expected) {
   expect(addr.hrp, expected.hrp);
   expect(addr.toString(), expected.toString());
   if (addr is P2WPKHAddress && expected is P2WPKHAddress) {
-    expect(addr.hash, expected.hash);
+    expect(addr.program, expected.program);
   }
   if (addr is P2WSHAddress && expected is P2WSHAddress) {
-    expect(addr.hash, expected.hash);
+    expect(addr.program, expected.program);
   }
 }
 
@@ -84,7 +85,7 @@ void main() {
         "P8bB9yPr3vVByqfmM5KXftyGckAtAdu6f8",
         NetworkParams.mainnet,
         P2PKHAddress.fromHash(
-          Bytes20.fromHex("0000000000000000000000000000000000000000"),
+          hexToBytes("0000000000000000000000000000000000000000"),
           version: NetworkParams.mainnet.p2pkhPrefix,
         ),
       );
@@ -105,7 +106,7 @@ void main() {
         "pUtBBpAznHgPW9TDtWJcDo7qGXQJqnf1W9",
         NetworkParams.mainnet,
         P2SHAddress.fromHash(
-          Bytes20.fromHex("ffffffffffffffffffffffffffffffffffffffff"),
+          hexToBytes("ffffffffffffffffffffffffffffffffffffffff"),
           version: NetworkParams.mainnet.p2shPrefix,
         ),
       );
@@ -118,7 +119,7 @@ void main() {
         "pc1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqmtd2rq",
         NetworkParams.mainnet,
         P2WPKHAddress.fromHash(
-          Bytes20.fromHex("0000000000000000000000000000000000000000"),
+          hexToBytes("0000000000000000000000000000000000000000"),
           hrp: NetworkParams.mainnet.bech32Hrp,
         ),
       );
@@ -139,7 +140,7 @@ void main() {
         "pc1qlllllllllllllllllllllllllllllllllllllllllllllllllllsm5knxw",
         NetworkParams.mainnet,
         P2WSHAddress.fromHash(
-          Bytes32.fromHex(
+          hexToBytes(
             "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
           ),
           hrp: NetworkParams.mainnet.bech32Hrp,

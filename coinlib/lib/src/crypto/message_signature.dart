@@ -23,7 +23,7 @@ class MagicHash with Writable {
     _writeUtf8(writer, message);
   }
 
-  Bytes32 get hash => sha256DoubleHash(toBytes());
+  Uint8List get hash => sha256DoubleHash(toBytes());
 
 }
 
@@ -62,17 +62,17 @@ class MessageSignature {
     required String prefix,
   }) {
 
-    late Bytes20 pkHash;
+    late Uint8List pkHash;
     if (address is P2PKHAddress) {
       pkHash = address.hash;
     } else if (address is P2WPKHAddress) {
-      pkHash = address.hash;
+      pkHash = address.program;
     } else {
       return false;
     }
 
     final pk = recover(message, prefix);
-    return pk != null && hash160(pk.data) == pkHash;
+    return pk != null && bytesEqual(hash160(pk.data), pkHash);
 
   }
 

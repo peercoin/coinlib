@@ -54,13 +54,14 @@ class ECDSASignature {
   factory ECDSASignature.fromDerHex(String hex)
     => ECDSASignature.fromDer(hexToBytes(hex));
 
-  /// Creates a signature using a private key ([privkey]) for a given [hash].
-  /// The signature will be generated deterministically and shall be the same
-  /// for a given hash and key.
-  factory ECDSASignature.sign(ECPrivateKey privkey, Bytes32 hash) {
+  /// Creates a signature using a private key ([privkey]) for a given 32-byte
+  /// [hash]. The signature will be generated deterministically and shall be the
+  /// same for a given hash and key.
+  factory ECDSASignature.sign(ECPrivateKey privkey, Uint8List hash) {
+    checkBytes(hash, 32);
 
     final sig = ECDSASignature.fromCompact(
-      secp256k1.ecdsaSign(hash.u8List, privkey.data),
+      secp256k1.ecdsaSign(hash, privkey.data),
     );
 
     // Verify signature to protect against computation errors. Cosmic rays etc.
@@ -73,10 +74,10 @@ class ECDSASignature {
   /// Takes a 32-byte message [hash] and [publickey] and returns true if the
   /// signature is valid for the public key and hash. This accepts malleable
   /// signatures with high and low S-values.
-  bool verify(ECPublicKey publickey, Bytes32 hash)
+  bool verify(ECPublicKey publickey, Uint8List hash)
     => secp256k1.ecdsaVerify(
       secp256k1.ecdsaSignatureNormalize(compact),
-      hash.u8List,
+      checkBytes(hash, 32),
       publickey.data,
     );
 

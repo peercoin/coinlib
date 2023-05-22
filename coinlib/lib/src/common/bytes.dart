@@ -1,43 +1,21 @@
 import 'dart:typed_data';
 import 'package:collection/collection.dart';
-import 'hex.dart';
 
-_copyCheckBytes(List<int> bytes, int length) {
+/// Throws an [ArgumentError] if the [bytes] are not of the required [length]
+/// and returns the [bytes].
+Uint8List checkBytes(Uint8List bytes, int length) {
   if (bytes.length != length) {
-    throw ArgumentError("Hash should be $length bytes", "bytes");
+    throw ArgumentError("Bytes should have length of $length", "bytes");
   }
-  return Uint8List.fromList(bytes);
+  return bytes;
 }
 
-// Encapsulates a [Uint8List] that must be of a certain length and can be
-// directly compared for equality.
-abstract class FixedBytes {
+/// Throws an [ArgumentError] if the [bytes] are not of the required [length]
+/// and returns a copy of the [bytes].
+Uint8List copyCheckBytes(Uint8List bytes, int length) => Uint8List.fromList(
+  checkBytes(bytes, length),
+);
 
-  final Uint8List u8List;
-
-  FixedBytes.fromList(List<int> list, int requiredLen)
-    : u8List = _copyCheckBytes(list, requiredLen);
-
-  FixedBytes.fromHex(String hex, int requiredLen)
-    : this.fromList(hexToBytes(hex), requiredLen);
-
-  @override
-  bool operator ==(Object other)
-    => (other is FixedBytes) && ListEquality().equals(u8List, other.u8List);
-
-  @override
-  int get hashCode => u8List[1] | u8List[2] << 8 | u8List[3] << 16 | u8List[4] << 24;
-
-}
-
-/// Encapsulates 32 bytes
-class Bytes32 extends FixedBytes {
-  Bytes32.fromList(List<int> list) : super.fromList(list, 32);
-  Bytes32.fromHex(String hex) : super.fromHex(hex, 32);
-}
-
-/// Encapsulates 20 bytes
-class Bytes20 extends FixedBytes {
-  Bytes20.fromList(List<int> list) : super.fromList(list, 20);
-  Bytes20.fromHex(String hex) : super.fromHex(hex, 20);
-}
+/// Determines if two objects are equal lists
+bool bytesEqual(Object? a, Object? b)
+  => (a is Uint8List) && (b is Uint8List) && ListEquality().equals(a, b);

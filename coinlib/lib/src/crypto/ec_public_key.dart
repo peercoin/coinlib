@@ -9,7 +9,7 @@ class InvalidPublicKey implements Exception {}
 /// private key
 class ECPublicKey {
 
-  /// Compressed 33-byte data
+  /// Either 33 compressed or 65 uncompressed bytes
   final Uint8List data;
 
   /// Constructs a public key from a 33-byte compressed or 65-byte uncompressed

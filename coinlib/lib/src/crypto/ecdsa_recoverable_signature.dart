@@ -51,10 +51,11 @@ class ECDSARecoverableSignature {
   }
 
   /// Creates a recoverable signature using a private key ([privkey]) for a
-  /// given [hash].
-  factory ECDSARecoverableSignature.sign(ECPrivateKey privkey, Bytes32 hash) {
+  /// given 32-byte [hash].
+  factory ECDSARecoverableSignature.sign(ECPrivateKey privkey, Uint8List hash) {
+    checkBytes(hash, 32);
 
-    final sigAndId = secp256k1.ecdsaSignRecoverable(hash.u8List, privkey.data);
+    final sigAndId = secp256k1.ecdsaSignRecoverable(hash, privkey.data);
     final recSig = ECDSARecoverableSignature._(
       sigAndId.signature, sigAndId.recid, privkey.compressed,
     );
@@ -73,13 +74,14 @@ class ECDSARecoverableSignature {
   factory ECDSARecoverableSignature.fromCompactHex(String hex)
     => ECDSARecoverableSignature.fromCompact(hexToBytes(hex));
 
-  /// Given a [hash], returns a public key recovered from the signature and
-  /// hash. This can be compared against the expected public key or public key
-  /// hash to determine if the message was signed correctly.
-  /// If a public key cannot be extracted, null shall be returned.
-  ECPublicKey? recover(Bytes32 hash) {
+  /// Given a 32-byte [hash], returns a public key recovered from the signature
+  /// and hash. This can be compared against the expected public key or public
+  /// key hash to determine if the message was signed correctly. If a public key
+  /// cannot be extracted, null shall be returned.
+  ECPublicKey? recover(Uint8List hash) {
+    checkBytes(hash, 32);
     final pkBytes = secp256k1.ecdaSignatureRecoverPubKey(
-      signature, recid, hash.u8List, compressed,
+      signature, recid, hash, compressed,
     );
     return pkBytes != null ? ECPublicKey(pkBytes) : null;
   }
