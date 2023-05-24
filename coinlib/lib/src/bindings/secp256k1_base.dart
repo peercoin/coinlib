@@ -72,9 +72,12 @@ abstract class Secp256k1Base<
   late int Function(
     CtxPtr, PubKeyPtr, RecoverableSignaturePtr, HeapArrayPtr,
   ) extEcdsaRecover;
+  late int Function(CtxPtr, HeapArrayPtr, HeapArrayPtr) extEcSeckeyTweakAdd;
+  late int Function(CtxPtr, PubKeyPtr, HeapArrayPtr) extEcPubkeyTweakAdd;
 
   // Heap arrays
   late HeapArrayBase privKeyArray;
+  late HeapArrayBase scalarArray;
   late HeapArrayBase serializedPubKeyArray;
   late HeapArrayBase hashArray;
   late HeapArrayBase serializedSigArray;
@@ -323,6 +326,41 @@ abstract class Secp256k1Base<
     hashArray.load(hash);
 
     if (extEcdsaRecover(ctxPtr, pubKeyPtr, recSigPtr, hashArray.ptr) != 1) {
+      return null;
+    }
+
+    return _serializePubKeyFromPtr(compressed);
+
+  }
+
+  /// Tweaks a private key ([privKey]) by a [scalar]. Returns null if a tweaked
+  /// private key could not be created.
+  Uint8List? privKeyTweak(Uint8List privKey, Uint8List scalar) {
+    _requireLoad();
+
+    privKeyArray.load(privKey);
+    scalarArray.load(scalar);
+
+    if (extEcSeckeyTweakAdd(ctxPtr, privKeyArray.ptr, scalarArray.ptr) != 1) {
+      return null;
+    }
+
+    return privKeyArray.list;
+
+  }
+
+  /// Tweaks a public key ([pubKey]) by adding the generator point multiplied by
+  /// the givern [scalar]. The resulting public key corresponds to the
+  /// private key tweaked by the same scalar. Returns null if a public key could
+  /// not be created. Will return a compressed public key if [compressed] is
+  /// true regardless of the size of the passed [pubKey].
+  Uint8List? pubKeyTweak(Uint8List pubKey, Uint8List scalar, bool compressed) {
+    _requireLoad();
+
+    _parsePubkeyIntoPtr(pubKey);
+    scalarArray.load(scalar);
+
+    if (extEcPubkeyTweakAdd(ctxPtr, pubKeyPtr, scalarArray.ptr) != 1) {
       return null;
     }
 

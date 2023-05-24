@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:coinlib/src/bindings/secp256k1.dart';
+import 'package:coinlib/src/common/bytes.dart';
 import 'package:coinlib/src/common/hex.dart';
 import 'ec_public_key.dart';
 import 'random.dart';
@@ -46,5 +47,14 @@ class ECPrivateKey {
   ECPublicKey get pubkey => _pubkeyCache ??= ECPublicKey(
     secp256k1.privToPubKey(data, compressed),
   );
+
+  /// Tweaks the private key with a scalar. In the instance a new key cannot be
+  /// created (practically impossible for random 32-bit scalars), then null will
+  /// be returned.
+  ECPrivateKey? tweak(Uint8List scalar) {
+    checkBytes(scalar, 32, name: "Scalar");
+    final newScalar = secp256k1.privKeyTweak(data, scalar);
+    return newScalar == null ? null : ECPrivateKey(newScalar, compressed: compressed);
+  }
 
 }

@@ -3,9 +3,9 @@ import 'package:collection/collection.dart';
 
 /// Throws an [ArgumentError] if the [bytes] are not of the required [length]
 /// and returns the [bytes].
-Uint8List checkBytes(Uint8List bytes, int length) {
+Uint8List checkBytes(Uint8List bytes, int length, { String name = "Bytes" }) {
   if (bytes.length != length) {
-    throw ArgumentError("Bytes should have length of $length", "bytes");
+    throw ArgumentError("$name should have length of $length", "bytes");
   }
   return bytes;
 }

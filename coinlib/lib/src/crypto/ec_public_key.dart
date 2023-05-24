@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:coinlib/src/bindings/secp256k1.dart';
+import 'package:coinlib/src/common/bytes.dart';
 import 'package:coinlib/src/common/hex.dart';
 import 'package:collection/collection.dart';
 
@@ -38,5 +39,13 @@ class ECPublicKey {
   @override
   int get hashCode => data[1] | data[2] << 8 | data[3] << 16 | data[4] << 24;
 
+  /// Tweaks the public key with a scalar multiplied by the generator point. In
+  /// the instance a new key cannot be created (practically impossible for
+  /// random 32-bit scalars), then null will be returned.
+  ECPublicKey? tweak(Uint8List scalar) {
+    checkBytes(scalar, 32, name: "Scalar");
+    final newKey = secp256k1.pubKeyTweak(data, scalar, compressed);
+    return newKey == null ? null : ECPublicKey(newKey);
+  }
 
 }

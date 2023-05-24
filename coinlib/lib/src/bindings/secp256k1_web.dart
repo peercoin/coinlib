@@ -77,6 +77,12 @@ class Secp256k1 extends Secp256k1Base<int, int, int, int,int, int, int, int> {
       = inst.functions["secp256k1_ecdsa_sign_recoverable"]
       as IntFunc6;
     extEcdsaRecover = inst.functions["secp256k1_ecdsa_recover"] as IntFunc4;
+    extEcSeckeyTweakAdd
+      = inst.functions["secp256k1_ec_seckey_tweak_add"]
+      as IntFunc3;
+    extEcPubkeyTweakAdd
+      = inst.functions["secp256k1_ec_pubkey_tweak_add"]
+      as IntFunc3;
 
     // Local functions for loading purposes
     final contextCreate = inst.functions["secp256k1_context_create"]
@@ -90,6 +96,7 @@ class Secp256k1 extends Secp256k1Base<int, int, int, int,int, int, int, int> {
     // Heap arrays
     final arrayFactory = HeapArrayWasmFactory(_memory, malloc, free);
     privKeyArray = arrayFactory.create(Secp256k1Base.privkeySize);
+    scalarArray = arrayFactory.create(Secp256k1Base.privkeySize);
     hashArray = arrayFactory.create(Secp256k1Base.hashSize);
     serializedPubKeyArray = arrayFactory.create(
       Secp256k1Base.uncompressedPubkeySize,

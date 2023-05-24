@@ -91,3 +91,10 @@ final invalidPubKeys = [
   // Wrong type for uncompressed
   "0339dfcfb935d6766b50e6af75630a3e72f2525014016cff0e46b2dc3d2c2b7b867707f63d3b254eb35287fc30138227286b8b56cee63c96ae4edccc5cd9f5c902",
 ];
+
+// Assuming private key = 1
+final invalidTweaks = [
+  // Note that 0 scalars are allowed
+  "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140",
+  "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141",
+];
