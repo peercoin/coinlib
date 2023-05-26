@@ -345,7 +345,8 @@ abstract class Secp256k1Base<
       return null;
     }
 
-    return privKeyArray.list;
+    // Return copy of private key or contents are subject to change
+    return Uint8List.fromList(privKeyArray.list);
 
   }
 
