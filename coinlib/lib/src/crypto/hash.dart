@@ -12,5 +12,5 @@ Uint8List sha256Hash(Uint8List msg) => _singleSha256(msg);
 Uint8List sha256DoubleHash(Uint8List msg) => _singleSha256(_singleSha256(msg));
 Uint8List hash160(Uint8List msg) => _ripemd160(_singleSha256(msg));
 Uint8List hmacSha512(Uint8List key, Uint8List msg) => Uint8List.fromList(
-  crypto.Hmac(crypto.sha256, key).convert(msg).bytes,
+  crypto.Hmac(crypto.sha512, key).convert(msg).bytes,
 );
