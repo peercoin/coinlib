@@ -6,6 +6,7 @@ export 'package:coinlib/src/crypto/ec_public_key.dart';
 export 'package:coinlib/src/crypto/ecdsa_signature.dart';
 export 'package:coinlib/src/crypto/ecdsa_recoverable_signature.dart';
 export 'package:coinlib/src/crypto/hash.dart';
+export 'package:coinlib/src/crypto/hd_key.dart';
 export 'package:coinlib/src/crypto/message_signature.dart';
 export 'package:coinlib/src/crypto/random.dart';
 export 'package:coinlib/src/address.dart';

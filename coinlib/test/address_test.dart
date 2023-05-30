@@ -6,6 +6,8 @@ const wrongNetwork = NetworkParams(
   wifPrefix: 0,
   p2pkhPrefix: 0xfa,
   p2shPrefix: 0xfb,
+  privHDPrefix: 0,
+  pubHDPrefix: 0,
   bech32Hrp: "wrong",
   messagePrefix: "",
 );
@@ -294,8 +296,9 @@ void main() {
       expectValidAddress(
         "${longHrp}1sqqqs3t97ut",
         NetworkParams(
-          wifPrefix: 0, p2shPrefix: 0, p2pkhPrefix: 0, bech32Hrp: longHrp,
-          messagePrefix: "",
+          wifPrefix: 0, p2shPrefix: 0, p2pkhPrefix: 0,
+          privHDPrefix: 0, pubHDPrefix: 0,
+          bech32Hrp: longHrp, messagePrefix: "",
         ),
         addr,
       );
