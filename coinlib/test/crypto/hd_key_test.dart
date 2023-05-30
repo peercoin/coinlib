@@ -259,6 +259,33 @@ void main() {
       expectArgumentError(() => masterHDKey.hdPublicKey.derivePath("m/0'"));
     });
 
+    test("fromKeyAndChainCode()", () {
+      for (final paths in hdVectors) {
+        // For all master keys
+        final vec = paths[0];
+        final key = HDPrivateKey.fromKeyAndChainCode(
+          ECPrivateKey.fromHex(vec.privHex), hexToBytes(vec.chaincodeHex),
+        );
+        vec.expectHDKey(key);
+      }
+    });
+
+    test("fromKeyAndChainCode() chaincode must be 32 bytes", () {
+      for (final invalid in [31, 33]) {
+        expectArgumentError(
+          () => HDPrivateKey.fromKeyAndChainCode(
+            masterHDKey.privateKey, Uint8List(invalid),
+          ),
+        );
+      }
+    });
+
+    test("encode() version must be uint32", () {
+      for (final invalid in [-1, 0x0100000000]) {
+        expectArgumentError(() => masterHDKey.encode(invalid));
+      }
+    });
+
   });
 
 }
