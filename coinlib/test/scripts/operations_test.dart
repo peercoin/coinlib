@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:coinlib/src/common/hex.dart';
 import 'package:test/test.dart';
 import 'package:coinlib/coinlib.dart';
@@ -192,7 +193,9 @@ void main() {
 
         if (vec.inputAsm != null) expectScriptOp(ScriptOp.fromAsm(vec.inputAsm!));
         expectScriptOp(ScriptOp.fromReader(BytesReader(hexToBytes(vec.inputHex))));
-        if (vec.number != null && !vec.isPush) expectScriptOp(ScriptOp.fromNumber(vec.number!));
+        if (vec.number != null && !vec.isPush) {
+          expectScriptOp(ScriptOp.fromNumber(vec.number!));
+        }
 
       }
 
@@ -209,6 +212,31 @@ void main() {
           reason: invalid,
         );
       }
+
+    });
+
+    test("fromReader() long pushdata", () {
+
+      expectLongPush(int length, List<int> compilePrefix) {
+
+        final bytes = Uint8List.fromList(List<int>.generate(length, (i) => i));
+        final compiled = Uint8List.fromList([...compilePrefix, ...bytes]);
+
+        final fromReader = ScriptOp.fromReader(
+          BytesReader(compiled),
+        ) as ScriptPushData;
+        final direct = ScriptPushData(bytes);
+
+        for (final op in [fromReader, direct]) {
+          expect(op.compiled, compiled);
+          expect(op.asm, bytesToHex(bytes));
+          expect(op.data, bytes);
+        }
+
+      }
+
+      expectLongPush(0x100, [0x4d, 0x00, 0x01]);
+      expectLongPush(0x10000, [0x4e, 0x00, 0x00, 0x01, 0x00]);
 
     });
 
