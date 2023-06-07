@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'package:coinlib/src/common/hex.dart';
 import 'package:test/test.dart';
 import 'package:coinlib/coinlib.dart';
+import 'common.dart';
 
 class OperationVector {
   final String? inputAsm;
@@ -115,10 +116,15 @@ final vectors = [
   ),
   OperationVector(
     inputAsm: "0f000000",
-    outputAsm: "0f000000",
     inputHex: "040f000000",
     isPush: true,
     number: 15,
+  ),
+  OperationVector(
+    inputAsm: "0000",
+    inputHex: "020000",
+    isPush: true,
+    number: 0,
   ),
 
   // Alternative ASM
@@ -185,20 +191,41 @@ final vectors = [
     outputAsm: "0102030405",
     isPush: true,
   ),
+  OperationVector(
+    inputHex: "0100",
+    outputHex: "00",
+    outputAsm: "0",
+    isPush: false,
+    number: 0,
+  ),
+  OperationVector(
+    inputHex: "0110",
+    outputHex: "60",
+    outputAsm: "10",
+    isPush: false,
+    number: 16,
+  ),
+  OperationVector(
+    inputHex: "4c0111",
+    outputHex: "0111",
+    outputAsm: "11",
+    isPush: true,
+    number: 17,
+  ),
 
   // Push nothing treated as zero
   OperationVector(
     inputHex: "4c00",
     outputHex: "00",
     outputAsm: "0",
-    isPush: true,
+    isPush: false,
     number: 0,
   ),
   OperationVector(
     inputHex: "4e00000000",
     outputHex: "00",
     outputAsm: "0",
-    isPush: true,
+    isPush: false,
     number: 0,
   ),
 
@@ -215,17 +242,20 @@ void main() {
 
       for (final vec in vectors) {
 
-        expectScriptOp(ScriptOp op) {
-          expect(op, vec.isPush ? isA<ScriptPushData>() : isA<ScriptOpCode>());
-          expect(op.asm, vec.outputAsm ?? vec.inputAsm);
-          expect(bytesToHex(op.compiled), vec.outputHex ?? vec.inputHex);
-          expect(op.number, vec.number);
+        expectScriptOpVec(ScriptOp op) {
+          expectScriptOp(
+            op,
+            vec.outputAsm ?? vec.inputAsm!,
+            vec.outputHex ?? vec.inputHex,
+            vec.number,
+            vec.isPush,
+          );
         }
 
-        if (vec.inputAsm != null) expectScriptOp(ScriptOp.fromAsm(vec.inputAsm!));
-        expectScriptOp(ScriptOp.fromReader(BytesReader(hexToBytes(vec.inputHex))));
+        if (vec.inputAsm != null) expectScriptOpVec(ScriptOp.fromAsm(vec.inputAsm!));
+        expectScriptOpVec(ScriptOp.fromReader(BytesReader(hexToBytes(vec.inputHex))));
         if (vec.number != null && !vec.isPush) {
-          expectScriptOp(ScriptOp.fromNumber(vec.number!));
+          expectScriptOpVec(ScriptOp.fromNumber(vec.number!));
         }
 
       }
@@ -281,7 +311,23 @@ void main() {
       }
     });
 
+    test("pushdata compresses to op-code", () {
+      expectScriptOp(ScriptPushData(Uint8List(0)), "0", "00", 0, true);
+      expectScriptOp(ScriptPushData(hexToBytes("00")), "0", "00", 0, true);
+      expectScriptOp(ScriptPushData(hexToBytes("10")), "10", "60", 16, true);
+      // No compression with two bytes
+      expectScriptOp(
+        ScriptPushData(hexToBytes("0000")), "0000", "020000", 0, true,
+      );
+    });
+
+    test("pushdata is copied", () {
+      final pushdata = ScriptPushData(Uint8List(1));
+      // This only modifies a copy
+      pushdata.data[0] = 0xff;
+      expect(pushdata.data[0], 0);
+    });
+
   });
 
 }
-

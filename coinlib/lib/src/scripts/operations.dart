@@ -72,7 +72,18 @@ abstract class ScriptOp {
 
     // If not push data, then opcode
     if (readN == -1) return ScriptOpCode(code);
-    return ScriptPushData(reader.readSlice(readN));
+
+    // If pushdata is empty, return 0 opcode. If it is one byte between 0-16,
+    // return numerical opcode.
+
+    final bytes = reader.readSlice(readN);
+    if (bytes.isEmpty) return ScriptOpCode(0);
+    if (bytes.length == 1) {
+      final n = bytes[0];
+      if (n == 0) return ScriptOpCode(0);
+      if (n <= 16) return ScriptOpCode(n + op1 - 1);
+    }
+    return ScriptPushData(bytes);
 
   }
 
@@ -109,7 +120,7 @@ class ScriptOpCode implements ScriptOp {
 
   @override
   String get asm {
-    // If numerical opcode, then return -1 if OP_1NEGATE, 0 if zero or as hex
+    // If numerical: return -1 if OP_1NEGATE, 0 if zero, or hex
     final n = number;
     if (n == 0) return "0";
     if (n == -1) return "-1";
@@ -133,38 +144,38 @@ class ScriptOpCode implements ScriptOp {
 /// Represents a [ScriptOp] that is a pushdata
 class ScriptPushData implements ScriptOp {
 
-  final Uint8List data;
+  final Uint8List _data;
 
-  ScriptPushData(this.data);
+  ScriptPushData(this._data);
 
   List<int> _compiledList() {
 
     // Compress down to numerical opcode
-    if (data.length == 1) {
-      final val = data[0];
+    if (_data.length == 1) {
+      final val = _data[0];
       if (val == 0) return [0];
       if (val >= 1 && val <= 16) return [ScriptOp.op1 + val - 1];
     }
 
-    if (data.length < ScriptOp.pushData1) {
-      return [data.length, ...data];
+    if (_data.length < ScriptOp.pushData1) {
+      return [_data.length, ..._data];
     }
 
-    if (data.length <= 0xff) {
-      return [ScriptOp.pushData1, data.length, ...data];
+    if (_data.length <= 0xff) {
+      return [ScriptOp.pushData1, _data.length, ..._data];
     }
 
-    if (data.length <= 0xffff) {
-      return [ScriptOp.pushData2, data.length, data.length >> 8, ...data];
+    if (_data.length <= 0xffff) {
+      return [ScriptOp.pushData2, _data.length, _data.length >> 8, ..._data];
     }
 
     return [
       ScriptOp.pushData4,
-      data.length,
-      data.length >> 8,
-      data.length >> 16,
-      data.length >> 24,
-      ...data,
+      _data.length,
+      _data.length >> 8,
+      _data.length >> 16,
+      _data.length >> 24,
+      ..._data,
     ];
 
   }
@@ -173,21 +184,27 @@ class ScriptPushData implements ScriptOp {
   Uint8List get compiled => Uint8List.fromList(_compiledList());
 
   @override
-  String get asm => data.isEmpty ? "0" : bytesToHex(data);
+  String get asm
+    => _data.isEmpty || (_data.length == 1 && _data[0] == 0)
+    ? "0"
+    : bytesToHex(_data);
 
   @override
   int? get number {
 
     // Only number if no more than 4 bytes
-    if (data.length > 4) return null;
+    if (_data.length > 4) return null;
 
-    if (data.isEmpty) return 0;
+    if (_data.isEmpty) return 0;
 
-    return data[0]
-      | (data.length > 1 ? data[1] << 8 : 0)
-      | (data.length > 2 ? data[2] << 16 : 0)
-      | (data.length > 3 ? data[3] << 24 : 0);
+    return _data[0]
+      | (_data.length > 1 ? _data[1] << 8 : 0)
+      | (_data.length > 2 ? _data[2] << 16 : 0)
+      | (_data.length > 3 ? _data[3] << 24 : 0);
 
   }
+
+  /// Returns a copy of the push data
+  Uint8List get data => Uint8List.fromList(_data);
 
 }
