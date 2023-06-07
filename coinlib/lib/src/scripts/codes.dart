@@ -121,10 +121,10 @@ final scriptOpNameToCode = {
 
   // Expansion ops.
   "NOP1": 0xb0,
-  "CHECKLOCKTIMEVERIFY": 0xb1,
   "NOP2": 0xb1,
-  "CHECKSEQUENCEVERIFY": 0xb2,
+  "CHECKLOCKTIMEVERIFY": 0xb1,
   "NOP3": 0xb2,
+  "CHECKSEQUENCEVERIFY": 0xb2,
   "NOP4": 0xb3,
   "NOP5": 0xb4,
   "NOP6": 0xb5,

@@ -60,6 +60,30 @@ final vectors = [
     isPush: false,
   ),
 
+  // Soft-fork activated opcode
+  OperationVector(
+    inputAsm: "OP_CHECKLOCKTIMEVERIFY",
+    inputHex: "b1",
+    isPush: false,
+  ),
+  OperationVector(
+    inputAsm: "OP_NOP2",
+    outputAsm: "OP_CHECKLOCKTIMEVERIFY",
+    inputHex: "b1",
+    isPush: false,
+  ),
+  OperationVector(
+    inputAsm: "OP_CHECKSEQUENCEVERIFY",
+    inputHex: "b2",
+    isPush: false,
+  ),
+  OperationVector(
+    inputAsm: "OP_NOP3",
+    outputAsm: "OP_CHECKSEQUENCEVERIFY",
+    inputHex: "b2",
+    isPush: false,
+  ),
+
   // Push data
   OperationVector(
     inputAsm: "11",
@@ -132,6 +156,13 @@ final vectors = [
     inputHex: "60",
     isPush: false,
     number: 16,
+  ),
+  OperationVector(
+    inputAsm: "OP_1",
+    outputAsm: "01",
+    inputHex: "51",
+    isPush: false,
+    number: 1,
   ),
   OperationVector(
     inputAsm: "OP_TRUE",
