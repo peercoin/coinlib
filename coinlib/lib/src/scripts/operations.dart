@@ -5,6 +5,7 @@ import 'codes.dart';
 
 class InvalidScriptAsm implements Exception {}
 
+/// Represents a single operation or script pushdata
 abstract class ScriptOp {
 
   static int op1Negate = scriptOpNameToCode["1NEGATE"]!;
@@ -21,6 +22,7 @@ abstract class ScriptOp {
   /// Returns an integer if the operation pushes a number, or null
   int? get number;
 
+  /// Interpret a single script ASM string into a [ScriptOp].
   factory ScriptOp.fromAsm(String asm) {
 
     if (asm.isEmpty) throw InvalidScriptAsm();
@@ -74,7 +76,13 @@ abstract class ScriptOp {
 
   }
 
+  /// Constructs an [ScriptOp] from a number, returning the smallest
+  /// representation
   factory ScriptOp.fromNumber(int n) {
+
+    if (n < -1 || n > 0xffffffff) {
+      throw ArgumentError.value(n, "n", "out of range");
+    }
 
     if (n == -1) return ScriptOpCode(op1Negate);
     if (n == 0) return ScriptOpCode(0);
@@ -90,6 +98,7 @@ abstract class ScriptOp {
 
 }
 
+/// Represents a [ScriptOp] that is an op code
 class ScriptOpCode implements ScriptOp {
 
   final int code;
@@ -121,6 +130,7 @@ class ScriptOpCode implements ScriptOp {
 
 }
 
+/// Represents a [ScriptOp] that is a pushdata
 class ScriptPushData implements ScriptOp {
 
   final Uint8List data;

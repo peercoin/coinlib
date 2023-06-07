@@ -205,6 +205,7 @@ void main() {
 
       for (final invalid in [
         "", "OP_NOTACODE", "OP_0 OP_1", "op_1", "OP_dup", "invalid", "-2",
+        "OP_DUPP",
       ]) {
         expect(
           () => ScriptOp.fromAsm(invalid),
@@ -238,6 +239,15 @@ void main() {
       expectLongPush(0x100, [0x4d, 0x00, 0x01]);
       expectLongPush(0x10000, [0x4e, 0x00, 0x00, 0x01, 0x00]);
 
+    });
+
+    test("invalid number", () {
+      for (final invalid in [-2, 0x100000000]) {
+        expect(
+          () => ScriptOp.fromNumber(invalid),
+          throwsA(isA<ArgumentError>()),
+        );
+      }
     });
 
   });
