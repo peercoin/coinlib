@@ -22,14 +22,16 @@ class Script {
 
   /// Decompiles the script and may return a sub-class representing the script
   /// type. May return [OutOfData] if the script has an invalid pushdata.
-  factory Script.decompile(Uint8List script) {
+  /// If [requireMinimal] is true, the script push push data minimally or
+  /// [PushDataNotMinimal] will be thrown.
+  factory Script.decompile(Uint8List script, { bool requireMinimal = false }) {
 
     final List<ScriptOp> ops = [];
     final reader = BytesReader(script);
 
     // Read all the operations into the list
     while (!reader.atEnd) {
-      ops.add(ScriptOp.fromReader(reader));
+      ops.add(ScriptOp.fromReader(reader, requireMinimal: requireMinimal));
     }
 
     return Script.match(ops);

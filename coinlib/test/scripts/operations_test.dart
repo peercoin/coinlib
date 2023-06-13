@@ -93,12 +93,6 @@ final vectors = [
     number: 17,
   ),
   OperationVector(
-    inputAsm: "ffffffff",
-    inputHex: "04ffffffff",
-    isPush: true,
-    number: 0xffffffff,
-  ),
-  OperationVector(
     inputAsm: "0100000000",
     inputHex: "050100000000",
     isPush: true,
@@ -229,6 +223,56 @@ final vectors = [
     number: 0,
   ),
 
+  // Leading significant bit determines sign of number
+  OperationVector(
+    inputAsm: "80",
+    outputAsm: "0",
+    inputHex: "0180",
+    outputHex: "00",
+    isPush: false,
+    number: 0,
+  ),
+  OperationVector(
+    inputAsm: "82",
+    inputHex: "0182",
+    isPush: true,
+    number: -2,
+  ),
+  OperationVector(
+    inputAsm: "ff",
+    inputHex: "01ff",
+    isPush: true,
+    number: -127,
+  ),
+  OperationVector(
+    inputAsm: "ffffffff",
+    inputHex: "04ffffffff",
+    isPush: true,
+    number: -2147483647,
+  ),
+  OperationVector(
+    inputAsm: "ff000080",
+    inputHex: "04ff000080",
+    isPush: true,
+    number: -255,
+  ),
+  OperationVector(
+    inputAsm: "01000080",
+    inputHex: "0401000080",
+    isPush: true,
+    number: -1,
+  ),
+
+  // 0x81 should be OP_1NEGATE
+  OperationVector(
+    inputAsm: "81",
+    outputAsm: "-1",
+    inputHex: "0181",
+    outputHex: "4f",
+    isPush: false,
+    number: -1,
+  ),
+
   // Unknown op code
   OperationVector(inputHex: "ba", outputAsm: "OP_UNKNOWN", isPush: false),
 
@@ -285,7 +329,7 @@ void main() {
         final compiled = Uint8List.fromList([...compilePrefix, ...bytes]);
 
         final fromReader = ScriptOp.fromReader(
-          BytesReader(compiled),
+          BytesReader(compiled), requireMinimal: true,
         ) as ScriptPushData;
         final direct = ScriptPushData(bytes);
 
@@ -326,6 +370,42 @@ void main() {
       // This only modifies a copy
       pushdata.data[0] = 0xff;
       expect(pushdata.data[0], 0);
+    });
+
+    test("require minimal pushdata", () {
+
+      for (final ok in [
+        "00", "0111", "60", "4f",
+        "4b000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a",
+        "4c4c000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b",
+      ]) {
+        expect(
+          ScriptOp.fromReader(BytesReader(hexToBytes(ok)), requireMinimal: true),
+          isA<ScriptOp>(),
+        );
+      }
+
+      for (final bad in [
+        // Incorrect for 0
+        "0100", "4c00", "0180",
+        // Incorrect for 16
+        "0110",
+        // Incorrect for 1NEGATE
+        "0181",
+        // PUSHDATA1 when 0x4b suffices
+        "4c4b000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a",
+        // PUSHDATA2 used when PUSHDATA1 suffices
+        "4dff00000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfe",
+        // PUSHDATA4 when PUSHDATA2 suffices
+        "4e00010000000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"
+      ]) {
+        expect(
+          () => ScriptOp.fromReader(BytesReader(hexToBytes(bad)), requireMinimal: true),
+          throwsA(isA<PushDataNotMinimal>()),
+          reason: bad,
+        );
+      }
+
     });
 
   });

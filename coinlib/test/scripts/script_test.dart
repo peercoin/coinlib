@@ -17,7 +17,6 @@ class ScriptVector {
 }
 
 final vectors = [
-
   // Basic scripts
   ScriptVector(inputAsm: "0", inputHex: "00"),
   ScriptVector(inputAsm: "0 0", inputHex: "0000"),
@@ -63,6 +62,14 @@ void main() {
         }
 
       }
+    });
+
+    test("requireMinimal fails when not minimal", () {
+      expect(Script.decompile(hexToBytes("00")), isA<Script>());
+      expect(
+        () => Script.decompile(hexToBytes("0100"), requireMinimal: true),
+        throwsA(isA<PushDataNotMinimal>()),
+      );
     });
 
     test("gives immutable ops as expected", () {

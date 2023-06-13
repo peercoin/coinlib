@@ -4,6 +4,7 @@ import 'package:coinlib/src/common/serial.dart';
 import 'codes.dart';
 
 class InvalidScriptAsm implements Exception {}
+class PushDataNotMinimal implements Exception {}
 
 /// Represents a single operation or script pushdata
 abstract class ScriptOp {
@@ -40,8 +41,11 @@ abstract class ScriptOp {
 
     }
 
-    // If "-1", then it is a 1NEGATE op code
-    if (asm == "-1") return ScriptOpCode(op1Negate);
+    // If "-1" or "81", then it is a 1NEGATE op code
+    if (asm == "-1" || asm == "81") return ScriptOpCode(op1Negate);
+
+    // If "80" then it is zero
+    if (asm == "80") return ScriptOpCode(0);
 
     // Otherwise assume hex. Provide opcode if available or else pushdata
 
@@ -58,7 +62,11 @@ abstract class ScriptOp {
 
   /// Reads a single operation from a [BytesReader]. [OutOfData] will be thrown
   /// if there is not enough data to read.
-  factory ScriptOp.fromReader(BytesReader reader) {
+  /// If [requireMinimal] is true, a pushdata operation must be encoded
+  /// minimally or else [PushDataNotMinimal] will be thrown.
+  factory ScriptOp.fromReader(
+    BytesReader reader, { bool requireMinimal = false, }
+  ) {
 
     final code = reader.readUInt8();
 
@@ -73,16 +81,30 @@ abstract class ScriptOp {
     // If not push data, then opcode
     if (readN == -1) return ScriptOpCode(code);
 
+    if (requireMinimal) {
+      // Push data opcode should be minimal for length
+      if (code == pushData1 && readN < pushData1) throw PushDataNotMinimal();
+      if (code == pushData2 && readN <= 0xff) throw PushDataNotMinimal();
+      if (code == pushData4 && readN <= 0xffff) throw PushDataNotMinimal();
+    }
+
     // If pushdata is empty, return 0 opcode. If it is one byte between 0-16,
-    // return numerical opcode.
+    // return numerical opcode. If it is 0x81, then OP_1NEGATE.
 
     final bytes = reader.readSlice(readN);
+
     if (bytes.isEmpty) return ScriptOpCode(0);
+
     if (bytes.length == 1) {
       final n = bytes[0];
-      if (n == 0) return ScriptOpCode(0);
+      if (requireMinimal && (n == 0x81 || n == 0x80 || n <= 16)) {
+        throw PushDataNotMinimal();
+      }
+      if (n == 0 || n == 0x80) return ScriptOpCode(0);
       if (n <= 16) return ScriptOpCode(n + op1 - 1);
+      if (n == 0x81) return ScriptOpCode(op1Negate);
     }
+
     return ScriptPushData(bytes);
 
   }
@@ -184,10 +206,14 @@ class ScriptPushData implements ScriptOp {
   Uint8List get compiled => Uint8List.fromList(_compiledList());
 
   @override
-  String get asm
-    => _data.isEmpty || (_data.length == 1 && _data[0] == 0)
-    ? "0"
-    : bytesToHex(_data);
+  String get asm {
+    // Zero condition
+    if (_data.isEmpty || (_data.length == 1 && _data[0] == 0)) return "0";
+    // -1 condition
+    if (_data.length == 1 && _data[0] == 0x81) return "-1";
+    // Everything else, including integers as little-endian hex
+    return bytesToHex(_data);
+  }
 
   @override
   int? get number {
@@ -197,10 +223,19 @@ class ScriptPushData implements ScriptOp {
 
     if (_data.isEmpty) return 0;
 
-    return _data[0]
+    // Calculate negative numbers as done by Peercoin
+    final isNeg = (_data.last & 0x80) == 0x80;
+
+    // Absolute number with sign bit removed
+    final abs = (
+      _data[0]
       | (_data.length > 1 ? _data[1] << 8 : 0)
       | (_data.length > 2 ? _data[2] << 16 : 0)
-      | (_data.length > 3 ? _data[3] << 24 : 0);
+      | (_data.length > 3 ? _data[3] << 24 : 0)
+    // Remove sign bit
+    ) & 0x7fffffff >> (8*(4-_data.length));
+
+    return isNeg ? -abs : abs;
 
   }
 
