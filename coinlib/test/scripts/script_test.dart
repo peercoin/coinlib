@@ -97,6 +97,24 @@ void main() {
       }
     });
 
+    test("match() matches correct scripts", () {
+
+      final matcher = Script([
+        ScriptOpCode(0), ScriptPushData(hexToBytes("010203")),
+        ScriptPushDataMatcher(5),
+      ]);
+
+      expect(matcher.match(Script.fromASM("0 010203 0102030405")), true);
+
+      expect(matcher.match(Script.fromASM("01 010203 0102030405")), false);
+      expect(matcher.match(Script.fromASM("0 010204 0102030405")), false);
+      expect(matcher.match(Script.fromASM("0 01020304 0102030405")), false);
+      expect(matcher.match(Script.fromASM("0 0102 0102030405")), false);
+      expect(matcher.match(Script.fromASM("0 010203 010203040506")), false);
+      expect(matcher.match(Script.fromASM("0 010203 01020304")), false);
+
+    });
+
   });
 
 }

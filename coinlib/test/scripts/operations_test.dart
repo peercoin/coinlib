@@ -355,6 +355,29 @@ void main() {
       }
     });
 
+  });
+
+  group("ScriptOpCode()", () {
+
+    test("match() matches identical op codes", () {
+      expect(ScriptOp.fromAsm("0").match(ScriptOp.fromAsm("00")), true);
+      expect(ScriptOpCode(0x87).match(ScriptOpCode(0x87)), true);
+      expect(
+        ScriptOp.fromReader(BytesReader(hexToBytes("52")))
+        .match(ScriptOpCode(0x52)),
+        true,
+      );
+    });
+
+    test("match() returns false for non-identical op-codes", () {
+      expect(ScriptOpCode(0).match(ScriptPushData(hexToBytes("00"))), false);
+      expect(ScriptOpCode(0).match(ScriptOpCode(1)), false);
+    });
+
+  });
+
+  group("ScriptPushData()", () {
+
     test("pushdata compresses to op-code", () {
       expectScriptOp(ScriptPushData(Uint8List(0)), "0", "00", 0, true);
       expectScriptOp(ScriptPushData(hexToBytes("00")), "0", "00", 0, true);
@@ -407,6 +430,52 @@ void main() {
       }
 
     });
+
+    final matchHex = "01020304";
+    final matchOp = ScriptPushData(hexToBytes(matchHex));
+
+    test("match() returns true", () {
+      expect(matchOp.match(matchOp), true);
+      expect(matchOp.match(ScriptPushData(hexToBytes(matchHex))), true);
+      expect(matchOp.match(ScriptPushDataMatcher(4)), true);
+    });
+
+    test("match() returns false", () {
+      expect(
+        ScriptPushData(hexToBytes("0100"))
+        .match(ScriptOp.fromNumber(1)),
+        false,
+      );
+      expect(matchOp.match(ScriptPushDataMatcher(3)), false);
+      expect(matchOp.match(ScriptPushDataMatcher(5)), false);
+      expect(matchOp.match(ScriptPushData(hexToBytes("01020303"))), false);
+    });
+
+  });
+
+  group("ScriptPushDataMatcher()", () {
+
+    final matcher = ScriptPushDataMatcher(3);
+
+    test("match() returns true", () {
+      expect(matcher.match(ScriptPushData(Uint8List(3))), true);
+      expect(matcher.match(ScriptPushData(hexToBytes("ffffff"))), true);
+      expect(matcher.match(ScriptPushDataMatcher(3)), true);
+    });
+
+    test("match() returns false", () {
+      expect(matcher.match(ScriptPushData(Uint8List(2))), false);
+      expect(matcher.match(ScriptPushData(Uint8List(4))), false);
+      expect(matcher.match(ScriptPushDataMatcher(2)), false);
+      expect(matcher.match(ScriptPushDataMatcher(4)), false);
+      expect(matcher.match(ScriptOpCode(0)), false);
+    });
+
+    test("asm shows number of bytes", () => expect(matcher.asm, "<3 bytes>"));
+    test(
+      "compiled gives empty push",
+      () => expect(bytesToHex(matcher.compiled), "03000000"),
+    );
 
   });
 

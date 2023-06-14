@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:coinlib/src/common/hex.dart';
 import 'package:coinlib/src/common/serial.dart';
+import 'package:collection/collection.dart';
 import 'codes.dart';
 
 class InvalidScriptAsm implements Exception {}
@@ -129,6 +130,10 @@ abstract class ScriptOp {
 
   }
 
+  /// Returns true when the other [ScriptOp] matches this one.
+  /// [ScriptPushDataMatcher] will match with a push data of a particular size.
+  bool match(ScriptOp other);
+
 }
 
 /// Represents a [ScriptOp] that is an op code
@@ -160,6 +165,9 @@ class ScriptOpCode implements ScriptOp {
     }
     return null;
   }
+
+  @override
+  bool match(ScriptOp other) => other is ScriptOpCode && code == other.code;
 
 }
 
@@ -241,5 +249,32 @@ class ScriptPushData implements ScriptOp {
 
   /// Returns a copy of the push data
   Uint8List get data => Uint8List.fromList(_data);
+
+  @override
+  bool match(ScriptOp other)
+    => (other is ScriptPushData && ListEquality().equals(_data, other._data))
+    || (other is ScriptPushDataMatcher && _data.length == other.size);
+
+}
+
+/// Provides comparison with [ScriptPushData] of a particular size.
+class ScriptPushDataMatcher implements ScriptOp {
+
+  final int size;
+  ScriptPushDataMatcher(this.size);
+
+  @override
+  bool match(ScriptOp other)
+    => (other is ScriptPushDataMatcher && other.size == size)
+    || (other is ScriptPushData && other._data.length == size);
+
+  @override
+  String get asm => "<$size bytes>";
+
+  @override
+  Uint8List get compiled => ScriptPushData(Uint8List(size)).compiled;
+
+  @override
+  int? get number => null;
 
 }

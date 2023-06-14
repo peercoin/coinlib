@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:coinlib/src/common/serial.dart';
+import 'package:collection/collection.dart';
 import 'operations.dart';
 
 class Script {
@@ -9,16 +10,8 @@ class Script {
   Uint8List? _compiledCache;
   String? _asmCache;
 
-  /// Constructs a script from the operations without constructing a sub-class
-  /// script that matches the operations.
-  Script.raw(List<ScriptOp> ops) : ops = List<ScriptOp>.unmodifiable(ops);
-
-  /// Takes a list of script operations ([ops]) and constructs a matching
-  /// subclass if one exists, or a basic [Script] class if there is no match.
-  factory Script.match(List<ScriptOp> ops) {
-    // TODO: Add script types
-    return Script.raw(ops);
-  }
+  /// Constructs a script from the operations
+  Script(List<ScriptOp> ops) : ops = List<ScriptOp>.unmodifiable(ops);
 
   /// Decompiles the script and may return a sub-class representing the script
   /// type. May return [OutOfData] if the script has an invalid pushdata.
@@ -34,13 +27,13 @@ class Script {
       ops.add(ScriptOp.fromReader(reader, requireMinimal: requireMinimal));
     }
 
-    return Script.match(ops);
+    return Script(ops);
 
   }
 
   /// Constructs a script from the given script assembly string ([asm]). May
   /// return a matching sub-class for the given script.
-  factory Script.fromASM(String asm) => Script.match(
+  factory Script.fromASM(String asm) => Script(
     asm.split(" ").map((s) => ScriptOp.fromAsm(s)).toList(),
   );
 
@@ -54,5 +47,11 @@ class Script {
   /// Returns the ASM string representation of the script. All data and integers
   /// are provided in hex format.
   String get asm => _asmCache ??= ops.map((op) => op.asm).join(" ");
+
+  /// Returns true if the script matches another, including a script containing
+  /// a [ScriptPushDataMatcher].
+  bool match(Script other)
+    => ops.length == other.ops.length
+    && IterableZip([ops, other.ops]).every((pair) => pair[0].match(pair[1]));
 
 }
