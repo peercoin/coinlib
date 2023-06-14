@@ -471,11 +471,45 @@ void main() {
       expect(matcher.match(ScriptOpCode(0)), false);
     });
 
-    test("asm shows number of bytes", () => expect(matcher.asm, "<3 bytes>"));
+    test("asm shows number of bytes", () => expect(matcher.asm, "<3-bytes>"));
     test(
       "compiled gives empty push",
       () => expect(bytesToHex(matcher.compiled), "03000000"),
     );
+
+    test("constructed from asm", () {
+      final matcher = ScriptOp.fromAsm("<30-bytes>");
+      expect(matcher, isA<ScriptPushDataMatcher>());
+      expect(matcher.asm, "<30-bytes>");
+      expect(
+        matcher.compiled,
+        Uint8List.fromList([30, ...List<int>.filled(30, 0)]),
+      );
+      expect((matcher as ScriptPushDataMatcher).size, 30);
+    });
+
+    test("doesn't allow bytes of 0 or over 0xffffffff", () {
+      expect(
+        () => ScriptOp.fromAsm("<0-bytes>"),
+        throwsA(isA<InvalidScriptAsm>()),
+      );
+      expect(
+        () => ScriptOp.fromAsm("<4294967296-bytes>"),
+        throwsA(isA<InvalidScriptAsm>()),
+      );
+      expect(
+        () => ScriptOp.fromAsm("<18446744073709551616-bytes>"),
+        throwsA(isA<InvalidScriptAsm>()),
+      );
+      expect(
+        () => ScriptPushDataMatcher(0),
+        throwsA(isA<ArgumentError>()),
+      );
+      expect(
+        () => ScriptPushDataMatcher(0x100000000),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
 
   });
 

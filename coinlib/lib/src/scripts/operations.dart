@@ -17,6 +17,8 @@ abstract class ScriptOp {
   static int pushData2 = pushData1+1;
   static int pushData4 = pushData2+1;
 
+  static final pushdataMatcherRegExp = RegExp(r"^<(\d+)-bytes>$");
+
   /// The compiled bytes for this operation
   Uint8List get compiled;
   /// The ASM string representation of this operation
@@ -47,6 +49,15 @@ abstract class ScriptOp {
 
     // If "80" then it is zero
     if (asm == "80") return ScriptOpCode(0);
+
+    // If it is in the form of <n-bytes>, then it represents a push data matcher
+    // of n bytes
+    final nBytesStr = pushdataMatcherRegExp.firstMatch(asm)?.group(1);
+    if (nBytesStr != null) {
+      final n = int.tryParse(nBytesStr);
+      if (n == null || n == 0 || n > 0xffffffff) throw InvalidScriptAsm();
+      return ScriptPushDataMatcher(n);
+    }
 
     // Otherwise assume hex. Provide opcode if available or else pushdata
 
@@ -261,7 +272,12 @@ class ScriptPushData implements ScriptOp {
 class ScriptPushDataMatcher implements ScriptOp {
 
   final int size;
-  ScriptPushDataMatcher(this.size);
+
+  ScriptPushDataMatcher(this.size) {
+    if (size == 0 || size > 0xffffffff) {
+      throw ArgumentError.value(size, "this.size", "outside of range");
+    }
+  }
 
   @override
   bool match(ScriptOp other)
@@ -269,7 +285,7 @@ class ScriptPushDataMatcher implements ScriptOp {
     || (other is ScriptPushData && other._data.length == size);
 
   @override
-  String get asm => "<$size bytes>";
+  String get asm => "<$size-bytes>";
 
   @override
   Uint8List get compiled => ScriptPushData(Uint8List(size)).compiled;

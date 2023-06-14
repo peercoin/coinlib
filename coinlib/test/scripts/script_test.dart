@@ -45,7 +45,7 @@ void main() {
     test("valid script vectors", () {
       for (final vec in vectors) {
 
-        final fromAsm = Script.fromASM(vec.inputAsm);
+        final fromAsm = Script.fromAsm(vec.inputAsm);
         final fromHex = Script.decompile(hexToBytes(vec.inputHex));
 
         for (final script in [fromAsm, fromHex]) {
@@ -74,7 +74,7 @@ void main() {
 
     test("gives immutable ops as expected", () {
 
-      final script = Script.fromASM("01 0 -1 OP_NOP2 0102030405 57c74942");
+      final script = Script.fromAsm("01 0 -1 OP_NOP2 0102030405 57c74942");
       expect(script.ops.length, 6);
 
       expectScriptOp(script.ops[0], "01", "51", 1, false);
@@ -92,26 +92,24 @@ void main() {
     test("invalid asm", () {
       for (final invalid in [
         "", " ", "0 ", " 0", "0 op_dup", "0 OP_DUP ", "0  OP_DUP", "0 DUP",
+        "<5 bytes", "5 bytes>", "< bytes>",
       ]) {
-        expect(() => Script.fromASM(invalid), throwsA(isA<InvalidScriptAsm>()));
+        expect(() => Script.fromAsm(invalid), throwsA(isA<InvalidScriptAsm>()));
       }
     });
 
     test("match() matches correct scripts", () {
 
-      final matcher = Script([
-        ScriptOpCode(0), ScriptPushData(hexToBytes("010203")),
-        ScriptPushDataMatcher(5),
-      ]);
+      final matcher = Script.fromAsm("0 010203 <5-bytes>");
 
-      expect(matcher.match(Script.fromASM("0 010203 0102030405")), true);
+      expect(matcher.match(Script.fromAsm("0 010203 0102030405")), true);
 
-      expect(matcher.match(Script.fromASM("01 010203 0102030405")), false);
-      expect(matcher.match(Script.fromASM("0 010204 0102030405")), false);
-      expect(matcher.match(Script.fromASM("0 01020304 0102030405")), false);
-      expect(matcher.match(Script.fromASM("0 0102 0102030405")), false);
-      expect(matcher.match(Script.fromASM("0 010203 010203040506")), false);
-      expect(matcher.match(Script.fromASM("0 010203 01020304")), false);
+      expect(matcher.match(Script.fromAsm("01 010203 0102030405")), false);
+      expect(matcher.match(Script.fromAsm("0 010204 0102030405")), false);
+      expect(matcher.match(Script.fromAsm("0 01020304 0102030405")), false);
+      expect(matcher.match(Script.fromAsm("0 0102 0102030405")), false);
+      expect(matcher.match(Script.fromAsm("0 010203 010203040506")), false);
+      expect(matcher.match(Script.fromAsm("0 010203 01020304")), false);
 
     });
 
