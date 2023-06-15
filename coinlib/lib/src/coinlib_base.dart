@@ -18,7 +18,10 @@ export 'package:coinlib/src/encode/wif.dart';
 
 export 'package:coinlib/src/scripts/codes.dart';
 export 'package:coinlib/src/scripts/operations.dart';
+export 'package:coinlib/src/scripts/program.dart';
 export 'package:coinlib/src/scripts/script.dart';
+
+export 'package:coinlib/src/scripts/programs/p2pkh.dart';
 
 export 'package:coinlib/src/address.dart';
 export 'package:coinlib/src/network_params.dart';
