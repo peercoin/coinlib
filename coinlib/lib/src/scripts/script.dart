@@ -54,4 +54,39 @@ class Script {
     => ops.length == other.ops.length
     && IterableZip([ops, other.ops]).every((pair) => pair[0].match(pair[1]));
 
+  /// Fills the script matchers (only [ScriptPushDataMatcher] right now) with
+  /// the provided values. A [Uint8List] should be provided for each
+  /// [ScriptPushDataMatcher].
+  Script fill(List<dynamic> values) {
+
+    late List<ScriptOp> newOps;
+    int valI = 0;
+
+    newOps = ops.map((op) {
+
+      if (op is ScriptPushDataMatcher) {
+        final val = values[valI++];
+        if (val is! Uint8List) {
+          throw ArgumentError("Pushdata value is not a Uint8List");
+        }
+        if (val.length != op.size) {
+          throw ArgumentError("Pushdata value is not the expected size");
+        }
+        return ScriptPushData(val);
+      }
+
+      return op;
+
+    }).toList();
+
+    if (valI != values.length) {
+      throw ArgumentError("Too many values provided to script");
+    }
+
+    return Script(newOps);
+
+  }
+
+  ScriptOp operator [](int i) => ops[i];
+
 }

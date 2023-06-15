@@ -113,6 +113,36 @@ void main() {
 
     });
 
+    final template = Script.fromAsm("0 <5-bytes> OP_HASH160 <3-bytes> OP_DUP");
+
+    test("fill() returns new script with data filled", () {
+
+      final filled = template.fill(
+        [hexToBytes("0102030405"), hexToBytes("000000")],
+      );
+      expect(filled.asm, "0 0102030405 OP_HASH160 000000 OP_DUP");
+
+    });
+
+    test("fill() failure", () {
+
+      for (final bad in [
+        [hexToBytes("01020304"), hexToBytes("000000")],
+        [hexToBytes("0102030405")],
+        [hexToBytes("0102030405"), hexToBytes("000000"), hexToBytes("0102")],
+        [hexToBytes("0102030405"), 5],
+        [hexToBytes("0102030405"), [0,0,0]],
+        [],
+      ]) {
+        expect(
+          () => template.fill(bad),
+          throwsA(isA<ArgumentError>()),
+          reason: bad.toString(),
+        );
+      }
+
+    });
+
   });
 
 }
