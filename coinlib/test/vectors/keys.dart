@@ -18,6 +18,9 @@ class KeyTestVector {
   get publicObj => ECPublicKey.fromHex(public);
 }
 
+final pubkeyVec = "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798";
+final pubkeyhashVec = "751e76e8199196d454941c45d1b3a323f1433bd6";
+
 final keyPairVectors = [
   KeyTestVector(
     private: "0000000000000000000000000000000000000000000000000000000000000001",

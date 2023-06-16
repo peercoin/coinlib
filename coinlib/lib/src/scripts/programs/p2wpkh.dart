@@ -1,4 +1,6 @@
 import 'dart:typed_data';
+import 'package:coinlib/src/crypto/ec_public_key.dart';
+import 'package:coinlib/src/crypto/hash.dart';
 import 'package:coinlib/src/scripts/operations.dart';
 import 'package:coinlib/src/scripts/program.dart';
 import 'package:coinlib/src/scripts/script.dart';
@@ -24,5 +26,7 @@ class P2WPKH implements Program {
   P2WPKH.fromAsm(String asm) : this.fromScript(Script.fromAsm(asm));
 
   P2WPKH.fromHash(this.pkHash) : script = template.fill([pkHash]);
+
+  P2WPKH.fromPublicKey(ECPublicKey pk) : this.fromHash(hash160(pk.data));
 
 }
