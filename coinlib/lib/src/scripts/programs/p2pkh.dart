@@ -3,6 +3,8 @@ import 'package:coinlib/src/scripts/operations.dart';
 import 'package:coinlib/src/scripts/program.dart';
 import 'package:coinlib/src/scripts/script.dart';
 
+/// Pay-to-Public-Key-Hash program taking a 20-byte public key hash that can
+/// satisfy this script with a signature.
 class P2PKH implements Program {
 
   static Script template = Script.fromAsm(
