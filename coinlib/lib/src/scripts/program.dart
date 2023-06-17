@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'programs/p2pkh.dart';
 import 'programs/p2sh.dart';
 import 'programs/p2wpkh.dart';
+import 'programs/p2wsh.dart';
 import 'script.dart';
 
 /// Thrown when a script doesn't match the program being constructed
@@ -29,6 +30,10 @@ abstract class Program {
 
     try {
       return P2WPKH.fromScript(script);
+    } on NoProgramMatch catch(_) {}
+
+    try {
+      return P2WSH.fromScript(script);
     } on NoProgramMatch catch(_) {}
 
     // If nothing matched, return a raw program

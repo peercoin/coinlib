@@ -24,6 +24,7 @@ export 'package:coinlib/src/scripts/script.dart';
 export 'package:coinlib/src/scripts/programs/p2pkh.dart';
 export 'package:coinlib/src/scripts/programs/p2sh.dart';
 export 'package:coinlib/src/scripts/programs/p2wpkh.dart';
+export 'package:coinlib/src/scripts/programs/p2wsh.dart';
 
 export 'package:coinlib/src/address.dart';
 export 'package:coinlib/src/network_params.dart';
