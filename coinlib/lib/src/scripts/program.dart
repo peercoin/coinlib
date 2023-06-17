@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'programs/p2pkh.dart';
+import 'programs/p2sh.dart';
 import 'programs/p2wpkh.dart';
 import 'script.dart';
 
@@ -20,6 +21,10 @@ abstract class Program {
 
     try {
       return P2PKH.fromScript(script);
+    } on NoProgramMatch catch(_) {}
+
+    try {
+      return P2SH.fromScript(script);
     } on NoProgramMatch catch(_) {}
 
     try {

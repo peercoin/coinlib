@@ -1,7 +1,6 @@
 import 'package:coinlib/coinlib.dart';
 import 'package:coinlib/src/common/hex.dart';
 import 'package:test/test.dart';
-
 import '../../vectors/keys.dart';
 
 void main() {
@@ -19,11 +18,7 @@ void main() {
     }
 
     test("decompile() success", () {
-      expectP2WPKH(
-        P2WPKH.decompile(
-          hexToBytes("0014$pubkeyhashVec"),
-        ),
-      );
+      expectP2WPKH(P2WPKH.decompile(hexToBytes("0014$pubkeyhashVec")));
     });
 
     test("fromAsm() success", () => expectP2WPKH(P2WPKH.fromAsm(asm)));
