@@ -14,6 +14,7 @@ void main() {
     final script = Script.fromAsm(asm);
 
     expectP2WSH(P2WSH p2wsh) {
+      expect(p2wsh.version, 0);
       expect(bytesToHex(p2wsh.scriptHash), scriptHash);
       expect(bytesToHex(p2wsh.program), scriptHash);
       expect(p2wsh.script.match(script), true);
@@ -54,7 +55,11 @@ void main() {
         "0 $scriptHash 0",
         "01 $scriptHash"
       ]) {
-        expect(() => P2WSH.fromAsm(bad), throwsA(isA<NoProgramMatch>()));
+        expect(
+          () => P2WSH.fromAsm(bad),
+          throwsA(isA<NoProgramMatch>()),
+          reason: bad,
+        );
       }
     });
 

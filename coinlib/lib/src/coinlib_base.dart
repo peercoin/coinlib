@@ -23,6 +23,7 @@ export 'package:coinlib/src/scripts/script.dart';
 
 export 'package:coinlib/src/scripts/programs/p2pkh.dart';
 export 'package:coinlib/src/scripts/programs/p2sh.dart';
+export 'package:coinlib/src/scripts/programs/p2witness.dart';
 export 'package:coinlib/src/scripts/programs/p2wpkh.dart';
 export 'package:coinlib/src/scripts/programs/p2wsh.dart';
 

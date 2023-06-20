@@ -1,4 +1,6 @@
 import 'dart:typed_data';
+import 'package:coinlib/coinlib.dart';
+
 import 'programs/p2pkh.dart';
 import 'programs/p2sh.dart';
 import 'programs/p2wpkh.dart';
@@ -34,6 +36,11 @@ abstract class Program {
 
     try {
       return P2WSH.fromScript(script);
+    } on NoProgramMatch catch(_) {}
+
+    // If no specific witness output matched, match with generic witness output
+    try {
+      return P2Witness.fromScript(script);
     } on NoProgramMatch catch(_) {}
 
     // If nothing matched, return a raw program
