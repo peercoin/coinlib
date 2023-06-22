@@ -16,8 +16,8 @@ class P2WSH extends P2Witness {
     if (program.length != 32 || version != 0) throw NoProgramMatch();
   }
 
-  P2WSH.decompile(Uint8List script)
-    : this.fromScript(Script.decompile(script, requireMinimal: true));
+  P2WSH.decompile(Uint8List compiled)
+    : this.fromScript(Script.decompile(compiled));
 
   P2WSH.fromAsm(String asm) : this.fromScript(Script.fromAsm(asm));
 

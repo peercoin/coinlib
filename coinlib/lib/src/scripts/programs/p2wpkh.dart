@@ -14,8 +14,8 @@ class P2WPKH extends P2Witness {
     if (program.length != 20 || version != 0) throw NoProgramMatch();
   }
 
-  P2WPKH.decompile(Uint8List script)
-    : this.fromScript(Script.decompile(script, requireMinimal: true));
+  P2WPKH.decompile(Uint8List compiled)
+    : this.fromScript(Script.decompile(compiled));
 
   P2WPKH.fromAsm(String asm) : this.fromScript(Script.fromAsm(asm));
 

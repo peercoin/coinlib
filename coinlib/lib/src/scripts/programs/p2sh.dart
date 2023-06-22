@@ -20,8 +20,8 @@ class P2SH implements Program {
     scriptHash = (script[1] as ScriptPushData).data;
   }
 
-  P2SH.decompile(Uint8List script)
-    : this.fromScript(Script.decompile(script, requireMinimal: true));
+  P2SH.decompile(Uint8List compiled)
+    : this.fromScript(Script.decompile(compiled));
 
   P2SH.fromAsm(String asm) : this.fromScript(Script.fromAsm(asm));
 

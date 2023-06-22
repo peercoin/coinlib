@@ -15,9 +15,9 @@ class Script {
 
   /// Decompiles the script and may return a sub-class representing the script
   /// type. May return [OutOfData] if the script has an invalid pushdata.
-  /// If [requireMinimal] is true, the script push push data minimally or
-  /// [PushDataNotMinimal] will be thrown.
-  factory Script.decompile(Uint8List script, { bool requireMinimal = false }) {
+  /// If [requireMinimal] is true (default), the script push push data minimally
+  /// or [PushDataNotMinimal] will be thrown.
+  factory Script.decompile(Uint8List script, { bool requireMinimal = true }) {
 
     final List<ScriptOp> ops = [];
     final reader = BytesReader(script);
@@ -88,5 +88,6 @@ class Script {
   }
 
   ScriptOp operator [](int i) => ops[i];
+  int get length => ops.length;
 
 }

@@ -153,6 +153,10 @@ class ScriptOpCode implements ScriptOp {
   final int code;
   ScriptOpCode(this.code);
 
+  /// The [name] should be capitalised without the `OP_` such as `CHECKSIG`. If
+  /// [name] isn't an opcode, it will return an `INVALIDOPCODE`.
+  ScriptOpCode.fromName(String name) : this(scriptOpNameToCode[name] ?? 0xff);
+
   @override
   Uint8List get compiled => Uint8List.fromList([code]);
 

@@ -1,10 +1,10 @@
 import 'dart:typed_data';
-import 'package:coinlib/coinlib.dart';
-
 import 'programs/p2pkh.dart';
 import 'programs/p2sh.dart';
 import 'programs/p2wpkh.dart';
 import 'programs/p2wsh.dart';
+import 'programs/p2witness.dart';
+import 'programs/multisig.dart';
 import 'script.dart';
 
 /// Thrown when a script doesn't match the program being constructed
@@ -43,13 +43,19 @@ abstract class Program {
       return P2Witness.fromScript(script);
     } on NoProgramMatch catch(_) {}
 
+    try {
+      return MultisigProgram.fromScript(script);
+    } on NoProgramMatch catch(_) {}
+
     // If nothing matched, return a raw program
     return RawProgram(script);
 
   }
 
-  factory Program.decompile(Uint8List script)
-    => Program.match(Script.decompile(script));
+  /// Decompile a script and match against a program. Must be mininal push data
+  /// by default
+  factory Program.decompile(Uint8List script, { bool requireMinimal = true })
+    => Program.match(Script.decompile(script, requireMinimal: requireMinimal));
 
   factory Program.fromAsm(String asm) => Program.match(Script.fromAsm(asm));
 

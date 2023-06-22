@@ -21,6 +21,7 @@ export 'package:coinlib/src/scripts/operations.dart';
 export 'package:coinlib/src/scripts/program.dart';
 export 'package:coinlib/src/scripts/script.dart';
 
+export 'package:coinlib/src/scripts/programs/multisig.dart';
 export 'package:coinlib/src/scripts/programs/p2pkh.dart';
 export 'package:coinlib/src/scripts/programs/p2sh.dart';
 export 'package:coinlib/src/scripts/programs/p2witness.dart';

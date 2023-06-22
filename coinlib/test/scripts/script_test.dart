@@ -46,7 +46,10 @@ void main() {
       for (final vec in vectors) {
 
         final fromAsm = Script.fromAsm(vec.inputAsm);
-        final fromHex = Script.decompile(hexToBytes(vec.inputHex));
+        final fromHex = Script.decompile(
+          hexToBytes(vec.inputHex),
+          requireMinimal: false,
+        );
 
         for (final script in [fromAsm, fromHex]) {
 

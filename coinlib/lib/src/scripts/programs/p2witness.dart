@@ -33,8 +33,8 @@ class P2Witness implements Program {
 
   }
 
-  P2Witness.decompile(Uint8List script)
-    : this.fromScript(Script.decompile(script, requireMinimal: true));
+  P2Witness.decompile(Uint8List compiled)
+    : this.fromScript(Script.decompile(compiled));
 
   P2Witness.fromAsm(String asm) : this.fromScript(Script.fromAsm(asm));
 

@@ -22,8 +22,8 @@ class P2PKH implements Program {
     pkHash = (script[2] as ScriptPushData).data;
   }
 
-  P2PKH.decompile(Uint8List script)
-    : this.fromScript(Script.decompile(script, requireMinimal: true));
+  P2PKH.decompile(Uint8List compiled)
+    : this.fromScript(Script.decompile(compiled));
 
   P2PKH.fromAsm(String asm) : this.fromScript(Script.fromAsm(asm));
 
