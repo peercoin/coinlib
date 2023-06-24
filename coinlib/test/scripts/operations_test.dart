@@ -389,10 +389,11 @@ void main() {
     });
 
     test("pushdata is copied", () {
-      final pushdata = ScriptPushData(Uint8List(1));
-      // This only modifies a copy
+      final data = Uint8List(2);
+      final pushdata = ScriptPushData(data);
       pushdata.data[0] = 0xff;
-      expect(pushdata.data[0], 0);
+      data[1] = 0xff;
+      expect(pushdata.data, Uint8List(2));
     });
 
     test("require minimal pushdata", () {

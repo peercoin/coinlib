@@ -16,7 +16,7 @@ void main() {
     expectRecSig(ECDSARecoverableSignature recSig, RecSigVector vector) {
       expect(recSig.compressed, vector.compressed);
       expect(recSig.recid, vector.recid);
-      expect(bytesToHex(recSig.signature), vector.signature);
+      expect(bytesToHex(recSig.signature.compact), vector.signature);
       expect(recSig.recover(hash)?.hex, vector.pubkey);
       expect(bytesToHex(recSig.compact), vector.compact);
     }
@@ -75,6 +75,18 @@ void main() {
           );
         }
       });
+
+    });
+
+    test(".signature is copied and cannot be mutated", () {
+
+      final hex = validRecoverableSigs[0].compact;
+      final data = hexToBytes(hex);
+      final sig = ECDSARecoverableSignature.fromCompact(data);
+
+      // Compact signature ignores first recid byte
+      data[1] = 0xff;
+      expect(bytesToHex(sig.signature.compact), hex.substring(2));
 
     });
 

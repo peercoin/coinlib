@@ -286,6 +286,16 @@ void main() {
       }
     });
 
+    test(".chaincode is copied and cannot be mutated", () {
+      final cc = Uint8List(32);
+      final hdKey = HDPrivateKey.fromKeyAndChainCode(
+        ECPrivateKey.fromHex(masterVector.privHex), cc,
+      );
+      hdKey.chaincode[0] = 0xff;
+      cc[1] = 0xff;
+      expect(hdKey.chaincode, Uint8List(32));
+    });
+
   });
 
 }

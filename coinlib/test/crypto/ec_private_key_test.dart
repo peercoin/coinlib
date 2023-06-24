@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:coinlib/coinlib.dart';
 import 'package:coinlib/src/common/hex.dart';
 import 'package:test/test.dart';
@@ -107,6 +108,21 @@ void main() {
       for (final invalid in invalidTweaks) {
         expect(keyPairVectors[0].privateObj.tweak(hexToBytes(invalid)), null);
       }
+    });
+
+    test("data is copied and cannot be mutated", () {
+
+      final expectedData = Uint8List(32);
+      expectedData.last = 1;
+
+      final data = Uint8List.fromList(expectedData);
+
+      final key = ECPrivateKey(data);
+      key.data[0] = 0xff;
+      data[1] = 0xff;
+
+      expect(key.data, expectedData);
+
     });
 
   });

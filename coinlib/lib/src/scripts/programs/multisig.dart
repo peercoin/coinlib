@@ -46,9 +46,11 @@ class MultisigProgram implements Program {
     ) throw NoProgramMatch();
 
     try {
-      pubkeys = potentialPubkeys.map(
-        (op) => ECPublicKey((op as ScriptPushData).data),
-      ).toList();
+      pubkeys = List.unmodifiable(
+        potentialPubkeys.map(
+          (op) => ECPublicKey((op as ScriptPushData).data),
+        ),
+      );
     } on InvalidPublicKey {
       throw NoProgramMatch();
     }
@@ -61,7 +63,7 @@ class MultisigProgram implements Program {
   MultisigProgram.fromAsm(String asm) : this.fromScript(Script.fromAsm(asm));
 
   MultisigProgram(this.threshold, Iterable<ECPublicKey> pubkeys)
-    : pubkeys = pubkeys.toList(),
+    : pubkeys = List.unmodifiable(pubkeys),
     script = Script([
       ScriptOp.fromNumber(threshold),
       ...pubkeys.map((pk) => ScriptPushData(pk.data)),

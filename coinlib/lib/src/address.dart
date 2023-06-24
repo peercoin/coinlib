@@ -46,12 +46,12 @@ abstract class Address {
 abstract class Base58Address implements Address {
 
   /// The 160bit public key or redeemScript hash for the base58 address
-  final Uint8List hash;
+  final Uint8List _hash;
   /// The network and address type version of the address
   final int version;
   String? _encodedCache;
 
-  Base58Address._(this.hash, this.version) {
+  Base58Address._(Uint8List hash, this.version) : _hash = hash {
     if (version < 0 || version > 255) {
       throw ArgumentError("base58 version must be within 0-255", "this.version");
     }
@@ -81,8 +81,10 @@ abstract class Base58Address implements Address {
 
   @override
   toString() => _encodedCache ??= base58Encode(
-    Uint8List.fromList([version, ...hash]),
+    Uint8List.fromList([version, ..._hash]),
   );
+
+  Uint8List get hash => Uint8List.fromList(_hash);
 
 }
 
@@ -116,10 +118,11 @@ abstract class Bech32Address implements Address {
   /// The program version of the address
   final int version;
   /// The witness program encoded in the address
-  final Uint8List program;
+  final Uint8List _program;
   String? _encodedCache;
 
-  Bech32Address._(this.version, this.program, this.hrp) {
+  Bech32Address._(this.version, Uint8List program, this.hrp)
+    : _program = program {
 
     if (version < 0 || version > 16) {
       throw ArgumentError("bech32 version must be 0-16", "this.version");
@@ -200,10 +203,12 @@ abstract class Bech32Address implements Address {
   toString() => _encodedCache ??= Bech32(
     hrp: hrp,
     words: List<int>.from([
-      version, ...convertBits(program, 8, 5, true)!,
+      version, ...convertBits(_program, 8, 5, true)!,
     ]),
     type: version == 0 ? Bech32Type.bech32 : Bech32Type.bech32m,
   ).encode();
+
+  Uint8List get program => Uint8List.fromList(_program);
 
 }
 

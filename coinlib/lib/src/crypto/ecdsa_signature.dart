@@ -13,12 +13,13 @@ class ECDSASignature {
   static const compactLength = 64;
 
   /// A compact representation of a ECDSASignature containing a big-endian
-  /// 32-byte value and big-endian 32-byte S value.
-  final Uint8List compact;
+  /// 32-byte R value and big-endian 32-byte S value.
+  final Uint8List _compact;
 
   /// Takes a 64-byte compact signature representation. See [this.compact].
   /// [InvalidECDSASignature] will be thrown if the signature is not valid.
-  ECDSASignature.fromCompact(this.compact) {
+  ECDSASignature.fromCompact(Uint8List compact)
+    : _compact = Uint8List.fromList(compact) {
     if (compact.length != compactLength) {
       throw ArgumentError(
         "Compact signatures should be $compactLength-bytes",
@@ -76,12 +77,13 @@ class ECDSASignature {
   /// signatures with high and low S-values.
   bool verify(ECPublicKey publickey, Uint8List hash)
     => secp256k1.ecdsaVerify(
-      secp256k1.ecdsaSignatureNormalize(compact),
+      secp256k1.ecdsaSignatureNormalize(_compact),
       checkBytes(hash, 32),
       publickey.data,
     );
 
   /// Returns the DER encoding for the signature
-  Uint8List get der => secp256k1.ecdsaSignatureToDer(compact);
+  Uint8List get der => secp256k1.ecdsaSignatureToDer(_compact);
+  Uint8List get compact => Uint8List.fromList(_compact);
 
 }

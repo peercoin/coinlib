@@ -104,6 +104,15 @@ void main() {
       }
     });
 
+    test("data cannot be mutated", () {
+      final hex = validPubKeys[0];
+      final data = hexToBytes(hex);
+      final key = ECPublicKey(data);
+      key.data[0] = 0xff;
+      data[1] = 0xff;
+      expect(bytesToHex(key.data), hex);
+    });
+
   });
 
 }

@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:coinlib/src/common/bytes.dart';
 import 'package:coinlib/src/crypto/ec_public_key.dart';
 import 'package:coinlib/src/crypto/hash.dart';
 import 'package:coinlib/src/scripts/operations.dart';
@@ -15,11 +16,11 @@ class P2PKH implements Program {
 
   @override
   final Script script;
-  late final Uint8List pkHash;
+  late final Uint8List _pkHash;
 
   P2PKH.fromScript(this.script) {
     if (!template.match(script)) throw NoProgramMatch();
-    pkHash = (script[2] as ScriptPushData).data;
+    _pkHash = (script[2] as ScriptPushData).data;
   }
 
   P2PKH.decompile(Uint8List compiled)
@@ -27,8 +28,11 @@ class P2PKH implements Program {
 
   P2PKH.fromAsm(String asm) : this.fromScript(Script.fromAsm(asm));
 
-  P2PKH.fromHash(this.pkHash) : script = template.fill([pkHash]);
+  P2PKH.fromHash(Uint8List pkHash)
+    : _pkHash = copyCheckBytes(pkHash, 20), script = template.fill([pkHash]);
 
   P2PKH.fromPublicKey(ECPublicKey pk) : this.fromHash(hash160(pk.data));
+
+  Uint8List get pkHash => Uint8List.fromList(_pkHash);
 
 }

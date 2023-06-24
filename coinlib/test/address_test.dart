@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:coinlib/coinlib.dart';
 import 'package:coinlib/src/common/hex.dart';
 import 'package:test/test.dart';
@@ -311,6 +312,26 @@ void main() {
       );
     });
 
+  });
+
+  group("Base58Address", () {
+    test(".hash is copied and cannot be mutated", () {
+      final hash = Uint8List(20);
+      final addr = P2PKHAddress.fromHash(hash, version: 0);
+      addr.hash[0] = 0xff;
+      hash[1] = 0xff;
+      expect(addr.hash, Uint8List(20));
+    });
+  });
+
+  group("Bech32Address", () {
+    test(".program is copied and cannot be mutated", () {
+      final hash = Uint8List(20);
+      final addr = P2WPKHAddress.fromHash(hash, hrp: "pc");
+      addr.program[0] = 0xff;
+      hash[1] = 0xff;
+      expect(addr.program, Uint8List(20));
+    });
   });
 
 }

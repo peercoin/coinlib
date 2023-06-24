@@ -119,6 +119,12 @@ void main() {
 
     });
 
+    test(".words cannot be mutated", () {
+      final bech32 = Bech32(hrp: "a", words: [1], type: Bech32Type.bech32);
+      expect(() => bech32.words[0] = 0, throwsA(anything));
+      expect(bech32.words, [1]);
+    });
+
   });
 
 }

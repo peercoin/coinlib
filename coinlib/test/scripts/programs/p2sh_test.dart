@@ -72,6 +72,15 @@ void main() {
       }
     });
 
+    test(".scriptHash is copied and cannot be mutated", () {
+      final hex = "0000000000000000000000000000000000000000";
+      final hash = hexToBytes(hex);
+      final p2sh = P2SH.fromHash(hash);
+      p2sh.scriptHash[0] = 0xff;
+      hash[1] = 0xff;
+      expect(bytesToHex(p2sh.scriptHash), hex);
+    });
+
   });
 
 }

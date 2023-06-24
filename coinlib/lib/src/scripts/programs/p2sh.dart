@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:coinlib/src/common/bytes.dart';
 import 'package:coinlib/src/crypto/hash.dart';
 import 'package:coinlib/src/scripts/operations.dart';
 import 'package:coinlib/src/scripts/program.dart';
@@ -11,13 +12,13 @@ class P2SH implements Program {
 
   @override
   final Script script;
-  late final Uint8List scriptHash;
+  late final Uint8List _scriptHash;
 
   /// Construct using an output script, not to be confused with the redeem
   /// script. For that use [fromRedeemScript].
   P2SH.fromScript(this.script) {
     if (!template.match(script)) throw NoProgramMatch();
-    scriptHash = (script[1] as ScriptPushData).data;
+    _scriptHash = (script[1] as ScriptPushData).data;
   }
 
   P2SH.decompile(Uint8List compiled)
@@ -25,9 +26,13 @@ class P2SH implements Program {
 
   P2SH.fromAsm(String asm) : this.fromScript(Script.fromAsm(asm));
 
-  P2SH.fromHash(this.scriptHash) : script = template.fill([scriptHash]);
+  P2SH.fromHash(Uint8List scriptHash)
+    : _scriptHash = copyCheckBytes(scriptHash, 20),
+    script = template.fill([scriptHash]);
 
   P2SH.fromRedeemScript(Script redeemScript)
     : this.fromHash(hash160(redeemScript.compiled));
+
+  Uint8List get scriptHash => Uint8List.fromList(_scriptHash);
 
 }

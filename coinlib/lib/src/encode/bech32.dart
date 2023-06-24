@@ -91,22 +91,26 @@ class Bech32 {
   final Bech32Type type;
 
   Bech32._skipValidation({
-    required this.hrp, required this.words, required this.type,
-  });
+    required this.hrp, required List<int> words, required this.type,
+  }): words = List.unmodifiable(words);
 
   /// Creates an encodable object with the human-readable-part ([hrp]), [words]
   /// for the given bech32 [type] (bech32 or bech32m).
   Bech32({
-    required String hrp, required this.words, required this.type,
-  }) : hrp = hrp.toLowerCase() {
+    required String hrp, required List<int> words, required this.type,
+  }) : hrp = hrp.toLowerCase(), words = List.unmodifiable(words) {
+
     if (hrp.isEmpty) throw InvalidBech32("Missing HRP");
     _throwOnInvalidHrp(hrp);
+
     if (words.any((w) => w < 0 || w > 31)) {
       throw InvalidBech32("Words outside of 5-bit range");
     }
+
     if (hrp.length + 1 + words.length + checksumLength > maxLength) {
       throw InvalidBech32("Bech32 too long");
     }
+
   }
 
   /// Decodes a bech32 string into the hrp, 5-bit words and type. May throw an

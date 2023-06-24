@@ -1,7 +1,6 @@
 import 'package:coinlib/coinlib.dart';
 import 'package:coinlib/src/common/hex.dart';
 import 'package:test/test.dart';
-import '../../crypto/hd_key_test.dart';
 import '../../vectors/keys.dart';
 
 class MultisigVector {
@@ -13,7 +12,6 @@ class MultisigVector {
 }
 
 final correctVectors = [
-
   // 1-of-1 pointless but valid
   MultisigVector(
     asm: "01 $pubkeyVec 01 OP_CHECKMULTISIG",
@@ -42,7 +40,6 @@ final correctVectors = [
     pubkeys: List.filled(20, pubkeyVec),
     threshold: 20,
   ),
-
 ];
 
 final invalidVectors = [
@@ -145,6 +142,15 @@ void main() {
       expectArgumentError(() => MultisigProgram(2, [pk]));
       expectArgumentError(() => MultisigProgram(21, List.filled(20, pk)));
 
+    });
+
+    test(".pubkeys cannot be mutated", () {
+      final multisig = MultisigProgram.fromAsm(correctVectors[0].asm);
+      expect(
+        () => multisig.pubkeys[0] = ECPublicKey.fromHex(longPubkeyVec),
+        throwsA(anything),
+      );
+      expect(multisig.pubkeys[0], ECPublicKey.fromHex(pubkeyVec));
     });
 
   });

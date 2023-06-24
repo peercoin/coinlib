@@ -15,17 +15,17 @@ abstract class HDKey {
   static int hardenBit = 0x80000000;
   static int encodedLength = 78;
 
-  final Uint8List chaincode;
+  final Uint8List _chaincode;
   final int depth;
   final int index;
   final int parentFingerprint;
 
   HDKey._({
-    required this.chaincode,
+    required Uint8List chaincode,
     required this.depth,
     required this.index,
     required this.parentFingerprint,
-  });
+  }) : _chaincode = Uint8List.fromList(chaincode);
 
   /// Decodes a base58 string into a [HDPrivateKey] or [HDPublicKey]. May throw
   /// [InvalidBase58], [InvalidBase58Checksum] or [InvalidHDKey].
@@ -93,6 +93,7 @@ abstract class HDKey {
   Uint8List get identifier => _identifierCache ??= hash160(publicKey.data);
   /// The integer fingerprint of the identifier
   int get fingerprint => identifier.buffer.asByteData().getUint32(0);
+  Uint8List get chaincode => Uint8List.fromList(_chaincode);
 
   /// Derives a key at [index] returning the same type of key: either public or
   /// private. The [index] can inlcude the [hardenBit] to specify that it is
@@ -119,7 +120,7 @@ abstract class HDKey {
     }
     data.buffer.asByteData().setUint32(33, index);
 
-    final i = hmacSha512(chaincode, data);
+    final i = hmacSha512(_chaincode, data);
     final il = i.sublist(0, 32);
     final ir = i.sublist(32);
 
@@ -205,7 +206,7 @@ abstract class HDKey {
     bd.setUint8(4, depth);
     bd.setUint32(5, parentFingerprint);
     bd.setUint32(9, index);
-    data.setRange(13, 45, chaincode);
+    data.setRange(13, 45, _chaincode);
 
     if (privateKey != null) {
       bd.setUint8(45, 0);

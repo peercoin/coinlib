@@ -9,7 +9,7 @@ class P2Witness implements Program {
   @override
   final Script script;
   late final int version;
-  late final Uint8List program;
+  late final Uint8List _program;
 
   bool _programSizeOk(int size) => size >= 2 && size <= 40;
 
@@ -28,7 +28,7 @@ class P2Witness implements Program {
       throw NoProgramMatch();
     }
 
-    program = push.data;
+    _program = push.data;
     version = ver;
 
   }
@@ -38,12 +38,16 @@ class P2Witness implements Program {
 
   P2Witness.fromAsm(String asm) : this.fromScript(Script.fromAsm(asm));
 
-  P2Witness.fromProgram(this.version, this.program) : script = Script([
-    ScriptOp.fromNumber(version), ScriptPushData(program),
-  ]) {
+  P2Witness.fromProgram(this.version, Uint8List program)
+    : _program = Uint8List.fromList(program),
+    script = Script([
+      ScriptOp.fromNumber(version), ScriptPushData(program),
+    ]) {
     if (version < 0 || version > 16 || !_programSizeOk(program.length)) {
       throw ArgumentError.value(program, "this.program", "wrong size");
     }
   }
+
+  Uint8List get program => Uint8List.fromList(_program);
 
 }

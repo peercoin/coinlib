@@ -93,6 +93,15 @@ void main() {
       );
     });
 
+    test(".compact is copied cannot be mutated", () {
+      final compact = hexToBytes(validSignatures[0]);
+      final sig = ECDSASignature.fromCompact(compact);
+      sig.compact[0] = 0xff;
+      compact[1] = 0xff;
+      expect(bytesToHex(sig.compact), validSignatures[0]);
+    });
+
+
     group(".sign()", () {
 
       late ECPrivateKey key, keyMutated1, keyMutated2;

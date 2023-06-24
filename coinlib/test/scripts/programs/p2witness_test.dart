@@ -98,6 +98,14 @@ void main() {
       expectFail(0, "${longBytes}00");
     });
 
+    test(".program is copied and cannot be mutated", () {
+      final prog = hexToBytes("0000");
+      final witness = P2Witness.fromProgram(16, prog);
+      witness.program[0] = 0xff;
+      prog[1] = 0xff;
+      expect(bytesToHex(witness.program), "0000");
+    });
+
   });
 
 }

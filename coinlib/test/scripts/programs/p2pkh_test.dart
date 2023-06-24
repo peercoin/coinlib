@@ -78,6 +78,15 @@ void main() {
       }
     });
 
+    test(".pkHash is copied and cannot be mutated", () {
+      final hex = "0000000000000000000000000000000000000000";
+      final hash = hexToBytes(hex);
+      final p2pkh = P2PKH.fromHash(hash);
+      p2pkh.pkHash[0] = 0xff;
+      hash[1] = 0xff;
+      expect(bytesToHex(p2pkh.pkHash), hex);
+    });
+
   });
 
 }

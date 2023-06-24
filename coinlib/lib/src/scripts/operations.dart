@@ -191,7 +191,7 @@ class ScriptPushData implements ScriptOp {
 
   final Uint8List _data;
 
-  ScriptPushData(this._data);
+  ScriptPushData(Uint8List data) : _data = Uint8List.fromList(data);
 
   List<int> _compiledList() {
 

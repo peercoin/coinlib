@@ -13,20 +13,15 @@ class ECPrivateKey {
   static const privateKeyLength = 32;
 
   /// 32-byte private key scalar
-  final Uint8List data;
+  final Uint8List _data;
   /// True if the derived public key should be in compressed format
   final bool compressed;
 
   /// Constructs a private key from a 32-byte scalar. The public key may be
   /// in the [compressed] format which is the default. [InvalidPrivateKey] will
   /// be thrown if the private key is not within the secp256k1 order.
-  ECPrivateKey(this.data, { this.compressed = true }) {
-    if (data.length != privateKeyLength) {
-      throw ArgumentError(
-        "Private key scalars should be $privateKeyLength-bytes",
-        "this.data",
-      );
-    }
+  ECPrivateKey(Uint8List data, { this.compressed = true })
+    : _data = copyCheckBytes(data, privateKeyLength, name: "Private key data") {
     if (!secp256k1.privKeyVerify(data)) throw InvalidPrivateKey();
   }
 
@@ -45,15 +40,16 @@ class ECPrivateKey {
   ECPublicKey? _pubkeyCache;
   /// The public key associated with this private key
   ECPublicKey get pubkey => _pubkeyCache ??= ECPublicKey(
-    secp256k1.privToPubKey(data, compressed),
+    secp256k1.privToPubKey(_data, compressed),
   );
+  Uint8List get data => Uint8List.fromList(_data);
 
   /// Tweaks the private key with a scalar. In the instance a new key cannot be
   /// created (practically impossible for random 32-bit scalars), then null will
   /// be returned.
   ECPrivateKey? tweak(Uint8List scalar) {
     checkBytes(scalar, 32, name: "Scalar");
-    final newScalar = secp256k1.privKeyTweak(data, scalar);
+    final newScalar = secp256k1.privKeyTweak(_data, scalar);
     return newScalar == null ? null : ECPrivateKey(newScalar, compressed: compressed);
   }
 
