@@ -218,12 +218,16 @@ mixin Writable {
 
   /// Obtains a [Uint8List] with data serialized for this object
   Uint8List toBytes() {
-    final measure = MeasureWriter();
-    write(measure);
-    final bytes = Uint8List(measure.size);
+    final bytes = Uint8List(size);
     final writer = BytesWriter(bytes);
     write(writer);
     return bytes;
+  }
+
+  int get size {
+    final measure = MeasureWriter();
+    write(measure);
+    return measure.size;
   }
 
 }
