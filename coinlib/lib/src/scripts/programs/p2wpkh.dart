@@ -11,7 +11,7 @@ import 'package:coinlib/src/scripts/script.dart';
 class P2WPKH extends P2Witness {
 
   P2WPKH.fromScript(Script script) : super.fromScript(script) {
-    if (program.length != 20 || version != 0) throw NoProgramMatch();
+    if (data.length != 20 || version != 0) throw NoProgramMatch();
   }
 
   P2WPKH.decompile(Uint8List compiled)
@@ -20,10 +20,10 @@ class P2WPKH extends P2Witness {
   P2WPKH.fromAsm(String asm) : this.fromScript(Script.fromAsm(asm));
 
   P2WPKH.fromHash(Uint8List pkHash)
-    : super.fromProgram(0, checkBytes(pkHash, 20, name: "PK hash"));
+    : super.fromData(0, checkBytes(pkHash, 20, name: "PK hash"));
 
   P2WPKH.fromPublicKey(ECPublicKey pk) : this.fromHash(hash160(pk.data));
 
-  Uint8List get pkHash => program;
+  Uint8List get pkHash => data;
 
 }

@@ -17,17 +17,23 @@ expectBase58Equal(Base58Address addr, Base58Address expected) {
   expect(addr.hash, expected.hash);
   expect(addr.version, expected.version);
   expect(addr.toString(), expected.toString());
+  if (addr is P2PKHAddress) {
+    expect(addr.program.pkHash, addr.hash);
+  } else if (addr is P2SHAddress) {
+    expect(addr.program.scriptHash, addr.hash);
+  }
 }
 
 expectBech32Equal(Bech32Address addr, Bech32Address expected) {
-  expect(addr.program, expected.program);
+  expect(addr.data, expected.data);
   expect(addr.hrp, expected.hrp);
   expect(addr.toString(), expected.toString());
-  if (addr is P2WPKHAddress && expected is P2WPKHAddress) {
-    expect(addr.program, expected.program);
-  }
-  if (addr is P2WSHAddress && expected is P2WSHAddress) {
-    expect(addr.program, expected.program);
+  if (addr is P2WPKHAddress) {
+    expect(addr.program.pkHash, addr.data);
+  } else if (addr is P2WSHAddress) {
+    expect(addr.program.scriptHash, addr.data);
+  } else if (addr is UnknownWitnessAddress) {
+    expect(addr.program.data, addr.data);
   }
 }
 
@@ -114,6 +120,15 @@ void main() {
         ),
       );
 
+      expectValidAddress(
+        "pL5vkwAVx6Qo1AVm7dzW5XKxP4meAjZQS1",
+        NetworkParams.mainnet,
+        P2SHAddress.fromScript(
+          Script.fromAsm("0"),
+          version: NetworkParams.mainnet.p2shPrefix,
+        ),
+      );
+
     });
 
     test("valid P2WPKH addresses", () {
@@ -146,6 +161,15 @@ void main() {
           hexToBytes(
             "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
           ),
+          hrp: NetworkParams.mainnet.bech32Hrp,
+        ),
+      );
+
+      expectValidAddress(
+        "pc1qdc6qh88lkdaf3899gnntk7q293ufq8flkvmnsa59zx3sv9a05qwsgzh235",
+        NetworkParams.mainnet,
+        P2WSHAddress.fromScript(
+          Script.fromAsm("0"),
           hrp: NetworkParams.mainnet.bech32Hrp,
         ),
       );
@@ -325,12 +349,12 @@ void main() {
   });
 
   group("Bech32Address", () {
-    test(".program is copied and cannot be mutated", () {
+    test(".data is copied and cannot be mutated", () {
       final hash = Uint8List(20);
       final addr = P2WPKHAddress.fromHash(hash, hrp: "pc");
-      addr.program[0] = 0xff;
+      addr.data[0] = 0xff;
       hash[1] = 0xff;
-      expect(addr.program, Uint8List(20));
+      expect(addr.data, Uint8List(20));
     });
   });
 

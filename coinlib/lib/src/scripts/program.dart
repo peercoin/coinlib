@@ -11,7 +11,8 @@ import 'script.dart';
 class NoProgramMatch implements Exception {}
 
 /// An interface for programs that wrap a [Script] with associated
-/// functionality.
+/// functionality. This is seperated from the [Script] class to present
+/// high-level abstractions.
 abstract class Program {
 
   Script get script;

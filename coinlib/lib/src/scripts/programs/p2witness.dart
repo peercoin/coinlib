@@ -9,7 +9,7 @@ class P2Witness implements Program {
   @override
   final Script script;
   late final int version;
-  late final Uint8List _program;
+  late final Uint8List _data;
 
   bool _programSizeOk(int size) => size >= 2 && size <= 40;
 
@@ -28,7 +28,7 @@ class P2Witness implements Program {
       throw NoProgramMatch();
     }
 
-    _program = push.data;
+    _data = push.data;
     version = ver;
 
   }
@@ -38,16 +38,19 @@ class P2Witness implements Program {
 
   P2Witness.fromAsm(String asm) : this.fromScript(Script.fromAsm(asm));
 
-  P2Witness.fromProgram(this.version, Uint8List program)
-    : _program = Uint8List.fromList(program),
+  /// Creates a non-specific segwit program from "witness program" data.
+  P2Witness.fromData(this.version, Uint8List data)
+    : _data = Uint8List.fromList(data),
     script = Script([
-      ScriptOp.fromNumber(version), ScriptPushData(program),
+      ScriptOp.fromNumber(version), ScriptPushData(data),
     ]) {
-    if (version < 0 || version > 16 || !_programSizeOk(program.length)) {
-      throw ArgumentError.value(program, "this.program", "wrong size");
+    if (version < 0 || version > 16 || !_programSizeOk(data.length)) {
+      throw ArgumentError.value(data, "this.data", "wrong size");
     }
   }
 
-  Uint8List get program => Uint8List.fromList(_program);
+  /// The data of the "witness program". It is called "data" and not "program"
+  /// to avoid confusion with the more general [Program] class.
+  Uint8List get data => Uint8List.fromList(_data);
 
 }

@@ -13,7 +13,7 @@ class P2WSH extends P2Witness {
   /// Construct using an output script, not to be confused with the redeem
   /// script. For that use [fromRedeemScript].
   P2WSH.fromScript(Script script) : super.fromScript(script) {
-    if (program.length != 32 || version != 0) throw NoProgramMatch();
+    if (data.length != 32 || version != 0) throw NoProgramMatch();
   }
 
   P2WSH.decompile(Uint8List compiled)
@@ -22,11 +22,11 @@ class P2WSH extends P2Witness {
   P2WSH.fromAsm(String asm) : this.fromScript(Script.fromAsm(asm));
 
   P2WSH.fromHash(Uint8List scriptHash)
-    : super.fromProgram(0, checkBytes(scriptHash, 32, name: "Script hash"));
+    : super.fromData(0, checkBytes(scriptHash, 32, name: "Script hash"));
 
   P2WSH.fromRedeemScript(Script redeemScript)
     : this.fromHash(sha256Hash(redeemScript.compiled));
 
-  Uint8List get scriptHash => program;
+  Uint8List get scriptHash => data;
 
 }

@@ -16,7 +16,7 @@ void main() {
     expectP2WSH(P2WSH p2wsh) {
       expect(p2wsh.version, 0);
       expect(bytesToHex(p2wsh.scriptHash), scriptHash);
-      expect(bytesToHex(p2wsh.program), scriptHash);
+      expect(bytesToHex(p2wsh.data), scriptHash);
       expect(p2wsh.script.match(script), true);
     }
 

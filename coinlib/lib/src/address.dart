@@ -6,6 +6,13 @@ import 'package:coinlib/src/crypto/hash.dart';
 import 'package:coinlib/src/network_params.dart';
 import 'package:coinlib/src/encode/base58.dart';
 import 'package:coinlib/src/encode/bech32.dart';
+import 'package:coinlib/src/scripts/program.dart';
+import 'package:coinlib/src/scripts/programs/p2pkh.dart';
+import 'package:coinlib/src/scripts/programs/p2sh.dart';
+import 'package:coinlib/src/scripts/programs/p2witness.dart';
+import 'package:coinlib/src/scripts/programs/p2wpkh.dart';
+import 'package:coinlib/src/scripts/programs/p2wsh.dart';
+import 'package:coinlib/src/scripts/script.dart';
 
 class InvalidAddress implements Exception {}
 class InvalidAddressNetwork implements Exception {}
@@ -38,6 +45,8 @@ abstract class Address {
       }
     }
   }
+
+  Program get program;
 
 }
 
@@ -98,12 +107,24 @@ class P2PKHAddress extends Base58Address {
   P2PKHAddress.fromPublicKey(ECPublicKey pubkey, { required int version })
     : this.fromHash(hash160(pubkey.data), version: version);
 
+  @override
+  P2PKH get program => P2PKH.fromHash(hash);
+
 }
 
 class P2SHAddress extends Base58Address {
+
   /// Constructs a P2SH address from the redeemScript [hash].
   P2SHAddress.fromHash(Uint8List hash, { required int version })
     : super._(copyCheckBytes(hash, 20), version);
+
+  /// Constructs a P2SH address for a redeemScript
+  P2SHAddress.fromScript(Script script, { required int version })
+    : super._(hash160(script.compiled), version);
+
+  @override
+  P2SH get program => P2SH.fromHash(hash);
+
 }
 
 /// Base class for addresses that use bech32: [P2WPKHAddress] and
@@ -117,17 +138,15 @@ abstract class Bech32Address implements Address {
   final String hrp;
   /// The program version of the address
   final int version;
-  /// The witness program encoded in the address
-  final Uint8List _program;
+  final Uint8List _data;
   String? _encodedCache;
 
-  Bech32Address._(this.version, Uint8List program, this.hrp)
-    : _program = program {
+  Bech32Address._(this.version, this._data, this.hrp) {
 
     if (version < 0 || version > 16) {
       throw ArgumentError("bech32 version must be 0-16", "this.version");
     }
-    if (program.length < 2 || program.length > maxWitnessProgramLength) {
+    if (_data.length < 2 || _data.length > maxWitnessProgramLength) {
       throw ArgumentError(
         "witness programs must be 2-$maxWitnessProgramLength in length",
         "this.program",
@@ -139,7 +158,7 @@ abstract class Bech32Address implements Address {
 
     final encodedLength
       // Encoded program length
-      = (program.length*8+4)/5
+      = (_data.length*8+4)/5
       // Seperator and version
       + 2
       + hrp.length
@@ -168,18 +187,18 @@ abstract class Bech32Address implements Address {
       throw InvalidAddress();
     }
 
-    final program = convertBits(bech32.words.sublist(1), 5, 8, false);
-    if (program == null) throw InvalidAddress();
+    final data = convertBits(bech32.words.sublist(1), 5, 8, false);
+    if (data == null) throw InvalidAddress();
 
-    final bytes = Uint8List.fromList(program);
+    final bytes = Uint8List.fromList(data);
 
     late Bech32Address addr;
 
     if (version == 0) {
       // Version 0 signals P2WPKH or P2WSH
-      if (program.length == 20) {
+      if (bytes.length == 20) {
         addr = P2WPKHAddress.fromHash(bytes, hrp: bech32.hrp);
-      } else if (program.length == 32) {
+      } else if (bytes.length == 32) {
         addr = P2WSHAddress.fromHash(bytes, hrp: bech32.hrp);
       } else {
         throw InvalidAddress();
@@ -203,12 +222,13 @@ abstract class Bech32Address implements Address {
   toString() => _encodedCache ??= Bech32(
     hrp: hrp,
     words: List<int>.from([
-      version, ...convertBits(_program, 8, 5, true)!,
+      version, ...convertBits(_data, 8, 5, true)!,
     ]),
     type: version == 0 ? Bech32Type.bech32 : Bech32Type.bech32m,
   ).encode();
 
-  Uint8List get program => Uint8List.fromList(_program);
+  /// The "witness program" data encoded in the address
+  Uint8List get data => Uint8List.fromList(_data);
 
 }
 
@@ -222,6 +242,9 @@ class P2WPKHAddress extends Bech32Address {
   P2WPKHAddress.fromPublicKey(ECPublicKey pubkey, { required String hrp })
     : this.fromHash(hash160(pubkey.data), hrp: hrp);
 
+  @override
+  P2WPKH get program => P2WPKH.fromHash(_data);
+
 }
 
 class P2WSHAddress extends Bech32Address {
@@ -230,6 +253,13 @@ class P2WSHAddress extends Bech32Address {
   P2WSHAddress.fromHash(Uint8List hash, { required String hrp })
     : super._(0, copyCheckBytes(hash, 32), hrp);
 
+  /// Constructs a P2WSH address for a witnessScript
+  P2WSHAddress.fromScript(Script script, { required String hrp })
+    : super._(0, sha256Hash(script.compiled), hrp);
+
+  @override
+  P2WSH get program => P2WSH.fromHash(_data);
+
 }
 
 /// This address type is for all bech32 addresses that do not match known
@@ -237,16 +267,19 @@ class P2WSHAddress extends Bech32Address {
 /// specified.
 class UnknownWitnessAddress extends Bech32Address {
 
-  /// Constructs a bech32 witness address from the [program], witness [version]
-  /// and [hrp]
+  /// Constructs a bech32 witness address from the "witness program" [data],
+  /// witness [version] and [hrp]
   UnknownWitnessAddress(
-    Uint8List program, { required int version, required String hrp, }
-  ) : super._(version, program, hrp);
+    Uint8List data, { required int version, required String hrp, }
+  ) : super._(version, data, hrp);
 
-  /// Constructs a bech32 witness address with the program provided as a [hex]
-  /// string.
+  /// Constructs a bech32 witness address with the "witness program" [data]
+  /// provided as a [hex] string.
   UnknownWitnessAddress.fromHex(
     String hex, { required int version, required String hrp, }
   ) : super._(version, hexToBytes(hex), hrp);
+
+  @override
+  P2Witness get program => P2Witness.fromData(version, _data);
 
 }

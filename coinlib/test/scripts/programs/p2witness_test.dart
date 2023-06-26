@@ -10,7 +10,7 @@ void main() {
 
     expectP2Witness(P2Witness p2witness, int version, String program) {
       expect(p2witness.version, version);
-      expect(bytesToHex(p2witness.program), program);
+      expect(bytesToHex(p2witness.data), program);
       expect(
         p2witness.script.match(
           Script.fromAsm("${version.toRadixString(16)} $program"),
@@ -42,9 +42,9 @@ void main() {
       expectAsm("10 $longBytes", 16, longBytes);
     });
 
-    test("fromProgram() success", () {
+    test("fromData() success", () {
       expectProgram(int version, String program) => expectP2Witness(
-        P2Witness.fromProgram(version, hexToBytes(program)), version, program,
+        P2Witness.fromData(version, hexToBytes(program)), version, program,
       );
       expectProgram(16, shortBytes);
       expectProgram(16, longBytes);
@@ -85,10 +85,10 @@ void main() {
       }
     });
 
-    test("fromProgram() fail", () {
+    test("fromData() fail", () {
       expectFail(int version, String program) {
         expect(
-          () => P2Witness.fromProgram(version, hexToBytes(program)),
+          () => P2Witness.fromData(version, hexToBytes(program)),
           throwsA(isA<ArgumentError>()),
         );
       }
@@ -98,12 +98,12 @@ void main() {
       expectFail(0, "${longBytes}00");
     });
 
-    test(".program is copied and cannot be mutated", () {
+    test(".data is copied and cannot be mutated", () {
       final prog = hexToBytes("0000");
-      final witness = P2Witness.fromProgram(16, prog);
-      witness.program[0] = 0xff;
+      final witness = P2Witness.fromData(16, prog);
+      witness.data[0] = 0xff;
       prog[1] = 0xff;
-      expect(bytesToHex(witness.program), "0000");
+      expect(bytesToHex(witness.data), "0000");
     });
 
   });

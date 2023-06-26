@@ -15,7 +15,7 @@ void main() {
     expectP2WPKH(P2WPKH p2wpkh) {
       expect(p2wpkh.version, 0);
       expect(bytesToHex(p2wpkh.pkHash), pubkeyhashVec);
-      expect(bytesToHex(p2wpkh.program), pubkeyhashVec);
+      expect(bytesToHex(p2wpkh.data), pubkeyhashVec);
       expect(p2wpkh.script.match(script), true);
     }
 

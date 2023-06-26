@@ -66,7 +66,7 @@ class MessageSignature {
     if (address is P2PKHAddress) {
       pkHash = address.hash;
     } else if (address is P2WPKHAddress) {
-      pkHash = address.program;
+      pkHash = address.data;
     } else {
       return false;
     }
