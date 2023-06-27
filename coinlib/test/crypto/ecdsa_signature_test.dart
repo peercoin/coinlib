@@ -20,7 +20,7 @@ void main() {
       ]) {
         expect(
           () => ECDSASignature.fromCompactHex(failing),
-          throwsA(isA<ArgumentError>()),
+          throwsArgumentError,
         );
       }
 

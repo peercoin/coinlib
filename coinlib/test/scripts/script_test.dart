@@ -139,7 +139,7 @@ void main() {
       ]) {
         expect(
           () => template.fill(bad),
-          throwsA(isA<ArgumentError>()),
+          throwsArgumentError,
           reason: bad.toString(),
         );
       }

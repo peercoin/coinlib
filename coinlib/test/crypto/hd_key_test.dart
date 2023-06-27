@@ -16,8 +16,6 @@ void forEachHDVector(void Function(HDVector? parent, HDVector vec) f) {
 
 void expectPriv(HDKey key) => expect(key, isA<HDPrivateKey>());
 void expectPub(HDKey key) => expect(key, isA<HDPublicKey>());
-void expectArgumentError(void Function() f)
-  => expect(f, throwsA(isA<ArgumentError>()));
 
 void main() {
 
@@ -165,7 +163,7 @@ void main() {
 
     test("fromSeed() invalid seed size", () {
       for (final size in [15, 65]) {
-        expectArgumentError(() => HDPrivateKey.fromSeed(Uint8List(size)));
+        expect(() => HDPrivateKey.fromSeed(Uint8List(size)), throwsArgumentError);
       }
     });
 
@@ -231,32 +229,42 @@ void main() {
         // Over max index
         "m/2147483648",
       ]) {
-        expectArgumentError(() => masterHDKey.derivePath(invalid));
+        expect(() => masterHDKey.derivePath(invalid), throwsArgumentError);
       }
     });
 
     test("derive m/ not from master", () {
-      expectArgumentError(
+      expect(
         () => HDKey.decode(hdVectors[0][1].privEncoded).derivePath("m/0"),
+        throwsArgumentError,
       );
     });
 
     test("invalid derive() index", () {
       for (final invalid in [-1, 4294967296]) {
-        expectArgumentError(() => masterHDKey.derive(invalid));
+        expect(() => masterHDKey.derive(invalid), throwsArgumentError);
       }
     });
 
     test("invalid deriveHardened() index", () {
       for (final invalid in [-1, 2147483648]) {
-        expectArgumentError(() => masterHDKey.deriveHardened(invalid));
+        expect(() => masterHDKey.deriveHardened(invalid), throwsArgumentError);
       }
     });
 
     test("fails to derive hardened for public key", () {
-      expectArgumentError(() => masterHDKey.hdPublicKey.deriveHardened(0));
-      expectArgumentError(() => masterHDKey.hdPublicKey.derive(0x80000000));
-      expectArgumentError(() => masterHDKey.hdPublicKey.derivePath("m/0'"));
+      expect(
+        () => masterHDKey.hdPublicKey.deriveHardened(0),
+        throwsArgumentError,
+      );
+      expect(
+        () => masterHDKey.hdPublicKey.derive(0x80000000),
+        throwsArgumentError,
+      );
+      expect(
+        () => masterHDKey.hdPublicKey.derivePath("m/0'"),
+        throwsArgumentError,
+      );
     });
 
     test("fromKeyAndChainCode()", () {
@@ -272,17 +280,18 @@ void main() {
 
     test("fromKeyAndChainCode() chaincode must be 32 bytes", () {
       for (final invalid in [31, 33]) {
-        expectArgumentError(
+        expect(
           () => HDPrivateKey.fromKeyAndChainCode(
             masterHDKey.privateKey, Uint8List(invalid),
           ),
+          throwsArgumentError,
         );
       }
     });
 
     test("encode() version must be uint32", () {
       for (final invalid in [-1, 0x0100000000]) {
-        expectArgumentError(() => masterHDKey.encode(invalid));
+        expect(() => masterHDKey.encode(invalid), throwsArgumentError);
       }
     });
 

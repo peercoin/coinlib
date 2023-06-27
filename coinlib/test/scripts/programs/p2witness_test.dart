@@ -89,7 +89,7 @@ void main() {
       expectFail(int version, String program) {
         expect(
           () => P2Witness.fromData(version, hexToBytes(program)),
-          throwsA(isA<ArgumentError>()),
+          throwsArgumentError,
         );
       }
       expectFail(-1, shortBytes);

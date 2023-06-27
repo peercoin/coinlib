@@ -20,7 +20,7 @@ void main() {
       ]) {
         expect(
           () => ECPrivateKey.fromHex(failing),
-          throwsA(isA<ArgumentError>()),
+          throwsArgumentError,
         );
       }
 

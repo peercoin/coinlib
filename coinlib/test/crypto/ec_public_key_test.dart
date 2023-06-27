@@ -21,7 +21,7 @@ void main() {
       ]) {
         expect(
           () => ECPublicKey.fromHex(failing),
-          throwsA(isA<ArgumentError>()),
+          throwsArgumentError,
         );
       }
 

@@ -71,7 +71,7 @@ void main() {
       ]) {
         expect(
           () => P2WSH.fromHash(hexToBytes(bad)),
-          throwsA(isA<ArgumentError>()),
+          throwsArgumentError,
         );
       }
     });

@@ -67,7 +67,7 @@ void main() {
       ]) {
         expect(
           () => P2WPKH.fromHash(hexToBytes(bad)),
-          throwsA(isA<ArgumentError>()),
+          throwsArgumentError,
         );
       }
     });

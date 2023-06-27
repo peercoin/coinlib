@@ -73,7 +73,7 @@ void main() {
     test("requires value 0-uint8_max", () {
       final dummyProg = Program.fromAsm("0");
       for (final val in [BigInt.from(-1), BigInt.from(1) << 64]) {
-        expect(() => Output(val, dummyProg), throwsA(isA<ArgumentError>()));
+        expect(() => Output(val, dummyProg), throwsArgumentError);
       }
     });
 

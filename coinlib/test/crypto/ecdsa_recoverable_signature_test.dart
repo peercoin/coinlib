@@ -32,7 +32,7 @@ void main() {
         ]) {
           expect(
             () => ECDSARecoverableSignature.fromCompactHex(failing),
-            throwsA(isA<ArgumentError>()),
+            throwsArgumentError,
           );
         }
 

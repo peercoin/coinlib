@@ -10,8 +10,8 @@ void main() {
       final li = Uint8List.fromList([1,2,3]);
       final result = f(li, 3);
       expect(result, li);
-      expect(() => checkBytes(li, 2), throwsA(isA<ArgumentError>()));
-      expect(() => checkBytes(li, 4), throwsA(isA<ArgumentError>()));
+      expect(() => checkBytes(li, 2), throwsArgumentError);
+      expect(() => checkBytes(li, 4), throwsArgumentError);
       li[0] = 0xff;
       expect(result[0], same ? 0xff : 1);
     }

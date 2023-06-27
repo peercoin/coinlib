@@ -264,12 +264,11 @@ void main() {
       );
     });
 
-    expectArgumentError(void Function() f) => expect(f, throwsA(isA<ArgumentError>()));
-
     test("invalid base58 version", () {
       for (final v in [-1, 256]) {
-        expectArgumentError(
+        expect(
           () => P2PKHAddress.fromPublicKey(pubkey, version: v),
+          throwsArgumentError,
         );
       }
     });
@@ -277,37 +276,52 @@ void main() {
     test("invalid version, program and hrp arguments", () {
 
       // Too small program
-      expectArgumentError(() => UnknownWitnessAddress.fromHex(
-        "00",
-        version: 16,
-        hrp: NetworkParams.mainnet.bech32Hrp,
-      ),);
+      expect(
+        () => UnknownWitnessAddress.fromHex(
+          "00",
+          version: 16,
+          hrp: NetworkParams.mainnet.bech32Hrp,
+        ),
+        throwsArgumentError,
+      );
 
       // Too large program
-      expectArgumentError(() => UnknownWitnessAddress.fromHex(
-        "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728",
-        version: 16,
-        hrp: NetworkParams.mainnet.bech32Hrp,
-      ),);
+      expect(
+        () => UnknownWitnessAddress.fromHex(
+          "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728",
+          version: 16,
+          hrp: NetworkParams.mainnet.bech32Hrp,
+        ),
+        throwsArgumentError,
+      );
 
       // Invalid HRP
-      expectArgumentError(() => UnknownWitnessAddress.fromHex(
-        "0001",
-        version: 16,
-        hrp: "\x7f""1axkwrx",
-      ),);
+      expect(
+        () => UnknownWitnessAddress.fromHex(
+          "0001",
+          version: 16,
+          hrp: "\x7f""1axkwrx",
+        ),
+        throwsArgumentError,
+      );
 
       // Invalid version
-      expectArgumentError(() => UnknownWitnessAddress.fromHex(
-        "0001",
-        version: 17,
-        hrp: NetworkParams.mainnet.bech32Hrp,
-      ),);
-      expectArgumentError(() => UnknownWitnessAddress.fromHex(
-        "0001",
-        version: -1,
-        hrp: NetworkParams.mainnet.bech32Hrp,
-      ),);
+      expect(
+        () => UnknownWitnessAddress.fromHex(
+          "0001",
+          version: 17,
+          hrp: NetworkParams.mainnet.bech32Hrp,
+        ),
+        throwsArgumentError,
+      );
+      expect(
+        () => UnknownWitnessAddress.fromHex(
+          "0001",
+          version: -1,
+          hrp: NetworkParams.mainnet.bech32Hrp,
+        ),
+        throwsArgumentError,
+      );
 
     });
 
@@ -331,8 +345,9 @@ void main() {
     });
 
     test("arguments too long", () {
-      expectArgumentError(
+      expect(
         () => UnknownWitnessAddress.fromHex("0001", version: 16, hrp: "${longHrp}1"),
+        throwsArgumentError,
       );
     });
 

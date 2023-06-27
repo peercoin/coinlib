@@ -131,16 +131,18 @@ void main() {
 
     test("invalid arguments", () {
 
-      expectArgumentError(void Function() f)
-        => expect(f, throwsA(isA<ArgumentError>()));
-
       final pk = ECPublicKey.fromHex(pubkeyVec);
-      expectArgumentError(() => MultisigProgram(1, []));
-      expectArgumentError(() => MultisigProgram(1, List.filled(21, pk)));
-      expectArgumentError(() => MultisigProgram(0, [pk]));
-      expectArgumentError(() => MultisigProgram(-1, [pk]));
-      expectArgumentError(() => MultisigProgram(2, [pk]));
-      expectArgumentError(() => MultisigProgram(21, List.filled(20, pk)));
+      expect(() => MultisigProgram(1, []), throwsArgumentError);
+      expect(
+        () => MultisigProgram(1, List.filled(21, pk)), throwsArgumentError,
+      );
+      expect(() => MultisigProgram(0, [pk]), throwsArgumentError);
+      expect(() => MultisigProgram(-1, [pk]), throwsArgumentError);
+      expect(() => MultisigProgram(2, [pk]), throwsArgumentError);
+      expect(
+        () => MultisigProgram(21, List.filled(20, pk)),
+        throwsArgumentError,
+      );
 
     });
 

@@ -348,10 +348,7 @@ void main() {
 
     test("invalid number", () {
       for (final invalid in [-2, 0x100000000]) {
-        expect(
-          () => ScriptOp.fromNumber(invalid),
-          throwsA(isA<ArgumentError>()),
-        );
+        expect(() => ScriptOp.fromNumber(invalid), throwsArgumentError);
       }
     });
 
@@ -502,14 +499,8 @@ void main() {
         () => ScriptOp.fromAsm("<18446744073709551616-bytes>"),
         throwsA(isA<InvalidScriptAsm>()),
       );
-      expect(
-        () => ScriptPushDataMatcher(0),
-        throwsA(isA<ArgumentError>()),
-      );
-      expect(
-        () => ScriptPushDataMatcher(0x100000000),
-        throwsA(isA<ArgumentError>()),
-      );
+      expect(() => ScriptPushDataMatcher(0), throwsArgumentError);
+      expect(() => ScriptPushDataMatcher(0x100000000), throwsArgumentError);
     });
 
   });

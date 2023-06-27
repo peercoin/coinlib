@@ -73,7 +73,7 @@ void main() {
       ]) {
         expect(
           () => P2PKH.fromHash(hexToBytes(bad)),
-          throwsA(isA<ArgumentError>()),
+          throwsArgumentError,
         );
       }
     });
