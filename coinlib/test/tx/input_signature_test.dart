@@ -29,6 +29,20 @@ void main() {
 
     });
 
+    test("invalid bytes", () {
+      for (final list in <List<int>>[
+        [],
+        [1],
+        [...hexToBytes(validDerSigs[0]), 0],
+        [...hexToBytes(invalidDerSigs[0]), InputSignature.sigHashAll],
+      ]) {
+        expect(
+          () => InputSignature.fromBytes(Uint8List.fromList(list)),
+          throwsA(isA<InvalidInputSignature>()),
+        );
+      }
+    });
+
     test("invalid sighash", () {
       final sig = ECDSASignature.fromDerHex(validDerSigs[0]);
       for (final hashType in [-1, 0, 0x80, 0x84, 4]) {
