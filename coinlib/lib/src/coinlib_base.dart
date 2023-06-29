@@ -28,6 +28,8 @@ export 'package:coinlib/src/scripts/programs/p2witness.dart';
 export 'package:coinlib/src/scripts/programs/p2wpkh.dart';
 export 'package:coinlib/src/scripts/programs/p2wsh.dart';
 
+export 'package:coinlib/src/tx/input.dart';
+export 'package:coinlib/src/tx/input_signature.dart';
 export 'package:coinlib/src/tx/outpoint.dart';
 export 'package:coinlib/src/tx/output.dart';
 export 'package:coinlib/src/tx/raw_input.dart';
