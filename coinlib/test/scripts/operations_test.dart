@@ -2,6 +2,8 @@ import 'dart:typed_data';
 import 'package:coinlib/src/common/hex.dart';
 import 'package:test/test.dart';
 import 'package:coinlib/coinlib.dart';
+import '../vectors/keys.dart';
+import '../vectors/signatures.dart';
 import 'common.dart';
 
 class OperationVector {
@@ -375,6 +377,8 @@ void main() {
 
   group("ScriptPushData()", () {
 
+    setUpAll(loadCoinlib);
+
     test("pushdata compresses to op-code", () {
       expectScriptOp(ScriptPushData(Uint8List(0)), "0", "00", 0, true);
       expectScriptOp(ScriptPushData(hexToBytes("00")), "0", "00", 0, true);
@@ -447,6 +451,22 @@ void main() {
       expect(matchOp.match(ScriptPushDataMatcher(3)), false);
       expect(matchOp.match(ScriptPushDataMatcher(5)), false);
       expect(matchOp.match(ScriptPushData(hexToBytes("01020303"))), false);
+    });
+
+    test("provides insig", () {
+      final der = hexToBytes(validDerSigs[0]);
+      final bytes = Uint8List.fromList([ ...der, InputSignature.sigHashAll]);
+      final insig = ScriptPushData(bytes).insig;
+      expect(insig, isNotNull);
+      expect(insig!.signature.der, der);
+      expect(insig.hashType, InputSignature.sigHashAll);
+    });
+
+    test("provides public key", () {
+      final bytes = hexToBytes(pubkeyVec);
+      final pk = ScriptPushData(bytes).publicKey;
+      expect(pk, isNotNull);
+      expect(pk!.hex, pubkeyVec);
     });
 
   });

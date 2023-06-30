@@ -18,9 +18,7 @@ class ECPublicKey {
   /// invalid or in the wrong format.
   ECPublicKey(Uint8List data) : _data = Uint8List.fromList(data) {
     if (data.length != 33 && data.length != 65) {
-      throw ArgumentError(
-        "Public keys should be 33 or 65 bytes", "this.data",
-      );
+      throw InvalidPublicKey();
     }
     if (!secp256k1.pubKeyVerify(data)) throw InvalidPublicKey();
   }

@@ -7,4 +7,6 @@ expectScriptOp(ScriptOp op, String asm, String hex, int? number, bool isPush) {
   expect(bytesToHex(op.compiled), hex);
   expect(op.number, number);
   expect(op, isPush ? isA<ScriptPushData>() : isA<ScriptOpCode>());
+  expect(op.insig, null);
+  expect(op.publicKey, null);
 }

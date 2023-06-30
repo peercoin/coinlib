@@ -1,6 +1,8 @@
 import 'dart:typed_data';
 import 'package:coinlib/src/common/hex.dart';
 import 'package:coinlib/src/common/serial.dart';
+import 'package:coinlib/src/crypto/ec_public_key.dart';
+import 'package:coinlib/src/tx/input_signature.dart';
 import 'package:collection/collection.dart';
 import 'codes.dart';
 
@@ -25,6 +27,11 @@ abstract class ScriptOp {
   String get asm;
   /// Returns an integer if the operation pushes a number, or null
   int? get number;
+  /// If this is a pushdata of an input signature then it shall be returned, or
+  /// null
+  InputSignature? get insig;
+  /// If this is a pushdata of a public key then it shall be returned, or null
+  ECPublicKey? get publicKey;
 
   /// Interpret a single script ASM string into a [ScriptOp].
   factory ScriptOp.fromAsm(String asm) {
@@ -184,6 +191,12 @@ class ScriptOpCode implements ScriptOp {
   @override
   bool match(ScriptOp other) => other is ScriptOpCode && code == other.code;
 
+  @override
+  InputSignature? get insig => null;
+
+  @override
+  ECPublicKey? get publicKey => null;
+
 }
 
 /// Represents a [ScriptOp] that is a pushdata
@@ -262,6 +275,24 @@ class ScriptPushData implements ScriptOp {
 
   }
 
+  @override
+  InputSignature? get insig {
+    try {
+      return InputSignature.fromBytes(data);
+    } on InvalidInputSignature {
+      return null;
+    }
+  }
+
+  @override
+  ECPublicKey? get publicKey {
+    try {
+      return ECPublicKey(data);
+    } on InvalidPublicKey {
+      return null;
+    }
+  }
+
   /// Returns a copy of the push data
   Uint8List get data => Uint8List.fromList(_data);
 
@@ -296,5 +327,11 @@ class ScriptPushDataMatcher implements ScriptOp {
 
   @override
   int? get number => null;
+
+  @override
+  InputSignature? get insig => null;
+
+  @override
+  ECPublicKey? get publicKey => null;
 
 }
