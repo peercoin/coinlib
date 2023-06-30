@@ -109,7 +109,6 @@ void main() {
       final matcher = Script.fromAsm("0 010203 <5-bytes>");
 
       expect(matcher.match(Script.fromAsm("0 010203 0102030405")), true);
-
       expect(matcher.match(Script.fromAsm("01 010203 0102030405")), false);
       expect(matcher.match(Script.fromAsm("0 010204 0102030405")), false);
       expect(matcher.match(Script.fromAsm("0 01020304 0102030405")), false);

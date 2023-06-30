@@ -32,6 +32,7 @@ export 'package:coinlib/src/tx/input.dart';
 export 'package:coinlib/src/tx/input_signature.dart';
 export 'package:coinlib/src/tx/outpoint.dart';
 export 'package:coinlib/src/tx/output.dart';
+export 'package:coinlib/src/tx/p2pkh_input.dart';
 export 'package:coinlib/src/tx/raw_input.dart';
 
 export 'package:coinlib/src/address.dart';

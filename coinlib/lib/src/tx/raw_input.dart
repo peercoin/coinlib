@@ -6,10 +6,13 @@ import 'outpoint.dart';
 /// A transaction input without any associated witness data that acts as the
 /// base for all other inputs as all inputs include a outpoint, script and
 /// sequence number.
-class RawInput with Writable implements Input {
+class RawInput extends Input {
 
+  @override
   final OutPoint prevOut;
+  @override
   final Script scriptSig;
+  @override
   final int sequence;
 
   RawInput({
@@ -21,7 +24,7 @@ class RawInput with Writable implements Input {
   RawInput.fromReader(BytesReader reader)
     : prevOut = OutPoint.fromReader(reader),
     scriptSig = Script.decompile(reader.readVarSlice()),
-    sequence = reader.readInt32();
+    sequence = reader.readUInt32();
 
   @override
   void write(Writer writer) {
