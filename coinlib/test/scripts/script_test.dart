@@ -18,6 +18,7 @@ class ScriptVector {
 
 final vectors = [
   // Basic scripts
+  ScriptVector(inputAsm: "", inputHex: ""),
   ScriptVector(inputAsm: "0", inputHex: "00"),
   ScriptVector(inputAsm: "0 0", inputHex: "0000"),
   ScriptVector(
@@ -59,8 +60,10 @@ void main() {
           expect(bytesToHex(script.compiled), expectHex);
 
           // Mutation of script not allowed
-          script.compiled[0] = 0xff;
-          expect(bytesToHex(script.compiled), expectHex);
+          if (script.compiled.isNotEmpty) {
+            script.compiled[0] = 0xff;
+            expect(bytesToHex(script.compiled), expectHex);
+          }
 
         }
 
@@ -94,7 +97,7 @@ void main() {
 
     test("invalid asm", () {
       for (final invalid in [
-        "", " ", "0 ", " 0", "0 op_dup", "0 OP_DUP ", "0  OP_DUP", "0 DUP",
+        " ", "0 ", " 0", "0 op_dup", "0 OP_DUP ", "0  OP_DUP", "0 DUP",
         "<5 bytes", "5 bytes>", "< bytes>",
       ]) {
         expect(() => Script.fromAsm(invalid), throwsA(isA<InvalidScriptAsm>()));

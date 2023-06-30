@@ -34,7 +34,9 @@ class Script {
   /// Constructs a script from the given script assembly string ([asm]). May
   /// return a matching sub-class for the given script.
   factory Script.fromAsm(String asm) => Script(
-    asm.split(" ").map((s) => ScriptOp.fromAsm(s)).toList(),
+    asm.isEmpty
+    ? []
+    : asm.split(" ").map((s) => ScriptOp.fromAsm(s)).toList(),
   );
 
   /// Returns the copied compiled bytes for the script.
