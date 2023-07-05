@@ -34,6 +34,7 @@ export 'package:coinlib/src/tx/outpoint.dart';
 export 'package:coinlib/src/tx/output.dart';
 export 'package:coinlib/src/tx/p2pkh_input.dart';
 export 'package:coinlib/src/tx/raw_input.dart';
+export 'package:coinlib/src/tx/witness_input.dart';
 
 export 'package:coinlib/src/address.dart';
 export 'package:coinlib/src/network_params.dart';
