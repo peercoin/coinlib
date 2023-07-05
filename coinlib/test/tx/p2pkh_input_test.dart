@@ -14,6 +14,7 @@ void main() {
     final prevOutHash = Uint8List(32);
     final prevOutN = 0xfeedbeef;
     final prevOut = OutPoint(prevOutHash, prevOutN);
+    final sequence = 0xbeeffeed;
     final der = validDerSigs[0];
 
     test("valid p2pkh inputs inc. addSignature", () {
@@ -23,7 +24,6 @@ void main() {
         ECDSASignature.fromDerHex(der),
         InputSignature.sigHashSingle,
       );
-      final sequence = 0xbeeffeed;
 
       final noSigScript = Script.fromAsm(pubkeyVec);
       final sigScript = Script.fromAsm("${der}02 $pubkeyVec");

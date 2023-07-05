@@ -7,7 +7,7 @@ import 'raw_input.dart';
 
 /// An input for a Pay-to-Public-Key-Hash output ([P2PKH]). This contains the
 /// public key that should match the hash in the associated output. It is either
-/// signed or unsigned and the [sign] method can be used to add a signature.
+/// signed or unsigned and the [addSignature] method can be used to add a signature.
 class P2PKHInput extends RawInput {
 
   final ECPublicKey publicKey;
@@ -28,7 +28,7 @@ class P2PKHInput extends RawInput {
   );
 
   /// Checks if the [RawInput] matches the expected format for a P2PKHInput,
-  /// with or without a signauture. If it does it returns a [P2PKHInput] for the
+  /// with or without a signature. If it does it returns a [P2PKHInput] for the
   /// input or else it returns null.
   static P2PKHInput? match(RawInput raw) {
 
