@@ -4,6 +4,7 @@ import 'package:coinlib/src/common/hex.dart';
 import 'package:test/test.dart';
 import '../vectors/keys.dart';
 import '../vectors/signatures.dart';
+import '../vectors/inputs.dart';
 
 void main() {
 
@@ -11,10 +12,6 @@ void main() {
 
     setUpAll(loadCoinlib);
 
-    final prevOutHash = Uint8List(32);
-    final prevOutN = 0xfeedbeef;
-    final prevOut = OutPoint(prevOutHash, prevOutN);
-    final sequence = 0xbeeffeed;
     final der = validDerSigs[0];
 
     test("valid p2pkh inputs inc. addSignature", () {
@@ -44,9 +41,7 @@ void main() {
 
       expectP2PKHInput(P2PKHInput input, bool hasSig) {
 
-        expect(input.prevOut.hash, prevOutHash);
-        expect(input.prevOut.n, prevOutN);
-        expect(input.sequence, sequence);
+        expectInput(input);
 
         expect(input.publicKey.hex, pubkeyVec);
         expect(input.complete, hasSig);

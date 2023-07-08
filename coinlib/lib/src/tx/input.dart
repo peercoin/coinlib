@@ -3,6 +3,7 @@ import 'package:coinlib/src/common/serial.dart';
 import 'package:coinlib/src/scripts/script.dart';
 import 'outpoint.dart';
 import 'p2pkh_input.dart';
+import 'p2sh_multisig_input.dart';
 import 'raw_input.dart';
 import 'witness_input.dart';
 
@@ -23,6 +24,9 @@ abstract class Input with Writable {
   /// returned. If there is no witness data for the input, the [witness] can be
   /// excluded or provided as an empty list.
   factory Input.match(RawInput raw, [List<Uint8List> witness = const[]])
-    => P2PKHInput.match(raw) ?? WitnessInput.match(raw, witness) ?? raw;
+    => P2PKHInput.match(raw)
+    ?? P2SHMultisigInput.match(raw)
+    ?? WitnessInput.match(raw, witness)
+    ?? raw;
 
 }

@@ -27,7 +27,7 @@ class P2PKHInput extends RawInput {
     sequence: sequence,
   );
 
-  /// Checks if the [RawInput] matches the expected format for a P2PKHInput,
+  /// Checks if the [RawInput] matches the expected format for a [P2PKHInput],
   /// with or without a signature. If it does it returns a [P2PKHInput] for the
   /// input or else it returns null.
   static P2PKHInput? match(RawInput raw) {

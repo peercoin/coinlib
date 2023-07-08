@@ -92,25 +92,25 @@ class BytesReader extends _ReadWriteBase {
 
 /// Methods to handle the writing of data
 mixin Writer {
-  writeUInt8(int i);
-  writeUInt16(int i);
-  writeUInt32(int i);
-  writeInt32(int i);
+  void writeUInt8(int i);
+  void writeUInt16(int i);
+  void writeUInt32(int i);
+  void writeInt32(int i);
   /// A [BigInt] is necessary to encode large 64-bit integers due to limits on
   /// the size of Javascript integers
-  writeUInt64(BigInt i);
-  writeSlice(Uint8List slice);
-  writeVarInt(BigInt i);
+  void writeUInt64(BigInt i);
+  void writeSlice(Uint8List slice);
+  void writeVarInt(BigInt i);
 
   /// Writes bytes with the length encoded as a varint
-  writeVarSlice(Uint8List slice) {
+  void writeVarSlice(Uint8List slice) {
     writeVarInt(BigInt.from(slice.length));
     writeSlice(slice);
   }
 
   /// Writes a list of Uint8List bytes with the length of the vector given by a
   /// varint.
-  writeVector(List<Uint8List> vector) {
+  void writeVector(List<Uint8List> vector) {
     writeVarInt(BigInt.from(vector.length));
     for (final bytes in vector) {
       writeVarSlice(bytes);
