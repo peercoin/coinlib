@@ -61,12 +61,17 @@ final invalidVectors = [
   MultisigVector(asm: "00 01 $pubkeyVec 01 OP_CHECKMULTISIG"),
   // Extra data at end
   MultisigVector(asm: "01 $pubkeyVec 01 OP_CHECKMULTISIG 00"),
+  // Not numerical
+  MultisigVector(asm: "OP_DUP $pubkeyVec 01 OP_CHECKMULTISIG"),
+  MultisigVector(asm: "01 $pubkeyVec OP_DUP OP_CHECKMULTISIG"),
   // Wrong public key length
   MultisigVector(
     asm:
-      "01 000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
-      "01 OP_CHECKMULTISIG",
+      "01 0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f817"
+      " 01 OP_CHECKMULTISIG",
   ),
+  // Not push data for public key
+  MultisigVector(asm: "01 01 01 OP_CHECKMULTISIG"),
   // Invalid public key data
   MultisigVector(asm: "01 ${invalidPubKeys[0]} 01 OP_CHECKMULTISIG"),
 ];
