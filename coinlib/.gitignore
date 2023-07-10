@@ -9,4 +9,7 @@ pubspec.lock
 # Do not include built binaries
 build/
 
+# API docs shouldn't be included
+doc/api/
+
 tags
