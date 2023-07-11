@@ -11,6 +11,8 @@ import 'witness_input.dart';
 /// determine the appropriate subclass from a [RawInput]
 abstract class Input with Writable {
 
+  static const sequenceFinal = 0xffffffff;
+
   OutPoint get prevOut;
   Script get scriptSig;
   int get sequence;

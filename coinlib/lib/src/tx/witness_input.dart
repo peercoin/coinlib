@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:coinlib/src/scripts/script.dart';
+import 'input.dart';
 import 'outpoint.dart';
 import 'raw_input.dart';
 import 'p2wpkh_input.dart';
@@ -11,8 +12,8 @@ class WitnessInput extends RawInput {
 
   WitnessInput({
     required OutPoint prevOut,
-    required int sequence,
     required this.witness,
+    int sequence = Input.sequenceFinal,
   }) : super(
     prevOut: prevOut,
     scriptSig: Script([]),
@@ -29,8 +30,8 @@ class WitnessInput extends RawInput {
         P2WPKHInput.match(raw, witness)
         ?? WitnessInput(
           prevOut: raw.prevOut,
-          sequence: raw.sequence,
           witness: witness,
+          sequence: raw.sequence,
         )
       )
       : null;

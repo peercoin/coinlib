@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:coinlib/src/crypto/ec_public_key.dart';
+import 'package:coinlib/src/tx/input.dart';
 import 'package:coinlib/src/tx/input_signature.dart';
 import 'package:coinlib/src/tx/outpoint.dart';
 import 'raw_input.dart';
@@ -17,9 +18,9 @@ class P2WPKHInput extends WitnessInput {
 
   P2WPKHInput({
     required OutPoint prevOut,
-    required int sequence,
     required this.publicKey,
     this.insig,
+    int sequence = Input.sequenceFinal,
   }) : super(
     prevOut: prevOut,
     sequence: sequence,
@@ -63,9 +64,9 @@ class P2WPKHInput extends WitnessInput {
   /// signature is replaced.
   P2WPKHInput addSignature(InputSignature insig) => P2WPKHInput(
     prevOut: prevOut,
-    sequence: sequence,
     publicKey: publicKey,
     insig: insig,
+    sequence: sequence,
   );
 
   @override

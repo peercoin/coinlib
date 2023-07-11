@@ -1,10 +1,11 @@
 import 'package:coinlib/src/common/serial.dart';
 import 'package:coinlib/src/scripts/operations.dart';
 import 'package:coinlib/src/scripts/program.dart';
+import 'package:coinlib/src/scripts/programs/multisig.dart';
+import 'package:coinlib/src/scripts/script.dart';
 import 'package:coinlib/src/tx/input_signature.dart';
 import 'package:coinlib/src/tx/outpoint.dart';
-import '../scripts/programs/multisig.dart';
-import '../scripts/script.dart';
+import 'input.dart';
 import 'raw_input.dart';
 
 /// An input for a Pay-to-Script-Hash output ([P2SH]) with a multisig
@@ -17,9 +18,9 @@ class P2SHMultisigInput extends RawInput {
 
   P2SHMultisigInput({
     required OutPoint prevOut,
-    required int sequence,
     required this.program,
     required List<InputSignature> sigs,
+    int sequence = Input.sequenceFinal,
   }) : sigs = List.unmodifiable(sigs), super(
     prevOut: prevOut,
     scriptSig: Script([
@@ -73,10 +74,10 @@ class P2SHMultisigInput extends RawInput {
 
     return P2SHMultisigInput(
       prevOut: raw.prevOut,
-      sequence: raw.sequence,
       program: multisig,
       // Cast necessary to ensure non-null, despite checking for null above
       sigs: sigs.whereType<InputSignature>().toList(),
+      sequence: raw.sequence,
     );
 
   }
@@ -87,9 +88,9 @@ class P2SHMultisigInput extends RawInput {
   P2SHMultisigInput replaceSignatures(List<InputSignature> newSigs)
     => P2SHMultisigInput(
     prevOut: prevOut,
-    sequence: sequence,
     program: program,
     sigs: newSigs,
+    sequence: sequence,
   );
 
   @override

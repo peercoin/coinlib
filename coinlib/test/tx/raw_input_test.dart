@@ -54,6 +54,16 @@ void main() {
 
     });
 
+    test("default max sequence", () {
+      expect(
+        RawInput(
+          prevOut: OutPoint(Uint8List(32), 0),
+          scriptSig: Script.fromAsm("0"),
+        ).sequence,
+        0xffffffff,
+      );
+    });
+
   });
 
 }

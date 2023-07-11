@@ -18,7 +18,7 @@ class RawInput extends Input {
   RawInput({
     required this.prevOut,
     required this.scriptSig,
-    required this.sequence,
+    this.sequence = Input.sequenceFinal,
   });
 
   RawInput.fromReader(BytesReader reader)

@@ -3,6 +3,7 @@ import 'package:coinlib/src/scripts/operations.dart';
 import 'package:coinlib/src/tx/input_signature.dart';
 import 'package:coinlib/src/tx/outpoint.dart';
 import '../scripts/script.dart';
+import 'input.dart';
 import 'raw_input.dart';
 
 /// An input for a Pay-to-Public-Key-Hash output ([P2PKH]). This contains the
@@ -15,9 +16,9 @@ class P2PKHInput extends RawInput {
 
   P2PKHInput({
     required OutPoint prevOut,
-    required int sequence,
     required this.publicKey,
     this.insig,
+    int sequence = Input.sequenceFinal,
   }) : super(
     prevOut: prevOut,
     scriptSig: Script([
@@ -43,9 +44,9 @@ class P2PKHInput extends RawInput {
 
     return P2PKHInput(
       prevOut: raw.prevOut,
-      sequence: raw.sequence,
       publicKey: publicKey,
       insig: insig,
+      sequence: raw.sequence,
     );
 
   }
@@ -54,9 +55,9 @@ class P2PKHInput extends RawInput {
   /// signature is replaced.
   P2PKHInput addSignature(InputSignature insig) => P2PKHInput(
     prevOut: prevOut,
-    sequence: sequence,
     publicKey: publicKey,
     insig: insig,
+    sequence: sequence,
   );
 
   @override
