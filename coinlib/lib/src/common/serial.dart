@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'checks.dart';
 
 /// Thrown when attempting to read or write beyond the boundary of data
 class OutOfData implements Exception {
@@ -126,26 +127,45 @@ class BytesWriter extends _ReadWriteBase with Writer {
   BytesWriter(super.bytes, [super.offset = 0]);
 
   @override
-  writeUInt8(int i) => _requireBytes(1, () => bytes.setUint8(offset++, i));
+  writeUInt8(int i) {
+    checkUint8(i);
+    _requireBytes(1, () => bytes.setUint8(offset++, i));
+  }
+
   @override
-  writeUInt16(int i) => _requireBytes(
-    2, () => bytes.setUint16((offset += 2) - 2, i, Endian.little),
-  );
+  writeUInt16(int i) {
+    checkUint16(i);
+    _requireBytes(
+      2, () => bytes.setUint16((offset += 2) - 2, i, Endian.little),
+    );
+  }
+
   @override
-  writeUInt32(int i) => _requireBytes(
-    4, () => bytes.setUint32((offset += 4) - 4, i, Endian.little),
-  );
+  writeUInt32(int i) {
+    checkUint32(i);
+    _requireBytes(
+      4, () => bytes.setUint32((offset += 4) - 4, i, Endian.little),
+    );
+  }
+
   @override
-  writeInt32(int i) => _requireBytes(
-    4, () => bytes.setInt32((offset += 4) - 4, i, Endian.little),
-  );
+  writeInt32(int i) {
+    checkInt32(i);
+    _requireBytes(
+      4, () => bytes.setInt32((offset += 4) - 4, i, Endian.little),
+    );
+  }
+
   @override
-  writeUInt64(BigInt i) => _requireBytes(
-    8, () {
-      writeUInt32(i.toUnsigned(32).toInt());
-      writeUInt32((i >> 32).toUnsigned(32).toInt());
-    },
-  );
+  writeUInt64(BigInt i) {
+    checkUint64(i);
+    _requireBytes(
+      8, () {
+        writeUInt32(i.toUnsigned(32).toInt());
+        writeUInt32((i >> 32).toUnsigned(32).toInt());
+      },
+    );
+  }
 
   @override
   /// Writes an expected number of bytes without any varint

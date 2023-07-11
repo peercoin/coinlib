@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:coinlib/src/common/bytes.dart';
+import 'package:coinlib/src/common/checks.dart';
 import 'package:coinlib/src/crypto/ec_private_key.dart';
 import 'package:coinlib/src/crypto/hash.dart';
 import 'package:coinlib/src/encode/base58.dart';
@@ -196,9 +197,7 @@ abstract class HDKey {
   /// Encodes the base58 representation of this key using the [version] prefix.
   String encode(int version) {
 
-    if (version < 0 || version > 0xffffffff) {
-      throw ArgumentError.value(version, "version", "must be 32-bit integer");
-    }
+    checkUint32(version, "version");
 
     Uint8List data = Uint8List(encodedLength);
     ByteData bd = data.buffer.asByteData();

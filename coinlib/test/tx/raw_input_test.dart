@@ -10,7 +10,7 @@ void main() {
       for (final n in [-1, 0x100000000]) {
         expect(
           () => RawInput(
-            prevOut: OutPoint(Uint8List(32), -1),
+            prevOut: OutPoint(Uint8List(32), 0),
             scriptSig: Script.fromAsm("0"),
             sequence: n,
           ),

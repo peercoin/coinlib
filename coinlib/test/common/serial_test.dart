@@ -211,6 +211,33 @@ void main() {
 
     });
 
+    test("throws error on wrong input", () {
+
+      final data = Uint8List(8);
+      final writer = BytesWriter(data);
+
+      expect(() => writer.writeUInt8(-1), throwsArgumentError);
+      expect(() => writer.writeUInt8(0x100), throwsArgumentError);
+
+      expect(() => writer.writeUInt16(-1), throwsArgumentError);
+      expect(() => writer.writeUInt16(0x10000), throwsArgumentError);
+
+      expect(() => writer.writeUInt32(-1), throwsArgumentError);
+      expect(() => writer.writeUInt32(0x100000000), throwsArgumentError);
+
+      expect(() => writer.writeInt32(-0x80000001), throwsArgumentError);
+      expect(() => writer.writeInt32(0x80000000), throwsArgumentError);
+
+      expect(() => writer.writeUInt64(-BigInt.one), throwsArgumentError);
+      expect(
+        () => writer.writeUInt64(
+          BigInt.parse("10000000000000000", radix: 16),
+        ),
+        throwsArgumentError,
+      );
+
+    });
+
   });
 
   group("MeasureWriter", () {

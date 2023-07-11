@@ -1,3 +1,4 @@
+import 'package:coinlib/src/common/checks.dart';
 import 'package:coinlib/src/common/serial.dart';
 import 'package:coinlib/src/scripts/script.dart';
 import 'input.dart';
@@ -19,7 +20,9 @@ class RawInput extends Input {
     required this.prevOut,
     required this.scriptSig,
     this.sequence = Input.sequenceFinal,
-  });
+  }) {
+    checkUint32(sequence, "this.sequence");
+  }
 
   RawInput.fromReader(BytesReader reader)
     : prevOut = OutPoint.fromReader(reader),

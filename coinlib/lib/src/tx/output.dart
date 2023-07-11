@@ -1,4 +1,5 @@
 import 'package:coinlib/src/address.dart';
+import 'package:coinlib/src/common/checks.dart';
 import 'package:coinlib/src/common/serial.dart';
 import 'package:coinlib/src/scripts/program.dart';
 
@@ -13,11 +14,7 @@ class Output with Writable {
   final Program program;
 
   Output(this.value, this.program) {
-    if (value.isNegative || value > maxValue) {
-      throw ArgumentError.value(
-        value, "value", "must be between 0 and $maxValue",
-      );
-    }
+    checkUint64(value, "this.value");
   }
   Output.fromAddress(BigInt value, Address address)
     : this(value, address.program);
