@@ -231,23 +231,33 @@ class MeasureWriter with Writer {
   }
 }
 
+/// Classes that use this mixin are serializable to a [Writer] via [write] and
+/// return cached bytes via [toBytes]. These classes should be immutable as the
+/// bytes are written to only once.
 mixin Writable {
+
+  Uint8List? _cache;
+  int? _sizeCache;
 
   /// Override to write data into [writer]
   void write(Writer writer);
 
-  /// Obtains a [Uint8List] with data serialized for this object
+  /// Obtains a cached [Uint8List] with data serialized for this object
   Uint8List toBytes() {
+    if (_cache != null) return _cache!;
     final bytes = Uint8List(size);
     final writer = BytesWriter(bytes);
     write(writer);
-    return bytes;
+    _sizeCache = bytes.length;
+    return _cache = bytes;
   }
 
+  /// Obtains the cached size of the object
   int get size {
+    if (_sizeCache != null) return _sizeCache!;
     final measure = MeasureWriter();
     write(measure);
-    return measure.size;
+    return _sizeCache = measure.size;
   }
 
 }

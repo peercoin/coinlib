@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-
 import 'package:coinlib/coinlib.dart';
 import 'package:coinlib/src/common/hex.dart';
 import 'package:test/test.dart';
@@ -23,6 +22,8 @@ final witness = [
 ];
 
 class WritableTestTx with Writable {
+
+  bool addExtra = false;
 
   @override
   void write(Writer writer) {
@@ -51,6 +52,9 @@ class WritableTestTx with Writable {
       expect(writer.atEnd, false);
     }
     writer.writeUInt32(0);
+
+    if (addExtra) writer.writeUInt8(1);
+
   }
 
 }
@@ -267,9 +271,31 @@ void main() {
   });
 
   group("Writable", () {
-    test("toBytes()", () {
-      expect(WritableTestTx().toBytes(), txData.sublist(3));
+
+    test("toBytes() and .size", () {
+
+      final expData = txData.sublist(3);
+      final expSize = txData.length-3;
+
+      // Should work OK twice
+      final obj = WritableTestTx();
+      for (int i = 0; i < 2; i++) {
+        expect(obj.toBytes(), expData);
+        expect(obj.size, expSize);
+      }
+
+      // Size should work without toBytes before it
+      final obj2 = WritableTestTx();
+      for (int i = 0; i < 2; i++) {
+        expect(obj2.size, expSize);
+      }
+
+      // Changes to the object do not change the cache
+      obj2.addExtra = true;
+      expect(obj2.size, expSize);
+
     });
+
   });
 
 }
