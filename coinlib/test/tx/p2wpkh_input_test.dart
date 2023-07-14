@@ -18,7 +18,7 @@ void main() {
     getWitness(bool hasSig) => [
       if (hasSig) Uint8List.fromList([
         ...hexToBytes(der),
-        InputSignature.sigHashSingle,
+        SigHashType.noneValue,
       ]),
       hexToBytes(pubkeyVec),
     ];
@@ -28,7 +28,7 @@ void main() {
       final pk = ECPublicKey(pkBytes);
       final insig = InputSignature(
         ECDSASignature.fromDerHex(der),
-        InputSignature.sigHashSingle,
+        SigHashType.none(),
       );
 
       final rawBytes = Uint8List.fromList([
@@ -49,7 +49,7 @@ void main() {
 
         if (hasSig) {
           expect(bytesToHex(input.insig!.signature.der), validDerSigs[0]);
-          expect(input.insig!.hashType, InputSignature.sigHashSingle);
+          expect(input.insig!.hashType.none, true);
         }
 
         expect(input.witness, getWitness(hasSig));

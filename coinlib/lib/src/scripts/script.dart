@@ -11,7 +11,7 @@ class Script {
   String? _asmCache;
 
   /// Constructs a script from the operations
-  Script(List<ScriptOp> ops) : ops = List<ScriptOp>.unmodifiable(ops);
+  Script(Iterable<ScriptOp> ops) : ops = List<ScriptOp>.unmodifiable(ops);
 
   /// Decompiles the script and may return a sub-class representing the script
   /// type. May return [OutOfData] if the script has an invalid pushdata.

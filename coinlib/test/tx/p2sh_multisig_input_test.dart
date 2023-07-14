@@ -25,10 +25,7 @@ void main() {
 
       insigs = validDerSigs
         .getRange(0, 4)
-        .map((der) => InputSignature(
-          ECDSASignature.fromDerHex(der),
-          InputSignature.sigHashSingle,
-        ),)
+        .map((der) => InputSignature(ECDSASignature.fromDerHex(der)))
         .toList();
 
       multisig = MultisigProgram(3, pks);

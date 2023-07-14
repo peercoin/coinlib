@@ -13,10 +13,9 @@ void main() {
     test("valid input signature", () {
 
       final der = hexToBytes(validDerSigs[0]);
-      final hashType = InputSignature.sigHashAll
-        | InputSignature.sigHashAnyoneCanPay;
+      final hashType = SigHashType.all(anyOneCanPay: true);
 
-      final bytes = Uint8List.fromList([...der, hashType]);
+      final bytes = Uint8List.fromList([...der, 0x81]);
 
       expectSig(InputSignature sig) {
         expect(sig.bytes, bytes);
@@ -34,19 +33,12 @@ void main() {
         [],
         [1],
         [...hexToBytes(validDerSigs[0]), 0],
-        [...hexToBytes(invalidDerSigs[0]), InputSignature.sigHashAll],
+        [...hexToBytes(invalidDerSigs[0]), 1],
       ]) {
         expect(
           () => InputSignature.fromBytes(Uint8List.fromList(list)),
           throwsA(isA<InvalidInputSignature>()),
         );
-      }
-    });
-
-    test("invalid sighash", () {
-      final sig = ECDSASignature.fromDerHex(validDerSigs[0]);
-      for (final hashType in [-1, 0, 0x80, 0x84, 4]) {
-        expect(() => InputSignature(sig, hashType), throwsArgumentError);
       }
     });
 

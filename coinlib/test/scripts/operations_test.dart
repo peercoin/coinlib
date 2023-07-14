@@ -455,11 +455,11 @@ void main() {
 
     test("provides insig", () {
       final der = hexToBytes(validDerSigs[0]);
-      final bytes = Uint8List.fromList([ ...der, InputSignature.sigHashAll]);
+      final bytes = Uint8List.fromList([ ...der, SigHashType.allValue]);
       final insig = ScriptPushData(bytes).insig;
       expect(insig, isNotNull);
       expect(insig!.signature.der, der);
-      expect(insig.hashType, InputSignature.sigHashAll);
+      expect(insig.hashType.all, true);
     });
 
     test("provides public key", () {

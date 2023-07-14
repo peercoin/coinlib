@@ -19,11 +19,11 @@ void main() {
       final pk = ECPublicKey.fromHex(pubkeyVec);
       final insig = InputSignature(
         ECDSASignature.fromDerHex(der),
-        InputSignature.sigHashSingle,
+        SigHashType.single(),
       );
 
       final noSigScript = Script.fromAsm(pubkeyVec);
-      final sigScript = Script.fromAsm("${der}02 $pubkeyVec");
+      final sigScript = Script.fromAsm("${der}03 $pubkeyVec");
 
       final noSigBytes = Uint8List.fromList([
         ...prevOutHash,
@@ -50,7 +50,7 @@ void main() {
 
         if (hasSig) {
           expect(bytesToHex(input.insig!.signature.der), validDerSigs[0]);
-          expect(input.insig!.hashType, InputSignature.sigHashSingle);
+          expect(input.insig!.hashType.single, true);
         }
 
         final bytes = hasSig ? sigBytes : noSigBytes;
