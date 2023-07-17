@@ -70,6 +70,15 @@ class P2WPKHInput extends WitnessInput {
   );
 
   @override
+  P2WPKHInput filterSignatures(bool Function(InputSignature insig) predicate)
+    => insig == null || predicate(insig!) ? this : P2WPKHInput(
+      prevOut: prevOut,
+      publicKey: publicKey,
+      insig: null,
+      sequence: sequence,
+    );
+
+  @override
   bool get complete => insig != null;
 
 }

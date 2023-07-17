@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:coinlib/src/common/serial.dart';
 import 'package:coinlib/src/scripts/script.dart';
+import 'package:coinlib/src/tx/input_signature.dart';
 import 'outpoint.dart';
 import 'p2pkh_input.dart';
 import 'p2sh_multisig_input.dart';
@@ -30,5 +31,9 @@ abstract class Input with Writable {
     ?? P2SHMultisigInput.match(raw)
     ?? WitnessInput.match(raw, witness)
     ?? raw;
+
+  /// Removes signatures that the [predicate] returns false for. This is used to
+  /// remove invalidated signatures.
+  Input filterSignatures(bool Function(InputSignature insig) predicate);
 
 }

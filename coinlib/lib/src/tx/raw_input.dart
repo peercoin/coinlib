@@ -1,6 +1,7 @@
 import 'package:coinlib/src/common/checks.dart';
 import 'package:coinlib/src/common/serial.dart';
 import 'package:coinlib/src/scripts/script.dart';
+import 'package:coinlib/src/tx/input_signature.dart';
 import 'input.dart';
 import 'outpoint.dart';
 
@@ -40,5 +41,8 @@ class RawInput extends Input {
   /// is no way to determine if it is or not.
   @override
   bool get complete => true;
+
+  @override
+  Input filterSignatures(bool Function(InputSignature insig) predicate) => this;
 
 }

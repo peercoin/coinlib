@@ -90,17 +90,6 @@ void main() {
           i,
         );
 
-        // Works with signatures replaced
-        expectP2SHMultisigInput(
-          P2SHMultisigInput(
-            prevOut: prevOut,
-            sequence: sequence,
-            program: multisig,
-            sigs: [],
-          ).replaceSignatures(insigs.sublist(0, i)),
-          i,
-        );
-
         final matched = Input.match(
           RawInput.fromReader(
             BytesReader(bytesForNumSigs(i)),
@@ -169,6 +158,63 @@ void main() {
           null,
         );
       }
+
+    });
+
+    test("insertSignature", () {
+      // Insert signatures out of order and ensure they are ordered
+
+      final hash = Uint8List(32);
+      final keys = List.generate(4, (i) => ECPrivateKey.generate());
+      final sigs = keys
+        .map((priv) => InputSignature(ECDSASignature.sign(priv, hash)))
+        .toList();
+
+      var input = P2SHMultisigInput(
+        prevOut: prevOut,
+        program: MultisigProgram(3, keys.map((priv) => priv.pubkey)),
+      );
+
+      expectInsertion(int index, List<int> expIndices) {
+
+        input = input.insertSignature(
+          sigs[index],
+          keys[index].pubkey,
+          (hashType) => hash,
+        );
+
+        expect(
+          input.sigs.map((sig) => sig.signature.compact).toList(),
+          expIndices.map((i) => sigs[i].signature.compact),
+        );
+
+      }
+
+      // Adds 3 and 1 twice which still goes through
+      expectInsertion(1, [1]);
+      expectInsertion(3, [1, 3]);
+      expectInsertion(3, [1, 3]);
+      expectInsertion(0, [0, 1, 3]);
+      expectInsertion(1, [0, 1, 3]);
+
+      // Adding more signatures than necessary trims from end
+      expectInsertion(2, [0, 1, 2]);
+
+    });
+
+    test("filterSignatures", () {
+
+      final input = P2SHMultisigInput(
+        prevOut: prevOut,
+        program: multisig,
+        sigs: insigs.sublist(0, 3),
+      );
+
+      int i = 0;
+      final filtered = input.filterSignatures((insig) => i++ & 1 == 1);
+
+      expect(filtered.sigs.length, 1);
+      expect(bytesToHex(filtered.sigs.first.signature.der), validDerSigs[1]);
 
     });
 

@@ -10,17 +10,20 @@ void main() {
 
   group("P2PKHInput", () {
 
-    setUpAll(loadCoinlib);
-
     final der = validDerSigs[0];
-
-    test("valid p2pkh inputs inc. addSignature", () {
-
-      final pk = ECPublicKey.fromHex(pubkeyVec);
-      final insig = InputSignature(
+    late ECPublicKey pk;
+    late InputSignature insig;
+    setUpAll(() async {
+      await loadCoinlib();
+      pk = ECPublicKey.fromHex(pubkeyVec);
+      insig = InputSignature(
         ECDSASignature.fromDerHex(der),
         SigHashType.single(),
       );
+
+    });
+
+    test("valid p2pkh inputs inc. addSignature", () {
 
       final noSigScript = Script.fromAsm(pubkeyVec);
       final sigScript = Script.fromAsm("${der}03 $pubkeyVec");
@@ -109,6 +112,19 @@ void main() {
           null,
         );
       }
+    });
+
+    test("filterSignatures", () {
+
+      final input = P2PKHInput(
+        prevOut: prevOut,
+        publicKey: pk,
+        insig: insig,
+      );
+
+      expect(input.filterSignatures((insig) => false).insig, isNull);
+      expect(input.filterSignatures((insig) => true).insig, isNotNull);
+
     });
 
   });

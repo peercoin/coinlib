@@ -3,6 +3,7 @@ import 'package:coinlib/src/common/bytes.dart';
 import 'package:coinlib/src/common/checks.dart';
 import 'package:coinlib/src/common/serial.dart';
 
+/// Reference to an [Output] by transaction hash and index
 class OutPoint with Writable {
 
   final Uint8List _hash;
@@ -23,5 +24,7 @@ class OutPoint with Writable {
   }
 
   Uint8List get hash => Uint8List.fromList(_hash);
+  /// True if this out point is the type found in a coinbase
+  bool get coinbase => _hash.every((e) => e == 0) && n == 0xffffffff;
 
 }

@@ -2,6 +2,7 @@ import 'package:coinlib/src/address.dart';
 import 'package:coinlib/src/common/checks.dart';
 import 'package:coinlib/src/common/serial.dart';
 import 'package:coinlib/src/scripts/program.dart';
+import 'package:coinlib/src/scripts/script.dart';
 
 /// A transaction output that carries a [value] and [program] specifying how the
 /// value can be spent.
@@ -18,6 +19,8 @@ class Output with Writable {
   }
   Output.fromAddress(BigInt value, Address address)
     : this(value, address.program);
+  /// The output used for blanking outputs when using [SigHashType.single].
+  Output.blank() : this(maxValue, RawProgram(Script([])));
 
   factory Output.fromReader(BytesReader reader) => Output(
     reader.readUInt64(),

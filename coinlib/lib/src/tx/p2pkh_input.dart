@@ -61,6 +61,15 @@ class P2PKHInput extends RawInput {
   );
 
   @override
+  P2PKHInput filterSignatures(bool Function(InputSignature insig) predicate)
+    => insig == null || predicate(insig!) ? this : P2PKHInput(
+      prevOut: prevOut,
+      publicKey: publicKey,
+      insig: null,
+      sequence: sequence,
+    );
+
+  @override
   bool get complete => insig != null;
 
 }

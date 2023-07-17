@@ -10,10 +10,19 @@ void main() {
 
   group("P2WPKHInput", () {
 
-    setUpAll(loadCoinlib);
-
     final der = validDerSigs[0];
     final pkBytes = hexToBytes(pubkeyVec);
+    late ECPublicKey pk;
+    late InputSignature insig;
+
+    setUpAll(() async {
+      await loadCoinlib();
+      pk = ECPublicKey(pkBytes);
+      insig = InputSignature(
+        ECDSASignature.fromDerHex(der),
+        SigHashType.none(),
+      );
+    });
 
     getWitness(bool hasSig) => [
       if (hasSig) Uint8List.fromList([
@@ -24,12 +33,6 @@ void main() {
     ];
 
     test("valid p2wpkh inputs inc. addSignature", () {
-
-      final pk = ECPublicKey(pkBytes);
-      final insig = InputSignature(
-        ECDSASignature.fromDerHex(der),
-        SigHashType.none(),
-      );
 
       final rawBytes = Uint8List.fromList([
         ...prevOutHash,
@@ -113,6 +116,19 @@ void main() {
       expectNoMatch("", [pkBytes.sublist(32)]);
       expectNoMatch("", [hexToBytes(invalidPubKeys[0])]);
       expectNoMatch("", [hexToBytes(invalidSignatures[0]), pkBytes]);
+
+    });
+
+    test("filterSignatures", () {
+
+      final input = P2WPKHInput(
+        prevOut: prevOut,
+        publicKey: pk,
+        insig: insig,
+      );
+
+      expect(input.filterSignatures((insig) => false).insig, isNull);
+      expect(input.filterSignatures((insig) => true).insig, isNotNull);
 
     });
 
