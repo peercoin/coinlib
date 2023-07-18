@@ -1,4 +1,6 @@
 import 'dart:typed_data';
+import 'package:coinlib/src/common/hex.dart';
+
 import 'checks.dart';
 
 /// Thrown when attempting to read or write beyond the boundary of data
@@ -251,6 +253,8 @@ mixin Writable {
     _sizeCache = bytes.length;
     return _cache = bytes;
   }
+
+  String toHex() => bytesToHex(toBytes());
 
   /// Obtains the cached size of the object
   int get size {

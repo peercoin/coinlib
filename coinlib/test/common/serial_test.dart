@@ -272,7 +272,7 @@ void main() {
 
   group("Writable", () {
 
-    test("toBytes() and .size", () {
+    test("toBytes(), toHex() and .size", () {
 
       final expData = txData.sublist(3);
       final expSize = txData.length-3;
@@ -281,6 +281,7 @@ void main() {
       final obj = WritableTestTx();
       for (int i = 0; i < 2; i++) {
         expect(obj.toBytes(), expData);
+        expect(obj.toHex(), bytesToHex(expData));
         expect(obj.size, expSize);
       }
 
