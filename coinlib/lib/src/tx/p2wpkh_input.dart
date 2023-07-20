@@ -35,7 +35,7 @@ class P2WPKHInput extends WitnessInput {
   /// [P2WPKHInput] for the input or else it returns null.
   static P2WPKHInput? match(RawInput raw, List<Uint8List> witness) {
 
-    if (raw.scriptSig.ops.isNotEmpty) return null;
+    if (raw.scriptSig.isNotEmpty) return null;
     if (witness.isEmpty || witness.length > 2) return null;
 
     try {

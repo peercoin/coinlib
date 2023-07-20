@@ -26,8 +26,8 @@ void main() {
         expect(witIn, isA<WitnessInput>());
         expect(witIn!.prevOut.hash, prevOutHash);
         expect(witIn.prevOut.n, prevOutN);
-        expect(witIn.scriptSig.length, 0);
-        expect(witIn.scriptSig.ops, isEmpty);
+        expect(witIn.scriptSig, isEmpty);
+        expect(witIn.script!.length, 0);
         expect(witIn.sequence, sequence);
         expect((witIn as WitnessInput).witness, witness);
         expect(witIn.complete, true);
@@ -38,7 +38,7 @@ void main() {
       expect(WitnessInput.match(raw, []), null);
       final rawWithScriptSig = RawInput(
         prevOut: raw.prevOut,
-        scriptSig: Script.fromAsm("0"),
+        scriptSig: Script.fromAsm("0").compiled,
         sequence: 0,
       );
       expect(WitnessInput.match(rawWithScriptSig, witness), null);

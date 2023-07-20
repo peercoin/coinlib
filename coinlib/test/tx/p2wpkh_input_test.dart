@@ -48,7 +48,8 @@ void main() {
         expect(input.publicKey.hex, pubkeyVec);
         expect(input.complete, hasSig);
         expect(input.insig, hasSig ? isNotNull : null);
-        expect(input.scriptSig.ops.isEmpty, true);
+        expect(input.scriptSig.isEmpty, true);
+        expect(input.script!.length, 0);
 
         if (hasSig) {
           expect(bytesToHex(input.insig!.signature.der), validDerSigs[0]);
@@ -98,7 +99,7 @@ void main() {
         P2WPKHInput.match(
           RawInput(
             prevOut: prevOut,
-            scriptSig: Script.fromAsm(asm),
+            scriptSig: Script.fromAsm(asm).compiled,
             sequence: 0,
           ),
           witness,

@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:coinlib/src/common/checks.dart';
 import 'package:coinlib/src/common/serial.dart';
 import 'package:coinlib/src/scripts/script.dart';
@@ -13,7 +14,7 @@ class RawInput extends Input {
   @override
   final OutPoint prevOut;
   @override
-  final Script scriptSig;
+  final Uint8List scriptSig;
   @override
   final int sequence;
 
@@ -27,13 +28,13 @@ class RawInput extends Input {
 
   RawInput.fromReader(BytesReader reader)
     : prevOut = OutPoint.fromReader(reader),
-    scriptSig = Script.decompile(reader.readVarSlice()),
+    scriptSig = reader.readVarSlice(),
     sequence = reader.readUInt32();
 
   @override
   void write(Writer writer) {
     prevOut.write(writer);
-    writer.writeVarSlice(scriptSig.compiled);
+    writer.writeVarSlice(scriptSig);
     writer.writeUInt32(sequence);
   }
 

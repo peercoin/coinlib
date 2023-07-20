@@ -63,7 +63,9 @@ void main() {
       expect(input.program.threshold, 3);
 
       expect(input.complete, numSigs == 3);
-      expect(input.scriptSig.match(scriptForNumSigs(numSigs)), true);
+      final expScript = scriptForNumSigs(numSigs);
+      expect(input.script.match(expScript), true);
+      expect(input.scriptSig, expScript.compiled);
 
       expect(
         input.sigs.map((sig) => sig.bytes),
@@ -151,7 +153,7 @@ void main() {
           P2SHMultisigInput.match(
             RawInput(
               prevOut: prevOut,
-              scriptSig: Script.fromAsm(asm),
+              scriptSig: Script.fromAsm(asm).compiled,
               sequence: 0,
             ),
           ),

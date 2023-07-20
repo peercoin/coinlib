@@ -15,7 +15,7 @@ abstract class Input with Writable {
   static const sequenceFinal = 0xffffffff;
 
   OutPoint get prevOut;
-  Script get scriptSig;
+  Uint8List get scriptSig;
   int get sequence;
 
   /// True when the input is fully signed and ready for broadcast
@@ -35,5 +35,15 @@ abstract class Input with Writable {
   /// Removes signatures that the [predicate] returns false for. This is used to
   /// remove invalidated signatures.
   Input filterSignatures(bool Function(InputSignature insig) predicate);
+
+  /// The script from the [scriptSig] bytes or null if the bytes do not
+  /// represent a valid script.
+  Script? get script {
+    try {
+      return Script.decompile(scriptSig);
+    } on Exception {
+      return null;
+    }
+  }
 
 }

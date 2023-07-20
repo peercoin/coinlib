@@ -25,20 +25,20 @@ void main() {
 
     test("valid p2pkh inputs inc. addSignature", () {
 
-      final noSigScript = Script.fromAsm(pubkeyVec);
-      final sigScript = Script.fromAsm("${der}03 $pubkeyVec");
+      final noSigScript = Script.fromAsm(pubkeyVec).compiled;
+      final sigScript = Script.fromAsm("${der}03 $pubkeyVec").compiled;
 
       final noSigBytes = Uint8List.fromList([
         ...prevOutHash,
         0xef, 0xbe, 0xed, 0xfe,
-        noSigScript.compiled.length, ...noSigScript.compiled,
+        noSigScript.length, ...noSigScript,
         0xed, 0xfe, 0xef, 0xbe,
       ]);
 
       final sigBytes = Uint8List.fromList([
         ...prevOutHash,
         0xef, 0xbe, 0xed, 0xfe,
-        sigScript.compiled.length, ...sigScript.compiled,
+        sigScript.length, ...sigScript,
         0xed, 0xfe, 0xef, 0xbe,
       ]);
 
@@ -49,7 +49,10 @@ void main() {
         expect(input.publicKey.hex, pubkeyVec);
         expect(input.complete, hasSig);
         expect(input.insig, hasSig ? isNotNull : null);
-        expect(input.scriptSig.match(hasSig ? sigScript : noSigScript), true);
+
+        final scriptSig = hasSig ? sigScript : noSigScript;
+        expect(input.scriptSig, scriptSig);
+        expect(input.script.match(Script.decompile(scriptSig)), true);
 
         if (hasSig) {
           expect(bytesToHex(input.insig!.signature.der), validDerSigs[0]);
@@ -105,7 +108,7 @@ void main() {
           P2PKHInput.match(
             RawInput(
               prevOut: prevOut,
-              scriptSig: Script.fromAsm(asm),
+              scriptSig: Script.fromAsm(asm).compiled,
               sequence: 0,
             ),
           ),

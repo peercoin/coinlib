@@ -16,7 +16,7 @@ class WitnessInput extends RawInput {
     int sequence = Input.sequenceFinal,
   }) : super(
     prevOut: prevOut,
-    scriptSig: Script([]),
+    scriptSig: Uint8List(0),
     sequence: sequence,
   );
 
@@ -24,7 +24,7 @@ class WitnessInput extends RawInput {
   /// or specialised sub-class object. If this is not a witness input, null is
   /// returned.
   static WitnessInput? match(RawInput raw, List<Uint8List> witness)
-    => raw.scriptSig.ops.isEmpty && witness.isNotEmpty
+    => raw.scriptSig.isEmpty && witness.isNotEmpty
       ? (
         // Is a witness input, so match with the specific input type
         P2WPKHInput.match(raw, witness)

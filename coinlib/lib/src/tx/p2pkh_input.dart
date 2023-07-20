@@ -24,7 +24,7 @@ class P2PKHInput extends RawInput {
     scriptSig: Script([
       if (insig != null) ScriptPushData(insig.bytes),
       ScriptPushData(publicKey.data),
-    ]),
+    ]).compiled,
     sequence: sequence,
   );
 
@@ -33,7 +33,9 @@ class P2PKHInput extends RawInput {
   /// input or else it returns null.
   static P2PKHInput? match(RawInput raw) {
 
-    final ops = raw.scriptSig.ops;
+    final script = raw.script;
+    if (script == null) return null;
+    final ops = script.ops;
     if (ops.isEmpty || ops.length > 2) return null;
 
     final insig = ops.length == 2 ? ops[0].insig : null;
@@ -71,5 +73,8 @@ class P2PKHInput extends RawInput {
 
   @override
   bool get complete => insig != null;
+
+  @override
+  Script get script => super.script!;
 
 }

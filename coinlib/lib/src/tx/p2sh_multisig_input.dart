@@ -30,7 +30,7 @@ class P2SHMultisigInput extends RawInput {
       ScriptOp.fromNumber(0),
       ...sigs.map((sig) => ScriptPushData(sig.bytes)),
       ScriptPushData(program.script.compiled),
-    ]),
+    ]).compiled,
     sequence: sequence,
   ) {
     if (sigs.length > program.threshold) {
@@ -46,7 +46,9 @@ class P2SHMultisigInput extends RawInput {
   /// [P2SHMultisigInput] for the input or else it returns null.
   static P2SHMultisigInput? match(RawInput raw) {
 
-    final ops = raw.scriptSig.ops;
+    final script = raw.script;
+    if (script == null) return null;
+    final ops = script.ops;
     if (ops.length < 2) return null;
 
     // Check that the first item is 0 which is necessary for CHECKMULTISIG
@@ -148,5 +150,9 @@ class P2SHMultisigInput extends RawInput {
 
   @override
   bool get complete => sigs.length == program.threshold;
+
+  @override
+  Script get script => super.script!;
+
 
 }

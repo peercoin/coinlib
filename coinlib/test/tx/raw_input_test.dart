@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:coinlib/coinlib.dart';
+import 'package:coinlib/src/common/hex.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -11,7 +12,7 @@ void main() {
         expect(
           () => RawInput(
             prevOut: OutPoint(Uint8List(32), 0),
-            scriptSig: Script.fromAsm("0"),
+            scriptSig: Script.fromAsm("0").compiled,
             sequence: n,
           ),
           throwsArgumentError,
@@ -19,9 +20,10 @@ void main() {
       }
     });
 
-    test("can be read and written and is always complete", () {
 
-      final hashBytes = Uint8List.fromList(List<int>.generate(32, (i) => i));
+    final hashBytes = Uint8List.fromList(List<int>.generate(32, (i) => i));
+
+    test("can be read and written and is always complete", () {
 
       final bytes = Uint8List.fromList([
         ...hashBytes, // Hash
@@ -33,7 +35,8 @@ void main() {
       expectRaw(RawInput input) {
         expect(input.prevOut.hash, hashBytes);
         expect(input.prevOut.n, 0x04030201);
-        expect(input.scriptSig.asm, "0");
+        expect(bytesToHex(input.scriptSig), "00");
+        expect(input.script!.asm, "0");
         expect(input.sequence, 0xa1a2a3a4);
         expect(input.complete, true);
         expect(input.size, bytes.length);
@@ -42,7 +45,7 @@ void main() {
 
       final raw = RawInput(
         prevOut: OutPoint(hashBytes, 0x04030201),
-        scriptSig: Script.fromAsm("0"),
+        scriptSig: Script.fromAsm("0").compiled,
         sequence: 0xa1a2a3a4,
       );
 
@@ -54,11 +57,38 @@ void main() {
 
     });
 
+    test("non-script scriptSig", () {
+
+      final bytes = Uint8List.fromList([
+        ...hashBytes, // Hash
+        1,2,3,4, // n
+        4, 1, 2, 3, 4, // Not a valid script
+        0xff, 0xff, 0xff, 0xff // Sequence
+      ]);
+
+      final scriptSig = Uint8List.fromList([1,2,3,4]);
+
+      expectNullScript(RawInput raw) {
+        expect(raw.script, null);
+        expect(raw.scriptSig, scriptSig);
+        expect(raw.sequence, 0xffffffff);
+      }
+
+      expectNullScript(RawInput.fromReader(BytesReader(bytes)));
+      expectNullScript(
+        RawInput(
+          prevOut: OutPoint(hashBytes, 0x04030201),
+          scriptSig: scriptSig,
+        ),
+      );
+
+    });
+
     test("default max sequence", () {
       expect(
         RawInput(
           prevOut: OutPoint(Uint8List(32), 0),
-          scriptSig: Script.fromAsm("0"),
+          scriptSig: Script.fromAsm("0").compiled,
         ).sequence,
         0xffffffff,
       );

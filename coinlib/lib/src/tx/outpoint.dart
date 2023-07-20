@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:coinlib/src/common/bytes.dart';
 import 'package:coinlib/src/common/checks.dart';
+import 'package:coinlib/src/common/hex.dart';
 import 'package:coinlib/src/common/serial.dart';
 
 /// Reference to an [Output] by transaction hash and index
@@ -13,6 +14,8 @@ class OutPoint with Writable {
     : _hash = copyCheckBytes(hash, 32, name: "Tx hash") {
     checkUint32(n, "this.n");
   }
+
+  OutPoint.fromHex(String hash, int n) : this(hexToBytes(hash), n);
 
   OutPoint.fromReader(BytesReader reader)
     : _hash = reader.readSlice(32), n = reader.readUInt32();
