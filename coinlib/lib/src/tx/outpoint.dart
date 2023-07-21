@@ -15,7 +15,9 @@ class OutPoint with Writable {
     checkUint32(n, "this.n");
   }
 
-  OutPoint.fromHex(String hash, int n) : this(hexToBytes(hash), n);
+  /// Takes the reversed transaction hash as hex
+  OutPoint.fromHex(String hash, int n)
+    : this(Uint8List.fromList(hexToBytes(hash).reversed.toList()), n);
 
   OutPoint.fromReader(BytesReader reader)
     : _hash = reader.readSlice(32), n = reader.readUInt32();

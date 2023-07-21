@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:coinlib/coinlib.dart';
+import 'package:coinlib/src/common/hex.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -25,6 +26,16 @@ void main() {
       expect(op.hash, bytes.sublist(0, 32));
       expect(op.n, 0x04030201);
       expect(op.toBytes(), bytes);
+    });
+
+    test("fromHex takes reversed hash", () {
+      final op = OutPoint.fromHex(
+        "6d7ed9914625c73c0288694a6819196a27ef6c08f98e1270d975a8e65a3dc09a", 0,
+      );
+      expect(
+        bytesToHex(op.hash),
+        "9ac03d5ae6a875d970128ef9086cef276a1919684a6988023cc7254691d97e6d",
+      );
     });
 
     test("hash cannot be mutated", () {
