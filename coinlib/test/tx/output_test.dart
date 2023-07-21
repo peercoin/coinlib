@@ -36,6 +36,18 @@ final vectors = [
     progType: P2WSH,
     address: "pc1qlllllllllllllllllllllllllllllllllllllllllllllllllllsm5knxw",
   ),
+  OutputVector(
+    value: BigInt.from(1),
+    scriptHex: "01",
+    outHex: "01000000000000000101",
+    progType: Null,
+  ),
+  OutputVector(
+    value: BigInt.from(0xff),
+    scriptHex: "00",
+    outHex: "ff000000000000000100",
+    progType: RawProgram,
+  )
 ];
 
 void main() {
@@ -45,18 +57,28 @@ void main() {
     test("can read and write outputs", () {
 
       expectOutput(Output out, OutputVector vec) {
+
         expect(out.value, vec.value);
         expect(out.size, vec.outBytes.length);
-        expect(out.program.script.compiled, vec.scriptBytes);
+        expect(out.scriptPubKey, vec.scriptBytes);
         expect(out.toBytes(), vec.outBytes);
         expect(out.program.runtimeType, vec.progType);
+
+        if (vec.progType != Null) {
+          expect(out.program!.script.compiled, vec.scriptBytes);
+        }
+
       }
 
       for (final vec in vectors) {
         expectOutput(Output.fromReader(BytesReader(vec.outBytes)), vec);
-        expectOutput(
-          Output(vec.value, Program.decompile(vec.scriptBytes)), vec,
-        );
+        expectOutput(Output.fromScriptBytes(vec.value, vec.scriptBytes), vec);
+        if (vec.progType != Null) {
+          expectOutput(
+            Output.fromProgram(vec.value, Program.decompile(vec.scriptBytes)),
+            vec,
+          );
+        }
         if (vec.address != null) {
           expectOutput(
             Output.fromAddress(
@@ -71,10 +93,20 @@ void main() {
     });
 
     test("requires value 0-uint8_max", () {
-      final dummyProg = Program.fromAsm("0");
       for (final val in [BigInt.from(-1), BigInt.from(1) << 64]) {
-        expect(() => Output(val, dummyProg), throwsArgumentError);
+        expect(
+          () => Output.fromScriptBytes(val, Uint8List(0)),
+          throwsArgumentError,
+        );
       }
+    });
+
+    test("scriptPubKey cannot be mutated", () {
+      final data = Uint8List(2);
+      final output = Output.fromScriptBytes(BigInt.one, data);
+      data[0] = 0xff;
+      output.scriptPubKey[1] = 0xff;
+      expect(output.scriptPubKey, Uint8List(2));
     });
 
   });

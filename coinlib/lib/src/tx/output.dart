@@ -1,8 +1,9 @@
+import 'dart:typed_data';
+import 'package:coinlib/coinlib.dart';
 import 'package:coinlib/src/address.dart';
 import 'package:coinlib/src/common/checks.dart';
 import 'package:coinlib/src/common/serial.dart';
 import 'package:coinlib/src/scripts/program.dart';
-import 'package:coinlib/src/scripts/script.dart';
 
 /// A transaction output that carries a [value] and [program] specifying how the
 /// value can be spent.
@@ -12,25 +13,50 @@ class Output with Writable {
   static BigInt maxValue = (BigInt.from(1) << 64) - BigInt.one;
 
   final BigInt value;
-  final Program program;
+  final Uint8List _scriptPubKey;
+  final Program? program;
 
-  Output(this.value, this.program) {
+  Output._(this.value, Uint8List scriptPubKey, this.program)
+    : _scriptPubKey = Uint8List.fromList(scriptPubKey) {
     checkUint64(value, "this.value");
   }
-  Output.fromAddress(BigInt value, Address address)
-    : this(value, address.program);
-  /// The output used for blanking outputs when using [SigHashType.single].
-  Output.blank() : this(maxValue, RawProgram(Script([])));
 
-  factory Output.fromReader(BytesReader reader) => Output(
+  Output.fromProgram(BigInt value, Program program) : this._(
+    value,
+    program.script.compiled,
+    program,
+  );
+
+  factory Output.fromScriptBytes(BigInt value, Uint8List scriptPubKey) {
+
+    late Program? program;
+    try {
+      program = Program.decompile(scriptPubKey);
+    } on Exception {
+      program = null;
+    }
+
+    return Output._(value, scriptPubKey, program);
+
+  }
+
+  Output.fromAddress(BigInt value, Address address)
+    : this.fromProgram(value, address.program);
+
+  /// The output used for blanking outputs when using [SigHashType.single].
+  Output.blank() : this.fromProgram(maxValue, RawProgram(Script([])));
+
+  factory Output.fromReader(BytesReader reader) => Output.fromScriptBytes(
     reader.readUInt64(),
-    Program.decompile(reader.readVarSlice()),
+    reader.readVarSlice(),
   );
 
   @override
   void write(Writer writer) {
     writer.writeUInt64(value);
-    writer.writeVarSlice(program.script.compiled);
+    writer.writeVarSlice(_scriptPubKey);
   }
+
+  Uint8List get scriptPubKey => Uint8List.fromList(_scriptPubKey);
 
 }
