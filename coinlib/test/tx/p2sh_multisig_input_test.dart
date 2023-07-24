@@ -166,11 +166,22 @@ void main() {
     test("insertSignature", () {
       // Insert signatures out of order and ensure they are ordered
 
-      final hash = Uint8List(32);
+      Uint8List getSigHash(SigHashType type) => Uint8List.fromList([
+        ...List.filled(31, 0), type.value,
+      ]);
+
       final keys = List.generate(4, (i) => ECPrivateKey.generate());
-      final sigs = keys
-        .map((priv) => InputSignature(ECDSASignature.sign(priv, hash)))
-        .toList();
+
+      final sigs = List.generate(
+        4,
+        (i) {
+          final hashType = SigHashType.fromValue(i % 3 + 1);
+          return InputSignature(
+            ECDSASignature.sign(keys[i], getSigHash(hashType)),
+            hashType,
+          );
+        }
+      );
 
       var input = P2SHMultisigInput(
         prevOut: prevOut,
@@ -180,9 +191,7 @@ void main() {
       expectInsertion(int index, List<int> expIndices) {
 
         input = input.insertSignature(
-          sigs[index],
-          keys[index].pubkey,
-          (hashType) => hash,
+          sigs[index], keys[index].pubkey, getSigHash,
         );
 
         expect(

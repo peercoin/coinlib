@@ -117,7 +117,9 @@ class P2SHMultisigInput extends RawInput {
         // Do not add any more when threshold is reached
         && positionedSigs.whereType<InputSignature>().length < program.threshold
         // Check signature against candidate public key and message hash
-        && sigs[sigI].signature.verify(pubkeys[pos], getSigHash(insig.hashType))
+        && sigs[sigI].signature.verify(
+          pubkeys[pos], getSigHash(sigs[sigI].hashType),
+        )
       ) {
         // Existing signature matched for this public key
         positionedSigs[pos] = sigs[sigI++];
