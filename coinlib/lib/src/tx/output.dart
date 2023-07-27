@@ -1,9 +1,9 @@
 import 'dart:typed_data';
-import 'package:coinlib/coinlib.dart';
 import 'package:coinlib/src/address.dart';
 import 'package:coinlib/src/common/checks.dart';
 import 'package:coinlib/src/common/serial.dart';
 import 'package:coinlib/src/scripts/program.dart';
+import 'package:coinlib/src/scripts/script.dart';
 
 /// A transaction output that carries a [value] and [program] specifying how the
 /// value can be spent.

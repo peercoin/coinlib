@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 import 'package:coinlib/src/common/checks.dart';
 import 'package:coinlib/src/common/serial.dart';
-import 'package:coinlib/src/scripts/script.dart';
 import 'package:coinlib/src/tx/input_signature.dart';
 import 'input.dart';
 import 'outpoint.dart';

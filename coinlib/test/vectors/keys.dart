@@ -14,8 +14,8 @@ class KeyTestVector {
     required this.wif,
     required this.version,
   });
-  get privateObj => ECPrivateKey.fromHex(private, compressed: compressed);
-  get publicObj => ECPublicKey.fromHex(public);
+  ECPrivateKey get privateObj => ECPrivateKey.fromHex(private, compressed: compressed);
+  ECPublicKey get publicObj => ECPublicKey.fromHex(public);
 }
 
 final pubkeyVec = "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798";

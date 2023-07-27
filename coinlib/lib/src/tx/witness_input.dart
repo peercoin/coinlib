@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-import 'package:coinlib/src/scripts/script.dart';
 import 'input.dart';
 import 'outpoint.dart';
 import 'raw_input.dart';

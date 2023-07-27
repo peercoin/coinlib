@@ -29,4 +29,14 @@ class NetworkParams {
     messagePrefix: "Peercoin Signed Message:\n",
   );
 
+  static const testnet = NetworkParams(
+    wifPrefix: 239,
+    p2pkhPrefix: 111,
+    p2shPrefix: 196,
+    privHDPrefix: 0x043587CF,
+    pubHDPrefix: 0x04358394,
+    bech32Hrp: "tpc",
+    messagePrefix: "Peercoin Signed Message:\n",
+  );
+
 }
