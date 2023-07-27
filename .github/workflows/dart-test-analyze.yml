@@ -1,0 +1,32 @@
+name: Dart-Test-Analyze
+
+on:
+  push:
+  pull_request:
+    branches:
+      - "master"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      # Note: This workflow uses the latest stable version of the Dart SDK.
+      # You can specify other versions if desired, see documentation here:
+      # https://github.com/dart-lang/setup-dart/blob/main/README.md
+      - uses: dart-lang/setup-dart@9a04e6d73cca37bd455e0608d7e5092f881fd603
+      - uses: browser-actions/setup-chrome@v1
+
+      - name: Install dependencies
+        run: dart pub get
+        working-directory: ./coinlib
+
+      - name: Analyze project source
+        run: dart analyze --fatal-infos
+        working-directory: ./coinlib
+
+      - name: Run tests using included wasm
+        run: dart test -p chrome
+        working-directory: ./coinlib
