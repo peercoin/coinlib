@@ -1,6 +1,6 @@
 name: coinlib_flutter
 description: A flutter wrapper for coinlib
-version: 1.0.0
+version: 1.0.0-alpha
 homepage:
 # Remove when publishing
 publish_to: none
