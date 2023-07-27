@@ -1,15 +1,17 @@
 # Coinlib
 
+**This is an alpha pre-release.**
+
 Coinlib is a straight-forward and modular library for Peercoin and other similar
 cryptocoins. This library allows for the construction and signing of
 transactions and management of BIP32 wallets.
 
 ## Usage
 
-This library requires a shared or dynamic library for linux or macOS, and a
-WebAssembly module for web. The WebAssembly module is precompiled and included
-with the library, but the linux and macOS libraries are not and must be built
-before use. See
+Unless using the flutter plugin (See `coinlib_flutter`), this library requires a
+shared or dynamic library for linux or macOS, and a WebAssembly module for web.
+The WebAssembly module is precompiled and included with the library, but the
+linux and macOS libraries are not and must be built before use. See
 ["Building Native & WebAssembly"](#building-native-and-webassembly) below.
 
 The library can be imported via:
