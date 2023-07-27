@@ -32,8 +32,14 @@ class LegacyTransaction with Writable {
   static const int currentVersion = 3;
   static const int maxSize = 1000000;
 
-  static const int maxInputs = (maxSize - 19) ~/ 41;
-  static const int maxOutputs = (maxSize - 51) ~/ 9;
+  static const int minInputSize = 41;
+  static const int minOutputSize = 9;
+  static const int minOtherSize = 10;
+
+  static const int maxInputs
+    = (maxSize - minOtherSize - minOutputSize) ~/ minInputSize;
+  static const int maxOutputs
+    = (maxSize - minOtherSize - minInputSize) ~/ minOutputSize;
 
   final int version;
   final List<Input> inputs;
