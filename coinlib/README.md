@@ -41,8 +41,8 @@ the root directory of your package which will produce a shared library into
 `build/libsecp256k1.so`. This can also be run in the `coinlib` root directory
 via `dart run bin/build_linux.dart`.
 
-This library must be in the `build` directory under the PWD, must be installed
-as a system library, or within `$LD_LIBRARY_PATH`.
+This library can be in the `build` directory under the PWD, installed as a
+system library, or within `$LD_LIBRARY_PATH`.
 
 ## Building for macOS
 
@@ -60,7 +60,11 @@ The dylib can be built in the root directory of coinlib by running `dart run
 bin/build_macos.dart` which will create the library under
 `build/libsecp256k1.dylib`.
 
-## Bindings and WebAssembly
+## Development
+
+This section is only relevant to developers of the library.
+
+### Bindings and WebAssembly
 
 The WebAssembly (WASM) module is pre-compiled and ready to use. FFI bindings
 are pre-generated. These only need to be updated when the underlying secp256k1
