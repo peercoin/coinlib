@@ -18,7 +18,7 @@ dart pub add coinlib
 If you are using the library for web, the library is ready to use. If you are
 using the library on Linux or macOS then please see
 ["Building for Linux"](#building-for-linux) and
-["Building for macOS"](#building-for-maxos) below.
+["Building for macOS"](#building-for-macos) below.
 
 No script is included for building on Windows at the present time, however a
 `secp256k1.dll` may be built into your `build/` directory separately.
