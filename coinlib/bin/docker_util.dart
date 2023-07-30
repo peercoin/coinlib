@@ -15,17 +15,18 @@ Future<String> getDockerCmd() async {
 
 }
 
-/// Runs the [dockerfile], binding [bindDir] to /host in the container and
-/// running [containerCmd]
+/// Runs the contents of [dockerScript] as a Dockerfile, binding [bindDir] to
+/// /host in the container and running [containerCmd]
 Future<bool> dockerRun(
-  String dockerCmd, String dockerfile, String tag, String bindDir,
+  String dockerCmd, String dockerScript, String tag, String bindDir,
   String containerCmd,
 ) async {
 
   // Build
-  print("Building $dockerfile using tag $tag");
+  print("Building $tag");
   var exitCode = await execWithStdio(
-    dockerCmd, ["build", "-f", "$thisDir/$dockerfile", "-t", tag],
+    dockerCmd, ["build", "-f", "-", "-t", tag],
+    stdin: dockerScript,
   );
 
   if (exitCode != 0) {
@@ -53,15 +54,15 @@ Future<bool> dockerRun(
 /// Runs the docker container and copies the [internalFile] to the build
 /// directory
 Future<bool> dockerBuild(
-  String dockerCmd, String dockerfile, String tag, String internalFile,
+  String dockerCmd, String dockerScript, String tag, String internalFile,
 ) async {
 
   // Ensure build directory is created
-  final buildDir = "$thisDir/../build";
+  final buildDir = "${Directory.current.path}/build";
   Directory(buildDir).create();
 
   return dockerRun(
-    dockerCmd, dockerfile, tag, buildDir, "cp $internalFile /host/",
+    dockerCmd, dockerScript, tag, buildDir, "cp $internalFile /host/",
   );
 
 }

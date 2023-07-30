@@ -4,7 +4,7 @@ version: 1.0.0-alpha
 repository: https://github.com/peercoin/coinlib
 
 environment:
-  sdk: '>=2.19.2 <3.0.0'
+  sdk: '>=2.19.2 <4.0.0'
 
 dev_dependencies:
   ffigen: ^6.0.0

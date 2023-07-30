@@ -1,7 +1,4 @@
 import 'dart:io';
-import "package:path/path.dart" show dirname;
-
-final thisDir = dirname(Platform.script.path);
 
 Future<bool> cmdAvailable(String cmd) async {
   try {
@@ -14,13 +11,22 @@ Future<bool> cmdAvailable(String cmd) async {
 }
 
 Future<int> execWithStdio(
-  String executable, List<String> arguments, { String? workingDir, }
+  String executable, List<String> arguments, {
+    String? workingDir, String? stdin,
+  }
 ) async {
 
   final process = await Process.start(
-    executable, arguments, mode: ProcessStartMode.inheritStdio,
-    workingDirectory: workingDir,
+    executable, arguments, workingDirectory: workingDir,
   );
+
+  process.stdout.pipe(stdout);
+
+  if (stdin != null) {
+    process.stdin.write(stdin);
+    await process.stdin.flush();
+    await process.stdin.close();
+  }
 
   return await process.exitCode;
 

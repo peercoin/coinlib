@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'util.dart';
+import 'package:path/path.dart' show dirname;
 
 /// Build a universal macOS framework for secp256k1 directly on a mac machine
 
@@ -12,7 +13,7 @@ void main() async {
   final libDir = "$tmpDir/secp256k1";
 
   var exitCode = await execWithStdio(
-    "cp", ["-r", "$thisDir/../src/secp256k1", libDir],
+    "cp", ["-r", "${dirname(Platform.script.path)}/../src/secp256k1", libDir],
   );
   if (exitCode != 0) {
     print("Could not copy secp256k1 to temporary build directory");
@@ -59,7 +60,7 @@ void main() async {
   }
 
   // Copy framework to build directory
-  final buildDir = "$thisDir/../build";
+  final buildDir = "${Directory.current.path}/build";
   Directory(buildDir).create();
   final libFile = File("$libDir/build/lib/libsecp256k1.2.dylib");
   await libFile.copy("$buildDir/libsecp256k1.dylib");
