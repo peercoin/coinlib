@@ -58,7 +58,8 @@ framework named `secp256k1.framework`.
 
 The dylib can be built in the root directory of coinlib by running `dart run
 bin/build_macos.dart` which will create the library under
-`build/libsecp256k1.dylib`.
+`build/libsecp256k1.dylib`. This library can be moved to the `build/` directory
+where the dart code is to be run.
 
 ## Development
 

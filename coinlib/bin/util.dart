@@ -18,11 +18,13 @@ Future<int> execWithStdio(
 
   final process = await Process.start(
     executable, arguments, workingDirectory: workingDir,
+    mode: (stdin == null)
+      ? ProcessStartMode.inheritStdio
+      : ProcessStartMode.normal,
   );
 
-  process.stdout.pipe(stdout);
-
   if (stdin != null) {
+    process.stdout.pipe(stdout);
     process.stdin.write(stdin);
     await process.stdin.flush();
     await process.stdin.close();
