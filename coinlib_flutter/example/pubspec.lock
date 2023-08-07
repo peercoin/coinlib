@@ -36,9 +36,10 @@ packages:
   coinlib:
     dependency: transitive
     description:
-      path: "../../coinlib"
-      relative: true
-    source: path
+      name: coinlib
+      sha256: "762ec36b0bbcc3dd19a83e2fef7e0eb773cabccd08e1bef9ce28c6fd32a34ae4"
+      url: "https://pub.dev"
+    source: hosted
     version: "1.0.0-alpha"
   coinlib_flutter:
     dependency: "direct main"
@@ -67,10 +68,10 @@ packages:
     dependency: transitive
     description:
       name: crypto
-      sha256: aa274aa7774f8964e4f4f38cc994db7b6158dd36e9187aaceaddc994b35c6c67
+      sha256: ff625774173754681d66daaf4a448684fb04b78f902da9cb3d308c19cc5e8bab
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.2"
+    version: "3.0.3"
   cupertino_icons:
     dependency: "direct main"
     description:
@@ -250,10 +251,10 @@ packages:
     dependency: transitive
     description:
       name: typed_data
-      sha256: "26f87ade979c47a150c9eaab93ccd2bebe70a27dc0b4b29517f2904f04eb11a5"
+      sha256: facc8d6582f16042dd49f2463ff1bd6e2c9ef9f3d5da3d9b087e244a7b564b3c
       url: "https://pub.dev"
     source: hosted
-    version: "1.3.1"
+    version: "1.3.2"
   vector_math:
     dependency: transitive
     description:
