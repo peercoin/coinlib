@@ -34,6 +34,13 @@ Future<int> execWithStdio(
 
 }
 
+void exitOnCode(int exitCode, String exitMsg) {
+  if (exitCode != 0) {
+    print(exitMsg);
+    exit(1);
+  }
+}
+
 String createTmpDir()
   => Directory.systemTemp.createTempSync("coinlibBuild").path;
 

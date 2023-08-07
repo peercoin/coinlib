@@ -56,10 +56,8 @@ The macOS dynamic library must either be provided as
 `$PWD/build/libsecp256k1.dylib` when running dart code, or provided as a system
 framework named `secp256k1.framework`.
 
-The dylib can be built in the root directory of coinlib by running `dart run
-bin/build_macos.dart` which will create the library under
-`build/libsecp256k1.dylib`. This library can be moved to the `build/` directory
-where the dart code is to be run.
+To build the dynamic library, run `dart run coinlib:build_macos` which will
+place the library under a `build` directory.
 
 ## Development
 

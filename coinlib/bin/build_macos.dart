@@ -6,19 +6,27 @@ import 'package:path/path.dart' show dirname;
 
 void main() async {
 
-  // Copy secp256k1 to temporary directory to keep source clean
+  // Clone secp256k1 to temporary directory to keep source clean
 
   final tmpDir = createTmpDir();
   print("Building in $tmpDir");
   final libDir = "$tmpDir/secp256k1";
 
-  var exitCode = await execWithStdio(
-    "cp", ["-r", "${dirname(Platform.script.path)}/../src/secp256k1", libDir],
+  exitOnCode(
+    await execWithStdio(
+      "git", ["clone", "https://github.com/bitcoin-core/secp256k1", libDir],
+    ),
+    "Could not clone secp256k1 to temporary build directory",
   );
-  if (exitCode != 0) {
-    print("Could not copy secp256k1 to temporary build directory");
-    exit(1);
-  }
+
+  // Checkout to 0.3.2 commit
+  exitOnCode(
+    await execWithStdio(
+      "git", ["checkout", "acf5c55ae6a94e5ca847e07def40427547876101"],
+      workingDir: libDir,
+    ),
+    "Could not checkout to v0.3.2 commit",
+  );
 
   // Generate configure
   exitCode = await execWithStdio("sh", ["./autogen.sh"], workingDir: libDir);
