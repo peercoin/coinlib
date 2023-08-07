@@ -1,5 +1,5 @@
 PODS:
-  - coinlib_flutter (0.3.1):
+  - coinlib_flutter (0.3.2):
     - Flutter
   - Flutter (1.0.0)
 
@@ -14,7 +14,7 @@ EXTERNAL SOURCES:
     :path: Flutter
 
 SPEC CHECKSUMS:
-  coinlib_flutter: 6075483770b45eb9c88e4c5ada1e41336edd21df
+  coinlib_flutter: 01e2b948ba8c22687626eaa51c8b2a2f0fe07800
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
 
 PODFILE CHECKSUM: ef19549a9bc3046e7bb7d2fab4d021637c0c58a3
