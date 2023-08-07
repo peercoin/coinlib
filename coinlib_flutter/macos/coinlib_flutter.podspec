@@ -19,8 +19,9 @@ The secp256k1 library bundled into the flutter plugin via cocoapods.
   # paths, so Classes contains a forwarder C file that relatively imports
   # `../src/*` so that the C sources can be shared among all target platforms.
   s.source           = { :path => '.' }
-  s.source_files     = 'Classes/**/*'
+  s.source_files     = 'Classes/*.c'
   s.dependency 'FlutterMacOS'
+  s.compiler_flags = '-Wno-unused-function', '-Wno-shorten-64-to-32'
 
   s.platform = :osx, '10.11'
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
