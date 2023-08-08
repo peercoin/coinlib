@@ -37,10 +37,10 @@ packages:
     dependency: transitive
     description:
       name: coinlib
-      sha256: "762ec36b0bbcc3dd19a83e2fef7e0eb773cabccd08e1bef9ce28c6fd32a34ae4"
+      sha256: bd1c7a79d417a649038805aace5ea0a3d948202dccb353995cf5c6dc0504a144
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0-alpha"
+    version: "1.0.0-alpha.2"
   coinlib_flutter:
     dependency: "direct main"
     description:
@@ -100,10 +100,10 @@ packages:
     dependency: transitive
     description:
       name: ffi
-      sha256: "13a6ccf6a459a125b3fcdb6ec73bd5ff90822e071207c663bfd1f70062d51d18"
+      sha256: "7bf0adc28a23d395f19f3f1eb21dd7cfd1dd9f8e1c50051c069122e6853bc878"
       url: "https://pub.dev"
     source: hosted
-    version: "1.2.1"
+    version: "2.1.0"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -272,5 +272,5 @@ packages:
     source: hosted
     version: "2.0.1"
 sdks:
-  dart: ">=3.0.0-0 <4.0.0"
+  dart: ">=3.0.0 <4.0.0"
   flutter: ">=2.17.0"
