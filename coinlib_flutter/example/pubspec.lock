@@ -44,9 +44,10 @@ packages:
   coinlib_flutter:
     dependency: "direct main"
     description:
-      path: ".."
-      relative: true
-    source: path
+      name: coinlib_flutter
+      sha256: "4768bda9f9f98c4282c5bb57a71016c8b66e028b5fdb5b2dbec66616699249e1"
+      url: "https://pub.dev"
+    source: hosted
     version: "1.0.0-alpha.3"
   collection:
     dependency: transitive
