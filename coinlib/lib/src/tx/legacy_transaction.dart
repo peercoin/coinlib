@@ -17,8 +17,8 @@ import 'input_signature.dart';
 import 'output.dart';
 import 'raw_input.dart';
 
-class TransactionTooLarge with Exception {}
-class CannotSignInput with Exception {
+class TransactionTooLarge implements Exception {}
+class CannotSignInput implements Exception {
   final String message;
   CannotSignInput(this.message);
   @override

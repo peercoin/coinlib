@@ -2,14 +2,14 @@ name: coinlib
 description:
   A straight-forward, modular library for Peercoin and other Satoshi-based UTXO
   blockchains
-version: 1.0.0-alpha
+version: 1.0.0-alpha.2
 repository: https://github.com/peercoin/coinlib
 
 environment:
-  sdk: '>=2.19.2 <4.0.0'
+  sdk: '>=3.0.0 <4.0.0'
 
 dev_dependencies:
-  ffigen: ^6.0.0
+  ffigen: ^9.0.1
   lints: ^2.0.0
   test: ^1.21.0
 
@@ -17,7 +17,7 @@ dependencies:
   collection: ^1.17.1
   crypto: ^3.0.2
   dart_base_x: ^1.0.0
-  ffi: ^1.2.1
+  ffi: ^2.1.0
   hex: ^0.2.0
   path: ^1.8.0
   pointycastle: ^3.7.3
@@ -29,4 +29,4 @@ ffigen:
   output: 'lib/src/generated/secp256k1.ffi.g.dart'
   headers:
     entry-points:
-      - 'src/secp256k1/include/secp256k1_recovery.h'
+      - '../coinlib_flutter/src/secp256k1/include/secp256k1_recovery.h'
