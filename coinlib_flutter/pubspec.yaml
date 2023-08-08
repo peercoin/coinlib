@@ -31,3 +31,4 @@ flutter:
         ffiPlugin: true
       macos:
         ffiPlugin: true
+      web:
