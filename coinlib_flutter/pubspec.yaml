@@ -2,7 +2,7 @@ name: coinlib_flutter
 description:
   A flutter wrapper for coinlib, a straight-forward, modular library for
   Peercoin and other Satoshi-based UTXO blockchains
-version: 1.0.0-alpha.2
+version: 1.0.0-alpha.3
 repository: https://github.com/peercoin/coinlib
 
 environment:
@@ -29,6 +29,8 @@ flutter:
         ffiPlugin: true
       ios:
         ffiPlugin: true
+        sharedDarwinSource: true
       macos:
         ffiPlugin: true
+        sharedDarwinSource: true
       web:

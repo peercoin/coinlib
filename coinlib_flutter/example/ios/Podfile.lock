@@ -1,20 +1,21 @@
 PODS:
   - coinlib_flutter (0.3.2):
     - Flutter
+    - FlutterMacOS
   - Flutter (1.0.0)
 
 DEPENDENCIES:
-  - coinlib_flutter (from `.symlinks/plugins/coinlib_flutter/ios`)
+  - coinlib_flutter (from `.symlinks/plugins/coinlib_flutter/darwin`)
   - Flutter (from `Flutter`)
 
 EXTERNAL SOURCES:
   coinlib_flutter:
-    :path: ".symlinks/plugins/coinlib_flutter/ios"
+    :path: ".symlinks/plugins/coinlib_flutter/darwin"
   Flutter:
     :path: Flutter
 
 SPEC CHECKSUMS:
-  coinlib_flutter: 01e2b948ba8c22687626eaa51c8b2a2f0fe07800
+  coinlib_flutter: 6abec900d67762a6e7ccfd567a3cd3ae00bbee35
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
 
 PODFILE CHECKSUM: ef19549a9bc3046e7bb7d2fab4d021637c0c58a3
