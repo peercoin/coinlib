@@ -51,6 +51,9 @@ class HDVector {
 
   }
 
+  // Adds a static check to the key type
+  expectHDPrivateKey(HDPrivateKey key) => expectHDKey(key);
+
 }
 
 final hdVectors = [

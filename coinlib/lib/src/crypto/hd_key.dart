@@ -152,13 +152,13 @@ abstract class HDKey {
 
   /// Derives a hardened key at [index] which only applies to private keys. The
   /// [index] must not include the left-bit to specify that it is hardened.
-  HDKey deriveHardened(int index) {
+  HDPrivateKey deriveHardened(int index) {
     if (index < 0 || index >= hardenBit) {
       throw ArgumentError.value(
         index, "index", "should be below hardered index",
       );
     }
-    return derive(index + hardenBit);
+    return derive(index + hardenBit) as HDPrivateKey;
   }
 
   /// Derives a child key in a [path] format akin to "m/15/3'/4" where the
@@ -279,6 +279,12 @@ class HDPrivateKey extends HDKey {
     if (key is HDPrivateKey) return key;
     throw InvalidHDKey();
   }
+
+  @override
+  HDPrivateKey derive(int index) => super.derive(index) as HDPrivateKey;
+
+  @override
+  HDPrivateKey derivePath(String path) => super.derivePath(path) as HDPrivateKey;
 
   HDPublicKey get hdPublicKey => HDPublicKey(
     publicKey: publicKey,

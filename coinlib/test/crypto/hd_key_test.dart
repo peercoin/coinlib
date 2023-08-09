@@ -171,9 +171,9 @@ void main() {
       forEachHDVector((parent, vec) {
         if (parent != null) {
 
-          final derivedPriv = HDKey.decode(parent.privEncoded).derive(vec.index);
+          final derivedPriv = HDPrivateKey.decode(parent.privEncoded).derive(vec.index);
           expectPriv(derivedPriv);
-          vec.expectHDKey(derivedPriv);
+          vec.expectHDPrivateKey(derivedPriv);
 
           if (!vec.hardened) {
             final derivedPub = HDKey.decode(parent.pubEncoded).derive(vec.index);
@@ -191,7 +191,7 @@ void main() {
           final derivedHardened = HDKey.decode(parent.privEncoded)
             .deriveHardened(vec.index - 0x80000000);
           expectPriv(derivedHardened);
-          vec.expectHDKey(derivedHardened);
+          vec.expectHDPrivateKey(derivedHardened);
         }
       });
     });
@@ -201,7 +201,7 @@ void main() {
       final derived = masterHDKey.derivePath("m/0'/1/2'/2/1000000000");
 
       expectPriv(derived);
-      hdVectors[0][5].expectHDKey(derived);
+      hdVectors[0][5].expectHDPrivateKey(derived);
 
       final pubDerived = HDPublicKey.decode(hdVectors[0][3].pubEncoded, pubPrefix)
         .derivePath("2/1000000000");
