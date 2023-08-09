@@ -32,6 +32,16 @@ import 'package:coinlib/coinlib.dart';
 The library must be asynchronously loaded by awaiting the `loadCoinlib()`
 function before any part of the library is used.
 
+The library uses a functional-style of OOP. With some exceptions, objects are
+immutable. New modified objects are returned from methods. For example, signing
+a transaction returns a new signed transaction object:
+
+```dart
+final signedTx = unsignedTx.sign(inputN: 0, key: privateKey);
+```
+
+An example is found in the `example/` directory.
+
 ## Building for Linux
 
 Docker or Podman is required to build the library for Linux.
