@@ -48,7 +48,7 @@ class LegacyTransaction with Writable {
 
   /// Constructs a transaction with the given [inputs] and [outputs].
   /// [TransactionTooLarge] will be thrown if the resulting transction exceeds
-  /// [maxSize (1MB).
+  /// [maxSize] (1MB).
   LegacyTransaction({
     this.version = currentVersion,
     required Iterable<Input> inputs,
