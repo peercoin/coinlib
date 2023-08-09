@@ -37,18 +37,18 @@ packages:
     dependency: transitive
     description:
       name: coinlib
-      sha256: bd1c7a79d417a649038805aace5ea0a3d948202dccb353995cf5c6dc0504a144
+      sha256: "25f642200cd85a23e2be8e7982732fe4cc0c8529046833eebe45f44d4c72c8cd"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0-alpha.2"
+    version: "1.0.0-alpha.3"
   coinlib_flutter:
     dependency: "direct main"
     description:
       name: coinlib_flutter
-      sha256: "4768bda9f9f98c4282c5bb57a71016c8b66e028b5fdb5b2dbec66616699249e1"
+      sha256: cc9bd8234936f9fd25129d6c4885310f9d135337f2b6d8436cb984c45e31e5ac
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0-alpha.3"
+    version: "1.0.0-alpha.3.1"
   collection:
     dependency: transitive
     description:
@@ -114,10 +114,10 @@ packages:
     dependency: "direct dev"
     description:
       name: flutter_lints
-      sha256: aeb0b80a8b3709709c9cc496cdc027c5b3216796bc0af0ce1007eaf24464fd4c
+      sha256: "2118df84ef0c3ca93f96123a616ae8540879991b8b57af2f81b76a7ada49b2a4"
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.1"
+    version: "2.0.2"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -143,10 +143,10 @@ packages:
     dependency: transitive
     description:
       name: lints
-      sha256: "5e4a9cd06d447758280a8ac2405101e0e2094d2a1dbdd3756aec3fe7775ba593"
+      sha256: "0a217c6c989d21039f1498c3ed9f3ed71b354e69873f13a8dfc3c9fe76f1b452"
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.1"
+    version: "2.1.1"
   matcher:
     dependency: transitive
     description:
@@ -183,10 +183,10 @@ packages:
     dependency: transitive
     description:
       name: plugin_platform_interface
-      sha256: "6a2128648c854906c53fa8e33986fc0247a1116122f9534dd20e3ab9e16a32bc"
+      sha256: "43798d895c929056255600343db8f049921cbec94d31ec87f1dc5c16c01935dd"
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.4"
+    version: "2.1.5"
   pointycastle:
     dependency: transitive
     description:
