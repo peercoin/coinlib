@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-import 'package:coinlib/src/common/hex.dart';
 import 'package:test/test.dart';
 import 'package:coinlib/coinlib.dart';
 import '../vectors/keys.dart';

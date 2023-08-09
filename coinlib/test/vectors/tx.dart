@@ -1,7 +1,5 @@
 import 'dart:typed_data';
-
 import 'package:coinlib/coinlib.dart';
-import 'package:coinlib/src/common/hex.dart';
 
 class TxVector {
   LegacyTransaction obj;

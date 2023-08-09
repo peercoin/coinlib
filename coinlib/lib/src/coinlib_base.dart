@@ -1,6 +1,7 @@
 import 'package:coinlib/src/bindings/secp256k1.dart';
 
 export 'package:coinlib/src/common/bytes.dart';
+export 'package:coinlib/src/common/hex.dart';
 export 'package:coinlib/src/common/serial.dart';
 
 export 'package:coinlib/src/crypto/ec_private_key.dart';

@@ -1,4 +1,3 @@
-
 import 'package:coinlib/coinlib.dart';
 
 class KeyTestVector {

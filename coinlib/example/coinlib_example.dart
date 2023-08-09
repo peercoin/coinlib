@@ -1,5 +1,4 @@
 import "package:coinlib/coinlib.dart";
-import "package:coinlib/src/common/hex.dart";
 
 void main() async {
 

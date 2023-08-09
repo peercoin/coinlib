@@ -1,6 +1,5 @@
 import 'package:coinlib/coinlib.dart';
 import 'package:test/test.dart';
-import 'package:coinlib/src/common/hex.dart';
 
 final privPrefix = NetworkParams.mainnet.privHDPrefix;
 final pubPrefix = NetworkParams.mainnet.pubHDPrefix;
