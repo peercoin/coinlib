@@ -199,19 +199,16 @@ void main() {
     test("derivePath()", () {
 
       final derived = masterHDKey.derivePath("m/0'/1/2'/2/1000000000");
-
       expectPriv(derived);
       hdVectors[0][5].expectHDPrivateKey(derived);
 
       final pubDerived = HDPublicKey.decode(hdVectors[0][3].pubEncoded, pubPrefix)
         .derivePath("2/1000000000");
-
       expectPub(pubDerived);
       hdVectors[0][5].expectHDKey(pubDerived);
 
       final pubMasterDerived =
         HDPublicKey.decode(hdVectors[1][0].pubEncoded, pubPrefix).derivePath("m/0");
-
       expectPub(pubMasterDerived);
       hdVectors[1][1].expectHDKey(pubMasterDerived);
 
