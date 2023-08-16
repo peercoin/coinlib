@@ -3,6 +3,7 @@ import 'package:coinlib/src/crypto/ec_public_key.dart';
 import 'package:coinlib/src/tx/input.dart';
 import 'package:coinlib/src/tx/input_signature.dart';
 import 'package:coinlib/src/tx/outpoint.dart';
+import 'pkh_input.dart';
 import 'raw_input.dart';
 import 'witness_input.dart';
 
@@ -11,9 +12,11 @@ import 'witness_input.dart';
 /// It is either signed or unsigned and the [addSignature] method can be used to
 /// add a signature. Signature and public key data is stored in the witness
 /// data.
-class P2WPKHInput extends WitnessInput {
+class P2WPKHInput extends WitnessInput with PKHInput {
 
+  @override
   final ECPublicKey publicKey;
+  @override
   final InputSignature? insig;
 
   P2WPKHInput({
@@ -60,6 +63,7 @@ class P2WPKHInput extends WitnessInput {
 
   }
 
+  @override
   /// Returns a new [P2WPKHInput] with the [InputSignature] added. Any existing
   /// signature is replaced.
   P2WPKHInput addSignature(InputSignature insig) => P2WPKHInput(
@@ -77,8 +81,5 @@ class P2WPKHInput extends WitnessInput {
       insig: null,
       sequence: sequence,
     );
-
-  @override
-  bool get complete => insig != null;
 
 }

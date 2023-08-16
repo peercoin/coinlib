@@ -2,6 +2,7 @@ import 'package:coinlib/src/crypto/ec_public_key.dart';
 import 'package:coinlib/src/scripts/operations.dart';
 import 'package:coinlib/src/tx/input_signature.dart';
 import 'package:coinlib/src/tx/outpoint.dart';
+import 'package:coinlib/src/tx/pkh_input.dart';
 import '../scripts/script.dart';
 import 'input.dart';
 import 'raw_input.dart';
@@ -9,9 +10,11 @@ import 'raw_input.dart';
 /// An input for a Pay-to-Public-Key-Hash output ([P2PKH]). This contains the
 /// public key that should match the hash in the associated output. It is either
 /// signed or unsigned and the [addSignature] method can be used to add a signature.
-class P2PKHInput extends RawInput {
+class P2PKHInput extends RawInput with PKHInput {
 
+  @override
   final ECPublicKey publicKey;
+  @override
   final InputSignature? insig;
 
   P2PKHInput({
@@ -53,6 +56,7 @@ class P2PKHInput extends RawInput {
 
   }
 
+  @override
   /// Returns a new [P2PKHInput] with the [InputSignature] added. Any existing
   /// signature is replaced.
   P2PKHInput addSignature(InputSignature insig) => P2PKHInput(
@@ -70,9 +74,6 @@ class P2PKHInput extends RawInput {
       insig: null,
       sequence: sequence,
     );
-
-  @override
-  bool get complete => insig != null;
 
   @override
   Script get script => super.script!;

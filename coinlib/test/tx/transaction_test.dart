@@ -6,15 +6,20 @@ import '../vectors/keys.dart';
 
 void main() {
 
-  group("LegacyTransaction", () {
+  group("Transaction", () {
 
     setUpAll(loadCoinlib);
 
-    expectVectorWithoutObj(LegacyTransaction tx, TxVector vec) {
+    expectVectorWithoutObj(Transaction tx, TxVector vec) {
       expect(tx.toHex(), vec.hex);
+
       expect(tx.hashHex, vec.hashHex);
-      expect(tx.txid, vec.hashHex);
       expect(tx.hash, hexToBytes(vec.hashHex).reversed);
+
+      expect(tx.txid, vec.txidHex);
+      expect(tx.legacyHash, hexToBytes(vec.txidHex).reversed);
+
+      expect(tx.isWitness, vec.isWitness);
       expect(tx.isCoinBase, vec.isCoinBase);
       expect(tx.isCoinStake, vec.isCoinStake);
       expect(tx.complete, vec.complete);
@@ -24,7 +29,7 @@ void main() {
 
     mapToHex(List<Writable> list) => list.map((e) => e.toHex());
 
-    expectFullVector(LegacyTransaction tx, TxVector vec) {
+    expectFullVector(Transaction tx, TxVector vec) {
       expectVectorWithoutObj(tx, vec);
       expect(tx.version, vec.obj.version);
       expect(tx.locktime, vec.obj.locktime);
@@ -35,8 +40,23 @@ void main() {
 
     test("valid txs", () {
       for (final vec in validTxVecs) {
+
         expectVectorWithoutObj(vec.obj, vec);
-        expectFullVector(LegacyTransaction.fromHex(vec.hex), vec);
+        expectFullVector(Transaction.fromHex(vec.hex), vec);
+        expectFullVector(
+          Transaction.fromHex(vec.hex, expectWitness: vec.isWitness), vec,
+        );
+        expect(vec.obj == vec.obj.legacy, !vec.isWitness);
+
+        if (vec.isWitness) {
+          final legacy = vec.obj.legacy;
+          expect(legacy.isWitness, false);
+          expect(legacy.inputs, everyElement(isA<RawInput>()));
+          expect(legacy.toHex(), vec.legacyHex);
+          expect(legacy.size, vec.legacyHex!.length/2);
+          expect(legacy.hashHex, vec.txidHex);
+        }
+
       }
     });
 
@@ -47,7 +67,10 @@ void main() {
         "03000000000100000000",
         "030000000001a0860100000000001a76a914c42e7ef92fdb603af844d064faad95db9bcdfd3d88ac04030201",
       ]) {
-        expect(() => LegacyTransaction.fromHex(vec), throwsA(isA<OutOfData>()));
+        expect(
+          () => Transaction.fromHex(vec),
+          throwsA(isA<InvalidTransaction>()),
+        );
       }
     });
 
@@ -74,7 +97,7 @@ void main() {
 
       }
 
-      LegacyTransaction txOfSize(int size) => LegacyTransaction(
+      Transaction txOfSize(int size) => Transaction(
         inputs: [
           RawInput(
             prevOut: examplePrevOut,
@@ -84,11 +107,11 @@ void main() {
         outputs: [],
       );
 
-      expect(LegacyTransaction.fromBytes(dataOfSize(1000000)).size, 1000000);
+      expect(Transaction.fromBytes(dataOfSize(1000000)).size, 1000000);
       expect(txOfSize(1000000).size, 1000000);
 
       expect(
-        () => LegacyTransaction.fromBytes(dataOfSize(1000001)),
+        () => Transaction.fromBytes(dataOfSize(1000001)),
         throwsA(isA<TransactionTooLarge>()),
       );
       expect(() => txOfSize(1000001), throwsA(isA<TransactionTooLarge>()));
@@ -97,31 +120,50 @@ void main() {
 
     test("signatureHash", () {
 
-      final tx = LegacyTransaction.fromHex(sigHashTxHex);
+      final tx = Transaction.fromHex(sigHashTxHex);
 
       for (final vec in sighashVectors) {
+
         expect(
           bytesToHex(
             tx.signatureHash(
               vec.inputN,
-              Script.fromAsm(vec.prevScriptAsm),
+              Script.fromAsm(vec.scriptCodeAsm),
               vec.type,
             ),
           ),
           vec.hash,
         );
+
+        expect(
+          bytesToHex(
+            tx.signatureHashForWitness(
+              vec.inputN,
+              Script.fromAsm(vec.scriptCodeAsm),
+              witnessValue,
+              vec.type,
+            ),
+          ),
+          vec.witnessHash,
+        );
+
       }
 
     });
 
     test("signatureHash input out of range", () {
+      final tx = Transaction.fromHex(sigHashTxHex);
       expect(
-        () => LegacyTransaction.fromHex(sigHashTxHex)
-          .signatureHash(2, Script([]), SigHashType.all()),
+        () => tx.signatureHash(2, Script([]), SigHashType.all()),
+        throwsArgumentError,
+      );
+      expect(
+        () => tx.signatureHashForWitness(
+          2, Script([]), witnessValue, SigHashType.all(),
+        ),
         throwsArgumentError,
       );
     });
-
 
     test("sign() failure", () {
 
@@ -129,7 +171,7 @@ void main() {
       final pubkey = privkey.pubkey;
       final wrongkey = ECPrivateKey.generate();
 
-      final txNoOutput = LegacyTransaction(
+      final txNoOutput = Transaction(
         inputs: [
           P2WPKHInput(prevOut: examplePrevOut, publicKey: pubkey),
           P2PKHInput(
@@ -143,7 +185,7 @@ void main() {
       // SIGHASH_NONE OK with no outputs
       expect(
         txNoOutput.sign(inputN: 1, key: privkey, hashType: SigHashType.none()),
-        isA<LegacyTransaction>(),
+        isA<Transaction>(),
       );
 
       // No outputs
@@ -155,7 +197,7 @@ void main() {
       final tx = txNoOutput.addOutput(exampleOutput);
 
       // OK
-      expect(tx.sign(inputN: 1, key: privkey), isA<LegacyTransaction>());
+      expect(tx.sign(inputN: 1, key: privkey), isA<Transaction>());
 
       // Input out of range
       expect(() => tx.sign(inputN: 2, key: privkey), throwsArgumentError);
@@ -196,7 +238,7 @@ void main() {
         required String hex,
       }) {
 
-        final tx = LegacyTransaction(
+        final tx = Transaction(
           inputs: prevTxIds.map((txid) => P2PKHInput(
               prevOut: OutPoint.fromHex(txid, 1), publicKey: keyVec.publicObj,
             ),
@@ -290,7 +332,7 @@ void main() {
       final pubkeys = privkeys.map((k) => k.pubkey).toList();
       final multisig = MultisigProgram(3, pubkeys);
 
-      final tx = LegacyTransaction(
+      final tx = Transaction(
         inputs: [
           P2PKHInput(
             prevOut: OutPoint.fromHex(
@@ -338,7 +380,7 @@ void main() {
       );
 
       // Check insigs by reference to their hash types
-      expectMultisigSigs(LegacyTransaction tx, List<SigHashType> types) {
+      expectMultisigSigs(Transaction tx, List<SigHashType> types) {
         final sigs = (tx.inputs[1] as P2SHMultisigInput).sigs;
         expect(sigs.length, types.length);
         expect(sigs.map((s) => s.hashType), types);
@@ -381,7 +423,7 @@ void main() {
     final privkey = ECPrivateKey.generate();
     final pubkey = privkey.pubkey;
 
-    var tx = LegacyTransaction(
+    var tx = Transaction(
       inputs: [
         P2PKHInput(prevOut: examplePrevOut, publicKey: pubkey),
         P2PKHInput(prevOut: examplePrevOut, publicKey: pubkey),

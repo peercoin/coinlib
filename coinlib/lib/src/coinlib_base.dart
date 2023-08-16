@@ -31,12 +31,13 @@ export 'package:coinlib/src/scripts/programs/p2wsh.dart';
 
 export 'package:coinlib/src/tx/input.dart';
 export 'package:coinlib/src/tx/input_signature.dart';
-export 'package:coinlib/src/tx/legacy_transaction.dart';
+export 'package:coinlib/src/tx/transaction.dart';
 export 'package:coinlib/src/tx/outpoint.dart';
 export 'package:coinlib/src/tx/output.dart';
 export 'package:coinlib/src/tx/p2pkh_input.dart';
 export 'package:coinlib/src/tx/p2sh_multisig_input.dart';
 export 'package:coinlib/src/tx/p2wpkh_input.dart';
+export 'package:coinlib/src/tx/pkh_input.dart';
 export 'package:coinlib/src/tx/raw_input.dart';
 export 'package:coinlib/src/tx/sighash_type.dart';
 export 'package:coinlib/src/tx/witness_input.dart';

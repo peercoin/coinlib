@@ -59,7 +59,7 @@ void main() async {
     "32d1f1cf811456c6da4ef9e1cb7f8bb80c4c5e9f2d2c3d743f2b68a9c6857823",
   );
 
-  final tx = LegacyTransaction(
+  final tx = Transaction(
     inputs: [
       P2PKHInput(prevOut: OutPoint(prevHash, 1), publicKey: key1.publicKey),
     ],
