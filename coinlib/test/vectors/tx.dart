@@ -462,6 +462,62 @@ final validTxVecs = [
 
 ];
 
+// Should deserialize as both legacy and witness transactions
+final ambiguousHex = "03000000000101000000000000002d00000000000000000000000000000000000000000000000000000000005151510b01010203040506070800010000000000";
+
+final ambiguousLegacy = TxVector(
+  obj: Transaction(
+    version: 3,
+    inputs: [],
+    outputs: [
+      Output.fromScriptBytes(
+        BigInt.one,
+        hexToBytes(
+          "00000000000000000000000000000000000000000000000000000000005151510b010102030405060708000100",
+        ),
+      ),
+    ],
+  ),
+  hashHex: "c484fd792a2b6abc72572da2fdfbe207edbab594b5b3d7fa0e7963b78c29c60a",
+  isWitness: false,
+  isCoinBase: false,
+  isCoinStake: false,
+  complete: false,
+  size: 64,
+  inputTypes: [],
+  hex: ambiguousHex,
+);
+
+final ambiguousWitness = TxVector(
+  obj: Transaction(
+    version: 3,
+    inputs: [
+      WitnessInput(
+        prevOut: OutPoint.fromHex(
+          "0000000000000000000000000000000000000000000000002d00000000000000", 0,
+        ),
+        witness: [Uint8List(0)],
+        sequence: 189878609,
+      ),
+    ],
+    outputs: [
+      Output.fromScriptBytes(
+        BigInt.parse("578437695752307201"),
+        Uint8List(0),
+      ),
+    ],
+  ),
+  hashHex: "c484fd792a2b6abc72572da2fdfbe207edbab594b5b3d7fa0e7963b78c29c60a",
+  txidHex: "a7905e577851b18db40986854f4d549a4cb8e759379bf783a0585a117792df1d",
+  isWitness: true,
+  isCoinBase: false,
+  isCoinStake: false,
+  complete: true,
+  size: 64,
+  inputTypes: [WitnessInput],
+  hex: ambiguousHex,
+);
+
 class SigHashVector {
   final int inputN;
   final String scriptCodeAsm;

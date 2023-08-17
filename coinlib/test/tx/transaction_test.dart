@@ -118,6 +118,23 @@ void main() {
 
     });
 
+    test("ambiguous tx", () {
+
+      expectFullVector(
+        Transaction.fromHex(ambiguousHex, expectWitness: false),
+        ambiguousLegacy,
+      );
+
+      expectFullVector(
+        Transaction.fromHex(ambiguousHex, expectWitness: true),
+        ambiguousWitness,
+      );
+
+      // Witness assumed by default
+      expectFullVector(Transaction.fromHex(ambiguousHex), ambiguousWitness);
+
+    });
+
     test("signatureHash", () {
 
       final tx = Transaction.fromHex(sigHashTxHex);
