@@ -77,7 +77,7 @@ final keyPairVectors = [
     compressed: true,
     wif: "L5oLkpV3aqBjhki6LmvChTCV6odsp4SXM6FfU2Gppt5kFLaHLuZ9",
     version: 0x80,
-  )
+  ),
 ];
 
 final validPubKeys = [

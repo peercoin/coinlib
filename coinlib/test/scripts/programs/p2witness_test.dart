@@ -59,7 +59,7 @@ void main() {
         "0028${longBytes}00",
         "0029${longBytes}00",
         "4f020102",
-        ""
+        "",
       ]) {
         expect(
           () => P2Witness.decompile(hexToBytes(bad)),

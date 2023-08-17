@@ -40,7 +40,7 @@ void main() {
         "0014${pubkeyhashVec}00",
         "0013000102030405060708090a0b0c0d0e0f101112",
         "0015${pubkeyhashVec}14",
-        "00", ""
+        "00", "",
       ]) {
         expect(() => P2WPKH.decompile(hexToBytes(bad)), throwsA(isA<NoProgramMatch>()));
       }
@@ -62,7 +62,7 @@ void main() {
       for (final bad in [
         "000102030405060708090a0b0c0d0e0f101112",
         "${pubkeyhashVec}14",
-        ""
+        "",
       ]) {
         expect(
           () => P2WPKH.fromHash(hexToBytes(bad)),

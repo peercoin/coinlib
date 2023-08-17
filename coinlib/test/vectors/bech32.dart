@@ -17,7 +17,7 @@ const validBech32m = [
   "abcdef1l7aum6echk45nj3s0wdvt2fg8x9yrzpqzd3ryx",
   "11llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllludsr8",
   "split1checkupstagehandshakeupstreamerranterredcaperredlc445v",
-  "?1v759aa"
+  "?1v759aa",
 ];
 
 final invalidBech32 = [

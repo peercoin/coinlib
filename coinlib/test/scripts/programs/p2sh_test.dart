@@ -52,7 +52,7 @@ void main() {
         "OP_HASH160 ${scriptHash}14 OP_EQUAL",
         "OP_HASH160 $scriptHash",
         "OP_HASH160 $scriptHash OP_EQUALVERIFY",
-        "OP_HASH256 $scriptHash OP_EQUAL"
+        "OP_HASH256 $scriptHash OP_EQUAL",
       ]) {
         expect(() => P2SH.fromAsm(bad), throwsA(isA<NoProgramMatch>()));
       }
@@ -62,7 +62,7 @@ void main() {
       for (final bad in [
         "000102030405060708090a0b0c0d0e0f101112",
         "${scriptHash}14",
-        ""
+        "",
       ]) {
         expect(
           () => P2SH.fromHash(hexToBytes(bad)),

@@ -28,7 +28,7 @@ void main() {
         ...hashBytes, // Hash
         1,2,3,4, // n
         1, 0, // OP_0
-        0xa4, 0xa3, 0xa2, 0xa1 // Sequence
+        0xa4, 0xa3, 0xa2, 0xa1, // Sequence
       ]);
 
       expectRaw(RawInput input) {
@@ -62,7 +62,7 @@ void main() {
         ...hashBytes, // Hash
         1,2,3,4, // n
         4, 1, 2, 3, 4, // Not a valid script
-        0xff, 0xff, 0xff, 0xff // Sequence
+        0xff, 0xff, 0xff, 0xff, // Sequence
       ]);
 
       final scriptSig = Uint8List.fromList([1,2,3,4]);

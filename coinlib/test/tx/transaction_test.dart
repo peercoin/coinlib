@@ -92,7 +92,7 @@ void main() {
           ...Iterable.generate(scriptSize),
           0xff, 0xff, 0xff, 0xff,
           0,
-          0,0,0,0
+          0,0,0,0,
         ]);
 
       }

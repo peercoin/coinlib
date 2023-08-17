@@ -46,7 +46,7 @@ final vectors = [
     scriptHex: "00",
     outHex: "ff000000000000000100",
     progType: RawProgram,
-  )
+  ),
 ];
 
 void main() {

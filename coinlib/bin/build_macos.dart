@@ -43,7 +43,7 @@ void main() async {
       // Install final dylib in local directory so it can be copied
       "--prefix", "$libDir/build",
       // Build for arm and x86 architectures
-      "CFLAGS=-O2 -arch x86_64 -arch arm64"
+      "CFLAGS=-O2 -arch x86_64 -arch arm64",
     ],
     workingDir: libDir,
   );

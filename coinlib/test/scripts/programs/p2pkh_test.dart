@@ -68,7 +68,7 @@ void main() {
       for (final bad in [
         "000102030405060708090a0b0c0d0e0f101112",
         "${pubkeyhashVec}14",
-        ""
+        "",
       ]) {
         expect(
           () => P2PKH.fromHash(hexToBytes(bad)),

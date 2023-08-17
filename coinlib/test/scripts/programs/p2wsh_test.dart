@@ -52,7 +52,7 @@ void main() {
         "0 000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e",
         "0 ${scriptHash}20",
         "0 $scriptHash 0",
-        "01 $scriptHash"
+        "01 $scriptHash",
       ]) {
         expect(
           () => P2WSH.fromAsm(bad),
@@ -66,7 +66,7 @@ void main() {
       for (final bad in [
         "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e",
         "${scriptHash}20",
-        ""
+        "",
       ]) {
         expect(
           () => P2WSH.fromHash(hexToBytes(bad)),

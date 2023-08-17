@@ -137,7 +137,7 @@ final validTxVecs = [
             "PCLHR5x8X2bitLes8DiSMTswpc46zt6THo",
             NetworkParams.mainnet,
           ),
-        )
+        ),
       ],
     ),
     hashHex: "6b1944794c215482f9b4532ccd0f982a3be80f0a349394cc2de2c95014c563be",
@@ -352,7 +352,7 @@ final validTxVecs = [
             "PQfazmXYxj7BKQG9jGbjKaQzYyi8AGEkH1",
             NetworkParams.mainnet,
           ),
-        )
+        ),
       ],
     ),
     hashHex: "c018ee785bea0ce31228bb60afa049341bb52e018d1b59046432e9ab0016fb57",
@@ -414,12 +414,14 @@ final validTxVecs = [
   TxVector(
     obj: Transaction(
       version: 3,
-      inputs: [P2WPKHInput(
-        prevOut: examplePrevOut,
-        publicKey: examplePubkey,
-        insig: exampleInsig,
-        sequence: 0x01020304,
-      )],
+      inputs: [
+        P2WPKHInput(
+          prevOut: examplePrevOut,
+          publicKey: examplePubkey,
+          insig: exampleInsig,
+          sequence: 0x01020304,
+        ),
+      ],
       outputs: [exampleOutput],
     ),
     hashHex: "f1cd5422c06f2f1a59bfb45307ab56f1a1720da5af766c06a2317ba43dfefafc",
@@ -438,10 +440,12 @@ final validTxVecs = [
   TxVector(
     obj: Transaction(
       version: 3,
-      inputs: [WitnessInput(
-        prevOut: examplePrevOut,
-        witness: [Uint8List(0), Uint8List.fromList([0xff, 1, 2, 3])],
-      )],
+      inputs: [
+        WitnessInput(
+          prevOut: examplePrevOut,
+          witness: [Uint8List(0), Uint8List.fromList([0xff, 1, 2, 3])],
+        ),
+      ],
       outputs: [exampleOutput],
     ),
     hashHex: "ef839df6a0094f5af7a8d4bc704e0ea9ad201c956784e7d7d99350de502028b0",
@@ -454,7 +458,7 @@ final validTxVecs = [
     inputTypes: [WitnessInput],
     hex: "03000000000101f1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe0000000000ffffffff01a0860100000000001976a914c42e7ef92fdb603af844d064faad95db9bcdfd3d88ac020004ff01020300000000",
     legacyHex: "0300000001f1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe0000000000ffffffff01a0860100000000001976a914c42e7ef92fdb603af844d064faad95db9bcdfd3d88ac00000000",
-  )
+  ),
 
 ];
 

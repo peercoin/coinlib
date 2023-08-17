@@ -64,7 +64,7 @@ void main() async {
       P2PKHInput(prevOut: OutPoint(prevHash, 1), publicKey: key1.publicKey),
     ],
     outputs: [
-      Output.fromAddress(BigInt.from(2000000), address)
+      Output.fromAddress(BigInt.from(2000000), address),
     ],
   );
 
