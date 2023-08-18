@@ -76,7 +76,25 @@ void main() {
 
     test("tx too large", () {
 
-      final nonScriptSize = 4 + 1 + 32 + 4 + 5 + 4 + 1 + 4;
+      final nonScriptSize
+        = 4 // Version
+        + 1 // nIn
+        + 36 // Prevout
+        + 5 // Script varint
+        + 4 // Sequence
+        + 1 // nOut
+        + 4; // Locktime
+
+      final witnessNonScriptSize
+        = 4 // Version
+        + 2 // Marker and flag
+        + 1 // nIn
+        + 36 // Prevout
+        + 1 // Empty script
+        + 4 // Sequence
+        + 1 // nOut
+        + 6 // Witness varints
+        + 4; // Locktime
 
       Uint8List dataOfSize(int size) {
 
@@ -107,14 +125,30 @@ void main() {
         outputs: [],
       );
 
+      Transaction witnessTxOfSize(int size) => Transaction(
+        inputs: [
+          WitnessInput(
+            prevOut: examplePrevOut,
+            witness: [Uint8List(size-witnessNonScriptSize)],
+          ),
+        ],
+        outputs: [],
+      );
+
+
       expect(Transaction.fromBytes(dataOfSize(1000000)).size, 1000000);
       expect(txOfSize(1000000).size, 1000000);
+      expect(witnessTxOfSize(1000000).size, 1000000);
 
       expect(
         () => Transaction.fromBytes(dataOfSize(1000001)),
         throwsA(isA<TransactionTooLarge>()),
       );
       expect(() => txOfSize(1000001), throwsA(isA<TransactionTooLarge>()));
+      expect(
+        () => witnessTxOfSize(1000001),
+        throwsA(isA<TransactionTooLarge>()),
+      );
 
     });
 
