@@ -279,9 +279,10 @@ void main() {
       expect(() => tx.outputs[0] = exampleOutput, throwsA(anything));
     });
 
-    test("sign P2PKH", () {
 
-      final keyVec = keyPairVectors[0];
+    final keyVec = keyPairVectors[0];
+
+    test("sign P2PKH", () {
 
       expectP2PKH({
         required List<String> prevTxIds,
@@ -363,6 +364,46 @@ void main() {
         ],
         hashType: SigHashType.all(anyOneCanPay: true),
         hex: "0300000002fb4c19324dfce03b96595340821fa92959418e9f0522d7df8b6ada7c71d6bb21010000006a47304402203d2104bca35cb5774d677940145267a0c665b135dda845221937831e98155d02022073fe3afa725e0cef6458ae9cc1ef79b42839bf3832dbc9a9363d2c3f4c01ca9d81210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ffffffff35b331b276aaeca6ec8ead5f33d6fb652bd3cf4761020c82ed0664acb9780c87010000006b483045022100bdf9f141ed69b24429299bec9f6a9ff34acb3c3de83190403b8ed9fa2b549e370220355b7b7116309b25f1a8195ad4c5fc2ee97dc4598a4e0690e764cbdafcd1aa2481210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ffffffff01a0860100000000001976a914c42e7ef92fdb603af844d064faad95db9bcdfd3d88ac00000000",
+      );
+
+    });
+
+    test("sign P2WPKH input", () {
+      // Includes a P2PKH input for good measure
+      // Sent on testnet:
+      //    779916ef78412d4fe99d3b65a01a9cbbf227091dc28e93b5832cb8fac0026075
+      // Includes 5ppc and 3ppc inputs
+      //    via 2ff951d8da4f1bd468621bdd392fac80e19bf371d5397e77576cb873f6f9af88
+
+      final prevHashHex
+        = "2ff951d8da4f1bd468621bdd392fac80e19bf371d5397e77576cb873f6f9af88";
+
+      final tx = Transaction(
+        inputs: [
+          P2PKHInput(
+            prevOut: OutPoint.fromHex(prevHashHex, 1),
+            publicKey: keyVec.publicObj,
+          ),
+          P2WPKHInput(
+            prevOut: OutPoint.fromHex(prevHashHex, 2),
+            publicKey: keyVec.publicObj,
+          ),
+        ],
+        outputs: [exampleOutput],
+      );
+      expect(tx.complete, false);
+
+      final partSigned = tx.sign(inputN: 0, key: keyVec.privateObj);
+      expect(partSigned.complete, false);
+
+      final signed = partSigned.sign(
+        inputN: 1, key: keyVec.privateObj, value: BigInt.from(3000000),
+      );
+      expect(signed.complete, true);
+
+      expect(
+        signed.toHex(),
+        "0300000000010288aff9f673b86c57777e39d571f39be180ac2f39dd1b6268d41b4fdad851f92f010000006a47304402202319e6c9ebe8445aae38811f5f5c4859efc483517154d44a98554046f56fee9302206a8b5ddf71314d3c8e9ae136d2db66167f93ce7b3eaf925f8e1dff7b81c4a48f01210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ffffffff88aff9f673b86c57777e39d571f39be180ac2f39dd1b6268d41b4fdad851f92f0200000000ffffffff01a0860100000000001976a914c42e7ef92fdb603af844d064faad95db9bcdfd3d88ac0002483045022100c6fb2f2ec7d0afa44457dd0bccd2466b02952f30d3ee52c9037efaf57ea2453302207afe28346385870125c07f77f426f3df33580d99b56eb3c3b5004285b06bcf6501210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f8179800000000",
       );
 
     });
