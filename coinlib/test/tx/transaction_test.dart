@@ -229,6 +229,7 @@ void main() {
             prevOut: examplePrevOut,
             publicKey: pubkey,
           ),
+          RawInput(prevOut: examplePrevOut, scriptSig: Uint8List(0)),
         ],
         outputs: [],
       );
@@ -251,7 +252,7 @@ void main() {
       expect(tx.sign(inputN: 1, key: privkey), isA<Transaction>());
 
       // Input out of range
-      expect(() => tx.sign(inputN: 2, key: privkey), throwsArgumentError);
+      expect(() => tx.sign(inputN: 3, key: privkey), throwsArgumentError);
 
       // Wrong key
       expect(
@@ -259,9 +260,15 @@ void main() {
         throwsA(isA<CannotSignInput>()),
       );
 
-      // Cannot sign witness input
+      // Cannot sign witness input without value
       expect(
         () => tx.sign(inputN: 0, key: privkey),
+        throwsA(isA<CannotSignInput>()),
+      );
+
+      // Cannot sign raw unmatched input
+      expect(
+        () => tx.sign(inputN: 2, key: privkey),
         throwsA(isA<CannotSignInput>()),
       );
 
