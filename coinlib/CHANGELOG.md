@@ -1,3 +1,8 @@
+## 1.0.0-rc.1
+
+- Add witness transactions
+- `LegacyTransaction` is replaced with a single `Transaction` class.
+
 ## 1.0.0-alpha.3
 
 - Return HDPrivateKey from HDPrivateKey derivation

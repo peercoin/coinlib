@@ -1,6 +1,6 @@
 # Coinlib
 
-**This is an alpha pre-release.**
+**This is a release-candidate.**
 
 Coinlib is a straight-forward and modular library for Peercoin and other similar
 cryptocoins. This library allows for the construction and signing of
