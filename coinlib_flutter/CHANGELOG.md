@@ -1,3 +1,7 @@
+## 1.0.0-rc.1
+
+Use underlying coinlib 1.0.0-rc.1.
+
 ## 1.0.0-alpha.3.1
 
 Use underlying coinlib alpha.3
