@@ -1,3 +1,9 @@
+## 1.0.0-rc.2
+
+- Add `forceLowR` to `ECDSASignature.sign` that is true by default. This forces
+    signatures to use a low r-value.
+- Transaction signatures now use low r-values.
+
 ## 1.0.0-rc.1
 
 - Add witness transactions
