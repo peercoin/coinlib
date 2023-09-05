@@ -83,6 +83,7 @@ class Secp256k1 extends Secp256k1Base<
     scalarArray = HeapArrayFfi(Secp256k1Base.privkeySize);
     serializedPubKeyArray = HeapArrayFfi(Secp256k1Base.uncompressedPubkeySize);
     hashArray = HeapArrayFfi(Secp256k1Base.hashSize);
+    entropyArray = HeapArrayFfi(Secp256k1Base.entropySize);
     serializedSigArray = HeapArrayFfi(Secp256k1Base.sigSize);
     derSigArray = HeapArrayFfi(Secp256k1Base.derSigSize);
 

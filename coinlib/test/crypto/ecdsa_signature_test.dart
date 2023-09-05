@@ -126,17 +126,27 @@ void main() {
       });
 
       test("provides a correct signature", () {
-        // This signature has been determined to be correct. secp256k1 has more
-        // exhaustive tests and this method is a wrapper around that.
-        // Should be the same each time
-        for (int x = 0; x < 2; x++) {
-          final sig = ECDSASignature.sign(key, msgHash);
-          expect(
-            bytesToHex(sig.compact),
-            "a951b0cf98bd51c614c802a65a418fa42482dc5c45c9394e39c0d98773c51cd530104fdc36d91582b5757e1de73d982e803cc14d75e82c65daf924e38d27d834",
-          );
-          expect(sig.verify(key.pubkey, msgHash), true);
+        // The low and high r-value signatures have been determined to be
+        // correct. secp256k1 has more exhaustive tests and this method is a
+        // wrapper around that.
+
+        expectWithR(bool lowR, String hex) {
+          // Do twice and should be the same both times
+          for (int x = 0; x < 2; x++) {
+            final sig = ECDSASignature.sign(key, msgHash, forceLowR: lowR);
+            expect(bytesToHex(sig.compact), hex);
+            expect(sig.verify(key.pubkey, msgHash), true);
+          }
         }
+        expectWithR(
+          false,
+          "a951b0cf98bd51c614c802a65a418fa42482dc5c45c9394e39c0d98773c51cd530104fdc36d91582b5757e1de73d982e803cc14d75e82c65daf924e38d27d834",
+        );
+        expectWithR(
+          true,
+          "0eda3be316b7d47901bc6a2bfc1b95cf6c408129a564d6b75963451e16fa155025077334a5bf937fcf3242cec81506deea34e26e65892bda896533c4e50e9360",
+        );
+
       });
 
       test("slight change in hash gives different signatures", () {

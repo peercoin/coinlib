@@ -24,6 +24,7 @@ abstract class Secp256k1Base<
   static const uncompressedFlags = 2;
   static const privkeySize = 32;
   static const hashSize = 32;
+  static const entropySize = 32;
   static const pubkeySize = 64;
   static const compressedPubkeySize = 33;
   static const uncompressedPubkeySize = 65;
@@ -80,6 +81,7 @@ abstract class Secp256k1Base<
   late HeapArrayBase scalarArray;
   late HeapArrayBase serializedPubKeyArray;
   late HeapArrayBase hashArray;
+  late HeapArrayBase entropyArray;
   late HeapArrayBase serializedSigArray;
   late HeapArrayBase derSigArray;
 
@@ -259,17 +261,28 @@ abstract class Secp256k1Base<
   /// Constructs a signature in the compact format using a 32-byte message
   /// [hash] and 32-byte [privKey] scalar. The signature contains a 32-byte
   /// big-endian R value followed by a 32-byte big-endian low-S value.
-  /// Signatures are deterministic according to RFC6979.
-  Uint8List ecdsaSign(Uint8List hash, Uint8List privKey) {
+  /// Signatures are deterministic according to RFC6979. Additional entropy may
+  /// be added as 32 bytes with [extraEntropy].
+  Uint8List ecdsaSign(
+    Uint8List hash, Uint8List privKey, [Uint8List? extraEntropy,]
+  ) {
     _requireLoad();
 
     privKeyArray.load(privKey);
     hashArray.load(hash);
+    if (extraEntropy != null) entropyArray.load(extraEntropy);
 
     // Sign
     if (
       extEcdsaSign(
-        ctxPtr, sigPtr, hashArray.ptr, privKeyArray.ptr, nullPtr, nullPtr,
+        ctxPtr, sigPtr, hashArray.ptr, privKeyArray.ptr,
+        // Passing null will give secp256k1_nonce_function_rfc6979. If secp256k1
+        // changes this default function in the future,
+        // secp256k1_nonce_function_rfc6979 should be used directly.
+        // Using null as it doesn't require passing an additional constant from
+        // the web and io implementations.
+        nullPtr,
+        extraEntropy == null ? nullPtr : entropyArray.ptr,
       ) != 1
     ) {
       throw Secp256k1Exception("Cannot sign message with private key");

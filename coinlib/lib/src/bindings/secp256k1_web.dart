@@ -98,6 +98,7 @@ class Secp256k1 extends Secp256k1Base<int, int, int, int,int, int, int, int> {
     privKeyArray = arrayFactory.create(Secp256k1Base.privkeySize);
     scalarArray = arrayFactory.create(Secp256k1Base.privkeySize);
     hashArray = arrayFactory.create(Secp256k1Base.hashSize);
+    entropyArray = arrayFactory.create(Secp256k1Base.entropySize);
     serializedPubKeyArray = arrayFactory.create(
       Secp256k1Base.uncompressedPubkeySize,
     );

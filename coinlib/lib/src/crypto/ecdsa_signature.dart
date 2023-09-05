@@ -58,12 +58,29 @@ class ECDSASignature {
   /// Creates a signature using a private key ([privkey]) for a given 32-byte
   /// [hash]. The signature will be generated deterministically and shall be the
   /// same for a given hash and key.
-  factory ECDSASignature.sign(ECPrivateKey privkey, Uint8List hash) {
+  /// If [forceLowR] is true (default), then signatures with high r-values will
+  /// be skipped until a signature with a low r-value is found.
+  factory ECDSASignature.sign(
+    ECPrivateKey privkey,
+    Uint8List hash,
+    { bool forceLowR = true, }
+  ) {
     checkBytes(hash, 32);
 
-    final sig = ECDSASignature.fromCompact(
-      secp256k1.ecdsaSign(hash, privkey.data),
-    );
+    Uint8List compact;
+
+    if (forceLowR) {
+      // Loop through incrementing entropy until a low r-value is found
+      Uint8List extraEntropy = Uint8List(32);
+      do {
+        compact = secp256k1.ecdsaSign(hash, privkey.data, extraEntropy);
+        for (int i = 0; extraEntropy[i]++ == 255; i++) {}
+      } while (compact[0] >= 0x80);
+    } else {
+      compact = secp256k1.ecdsaSign(hash, privkey.data);
+    }
+
+    final sig = ECDSASignature.fromCompact(compact);
 
     // Verify signature to protect against computation errors. Cosmic rays etc.
     if (!sig.verify(privkey.pubkey, hash)) throw InvalidECDSASignature();
