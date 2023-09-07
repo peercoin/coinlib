@@ -37,18 +37,18 @@ packages:
     dependency: transitive
     description:
       name: coinlib
-      sha256: "2a200b32779b05adb826a80a3a65af4373a1ebdabe0252018e39831abfe20ae3"
+      sha256: c8018027801ddcb093837ad8f27e9ac014434b84860ecd3114ca28980614ec4a
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0-rc.2"
+    version: "1.0.0-rc.3"
   coinlib_flutter:
     dependency: "direct main"
     description:
       name: coinlib_flutter
-      sha256: a4c009ae0b813f216b4919001b0b90f758f5d777ebb9aa98a3a413c00acaff35
+      sha256: "055a1ba6404f3b1c5489d08d84193d9b6551e55357fe61ce668471f07bc16895"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0-rc.2"
+    version: "1.0.0-rc.3"
   collection:
     dependency: transitive
     description:
