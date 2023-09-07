@@ -1,3 +1,7 @@
+## 1.0.0-rc.3
+
+- Make static variables immutable as final or const.
+
 ## 1.0.0-rc.2
 
 - Add `forceLowR` to `ECDSASignature.sign` that is true by default. This forces
