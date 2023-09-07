@@ -10,7 +10,7 @@ import 'package:coinlib/src/scripts/script.dart';
 /// satisfy this script with a signature.
 class P2PKH implements Program {
 
-  static Script template = Script.fromAsm(
+  static final template = Script.fromAsm(
     "OP_DUP OP_HASH160 <20-bytes> OP_EQUALVERIFY OP_CHECKSIG",
   );
 

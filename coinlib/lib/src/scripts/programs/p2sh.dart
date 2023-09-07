@@ -8,7 +8,7 @@ import 'package:coinlib/src/scripts/script.dart';
 /// Pay-to-Script-Hash program taking a 20-byte script hash for a redeem script.
 class P2SH implements Program {
 
-  static Script template = Script.fromAsm("OP_HASH160 <20-bytes> OP_EQUAL");
+  static final template = Script.fromAsm("OP_HASH160 <20-bytes> OP_EQUAL");
 
   @override
   final Script script;

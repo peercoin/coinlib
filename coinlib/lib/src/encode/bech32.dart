@@ -81,10 +81,10 @@ enum Bech32Type { bech32, bech32m }
 /// words may need to be further converted into the required data.
 class Bech32 {
 
-  static int maxLength = 90;
-  static int checksumLength = 6;
-  static int bech32CheckConst = 1;
-  static int bech32mCheckConst = 0x2bc830a3;
+  static const maxLength = 90;
+  static const checksumLength = 6;
+  static const bech32CheckConst = 1;
+  static const bech32mCheckConst = 0x2bc830a3;
 
   final String hrp;
   final List<int> words;

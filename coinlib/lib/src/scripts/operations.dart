@@ -12,13 +12,12 @@ class PushDataNotMinimal implements Exception {}
 /// Represents a single operation or script pushdata
 abstract class ScriptOp {
 
-  static int op1Negate = scriptOpNameToCode["1NEGATE"]!;
-  static int op1 = scriptOpNameToCode["1"]!;
-  static int op16 = scriptOpNameToCode["16"]!;
-  static int pushData1 = scriptOpNameToCode["PUSHDATA1"]!;
-  static int pushData2 = pushData1+1;
-  static int pushData4 = pushData2+1;
-
+  static final op1Negate = scriptOpNameToCode["1NEGATE"]!;
+  static final op1 = scriptOpNameToCode["1"]!;
+  static final op16 = scriptOpNameToCode["16"]!;
+  static final pushData1 = scriptOpNameToCode["PUSHDATA1"]!;
+  static final pushData2 = pushData1+1;
+  static final pushData4 = pushData2+1;
   static final pushdataMatcherRegExp = RegExp(r"^<(\d+)-bytes>$");
 
   /// The compiled bytes for this operation

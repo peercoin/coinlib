@@ -6,8 +6,8 @@ import 'package:coinlib/src/scripts/script.dart';
 
 class MultisigProgram implements Program {
 
-  static int maxPubkeys = 20;
-  static ScriptOp checkmultisig = ScriptOpCode.fromName("CHECKMULTISIG");
+  static const maxPubkeys = 20;
+  static final checkmultisig = ScriptOpCode.fromName("CHECKMULTISIG");
 
   @override
   final Script script;

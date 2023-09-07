@@ -10,7 +10,7 @@ import 'package:coinlib/src/scripts/script.dart';
 class Output with Writable {
 
   /// Max 64-bit integer
-  static BigInt maxValue = (BigInt.from(1) << 64) - BigInt.one;
+  static final maxValue = (BigInt.from(1) << 64) - BigInt.one;
 
   final BigInt value;
   final Uint8List _scriptPubKey;

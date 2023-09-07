@@ -31,19 +31,19 @@ class CannotSignInput implements Exception {
 /// with witness data.
 class Transaction with Writable {
 
-  static Uint8List hashZero = Uint8List(32);
-  static Uint8List hashOne = Uint8List(32)..last = 1;
+  static final hashZero = Uint8List(32);
+  static final hashOne = Uint8List(32)..last = 1;
 
-  static const int currentVersion = 3;
-  static const int maxSize = 1000000;
+  static const currentVersion = 3;
+  static const maxSize = 1000000;
 
-  static const int minInputSize = 41;
-  static const int minOutputSize = 9;
-  static const int minOtherSize = 10;
+  static const minInputSize = 41;
+  static const minOutputSize = 9;
+  static const minOtherSize = 10;
 
-  static const int maxInputs
+  static const maxInputs
     = (maxSize - minOtherSize - minOutputSize) ~/ minInputSize;
-  static const int maxOutputs
+  static const maxOutputs
     = (maxSize - minOtherSize - minInputSize) ~/ minOutputSize;
 
   final int version;

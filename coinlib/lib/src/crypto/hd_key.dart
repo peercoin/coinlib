@@ -12,9 +12,9 @@ class InvalidHDKeyVersion implements Exception {}
 
 abstract class HDKey {
 
-  static int maxIndex = 0xffffffff;
-  static int hardenBit = 0x80000000;
-  static int encodedLength = 78;
+  static const maxIndex = 0xffffffff;
+  static const hardenBit = 0x80000000;
+  static const encodedLength = 78;
 
   final Uint8List _chaincode;
   final int depth;

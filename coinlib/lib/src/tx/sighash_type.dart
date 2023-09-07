@@ -5,14 +5,14 @@
 class SigHashType {
 
   /// Value to sign all outputs
-  static const int allValue = 1;
+  static const allValue = 1;
   /// Value to sign no outputs
-  static const int noneValue = 2;
+  static const noneValue = 2;
   /// Value to sign the output at the same index as the input
-  static const int singleValue = 3;
+  static const singleValue = 3;
   /// Flag that can be combined with other hash type values to only sign the
   /// input containing the signature
-  static const int anyOneCanPayFlag = 0x80;
+  static const anyOneCanPayFlag = 0x80;
 
   /// The single byte representation of the sighash type. Use [all], [none],
   /// [single] and [anyonecanpay] to extract details of the type.
