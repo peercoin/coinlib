@@ -1,3 +1,7 @@
+## 1.0.0
+
+Final release for 1.0.0
+
 ## 1.0.0-rc.3
 
 - Make static variables immutable as final or const.

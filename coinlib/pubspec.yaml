@@ -2,7 +2,7 @@ name: coinlib
 description:
   A straight-forward, modular library for Peercoin and other Satoshi-based UTXO
   blockchains
-version: 1.0.0-rc.3
+version: 1.0.0
 repository: https://github.com/peercoin/coinlib
 
 environment:

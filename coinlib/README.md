@@ -17,8 +17,6 @@
 
 # Coinlib
 
-**This is a release-candidate.**
-
 Coinlib is a straight-forward and modular library for Peercoin and other similar
 cryptocoins. This library allows for the construction and signing of
 transactions and management of BIP32 wallets.
