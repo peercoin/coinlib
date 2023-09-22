@@ -2,8 +2,8 @@
 class NetworkParams {
 
   final int wifPrefix;
-  final int p2pkhPrefix;
-  final int p2shPrefix;
+  final List<int> p2pkhPrefix;
+  final List<int> p2shPrefix;
   final int privHDPrefix;
   final int pubHDPrefix;
   final String bech32Hrp;
@@ -21,8 +21,8 @@ class NetworkParams {
 
   static const mainnet = NetworkParams(
     wifPrefix: 183,
-    p2pkhPrefix: 55,
-    p2shPrefix: 117,
+    p2pkhPrefix: [55],
+    p2shPrefix: [117],
     privHDPrefix: 0x0488ade4,
     pubHDPrefix: 0x0488b21e,
     bech32Hrp: "pc",
@@ -31,8 +31,8 @@ class NetworkParams {
 
   static const testnet = NetworkParams(
     wifPrefix: 239,
-    p2pkhPrefix: 111,
-    p2shPrefix: 196,
+    p2pkhPrefix: [111],
+    p2shPrefix: [196],
     privHDPrefix: 0x043587CF,
     pubHDPrefix: 0x04358394,
     bech32Hrp: "tpc",

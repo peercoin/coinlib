@@ -57,12 +57,14 @@ abstract class Base58Address implements Address {
   /// The 160bit public key or redeemScript hash for the base58 address
   final Uint8List _hash;
   /// The network and address type version of the address
-  final int version;
+  final List<int> version;
   String? _encodedCache;
 
   Base58Address._(Uint8List hash, this.version) : _hash = hash {
-    if (version < 0 || version > 255) {
-      throw ArgumentError("base58 version must be within 0-255", "this.version");
+    for (int byte in version) {
+      if (byte < 0 || byte > 255) {
+        throw ArgumentError("base58 version bytes must be within 0-255", "this.version");
+      }
     }
   }
 
@@ -71,13 +73,13 @@ abstract class Base58Address implements Address {
     final data = base58Decode(encoded);
     if (data.length != 21) throw InvalidAddress();
 
-    final version = data.first;
-    final payload = data.sublist(1);
+    final version = data.sublist(0, network.p2shPrefix.length);
+    final payload = data.sublist(network.p2shPrefix.length);
 
     late Base58Address addr;
-    if (version == network.p2pkhPrefix) {
+    if (_compareNetworkVersion(version, network.p2pkhPrefix)) {
       addr = P2PKHAddress.fromHash(payload, version: version);
-    } else if (version == network.p2shPrefix) {
+    } else if (_compareNetworkVersion(version, network.p2shPrefix)) {
       addr = P2SHAddress.fromHash(payload, version: version);
     } else {
       throw InvalidAddressNetwork();
@@ -90,7 +92,7 @@ abstract class Base58Address implements Address {
 
   @override
   toString() => _encodedCache ??= base58Encode(
-    Uint8List.fromList([version, ..._hash]),
+    Uint8List.fromList([...version, ..._hash]),
   );
 
   Uint8List get hash => Uint8List.fromList(_hash);
@@ -100,11 +102,11 @@ abstract class Base58Address implements Address {
 class P2PKHAddress extends Base58Address {
 
   /// Takes a [hash] directly for a P2PKH address
-  P2PKHAddress.fromHash(Uint8List hash, { required int version })
+  P2PKHAddress.fromHash(Uint8List hash, { required List<int> version })
     : super._(copyCheckBytes(hash, 20), version);
 
   /// Constructs a P2PKH address from a given [pubkey].
-  P2PKHAddress.fromPublicKey(ECPublicKey pubkey, { required int version })
+  P2PKHAddress.fromPublicKey(ECPublicKey pubkey, { required List<int> version })
     : this.fromHash(hash160(pubkey.data), version: version);
 
   @override
@@ -115,11 +117,11 @@ class P2PKHAddress extends Base58Address {
 class P2SHAddress extends Base58Address {
 
   /// Constructs a P2SH address from the redeemScript [hash].
-  P2SHAddress.fromHash(Uint8List hash, { required int version })
+  P2SHAddress.fromHash(Uint8List hash, { required List<int> version })
     : super._(copyCheckBytes(hash, 20), version);
 
   /// Constructs a P2SH address for a redeemScript
-  P2SHAddress.fromScript(Script script, { required int version })
+  P2SHAddress.fromScript(Script script, { required List<int> version })
     : super._(hash160(script.compiled), version);
 
   @override
@@ -282,4 +284,13 @@ class UnknownWitnessAddress extends Bech32Address {
   @override
   P2Witness get program => P2Witness.fromData(version, _data);
 
+}
+
+/// Checks for Network version, adding support for multi-bytes prefix networks
+/// [version] is the address prefix, and [prefix] is the network prefix bytes
+bool _compareNetworkVersion(Uint8List version, List<int> prefix) {
+  for (int i = 0; i < version.length; i++) {
+    if (version[i] != prefix[i]) return false;
+  }
+  return true;
 }

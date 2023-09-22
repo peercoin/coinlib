@@ -4,8 +4,8 @@ import 'package:test/test.dart';
 
 const wrongNetwork = NetworkParams(
   wifPrefix: 0,
-  p2pkhPrefix: 0xfa,
-  p2shPrefix: 0xfb,
+  p2pkhPrefix: [0xfa],
+  p2shPrefix: [0xfb],
   privHDPrefix: 0,
   pubHDPrefix: 0,
   bech32Hrp: "wrong",
@@ -266,7 +266,7 @@ void main() {
     test("invalid base58 version", () {
       for (final v in [-1, 256]) {
         expect(
-          () => P2PKHAddress.fromPublicKey(pubkey, version: v),
+          () => P2PKHAddress.fromPublicKey(pubkey, version: [v]),
           throwsArgumentError,
         );
       }
@@ -334,7 +334,7 @@ void main() {
       expectValidAddress(
         "${longHrp}1sqqqs3t97ut",
         NetworkParams(
-          wifPrefix: 0, p2shPrefix: 0, p2pkhPrefix: 0,
+          wifPrefix: 0, p2shPrefix: [0], p2pkhPrefix: [0],
           privHDPrefix: 0, pubHDPrefix: 0,
           bech32Hrp: longHrp, messagePrefix: "",
         ),
@@ -355,7 +355,7 @@ void main() {
   group("Base58Address", () {
     test(".hash is copied and cannot be mutated", () {
       final hash = Uint8List(20);
-      final addr = P2PKHAddress.fromHash(hash, version: 0);
+      final addr = P2PKHAddress.fromHash(hash, version: [0]);
       addr.hash[0] = 0xff;
       hash[1] = 0xff;
       expect(addr.hash, Uint8List(20));
