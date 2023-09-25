@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:coinlib/coinlib.dart';
 import 'package:test/test.dart';
 import '../vectors/keys.dart';
@@ -38,7 +40,35 @@ void main() {
       }
     });
 
-    test(".hex", () {
+    test(".fromXOnly", () {
+
+      expect(
+        ECPublicKey.fromXOnlyHex(
+          "d69c3509bb99e412e68b0fe8544e72837dfa30746d8be2aa65975f29d22dc7b9",
+        ).hex,
+        "02d69c3509bb99e412e68b0fe8544e72837dfa30746d8be2aa65975f29d22dc7b9",
+      );
+
+      for (final invalid in [
+        "eefdea4cdb677750a420fee807eacf21eb9898ae79b9768766e4faa04a2d4a34",
+        "fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc30",
+      ]) {
+        expect(
+          () => ECPublicKey.fromXOnlyHex(invalid),
+          throwsA(isA<InvalidPublicKey>()),
+        );
+      }
+
+      for (final wrongSize in [31, 33]) {
+        expect(
+          () => ECPublicKey.fromXOnly(Uint8List(wrongSize)),
+          throwsArgumentError,
+        );
+      }
+
+  });
+
+  test(".hex", () {
       for (final vector in keyPairVectors) {
         expect(vector.publicObj.hex, vector.public);
       }

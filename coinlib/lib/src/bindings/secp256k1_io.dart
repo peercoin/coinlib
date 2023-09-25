@@ -46,6 +46,8 @@ class Secp256k1 extends Secp256k1Base<
   Pointer<Size>,
   Pointer<secp256k1_ecdsa_signature>,
   Pointer<secp256k1_ecdsa_recoverable_signature>,
+  Pointer<secp256k1_keypair>,
+  Pointer<secp256k1_xonly_pubkey>,
   Pointer<Int>,
   Pointer<Never>
 > {
@@ -77,9 +79,13 @@ class Secp256k1 extends Secp256k1Base<
     extEcdsaRecover = _lib.secp256k1_ecdsa_recover;
     extEcSeckeyTweakAdd = _lib.secp256k1_ec_seckey_tweak_add;
     extEcPubkeyTweakAdd = _lib.secp256k1_ec_pubkey_tweak_add;
+    extKeypairCreate = _lib.secp256k1_keypair_create;
+    extXOnlyPubkeyParse = _lib.secp256k1_xonly_pubkey_parse;
+    extSchnorrSign32 = _lib.secp256k1_schnorrsig_sign32;
+    extSchnorrVerify = _lib.secp256k1_schnorrsig_verify;
 
     // Set heap arrays
-    privKeyArray = HeapArrayFfi(Secp256k1Base.privkeySize);
+    key32Array = HeapArrayFfi(Secp256k1Base.privkeySize);
     scalarArray = HeapArrayFfi(Secp256k1Base.privkeySize);
     serializedPubKeyArray = HeapArrayFfi(Secp256k1Base.uncompressedPubkeySize);
     hashArray = HeapArrayFfi(Secp256k1Base.hashSize);
@@ -95,6 +101,8 @@ class Secp256k1 extends Secp256k1Base<
     pubKeyPtr = malloc();
     sigPtr = malloc();
     recSigPtr = malloc();
+    keyPairPtr = malloc();
+    xPubKeyPtr = malloc();
     recIdPtr = malloc();
     nullPtr = nullptr;
 

@@ -27,9 +27,22 @@ class ECPublicKey {
   /// 33-byte compressed key, or 65-byte uncompressed key
   ECPublicKey.fromHex(String hex) : this(hexToBytes(hex));
 
+  /// Constructs a public key from a 32-byte X coordinate where the Y coordinate
+  /// is made even.
+  ECPublicKey.fromXOnly(Uint8List xcoord) : this(
+    Uint8List.fromList([2, ...checkBytes(xcoord, 32, name: "xcoord")]),
+  );
+  ECPublicKey.fromXOnlyHex(String hex) : this.fromXOnly(hexToBytes(hex));
+
   String get hex => bytesToHex(_data);
   bool get compressed => _data.length == 33;
   Uint8List get data => Uint8List.fromList(_data);
+
+  /// Obtains the X coordinate of the public key which is used for Schnorr
+  /// signatures. Schnorr signatures force an even Y coordinate. Public and
+  /// private keys are converted to use even Y coordinates as necessary allowing
+  /// any existing keys to work.
+  Uint8List get xonly => _data.sublist(1, 33);
 
   @override
   bool operator ==(Object other)

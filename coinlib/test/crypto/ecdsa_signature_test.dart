@@ -9,14 +9,11 @@ void main() {
 
     setUpAll(loadCoinlib);
 
+    final validSig = validSignatures[0];
+
     test("requires 64-bytes", () {
 
-      for (final failing in [
-        // Too small
-        "a951b0cf98bd51c614c802a65a418fa42482dc5c45c9394e39c0d98773c51cd530104fdc36d91582b5757e1de73d982e803cc14d75e82c65daf924e38d27d8",
-        // Too large
-        "a951b0cf98bd51c614c802a65a418fa42482dc5c45c9394e39c0d98773c51cd530104fdc36d91582b5757e1de73d982e803cc14d75e82c65daf924e38d27d834ff",
-      ]) {
+      for (final failing in [validSig.substring(2), "${validSig}00"]) {
         expect(
           () => ECDSASignature.fromCompactHex(failing),
           throwsArgumentError,
@@ -93,11 +90,11 @@ void main() {
     });
 
     test(".compact is copied cannot be mutated", () {
-      final compact = hexToBytes(validSignatures[0]);
+      final compact = hexToBytes(validSig);
       final sig = ECDSASignature.fromCompact(compact);
       sig.compact[0] = 0xff;
       compact[1] = 0xff;
-      expect(bytesToHex(sig.compact), validSignatures[0]);
+      expect(bytesToHex(sig.compact), validSig);
     });
 
 

@@ -30,3 +30,4 @@ ffigen:
   headers:
     entry-points:
       - '../coinlib_flutter/src/secp256k1/include/secp256k1_recovery.h'
+      - '../coinlib_flutter/src/secp256k1/include/secp256k1_schnorrsig.h'
