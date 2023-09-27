@@ -29,6 +29,11 @@ void main() {
     test("fromAsm() success", () => expectP2TR(P2TR.fromAsm(asm)));
 
     test(
+      "fromTweakedKeyX() success",
+      () => expectP2TR(P2TR.fromTweakedKeyX(hexToBytes(tweakedKey))),
+    );
+
+    test(
       "fromTweakedKey() success",
       () => expectP2TR(
         P2TR.fromTweakedKey(ECPublicKey.fromXOnlyHex(tweakedKey)),
