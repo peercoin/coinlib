@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'programs/p2pkh.dart';
 import 'programs/p2sh.dart';
+import 'programs/p2tr.dart';
 import 'programs/p2wpkh.dart';
 import 'programs/p2wsh.dart';
 import 'programs/p2witness.dart';
@@ -29,6 +30,10 @@ abstract class Program {
 
     try {
       return P2SH.fromScript(script);
+    } on NoProgramMatch catch(_) {}
+
+    try {
+      return P2TR.fromScript(script);
     } on NoProgramMatch catch(_) {}
 
     try {
