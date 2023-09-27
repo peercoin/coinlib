@@ -45,5 +45,6 @@ export 'package:coinlib/src/tx/witness_input.dart';
 
 export 'package:coinlib/src/address.dart';
 export 'package:coinlib/src/network_params.dart';
+export 'package:coinlib/src/taproot.dart';
 
 Future<void> loadCoinlib() => secp256k1.load();

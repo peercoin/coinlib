@@ -42,7 +42,11 @@ class ECPublicKey {
   /// signatures. Schnorr signatures force an even Y coordinate. Public and
   /// private keys are converted to use even Y coordinates as necessary allowing
   /// any existing keys to work.
-  Uint8List get xonly => _data.sublist(1, 33);
+  Uint8List get x => _data.sublist(1, 33);
+
+  /// Obtains a new key that uses the same X coordinate but uses an even Y
+  /// coordinate.
+  ECPublicKey get xonly => ECPublicKey.fromXOnly(x);
 
   @override
   bool operator ==(Object other)

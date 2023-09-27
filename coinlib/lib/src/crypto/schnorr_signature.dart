@@ -42,7 +42,7 @@ class SchnorrSignature {
   /// Takes a 32-byte message [hash] and [publickey] and returns true if the
   /// signature is valid for the public key and hash.
   bool verify(ECPublicKey publickey, Uint8List hash)
-    => secp256k1.schnorrVerify(_data, checkBytes(hash, 32), publickey.xonly);
+    => secp256k1.schnorrVerify(_data, checkBytes(hash, 32), publickey.x);
 
   /// The serialized 32 byte r and s values of a schnorr signature
   Uint8List get data => Uint8List.fromList(_data);
