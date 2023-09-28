@@ -9,10 +9,12 @@ import 'package:coinlib/src/encode/bech32.dart';
 import 'package:coinlib/src/scripts/program.dart';
 import 'package:coinlib/src/scripts/programs/p2pkh.dart';
 import 'package:coinlib/src/scripts/programs/p2sh.dart';
+import 'package:coinlib/src/scripts/programs/p2tr.dart';
 import 'package:coinlib/src/scripts/programs/p2witness.dart';
 import 'package:coinlib/src/scripts/programs/p2wpkh.dart';
 import 'package:coinlib/src/scripts/programs/p2wsh.dart';
 import 'package:coinlib/src/scripts/script.dart';
+import 'package:coinlib/src/taproot.dart';
 
 class InvalidAddress implements Exception {}
 class InvalidAddressNetwork implements Exception {}
@@ -203,8 +205,15 @@ abstract class Bech32Address implements Address {
       } else {
         throw InvalidAddress();
       }
+    } else if (version == 1) {
+      // Version 1 is Taproot
+      if (bytes.length == 32) {
+        addr = P2TRAddress.fromTweakedKeyX(bytes, hrp: bech32.hrp);
+      } else {
+        throw InvalidAddress();
+      }
     } else if (version <= 16) {
-      // Treat other versions as unknown. Will add version 1 taproot later
+      // Treat other versions as unknown.
       if (bytes.length < 2 || bytes.length > maxWitnessProgramLength) {
         throw InvalidAddress();
       }
@@ -262,9 +271,24 @@ class P2WSHAddress extends Bech32Address {
 
 }
 
+class P2TRAddress extends Bech32Address {
+
+  P2TRAddress.fromTweakedKeyX(Uint8List tweakedKeyX, { required String hrp })
+    : super._(1, copyCheckBytes(tweakedKeyX, 32), hrp);
+
+  P2TRAddress.fromTweakedKey(ECPublicKey tweakedKey, { required String hrp })
+    : super._(1, tweakedKey.x, hrp);
+
+  P2TRAddress.fromTaproot(Taproot taproot, { required String hrp })
+    : super._(1, taproot.tweakedKey.x, hrp);
+
+  @override
+  P2TR get program => P2TR.fromTweakedKeyX(_data);
+
+}
+
 /// This address type is for all bech32 addresses that do not match known
-/// witness versions. Currently this includes taproot until it is fully
-/// specified.
+/// witness versions.
 class UnknownWitnessAddress extends Bech32Address {
 
   /// Constructs a bech32 witness address from the "witness program" [data],

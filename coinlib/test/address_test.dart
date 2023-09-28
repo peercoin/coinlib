@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:coinlib/coinlib.dart';
 import 'package:test/test.dart';
+import 'vectors/taproot.dart';
 
 const wrongNetwork = NetworkParams(
   wifPrefix: 0,
@@ -31,6 +32,8 @@ expectBech32Equal(Bech32Address addr, Bech32Address expected) {
     expect(addr.program.pkHash, addr.data);
   } else if (addr is P2WSHAddress) {
     expect(addr.program.scriptHash, addr.data);
+  } else if (addr is P2TRAddress) {
+    expect(addr.program.tweakedKey.x, addr.data);
   } else if (addr is UnknownWitnessAddress) {
     expect(addr.program.data, addr.data);
   }
@@ -175,6 +178,45 @@ void main() {
 
     });
 
+    test("valid P2TR addresses", () {
+
+      expectValidAddress(
+        "pc1punvppl2stp38f7kwv2u2spltjuvuaayuqsthe34hd2dyy5w4g58qj5f0v2",
+        NetworkParams.mainnet,
+        P2TRAddress.fromTweakedKeyX(
+          hexToBytes(
+            "e4d810fd50586274face62b8a807eb9719cef49c04177cc6b76a9a4251d5450e",
+          ),
+          hrp: NetworkParams.mainnet.bech32Hrp,
+        ),
+      );
+
+      expectValidAddress(
+        "pc1pz37fc4cn9ah8anwm4xqqhvxygjf9rjf2resrw8h8w4tmvcs0863s0hvxry",
+        NetworkParams.mainnet,
+        P2TRAddress.fromTweakedKey(
+          ECPublicKey.fromXOnlyHex(
+            "147c9c57132f6e7ecddba9800bb0c4449251c92a1e60371ee77557b6620f3ea3",
+          ),
+          hrp: NetworkParams.mainnet.bech32Hrp,
+        ),
+      );
+
+      expectValidAddress(
+        "pc1p2wsldez5mud2yam29q22wgfh9439spgduvct83k3pm50fcxa5dpsxcz8x2",
+        NetworkParams.mainnet,
+        P2TRAddress.fromTaproot(
+          Taproot(
+            internalKey: ECPublicKey.fromXOnlyHex(
+              taprootVectors[0].xInternalPubKeyHex,
+            ),
+          ),
+          hrp: NetworkParams.mainnet.bech32Hrp,
+        ),
+      );
+
+    });
+
     test("valid unknown witness addresses", () {
 
       // 40 program bytes
@@ -199,17 +241,6 @@ void main() {
         ),
       );
 
-      // Taproot v=1, unknown at the moment
-      expectValidAddress(
-        "pc1pqqqsyqcyq5rqwzqfpg9scrgwpugpzysnzs23v9ccrydpk8qarc0s6f7fhu",
-        NetworkParams.mainnet,
-        UnknownWitnessAddress.fromHex(
-          "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
-          version: 1,
-          hrp: NetworkParams.mainnet.bech32Hrp,
-        ),
-      );
-
     });
 
     test("invalid addresses", () {
@@ -222,9 +253,11 @@ void main() {
         "TTazDDREDxxh1mPyGySut6H98h4UKPG6",
         "pc1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq3nu382",
         "pc1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq2zhzfj",
+        "pc1pqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq2trl7f",
         // Too-long
         "9tT9KH26AxgN8j9uTpKdwUkK6LFcSKp4FpF",
         "pc1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqquk6wwa",
+        "pc1pqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqgk5ml5",
         // Segwit version 17
         "pc13qqqsyqcyq5rqwzqfpg9scrgwpugpzysnzs23v9ccrydpk8qarc0sxaytzs",
         // Too long unknown segwit
