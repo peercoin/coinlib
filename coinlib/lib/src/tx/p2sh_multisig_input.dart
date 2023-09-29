@@ -9,7 +9,7 @@ import 'package:coinlib/src/tx/input_signature.dart';
 import 'package:coinlib/src/tx/outpoint.dart';
 import 'input.dart';
 import 'raw_input.dart';
-import 'sighash_type.dart';
+import 'sighash/sighash_type.dart';
 
 /// An input for a Pay-to-Script-Hash output ([P2SH]) with a multisig
 /// redeemScript and any number of required signatures that may be provided with

@@ -169,53 +169,6 @@ void main() {
 
     });
 
-    test("signatureHash", () {
-
-      final tx = Transaction.fromHex(sigHashTxHex);
-
-      for (final vec in sighashVectors) {
-
-        expect(
-          bytesToHex(
-            tx.signatureHash(
-              vec.inputN,
-              Script.fromAsm(vec.scriptCodeAsm),
-              vec.type,
-            ),
-          ),
-          vec.hash,
-        );
-
-        expect(
-          bytesToHex(
-            tx.signatureHashForWitness(
-              vec.inputN,
-              Script.fromAsm(vec.scriptCodeAsm),
-              witnessValue,
-              vec.type,
-            ),
-          ),
-          vec.witnessHash,
-        );
-
-      }
-
-    });
-
-    test("signatureHash input out of range", () {
-      final tx = Transaction.fromHex(sigHashTxHex);
-      expect(
-        () => tx.signatureHash(2, Script([]), SigHashType.all()),
-        throwsArgumentError,
-      );
-      expect(
-        () => tx.signatureHashForWitness(
-          2, Script([]), witnessValue, SigHashType.all(),
-        ),
-        throwsArgumentError,
-      );
-    });
-
     test("sign() failure", () {
 
       final privkey = ECPrivateKey.generate();

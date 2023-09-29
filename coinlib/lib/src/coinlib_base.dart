@@ -41,8 +41,11 @@ export 'package:coinlib/src/tx/p2sh_multisig_input.dart';
 export 'package:coinlib/src/tx/p2wpkh_input.dart';
 export 'package:coinlib/src/tx/pkh_input.dart';
 export 'package:coinlib/src/tx/raw_input.dart';
-export 'package:coinlib/src/tx/sighash_type.dart';
 export 'package:coinlib/src/tx/witness_input.dart';
+
+export 'package:coinlib/src/tx/sighash/legacy_signature_hasher.dart';
+export 'package:coinlib/src/tx/sighash/sighash_type.dart';
+export 'package:coinlib/src/tx/sighash/witness_signature_hasher.dart';
 
 export 'package:coinlib/src/address.dart';
 export 'package:coinlib/src/network_params.dart';

@@ -39,6 +39,8 @@ class SigHashType {
 
   /// Sign all of the outputs. If [anyOneCanPay] is true, then only the input
   /// containing the signature will be signed.
+  /// If [anyOneCanPay] is false and a Taproot input is being signed, this will
+  /// be treated as "SIGHASH_DEFAULT".
   const SigHashType.all({ bool anyOneCanPay = false })
     : value = allValue | (anyOneCanPay ? anyOneCanPayFlag : 0);
 
