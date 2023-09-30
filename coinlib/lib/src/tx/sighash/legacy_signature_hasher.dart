@@ -13,14 +13,14 @@ import 'signature_hasher.dart';
 final class LegacySignatureHasher implements SignatureHasher {
 
   static final ScriptOp _codeseperator = ScriptOpCode.fromName("CODESEPARATOR");
-  static final hashOne = Uint8List(32)..last = 1;
+  static final _hashOne = Uint8List(32)..last = 1;
 
   final Transaction tx;
   final int inputN;
   final Script scriptCode;
   final SigHashType hashType;
 
-  /// Produces the hash for an input signature for a non-witness input at
+  /// Produces the hash of an input signature for a non-witness input at
   /// [inputN]. The [scriptCode] of the redeem script is necessary. [hashType]
   /// controls what data is included in the signature.
   LegacySignatureHasher({
@@ -42,7 +42,7 @@ final class LegacySignatureHasher implements SignatureHasher {
 
     // If there is no matching output for SIGHASH_SINGLE, then return all null
     // bytes apart from the last byte that should be 1
-    if (hashType.single && inputN >= tx.outputs.length) return hashOne;
+    if (hashType.single && inputN >= tx.outputs.length) return _hashOne;
 
     // Create modified transaction for obtaining a signature hash
 
