@@ -37,23 +37,19 @@ final class WitnessSignatureHasher with Writable implements SignatureHasher {
   void write(Writer writer) {
 
     final thisIn = tx.inputs[inputN];
-    final measuring = Writable is MeasureWriter;
 
-    final hashPrevouts = !hashType.anyOneCanPay && !measuring
+    final hashPrevouts = !hashType.anyOneCanPay
       ? hashes.prevouts.doubleHash
       : hashZero;
 
     final hashSequences
-      = !hashType.anyOneCanPay
-      && !hashType.single
-      && !hashType.none
-      && !measuring
+      = !hashType.anyOneCanPay && !hashType.single && !hashType.none
       ? hashes.sequences.doubleHash
       : hashZero;
 
-    final hashOutputs = !hashType.single && !hashType.none && !measuring
+    final hashOutputs = !hashType.single && !hashType.none
       ? hashes.outputs.doubleHash
-      : hashType.single && inputN < tx.outputs.length && !measuring
+      : hashType.single && inputN < tx.outputs.length
         ? sha256DoubleHash(tx.outputs[inputN].toBytes())
         : hashZero;
 
