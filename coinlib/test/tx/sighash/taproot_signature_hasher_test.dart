@@ -87,7 +87,12 @@ final taprootSigVectors = [
     hashType: SigHashType.all(anyOneCanPay: true),
     sigHashHex: "cccb739eca6c13a8a89e6e5cd317ffe55669bbda23f2fd37b0f18755e008edd2",
   ),
-  // TODO: Leaf hash signature hash
+  TaprootSignatureVector(
+    inputN: 0,
+    hashType: SigHashType.single(),
+    sigHashHex: "20834f382e040a8b6d03600667c2c593b4ffa955f15476ba3b70b72c2538320c",
+    leafHashHex: "2bfe58ab6d9fd575bdc3a624e4825dd2b375d64ac033fbc46ea79dbab4f69a3e",
+  ),
 ];
 
 void main() {
