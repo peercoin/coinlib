@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 import 'package:crypto/crypto.dart' as crypto;
 import 'package:pointycastle/digests/ripemd160.dart';
@@ -14,3 +15,10 @@ Uint8List hash160(Uint8List msg) => _ripemd160(_singleSha256(msg));
 Uint8List hmacSha512(Uint8List key, Uint8List msg) => Uint8List.fromList(
   crypto.Hmac(crypto.sha512, key).convert(msg).bytes,
 );
+
+Uint8List Function(Uint8List msg) getTaggedHasher(String tag) {
+  final hashedTag = sha256Hash(utf8.encode(tag) as Uint8List);
+  return (Uint8List msg) => sha256Hash(
+    Uint8List.fromList([...hashedTag, ...hashedTag, ...msg]),
+  );
+}

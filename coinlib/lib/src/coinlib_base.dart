@@ -45,6 +45,7 @@ export 'package:coinlib/src/tx/witness_input.dart';
 
 export 'package:coinlib/src/tx/sighash/legacy_signature_hasher.dart';
 export 'package:coinlib/src/tx/sighash/sighash_type.dart';
+export 'package:coinlib/src/tx/sighash/taproot_signature_hasher.dart';
 export 'package:coinlib/src/tx/sighash/witness_signature_hasher.dart';
 
 export 'package:coinlib/src/address.dart';

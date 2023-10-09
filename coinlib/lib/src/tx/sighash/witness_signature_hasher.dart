@@ -13,7 +13,7 @@ final class WitnessSignatureHasher with Writable implements SignatureHasher {
   static final hashZero = Uint8List(32);
 
   final Transaction tx;
-  final PrecomputedSignatureHashes hashes;
+  final TransactionSignatureHashes hashes;
   final int inputN;
   final Script scriptCode;
   final BigInt value;
@@ -29,7 +29,7 @@ final class WitnessSignatureHasher with Writable implements SignatureHasher {
     required this.scriptCode,
     required this.value,
     required this.hashType,
-  }) : hashes = PrecomputedSignatureHashes(tx) {
+  }) : hashes = TransactionSignatureHashes(tx) {
     SignatureHasher.checkInputN(tx, inputN);
   }
 
