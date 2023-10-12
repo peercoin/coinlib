@@ -23,6 +23,7 @@ void main() {
           expect(o.none, none);
           expect(o.single, single);
           expect(o.anyOneCanPay, anyOneCanPay);
+          expect(o.schnorrDefault, false);
         }
 
       }
@@ -40,6 +41,17 @@ void main() {
         SigHashType.single(anyOneCanPay: true), 0x83, false, false, true, true,
       );
 
+    });
+
+    test("default Schnorr", () {
+      final hashType = SigHashType.schnorrDefault();
+      expect(hashType.schnorrDefault, true);
+      expect(hashType.value, 0);
+      expect(hashType.all, true);
+      expect(hashType.none, false);
+      expect(hashType.single, false);
+      expect(hashType.anyOneCanPay, false);
+      expect(hashType, isNot(SigHashType.all()));
     });
 
     test("invalid values", () {

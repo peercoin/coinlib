@@ -29,6 +29,9 @@ abstract class ScriptOp {
   /// If this is a pushdata of an ECDSA input signature then it shall be
   /// returned, or null
   ECDSAInputSignature? get ecdsaSig;
+  /// If this is a pushdata of a Schnorr input signature then it shall be
+  /// returned, or null
+  SchnorrInputSignature? get schnorrSig;
   /// If this is a pushdata of a public key then it shall be returned, or null
   ECPublicKey? get publicKey;
 
@@ -194,6 +197,9 @@ class ScriptOpCode implements ScriptOp {
   ECDSAInputSignature? get ecdsaSig => null;
 
   @override
+  SchnorrInputSignature? get schnorrSig => null;
+
+  @override
   ECPublicKey? get publicKey => null;
 
 }
@@ -284,6 +290,15 @@ class ScriptPushData implements ScriptOp {
   }
 
   @override
+  SchnorrInputSignature? get schnorrSig {
+    try {
+      return SchnorrInputSignature.fromBytes(data);
+    } on InvalidInputSignature {
+      return null;
+    }
+  }
+
+  @override
   ECPublicKey? get publicKey {
     try {
       return ECPublicKey(data);
@@ -329,6 +344,9 @@ class ScriptPushDataMatcher implements ScriptOp {
 
   @override
   ECDSAInputSignature? get ecdsaSig => null;
+
+  @override
+  SchnorrInputSignature? get schnorrSig => null;
 
   @override
   ECPublicKey? get publicKey => null;

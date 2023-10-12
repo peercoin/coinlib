@@ -81,5 +81,4 @@ class SigHashType {
   @override
   int get hashCode => value;
 
-
 }

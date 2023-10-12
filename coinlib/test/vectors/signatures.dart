@@ -30,6 +30,8 @@ final invalidDerSigs = [
   "3005020100020100",
 ];
 
+final validSchnorrSig = "e907831f80848d1069a5371b402410364bdf1c5f8307b0084c55f1ce2dca821525f66a4a85ea8b71e482a74f382d2ce5ebeee8fdb2172f477df4900d310536c0";
+
 class RecSigVector {
   final String compact;
   final bool compressed;
