@@ -455,7 +455,7 @@ void main() {
     test("provides insig", () {
       final der = hexToBytes(validDerSigs[0]);
       final bytes = Uint8List.fromList([ ...der, SigHashType.allValue]);
-      final insig = ScriptPushData(bytes).insig;
+      final insig = ScriptPushData(bytes).ecdsaSig;
       expect(insig, isNotNull);
       expect(insig!.signature.der, der);
       expect(insig.hashType.all, true);

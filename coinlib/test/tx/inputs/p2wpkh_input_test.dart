@@ -12,12 +12,12 @@ void main() {
     final der = validDerSigs[0];
     final pkBytes = hexToBytes(pubkeyVec);
     late ECPublicKey pk;
-    late InputSignature insig;
+    late ECDSAInputSignature insig;
 
     setUpAll(() async {
       await loadCoinlib();
       pk = ECPublicKey(pkBytes);
-      insig = InputSignature(
+      insig = ECDSAInputSignature(
         ECDSASignature.fromDerHex(der),
         SigHashType.none(),
       );

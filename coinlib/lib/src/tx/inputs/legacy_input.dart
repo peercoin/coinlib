@@ -29,13 +29,13 @@ abstract class LegacyInput extends RawInput {
 
   /// Creates a signature for the input. Used by subclasses to implement
   /// signing.
-  InputSignature createInputSignature({
+  ECDSAInputSignature createInputSignature({
     required Transaction tx,
     required int inputN,
     required ECPrivateKey key,
     required Script scriptCode,
     hashType = const SigHashType.all(),
-  }) => InputSignature(
+  }) => ECDSAInputSignature(
     ECDSASignature.sign(
       key,
       LegacySignatureHasher(

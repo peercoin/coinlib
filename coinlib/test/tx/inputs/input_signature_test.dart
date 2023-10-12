@@ -5,7 +5,7 @@ import '../../vectors/signatures.dart';
 
 void main() {
 
-  group("InputSignature", () {
+  group("ECDSAInputSignature", () {
 
     setUpAll(loadCoinlib);
 
@@ -16,14 +16,14 @@ void main() {
 
       final bytes = Uint8List.fromList([...der, 0x81]);
 
-      expectSig(InputSignature sig) {
+      expectSig(ECDSAInputSignature sig) {
         expect(sig.bytes, bytes);
         expect(sig.hashType, hashType);
         expect(sig.signature.der, der);
       }
 
-      expectSig(InputSignature(ECDSASignature.fromDer(der), hashType));
-      expectSig(InputSignature.fromBytes(bytes));
+      expectSig(ECDSAInputSignature(ECDSASignature.fromDer(der), hashType));
+      expectSig(ECDSAInputSignature.fromBytes(bytes));
 
     });
 
@@ -35,7 +35,7 @@ void main() {
         [...hexToBytes(invalidDerSigs[0]), 1],
       ]) {
         expect(
-          () => InputSignature.fromBytes(Uint8List.fromList(list)),
+          () => ECDSAInputSignature.fromBytes(Uint8List.fromList(list)),
           throwsA(isA<InvalidInputSignature>()),
         );
       }

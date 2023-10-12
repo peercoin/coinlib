@@ -21,7 +21,7 @@ class P2WPKHInput extends LegacyWitnessInput with PKHInput {
   @override
   final ECPublicKey publicKey;
   @override
-  final InputSignature? insig;
+  final ECDSAInputSignature? insig;
 
   P2WPKHInput({
     required OutPoint prevOut,
@@ -48,7 +48,7 @@ class P2WPKHInput extends LegacyWitnessInput with PKHInput {
     try {
 
       final insig = witness.length == 2
-        ? InputSignature.fromBytes(witness[0])
+        ? ECDSAInputSignature.fromBytes(witness[0])
         : null;
       final publicKey = ECPublicKey(witness.last);
 
@@ -86,9 +86,9 @@ class P2WPKHInput extends LegacyWitnessInput with PKHInput {
   );
 
   @override
-  /// Returns a new [P2WPKHInput] with the [InputSignature] added. Any existing
-  /// signature is replaced.
-  P2WPKHInput addSignature(InputSignature insig) => P2WPKHInput(
+  /// Returns a new [P2WPKHInput] with the [ECDSAInputSignature] added. Any
+  /// existing signature is replaced.
+  P2WPKHInput addSignature(ECDSAInputSignature insig) => P2WPKHInput(
     prevOut: prevOut,
     publicKey: publicKey,
     insig: insig,

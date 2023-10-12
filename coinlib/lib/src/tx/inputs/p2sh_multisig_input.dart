@@ -22,12 +22,12 @@ import 'raw_input.dart';
 class P2SHMultisigInput extends LegacyInput {
 
   final MultisigProgram program;
-  final List<InputSignature> sigs;
+  final List<ECDSAInputSignature> sigs;
 
   P2SHMultisigInput({
     required OutPoint prevOut,
     required this.program,
-    Iterable<InputSignature> sigs = const [],
+    Iterable<ECDSAInputSignature> sigs = const [],
     int sequence = Input.sequenceFinal,
   }) : sigs = List.unmodifiable(sigs), super(
     prevOut: prevOut,
@@ -77,8 +77,11 @@ class P2SHMultisigInput extends LegacyInput {
     // Can only have upto threshold sigs plus OP_0 and redeemScript
     if (ops.length > 2 + multisig.threshold) return null;
 
-    // Convert signature data into InputSignatures
-    final sigs = ops.getRange(1, ops.length-1).map((op) => op.insig).toList();
+    // Convert signature data into ECDSAInputSignatures
+    final sigs
+      = ops.getRange(1, ops.length-1)
+      .map((op) => op.ecdsaSig).toList();
+
     // Fail if any signature is null
     if (sigs.any((sig) => sig == null)) return null;
 
@@ -86,7 +89,7 @@ class P2SHMultisigInput extends LegacyInput {
       prevOut: raw.prevOut,
       program: multisig,
       // Cast necessary to ensure non-null, despite checking for null above
-      sigs: sigs.whereType<InputSignature>().toList(),
+      sigs: sigs.whereType<ECDSAInputSignature>().toList(),
       sequence: raw.sequence,
     );
 
@@ -132,7 +135,7 @@ class P2SHMultisigInput extends LegacyInput {
   /// If there are more signatures than the required threshold, the last
   /// signature will be removed.
   P2SHMultisigInput insertSignature(
-    InputSignature insig,
+    ECDSAInputSignature insig,
     ECPublicKey pubkey,
     Uint8List Function(SigHashType hashType) getSigHash,
   ) {
@@ -140,18 +143,21 @@ class P2SHMultisigInput extends LegacyInput {
     final pubkeys = program.pubkeys;
 
     // Create list that will match signatures to the public keys in order
-    List<InputSignature?> positionedSigs = List.filled(pubkeys.length, null);
+    List<ECDSAInputSignature?> positionedSigs
+      = List.filled(pubkeys.length, null);
 
     // Iterate both public key positions and signatures sequentially as they
     // should already be in order
     for (int pos = 0, sigI = 0; pos < pubkeys.length; pos++) {
+
+      final numAdded = positionedSigs.whereType<ECDSAInputSignature>().length;
 
       // Check existing first to ensure they get matched
       if (
         // Check all signatures have not already been matched
         sigI != sigs.length
         // Do not add any more when threshold is reached
-        && positionedSigs.whereType<InputSignature>().length < program.threshold
+        && numAdded < program.threshold
         // Check signature against candidate public key and message hash
         && sigs[sigI].signature.verify(
           pubkeys[pos], getSigHash(sigs[sigI].hashType),
@@ -171,7 +177,9 @@ class P2SHMultisigInput extends LegacyInput {
       program: program,
       // Remove nulls leaving actual signatures and trim down to threshold if
       // needed
-      sigs: positionedSigs.whereType<InputSignature>().take(program.threshold),
+      sigs: positionedSigs
+        .whereType<ECDSAInputSignature>()
+        .take(program.threshold),
       sequence: sequence,
     );
 

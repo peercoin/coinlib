@@ -10,7 +10,7 @@ void main() {
   group("P2SHMultisigInput", () {
 
     late List<ECPublicKey> pks;
-    late List<InputSignature> insigs;
+    late List<ECDSAInputSignature> insigs;
     late MultisigProgram multisig;
 
     setUpAll(() async {
@@ -24,7 +24,7 @@ void main() {
 
       insigs = validDerSigs
         .getRange(0, 4)
-        .map((der) => InputSignature(ECDSASignature.fromDerHex(der)))
+        .map((der) => ECDSAInputSignature(ECDSASignature.fromDerHex(der)))
         .toList();
 
       multisig = MultisigProgram(3, pks);
@@ -175,7 +175,7 @@ void main() {
         4,
         (i) {
           final hashType = SigHashType.fromValue(i % 3 + 1);
-          return InputSignature(
+          return ECDSAInputSignature(
             ECDSASignature.sign(keys[i], getSigHash(hashType)),
             hashType,
           );

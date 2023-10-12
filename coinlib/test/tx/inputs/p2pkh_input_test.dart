@@ -11,11 +11,11 @@ void main() {
 
     final der = validDerSigs[0];
     late ECPublicKey pk;
-    late InputSignature insig;
+    late ECDSAInputSignature insig;
     setUpAll(() async {
       await loadCoinlib();
       pk = ECPublicKey.fromHex(pubkeyVec);
-      insig = InputSignature(
+      insig = ECDSAInputSignature(
         ECDSASignature.fromDerHex(der),
         SigHashType.single(),
       );

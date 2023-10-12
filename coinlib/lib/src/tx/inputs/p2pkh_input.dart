@@ -22,7 +22,7 @@ class P2PKHInput extends LegacyInput with PKHInput {
   @override
   final ECPublicKey publicKey;
   @override
-  final InputSignature? insig;
+  final ECDSAInputSignature? insig;
 
   P2PKHInput({
     required OutPoint prevOut,
@@ -48,7 +48,7 @@ class P2PKHInput extends LegacyInput with PKHInput {
     final ops = script.ops;
     if (ops.isEmpty || ops.length > 2) return null;
 
-    final insig = ops.length == 2 ? ops[0].insig : null;
+    final insig = ops.length == 2 ? ops[0].ecdsaSig : null;
     if (insig == null && ops.length == 2) return null;
 
     final publicKey = ops.last.publicKey;
@@ -80,9 +80,9 @@ class P2PKHInput extends LegacyInput with PKHInput {
   );
 
   @override
-  /// Returns a new [P2PKHInput] with the [InputSignature] added. Any existing
-  /// signature is replaced.
-  P2PKHInput addSignature(InputSignature insig) => P2PKHInput(
+  /// Returns a new [P2PKHInput] with the [ECDSAInputSignature] added. Any
+  /// existing signature is replaced.
+  P2PKHInput addSignature(ECDSAInputSignature insig) => P2PKHInput(
     prevOut: prevOut,
     publicKey: publicKey,
     insig: insig,

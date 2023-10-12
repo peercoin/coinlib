@@ -4,16 +4,23 @@ import 'package:coinlib/src/tx/sighash/sighash_type.dart';
 
 class InvalidInputSignature implements Exception {}
 
+/// The base for input signatures that carry a [hashType].
+abstract interface class InputSignature {
+  SigHashType get hashType;
+  Uint8List get bytes;
+}
+
 /// Encapsulates an ECDSA [signature] and [hashType] for inclusion in an
 /// [Input].
-class InputSignature {
+class ECDSAInputSignature implements InputSignature {
 
   final ECDSASignature signature;
+  @override
   final SigHashType hashType;
 
-  InputSignature(this.signature, [this.hashType = const SigHashType.all()]);
+  ECDSAInputSignature(this.signature, [this.hashType = const SigHashType.all()]);
 
-  factory InputSignature.fromBytes(Uint8List bytes) {
+  factory ECDSAInputSignature.fromBytes(Uint8List bytes) {
 
     if (bytes.isEmpty) throw InvalidInputSignature();
 
@@ -27,10 +34,11 @@ class InputSignature {
     final hashType = bytes.last;
     if (!SigHashType.validValue(hashType)) throw InvalidInputSignature();
 
-    return InputSignature(sig, SigHashType.fromValue(hashType));
+    return ECDSAInputSignature(sig, SigHashType.fromValue(hashType));
 
   }
 
+  @override
   Uint8List get bytes => Uint8List.fromList([...signature.der, hashType.value]);
 
 }

@@ -43,7 +43,7 @@ final exampleOutput = Output.fromAddress(
   ),
 );
 
-final exampleInsig = InputSignature.fromBytes(
+final exampleInsig = ECDSAInputSignature.fromBytes(
   hexToBytes(
     "30450221008732a460737d956fd94d49a31890b2908f7ed7025a9c1d0f25e43290f1841716022004fa7d608a291d44ebbbebbadaac18f943031e7de39ef3bf9920998c43e60c0401",
   ),
@@ -102,7 +102,7 @@ final validTxVecs = [
           publicKey: ECPublicKey.fromHex(
             "04aa592c859fd00ed2a02609aad3a1bf72e0b42de67713e632c70a33cc488c15598a0fb419370a54d1c275b44380e8777fc01b6dc3cd43a416c6bab0e30dc1e19f",
           ),
-          insig: InputSignature.fromBytes(
+          insig: ECDSAInputSignature.fromBytes(
             hexToBytes(
               "3046022100fd3d8fef44fb0962ba3f07bee1d4cafb84e60e38e6c7d9274504b3638a8d2f520221009fce009044e615b6883d4bf62e04c48f9fe236e19d644b082b2f0ae5c98e045c01",
             ),
@@ -116,7 +116,7 @@ final validTxVecs = [
           publicKey: ECPublicKey.fromHex(
             "04aa592c859fd00ed2a02609aad3a1bf72e0b42de67713e632c70a33cc488c15598a0fb419370a54d1c275b44380e8777fc01b6dc3cd43a416c6bab0e30dc1e19f",
           ),
-          insig: InputSignature.fromBytes(
+          insig: ECDSAInputSignature.fromBytes(
             hexToBytes(
               "3045022100e2e61c40f26e2510b76dc72ea2f568ec514fce185c719e18bca9caaef2b20e9e02207f1100fc79eb0584e970c7f18fb226f178951d481767b4092d50d13c50ccba8b01",
             ),
@@ -200,12 +200,12 @@ final validTxVecs = [
           prevOut: examplePrevOut,
           program: exampleMultisig,
           sigs: [
-            InputSignature.fromBytes(
+            ECDSAInputSignature.fromBytes(
               hexToBytes(
                 "304402200773352a6c70b5ddfe8f6af883d9ea7b9abf7a96fdabe4d3b4a7a590f142c84402206fbf9b634221f206b7c99b3d9bc9dbdc5fec16536d7fd1eac352bbb4feff2a6f01",
               ),
             ),
-            InputSignature.fromBytes(
+            ECDSAInputSignature.fromBytes(
               hexToBytes(
                 "304402207567ea17703e2df7993ce70ead3f9f051e3bf7b8dfcdc6e9edc7547c0c0c4ef302204332066de953f267db9c31ca934052f1cfabd4281fd2649f928a66b1deb604e701",
               ),
@@ -234,7 +234,7 @@ final validTxVecs = [
           prevOut: examplePrevOut,
           program: exampleMultisig,
           sigs: [
-            InputSignature.fromBytes(
+            ECDSAInputSignature.fromBytes(
               hexToBytes(
                 "304402207567ea17703e2df7993ce70ead3f9f051e3bf7b8dfcdc6e9edc7547c0c0c4ef302204332066de953f267db9c31ca934052f1cfabd4281fd2649f928a66b1deb604e701",
               ),
@@ -305,7 +305,7 @@ final validTxVecs = [
           publicKey: ECPublicKey.fromHex(
             "02d5ede09a8ae667d0f855ef90325e27f6ce35bbe60a1e6e87af7f5b3c652140fd",
           ),
-          insig: InputSignature.fromBytes(
+          insig: ECDSAInputSignature.fromBytes(
             hexToBytes(
               "30450221009d41dc793ba24e65f571473d40b299b6459087cea1509f0d381740b1ac863cb6022039c425906fcaf51b2b84d8092569fb3213de43abaff2180e2a799d4fcb4dd0aa01",
             ),

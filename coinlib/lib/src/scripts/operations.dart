@@ -26,9 +26,9 @@ abstract class ScriptOp {
   String get asm;
   /// Returns an integer if the operation pushes a number, or null
   int? get number;
-  /// If this is a pushdata of an input signature then it shall be returned, or
-  /// null
-  InputSignature? get insig;
+  /// If this is a pushdata of an ECDSA input signature then it shall be
+  /// returned, or null
+  ECDSAInputSignature? get ecdsaSig;
   /// If this is a pushdata of a public key then it shall be returned, or null
   ECPublicKey? get publicKey;
 
@@ -191,7 +191,7 @@ class ScriptOpCode implements ScriptOp {
   bool match(ScriptOp other) => other is ScriptOpCode && code == other.code;
 
   @override
-  InputSignature? get insig => null;
+  ECDSAInputSignature? get ecdsaSig => null;
 
   @override
   ECPublicKey? get publicKey => null;
@@ -275,9 +275,9 @@ class ScriptPushData implements ScriptOp {
   }
 
   @override
-  InputSignature? get insig {
+  ECDSAInputSignature? get ecdsaSig {
     try {
-      return InputSignature.fromBytes(data);
+      return ECDSAInputSignature.fromBytes(data);
     } on InvalidInputSignature {
       return null;
     }
@@ -328,7 +328,7 @@ class ScriptPushDataMatcher implements ScriptOp {
   int? get number => null;
 
   @override
-  InputSignature? get insig => null;
+  ECDSAInputSignature? get ecdsaSig => null;
 
   @override
   ECPublicKey? get publicKey => null;
