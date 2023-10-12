@@ -3,9 +3,9 @@ import 'package:coinlib/src/common/serial.dart';
 import 'package:coinlib/src/crypto/hash.dart';
 import 'package:coinlib/src/scripts/operations.dart';
 import 'package:coinlib/src/scripts/script.dart';
-import 'package:coinlib/src/tx/output.dart';
-import 'package:coinlib/src/tx/raw_input.dart';
+import 'package:coinlib/src/tx/inputs/raw_input.dart';
 import 'package:coinlib/src/tx/sighash/sighash_type.dart';
+import 'package:coinlib/src/tx/output.dart';
 import 'package:coinlib/src/tx/transaction.dart';
 import 'signature_hasher.dart';
 

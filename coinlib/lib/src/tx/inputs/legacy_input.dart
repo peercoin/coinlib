@@ -1,0 +1,51 @@
+import 'package:coinlib/src/crypto/ec_private_key.dart';
+import 'package:coinlib/src/crypto/ecdsa_signature.dart';
+import 'package:coinlib/src/scripts/script.dart';
+import 'package:coinlib/src/tx/sighash/legacy_signature_hasher.dart';
+import 'package:coinlib/src/tx/sighash/sighash_type.dart';
+import 'package:coinlib/src/tx/transaction.dart';
+import 'input.dart';
+import 'input_signature.dart';
+import 'raw_input.dart';
+
+/// Inputs that are not witness inputs: [P2PKHInput] and [P2SHMultisigInput].
+abstract class LegacyInput extends RawInput {
+
+  LegacyInput({
+    required super.prevOut,
+    required super.scriptSig,
+    super.sequence = Input.sequenceFinal,
+  });
+
+  /// Signs the input given the [tx], input number ([inputN]) and a private
+  /// [key] using the specifified [hashType].
+  /// Implemented by specific subclasses.
+  LegacyInput sign({
+    required Transaction tx,
+    required int inputN,
+    required ECPrivateKey key,
+    hashType = const SigHashType.all(),
+  });
+
+  /// Creates a signature for the input. Used by subclasses to implement
+  /// signing.
+  InputSignature createInputSignature({
+    required Transaction tx,
+    required int inputN,
+    required ECPrivateKey key,
+    required Script scriptCode,
+    hashType = const SigHashType.all(),
+  }) => InputSignature(
+    ECDSASignature.sign(
+      key,
+      LegacySignatureHasher(
+        tx: tx,
+        inputN: inputN,
+        scriptCode: scriptCode,
+        hashType: hashType,
+      ).hash,
+    ),
+    hashType,
+  );
+
+}

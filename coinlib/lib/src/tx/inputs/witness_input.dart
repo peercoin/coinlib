@@ -1,6 +1,6 @@
 import 'dart:typed_data';
+import 'package:coinlib/src/tx/outpoint.dart';
 import 'input.dart';
-import 'outpoint.dart';
 import 'raw_input.dart';
 import 'p2wpkh_input.dart';
 

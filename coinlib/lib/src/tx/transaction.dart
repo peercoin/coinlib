@@ -3,21 +3,14 @@ import 'package:coinlib/src/common/checks.dart';
 import 'package:coinlib/src/common/hex.dart';
 import 'package:coinlib/src/common/serial.dart';
 import 'package:coinlib/src/crypto/ec_private_key.dart';
-import 'package:coinlib/src/crypto/ec_public_key.dart';
-import 'package:coinlib/src/crypto/ecdsa_signature.dart';
 import 'package:coinlib/src/crypto/hash.dart';
-import 'package:coinlib/src/scripts/programs/p2pkh.dart';
-import 'package:coinlib/src/scripts/script.dart';
-import 'p2sh_multisig_input.dart';
-import 'pkh_input.dart';
-import 'sighash/legacy_signature_hasher.dart';
+import 'inputs/input.dart';
+import 'inputs/legacy_input.dart';
+import 'inputs/legacy_witness_input.dart';
+import 'inputs/raw_input.dart';
+import 'inputs/witness_input.dart';
 import 'sighash/sighash_type.dart';
-import 'sighash/witness_signature_hasher.dart';
-import 'input.dart';
-import 'input_signature.dart';
 import 'output.dart';
-import 'raw_input.dart';
-import 'witness_input.dart';
 
 class TransactionTooLarge implements Exception {}
 class InvalidTransaction implements Exception {}
@@ -209,70 +202,38 @@ class Transaction with Writable {
 
     final input = inputs[inputN];
 
-    if (input is WitnessInput && value == null) {
-      throw CannotSignInput("Prevout values are required for witness inputs");
-    }
+    // Sign input
+    late Input signedIn;
 
-    // Get data for input
-    late List<ECPublicKey> pubkeys;
-    late Script scriptCode;
+    if (input is LegacyInput) {
+      signedIn = input.sign(
+        tx: this,
+        inputN: inputN,
+        key: key,
+        hashType: hashType,
+      );
+    } else if (input is LegacyWitnessInput) {
 
-    if (input is PKHInput) {
-      // Require explicit cast for a mixin
-      final pk = (input as PKHInput).publicKey;
-      pubkeys = [pk];
-      scriptCode = P2PKH.fromPublicKey(pk).script;
-    } else if (input is P2SHMultisigInput) {
-      pubkeys = input.program.pubkeys;
-      // For P2SH the script code is the redeem script
-      scriptCode = input.program.script;
+      if (value == null) {
+        throw CannotSignInput("Prevout values are required for witness inputs");
+      }
+
+      signedIn = input.sign(
+        tx: this,
+        inputN: inputN,
+        key: key,
+        value: value,
+        hashType: hashType,
+      );
+
     } else {
       throw CannotSignInput("${input.runtimeType} not a signable input");
-    }
-
-    if (!pubkeys.contains(key.pubkey)) {
-      throw CannotSignInput("Public key not part of input");
-    }
-
-    // Create signature
-    final hasher = input is WitnessInput
-      ? WitnessSignatureHasher(
-        tx: this,
-        inputN: inputN,
-        scriptCode: scriptCode,
-        value: value!,
-        hashType: hashType,
-      )
-      : LegacySignatureHasher(
-        tx: this,
-        inputN: inputN,
-        scriptCode: scriptCode,
-        hashType: hashType,
-      );
-    final insig = InputSignature(ECDSASignature.sign(key, hasher.hash), hashType);
-
-    // Get input with new signature
-    late Input newInput;
-    if (input is PKHInput) {
-      newInput = (input as PKHInput).addSignature(insig) as Input;
-    } else if (input is P2SHMultisigInput) {
-      // Add signature in the correct order
-      newInput = input.insertSignature(
-        insig,
-        key.pubkey,
-        (hashType) => LegacySignatureHasher(
-          tx: this,
-          inputN: inputN,
-          scriptCode: scriptCode,
-          hashType: hashType,
-        ).hash,
-      );
     }
 
     // Replace input in input list
     final newInputs = inputs.asMap().map(
       (index, input) => MapEntry(
-        index, index == inputN ? newInput : input,
+        index, index == inputN ? signedIn : input,
       ),
     ).values;
 

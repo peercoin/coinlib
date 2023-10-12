@@ -31,17 +31,18 @@ export 'package:coinlib/src/scripts/programs/p2witness.dart';
 export 'package:coinlib/src/scripts/programs/p2wpkh.dart';
 export 'package:coinlib/src/scripts/programs/p2wsh.dart';
 
-export 'package:coinlib/src/tx/input.dart';
-export 'package:coinlib/src/tx/input_signature.dart';
 export 'package:coinlib/src/tx/transaction.dart';
 export 'package:coinlib/src/tx/outpoint.dart';
 export 'package:coinlib/src/tx/output.dart';
-export 'package:coinlib/src/tx/p2pkh_input.dart';
-export 'package:coinlib/src/tx/p2sh_multisig_input.dart';
-export 'package:coinlib/src/tx/p2wpkh_input.dart';
-export 'package:coinlib/src/tx/pkh_input.dart';
-export 'package:coinlib/src/tx/raw_input.dart';
-export 'package:coinlib/src/tx/witness_input.dart';
+
+export 'package:coinlib/src/tx/inputs/input.dart';
+export 'package:coinlib/src/tx/inputs/input_signature.dart';
+export 'package:coinlib/src/tx/inputs/p2pkh_input.dart';
+export 'package:coinlib/src/tx/inputs/p2sh_multisig_input.dart';
+export 'package:coinlib/src/tx/inputs/p2wpkh_input.dart';
+export 'package:coinlib/src/tx/inputs/pkh_input.dart';
+export 'package:coinlib/src/tx/inputs/raw_input.dart';
+export 'package:coinlib/src/tx/inputs/witness_input.dart';
 
 export 'package:coinlib/src/tx/sighash/legacy_signature_hasher.dart';
 export 'package:coinlib/src/tx/sighash/sighash_type.dart';

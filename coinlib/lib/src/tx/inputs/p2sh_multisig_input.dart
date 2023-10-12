@@ -1,20 +1,25 @@
 import 'dart:typed_data';
 import 'package:coinlib/src/common/serial.dart';
+import 'package:coinlib/src/crypto/ec_private_key.dart';
 import 'package:coinlib/src/crypto/ec_public_key.dart';
 import 'package:coinlib/src/scripts/operations.dart';
 import 'package:coinlib/src/scripts/program.dart';
 import 'package:coinlib/src/scripts/programs/multisig.dart';
 import 'package:coinlib/src/scripts/script.dart';
-import 'package:coinlib/src/tx/input_signature.dart';
 import 'package:coinlib/src/tx/outpoint.dart';
+import 'package:coinlib/src/tx/sighash/legacy_signature_hasher.dart';
+import 'package:coinlib/src/tx/sighash/sighash_type.dart';
+import 'package:coinlib/src/tx/transaction.dart';
 import 'input.dart';
+import 'input_signature.dart';
+import 'legacy_input.dart';
 import 'raw_input.dart';
-import 'sighash/sighash_type.dart';
 
 /// An input for a Pay-to-Script-Hash output ([P2SH]) with a multisig
-/// redeemScript and any number of required signatures that may be provided with
-/// [replaceSignatures].
-class P2SHMultisigInput extends RawInput {
+/// redeemScript and any number of required signatures. It can be signed with
+/// one of the associated [ECPrivateKey] objects using [sign] or an existing
+/// signature can be inserted with [insertSignature].
+class P2SHMultisigInput extends LegacyInput {
 
   final MultisigProgram program;
   final List<InputSignature> sigs;
@@ -87,6 +92,37 @@ class P2SHMultisigInput extends RawInput {
 
   }
 
+  @override
+  LegacyInput sign({
+    required Transaction tx,
+    required int inputN,
+    required ECPrivateKey key,
+    hashType = const SigHashType.all(),
+  }) {
+
+    if (!program.pubkeys.contains(key.pubkey)) {
+      throw CannotSignInput("Key doesn't exist for multisig input");
+    }
+
+    return insertSignature(
+      createInputSignature(
+        tx: tx,
+        inputN: inputN,
+        key: key,
+        scriptCode: program.script,
+        hashType: hashType,
+      ),
+      key.pubkey,
+      (hashType) => LegacySignatureHasher(
+        tx: tx,
+        inputN: inputN,
+        scriptCode: program.script,
+        hashType: hashType,
+      ).hash,
+    );
+
+  }
+
   /// Returns a new [P2SHMultisigInput] with the new signature added in order.
   /// The [pubkey] should be the public key for the signature to ensure that it
   /// matches. [getSigHash] obtains the signature hash for a given type so that
@@ -155,6 +191,5 @@ class P2SHMultisigInput extends RawInput {
 
   @override
   Script get script => super.script!;
-
 
 }
