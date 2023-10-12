@@ -45,7 +45,7 @@ final prevOuts = [
 
 class TaprootSignatureVector {
   final int inputN;
-  final SigHashType hashType;
+  final SigHashType? hashType;
   final String? leafHashHex;
   final String sigHashHex;
   TaprootSignatureVector({
@@ -68,8 +68,13 @@ final taprootSigVectors = [
     sigHashHex: "325a644af47e8a5a2591cda0ab0723978537318f10e6a63d4eed783b96a71a4d",
   ),
   TaprootSignatureVector(
-    inputN: 4,
+    inputN: 3,
     hashType: SigHashType.all(),
+    sigHashHex: "bf013ea93474aa67815b1b6cc441d23b64fa310911d991e713cd34c7f5d46669",
+  ),
+  TaprootSignatureVector(
+    inputN: 4,
+    hashType: null,
     sigHashHex: "4f900a0bae3f1446fd48490c2958b5a023228f01661cda3496a11da502a7f7ef",
   ),
   TaprootSignatureVector(
