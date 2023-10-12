@@ -45,7 +45,7 @@ final prevOuts = [
 
 class TaprootSignatureVector {
   final int inputN;
-  final SigHashType? hashType;
+  final SigHashType hashType;
   final String? leafHashHex;
   final String sigHashHex;
   TaprootSignatureVector({
@@ -74,7 +74,7 @@ final taprootSigVectors = [
   ),
   TaprootSignatureVector(
     inputN: 4,
-    hashType: null,
+    hashType: SigHashType.schnorrDefault(),
     sigHashHex: "4f900a0bae3f1446fd48490c2958b5a023228f01661cda3496a11da502a7f7ef",
   ),
   TaprootSignatureVector(

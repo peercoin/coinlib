@@ -17,7 +17,7 @@ final class TaprootSignatureHasher with Writable implements SignatureHasher {
   final PrevOutSignatureHashes? prevOutHashes;
   final int inputN;
   final List<Output> prevOuts;
-  final SigHashType? hashType;
+  final SigHashType hashType;
   final Uint8List? leafHash;
   final int codeSeperatorPos;
 
@@ -34,7 +34,7 @@ final class TaprootSignatureHasher with Writable implements SignatureHasher {
     required this.tx,
     required this.inputN,
     required this.prevOuts,
-    this.hashType,
+    required this.hashType,
     this.leafHash,
     this.codeSeperatorPos = 0xFFFFFFFF,
   }) : txHashes = TransactionSignatureHashes(tx),
@@ -42,7 +42,7 @@ final class TaprootSignatureHasher with Writable implements SignatureHasher {
 
     SignatureHasher.checkInputN(tx, inputN);
 
-    if (hashType != null && hashType!.single && inputN >= tx.outputs.length) {
+    if (hashType.single && inputN >= tx.outputs.length) {
       throw ArgumentError.value(
         inputN, "inputN", "has no corresponing output for SIGHASH_SINGLE",
       );
@@ -62,29 +62,27 @@ final class TaprootSignatureHasher with Writable implements SignatureHasher {
     final extFlag = leafHash == null ? 0 : 1;
 
     writer.writeUInt8(0); // "Epoch"
-    writer.writeUInt8(hashType == null ? 0 : hashType!.value);
-
-    final actualHashType = hashType ?? SigHashType.all();
+    writer.writeUInt8(hashType.value);
 
     // Total transaction data
     writer.writeUInt32(tx.version);
     writer.writeUInt32(tx.locktime);
 
-    if (!actualHashType.anyOneCanPay) {
+    if (!hashType.anyOneCanPay) {
       writer.writeSlice(txHashes.prevouts.singleHash);
       writer.writeSlice(prevOutHashes!.amounts.singleHash);
       writer.writeSlice(prevOutHashes!.scripts.singleHash);
       writer.writeSlice(txHashes.sequences.singleHash);
     }
 
-    if (actualHashType.all) {
+    if (hashType.all) {
       writer.writeSlice(txHashes.outputs.singleHash);
     }
 
     // Data specific to spending input
     writer.writeUInt8(extFlag << 1);
 
-    if (actualHashType.anyOneCanPay) {
+    if (hashType.anyOneCanPay) {
       tx.inputs[inputN].prevOut.write(writer);
       prevOuts[inputN].write(writer);
       writer.writeUInt32(tx.inputs[inputN].sequence);
@@ -93,7 +91,7 @@ final class TaprootSignatureHasher with Writable implements SignatureHasher {
     }
 
     // Data specific to matched output
-    if (actualHashType.single) {
+    if (hashType.single) {
       writer.writeSlice(
         PrecomputeHasher.singleOutput(tx.outputs[inputN]).singleHash,
       );
