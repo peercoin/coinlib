@@ -25,4 +25,20 @@ signatureHasherTester(
     expect(() => hasher(tx, 2, sighashVectors[0]), throwsArgumentError);
   });
 
+  test("doesn't allow SIGHASH_DEFAULT", () {
+    expect(
+      () => hasher(
+        tx, 0,
+        SigHashVector(
+          inputN: 0,
+          scriptCodeAsm: "",
+          type: SigHashType.schnorrDefault(),
+          hash: "",
+          witnessHash: "",
+        ),
+      ),
+      throwsArgumentError,
+    );
+  });
+
 });

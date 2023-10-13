@@ -42,7 +42,7 @@ abstract class LegacyInput extends RawInput {
         tx: tx,
         inputN: inputN,
         scriptCode: scriptCode,
-        hashType: hashType,
+        hashType: RawInput.checkHashTypeNotSchnorr(hashType),
       ).hash,
     ),
     hashType,

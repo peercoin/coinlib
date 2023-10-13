@@ -225,6 +225,25 @@ void main() {
         throwsA(isA<CannotSignInput>()),
       );
 
+      // Cannot use schnorrDefault to sign legacy inputs
+      expect(
+        () => tx.sign(
+          inputN: 1,
+          key: privkey,
+          hashType: SigHashType.schnorrDefault(),
+        ),
+        throwsA(isA<CannotSignInput>()),
+      );
+      expect(
+        () => tx.sign(
+          inputN: 0,
+          key: privkey,
+          hashType: SigHashType.schnorrDefault(),
+          value: BigInt.parse("10000"),
+        ),
+        throwsA(isA<CannotSignInput>()),
+      );
+
     });
 
     test("immutable inputs/outputs", () {

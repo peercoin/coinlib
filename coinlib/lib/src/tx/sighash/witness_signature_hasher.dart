@@ -31,6 +31,7 @@ final class WitnessSignatureHasher with Writable implements SignatureHasher {
     required this.hashType,
   }) : hashes = TransactionSignatureHashes(tx) {
     SignatureHasher.checkInputN(tx, inputN);
+    SignatureHasher.checkSchnorrDisallowed(hashType);
   }
 
   @override

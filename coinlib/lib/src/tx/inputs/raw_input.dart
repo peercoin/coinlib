@@ -2,6 +2,8 @@ import 'dart:typed_data';
 import 'package:coinlib/src/common/checks.dart';
 import 'package:coinlib/src/common/serial.dart';
 import 'package:coinlib/src/tx/outpoint.dart';
+import 'package:coinlib/src/tx/sighash/sighash_type.dart';
+import 'package:coinlib/src/tx/transaction.dart';
 import 'input.dart';
 import 'input_signature.dart';
 
@@ -16,6 +18,15 @@ class RawInput extends Input {
   final Uint8List scriptSig;
   @override
   final int sequence;
+
+  static SigHashType checkHashTypeNotSchnorr(SigHashType type) {
+    if (type.schnorrDefault) {
+      throw CannotSignInput(
+        "Cannot sign a legacy input with a default Schnorr hash type",
+      );
+    }
+    return type;
+  }
 
   RawInput({
     required this.prevOut,

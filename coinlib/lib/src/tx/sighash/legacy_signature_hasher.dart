@@ -30,6 +30,7 @@ final class LegacySignatureHasher implements SignatureHasher {
     required this.hashType,
   }) {
     SignatureHasher.checkInputN(tx, inputN);
+    SignatureHasher.checkSchnorrDisallowed(hashType);
   }
 
   @override
