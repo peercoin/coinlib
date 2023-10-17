@@ -48,6 +48,17 @@ class ECPublicKey {
   /// coordinate.
   ECPublicKey get xonly => ECPublicKey.fromXOnly(x);
 
+  /// True if the Y-coordinate is even as required for Schnorr signatures. If
+  /// the Y-coorindate is not even, then the odd equivilent can be obtained via
+  /// [xonly].
+  bool get yIsEven
+    // Compressed even type
+    => _data[0] == 2
+    // Uncompressed even type
+    || _data[0] == 6
+    // Uncompressed and check for even
+    || (_data[0] == 4 && (_data.last & 1 == 0));
+
   @override
   bool operator ==(Object other)
     => (other is ECPublicKey) && ListEquality().equals(_data, other._data);

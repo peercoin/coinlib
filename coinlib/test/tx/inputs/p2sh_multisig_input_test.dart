@@ -19,7 +19,7 @@ void main() {
 
       pks = validPubKeys
         .getRange(0, 4)
-        .map((hex) => ECPublicKey.fromHex(pubkeyVec))
+        .map((vec) => ECPublicKey.fromHex(vec.hex))
         .toList();
 
       insigs = validDerSigs

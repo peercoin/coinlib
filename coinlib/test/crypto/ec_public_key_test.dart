@@ -29,8 +29,11 @@ void main() {
     });
 
     test("accepts compressed, uncompressed and hybrid types", () {
-      for (final pk in validPubKeys) {
-        expect(ECPublicKey.fromHex(pk).hex, pk);
+      for (final vec in validPubKeys) {
+        final pk = ECPublicKey.fromHex(vec.hex);
+        expect(pk.hex, vec.hex);
+        expect(pk.compressed, vec.compressed);
+        expect(pk.yIsEven, vec.evenY);
       }
     });
 
@@ -83,13 +86,13 @@ void main() {
     test(".equal", () {
       for (int i = 0; i < validPubKeys.length; i++) {
         expect(
-          ECPublicKey.fromHex(validPubKeys[i]),
-          ECPublicKey.fromHex(validPubKeys[i]),
+          ECPublicKey.fromHex(validPubKeys[i].hex),
+          ECPublicKey.fromHex(validPubKeys[i].hex),
         );
         for (int j = 0; j < i; j++) {
           expect(
-            ECPublicKey.fromHex(validPubKeys[i]),
-            isNot(equals(ECPublicKey.fromHex(validPubKeys[j]))),
+            ECPublicKey.fromHex(validPubKeys[i].hex),
+            isNot(equals(ECPublicKey.fromHex(validPubKeys[j].hex))),
           );
         }
       }
@@ -134,7 +137,7 @@ void main() {
     });
 
     test("data cannot be mutated", () {
-      final hex = validPubKeys[0];
+      final hex = validPubKeys[0].hex;
       final data = hexToBytes(hex);
       final key = ECPublicKey(data);
       key.data[0] = 0xff;
