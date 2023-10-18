@@ -182,6 +182,7 @@ void main() {
             prevOut: examplePrevOut,
             publicKey: pubkey,
           ),
+          TaprootKeyInput(prevOut: examplePrevOut),
           RawInput(prevOut: examplePrevOut, scriptSig: Uint8List(0)),
         ],
         outputs: [],
@@ -205,9 +206,9 @@ void main() {
       expect(tx.sign(inputN: 1, key: privkey), isA<Transaction>());
 
       // Input out of range
-      expect(() => tx.sign(inputN: 3, key: privkey), throwsArgumentError);
+      expect(() => tx.sign(inputN: 4, key: privkey), throwsArgumentError);
 
-      // Wrong key
+      // Wrong key for P2PKH
       expect(
         () => tx.sign(inputN: 1, key: wrongkey),
         throwsA(isA<CannotSignInput>()),
@@ -221,7 +222,7 @@ void main() {
 
       // Cannot sign raw unmatched input
       expect(
-        () => tx.sign(inputN: 2, key: privkey),
+        () => tx.sign(inputN: 3, key: privkey),
         throwsA(isA<CannotSignInput>()),
       );
 
@@ -242,6 +243,53 @@ void main() {
           value: BigInt.parse("10000"),
         ),
         throwsA(isA<CannotSignInput>()),
+      );
+
+      // Taproot tests
+      final tr = Taproot(internalKey: pubkey);
+      final tweakedKey = tr.tweakPrivateKey(privkey);
+
+      final val = BigInt.from(10000);
+      final prevOuts = [
+        Output.fromProgram(val, P2WPKH.fromPublicKey(pubkey)),
+        Output.fromProgram(val, P2PKH.fromPublicKey(pubkey)),
+        Output.fromProgram(val, P2TR.fromTaproot(tr)),
+        Output.blank(),
+      ];
+
+      // Require prev outs for TR
+      expect(
+        () => tx.sign(
+          inputN: 2,
+          key: tweakedKey,
+        ),
+        throwsA(isA<CannotSignInput>()),
+      );
+
+      // Require prev out number to match number of inputs
+      expect(
+        () => tx.sign(
+          inputN: 2,
+          key: tweakedKey,
+          prevOuts: prevOuts.sublist(0, 3),
+        ),
+        throwsA(isA<CannotSignInput>()),
+      );
+
+      // Wrong (untweaked) key for TR
+      expect(
+        () => tx.sign(
+          inputN: 2,
+          key: privkey,
+          prevOuts: prevOuts,
+        ),
+        throwsA(isA<CannotSignInput>()),
+      );
+
+      // Ensure it does work with correct key
+      expect(
+        tx.sign(inputN: 2, key: tweakedKey, prevOuts: prevOuts),
+        isA<Transaction>(),
       );
 
     });

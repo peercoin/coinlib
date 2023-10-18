@@ -4,6 +4,7 @@ import 'package:coinlib/src/common/hex.dart';
 import 'package:coinlib/src/common/serial.dart';
 import 'package:coinlib/src/crypto/ec_private_key.dart';
 import 'package:coinlib/src/crypto/hash.dart';
+import 'package:coinlib/src/tx/inputs/taproot_key_input.dart';
 import 'inputs/input.dart';
 import 'inputs/legacy_input.dart';
 import 'inputs/legacy_witness_input.dart';
@@ -185,11 +186,13 @@ class Transaction with Writable {
   /// [Transaction] with the signed input. The input must be a signable
   /// P2PKH, P2WPKH or P2SH multisig input or [CannotSignInput] will be thrown.
   /// [value] is only required for P2WPKH.
+  /// [prevOuts] is only required for Taproot inputs.
   Transaction sign({
     required int inputN,
     required ECPrivateKey key,
     hashType = const SigHashType.all(),
     BigInt? value,
+    List<Output>? prevOuts,
   }) {
 
     if (inputN >= inputs.length) {
@@ -223,6 +226,28 @@ class Transaction with Writable {
         inputN: inputN,
         key: key,
         value: value,
+        hashType: hashType,
+      );
+
+    } else if (input is TaprootKeyInput) {
+
+      if (prevOuts == null) {
+        throw CannotSignInput(
+          "Previous outputs are required when signing a taproot input",
+        );
+      }
+
+      if (prevOuts.length != inputs.length) {
+        throw CannotSignInput(
+          "The number of previous outputs must match the number of inputs",
+        );
+      }
+
+      signedIn = input.sign(
+        tx: this,
+        inputN: inputN,
+        key: key,
+        prevOuts: prevOuts,
         hashType: hashType,
       );
 

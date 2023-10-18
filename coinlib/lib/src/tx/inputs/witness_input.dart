@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:coinlib/src/tx/inputs/taproot_key_input.dart';
 import 'package:coinlib/src/tx/outpoint.dart';
 import 'input.dart';
 import 'raw_input.dart';
@@ -27,6 +28,7 @@ class WitnessInput extends RawInput {
       ? (
         // Is a witness input, so match with the specific input type
         P2WPKHInput.match(raw, witness)
+        ?? TaprootKeyInput.match(raw, witness)
         ?? WitnessInput(
           prevOut: raw.prevOut,
           witness: witness,

@@ -37,11 +37,15 @@ export 'package:coinlib/src/tx/output.dart';
 
 export 'package:coinlib/src/tx/inputs/input.dart';
 export 'package:coinlib/src/tx/inputs/input_signature.dart';
+export 'package:coinlib/src/tx/inputs/legacy_input.dart';
+export 'package:coinlib/src/tx/inputs/legacy_witness_input.dart';
 export 'package:coinlib/src/tx/inputs/p2pkh_input.dart';
 export 'package:coinlib/src/tx/inputs/p2sh_multisig_input.dart';
 export 'package:coinlib/src/tx/inputs/p2wpkh_input.dart';
 export 'package:coinlib/src/tx/inputs/pkh_input.dart';
 export 'package:coinlib/src/tx/inputs/raw_input.dart';
+export 'package:coinlib/src/tx/inputs/taproot_input.dart';
+export 'package:coinlib/src/tx/inputs/taproot_key_input.dart';
 export 'package:coinlib/src/tx/inputs/witness_input.dart';
 
 export 'package:coinlib/src/tx/sighash/legacy_signature_hasher.dart';
