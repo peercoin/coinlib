@@ -80,12 +80,39 @@ final keyPairVectors = [
   ),
 ];
 
+class PubkeyVector {
+  final String hex;
+  final bool compressed;
+  final bool evenY;
+  PubkeyVector(this.hex, { required this.compressed, required this.evenY });
+}
+
 final validPubKeys = [
-  "022bbfc800cdca5d0b63afc430bf700a8003864b979a56fda839990488a357d92d",
-  "0307174f6d0c55806fb4f6b6112f2d74a90d8236bf230a0d4b99e5e2131448c209",
-  "0439dfcfb935d6766b50e6af75630a3e72f2525014016cff0e46b2dc3d2c2b7b867707f63d3b254eb35287fc30138227286b8b56cee63c96ae4edccc5cd9f5c902",
-  "06ef164284e2c3abc32b310eb62904af0d49196c51087bdf4038998f8818787c882433ae83422904f48ad36dcf351ac9a37e6b00e57cf40b469b650ec850640efe",
-  "07576168b540f6f80e4d2a325f8cbd420ceb170ff42cd07e96bffc5e6a4a4ea04b1208f618306fd629cd2972cea45aa81ae7b24a64bf2e86704d7a63d82fd97a8f",
+  PubkeyVector(
+    "022bbfc800cdca5d0b63afc430bf700a8003864b979a56fda839990488a357d92d",
+    compressed: true,
+    evenY: true,
+  ),
+  PubkeyVector(
+    "0307174f6d0c55806fb4f6b6112f2d74a90d8236bf230a0d4b99e5e2131448c209",
+    compressed: true,
+    evenY: false,
+  ),
+  PubkeyVector(
+    "0439dfcfb935d6766b50e6af75630a3e72f2525014016cff0e46b2dc3d2c2b7b867707f63d3b254eb35287fc30138227286b8b56cee63c96ae4edccc5cd9f5c902",
+    compressed: false,
+    evenY: true,
+  ),
+  PubkeyVector(
+    "06ef164284e2c3abc32b310eb62904af0d49196c51087bdf4038998f8818787c882433ae83422904f48ad36dcf351ac9a37e6b00e57cf40b469b650ec850640efe",
+    compressed: false,
+    evenY: true,
+  ),
+  PubkeyVector(
+    "07576168b540f6f80e4d2a325f8cbd420ceb170ff42cd07e96bffc5e6a4a4ea04b1208f618306fd629cd2972cea45aa81ae7b24a64bf2e86704d7a63d82fd97a8f",
+    compressed: false,
+    evenY: false,
+  ),
 ];
 
 final invalidPubKeys = [
