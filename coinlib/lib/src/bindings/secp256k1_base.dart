@@ -77,6 +77,7 @@ abstract class Secp256k1Base<
   ) extEcdsaRecover;
   late int Function(CtxPtr, HeapArrayPtr, HeapArrayPtr) extEcSeckeyTweakAdd;
   late int Function(CtxPtr, PubKeyPtr, HeapArrayPtr) extEcPubkeyTweakAdd;
+  late int Function(CtxPtr, HeapArrayPtr) extEcSeckeyNegate;
 
   // Schnorr functions
   late int Function(CtxPtr, KeyPairPtr, HeapArrayPtr) extKeypairCreate;
@@ -374,8 +375,8 @@ abstract class Secp256k1Base<
 
   }
 
-  /// Tweaks a private key ([privKey]) by a [scalar]. Returns null if a tweaked
-  /// private key could not be created.
+  /// Tweaks a 32-byte private key ([privKey]) by a [scalar]. Returns null if a
+  /// tweaked private key could not be created.
   Uint8List? privKeyTweak(Uint8List privKey, Uint8List scalar) {
     _requireLoad();
 
@@ -407,6 +408,20 @@ abstract class Secp256k1Base<
     }
 
     return _serializePubKeyFromPtr(compressed);
+
+  }
+
+  /// Takes a 32-byte private key ([privKey]) and negates it.
+  Uint8List privKeyNegate(Uint8List privKey) {
+    _requireLoad();
+
+    key32Array.load(privKey);
+
+    if (extEcSeckeyNegate(ctxPtr, key32Array.ptr) != 1) {
+      throw Secp256k1Exception("Invalid private key for negation");
+    }
+
+    return Uint8List.fromList(key32Array.list);
 
   }
 

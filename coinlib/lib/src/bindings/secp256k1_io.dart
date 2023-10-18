@@ -79,6 +79,7 @@ class Secp256k1 extends Secp256k1Base<
     extEcdsaRecover = _lib.secp256k1_ecdsa_recover;
     extEcSeckeyTweakAdd = _lib.secp256k1_ec_seckey_tweak_add;
     extEcPubkeyTweakAdd = _lib.secp256k1_ec_pubkey_tweak_add;
+    extEcSeckeyNegate = _lib.secp256k1_ec_seckey_negate;
     extKeypairCreate = _lib.secp256k1_keypair_create;
     extXOnlyPubkeyParse = _lib.secp256k1_xonly_pubkey_parse;
     extSchnorrSign32 = _lib.secp256k1_schnorrsig_sign32;

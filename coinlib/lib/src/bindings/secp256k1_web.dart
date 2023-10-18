@@ -85,6 +85,9 @@ class Secp256k1 extends Secp256k1Base<
     extEcPubkeyTweakAdd
       = inst.functions["secp256k1_ec_pubkey_tweak_add"]
       as IntFunc3;
+    extEcSeckeyNegate
+      = inst.functions["secp256k1_ec_seckey_negate"]
+      as IntFunc2;
     extKeypairCreate = inst.functions["secp256k1_keypair_create"] as IntFunc3;
     extXOnlyPubkeyParse
       = inst.functions["secp256k1_xonly_pubkey_parse"]
