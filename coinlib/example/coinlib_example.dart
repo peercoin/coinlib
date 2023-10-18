@@ -53,8 +53,10 @@ void main() async {
 
   // Create a transaction that spends a P2PKH input to the address generated
   // earlier. The version is set to 3 by default with a 0 locktime.
-  // hexToBytes is a convenience function.
 
+  print("\nP2PKH tranasction");
+
+  // hexToBytes is a convenience function.
   final prevHash = hexToBytes(
     "32d1f1cf811456c6da4ef9e1cb7f8bb80c4c5e9f2d2c3d743f2b68a9c6857823",
   );
@@ -82,5 +84,35 @@ void main() async {
 
   print("Txid = ${signedTx.txid}");
   print("Tx hex = ${signedTx.toHex()}");
+
+  print("\nTaproot");
+
+  // Create a Taproot object with an internal key
+  final taproot = Taproot(internalKey: key1.publicKey);
+
+  // Print P2TR address
+  final trAddr = P2TRAddress.fromTaproot(
+    taproot, hrp: NetworkParams.mainnet.bech32Hrp,
+  );
+  print("Taproot address: $trAddr");
+
+  // Sign a TR input using key-path. Send to an identical TR output
+
+  final trOutput = Output.fromProgram(
+    BigInt.from(123456),
+    P2TR.fromTaproot(taproot),
+  );
+
+  final trTx = Transaction(
+    inputs: [TaprootKeyInput(prevOut: OutPoint(prevHash, 1))],
+    outputs: [trOutput],
+  ).sign(
+    inputN: 0,
+    // Private keys must be tweaked by the Taproot object
+    key: taproot.tweakPrivateKey(key1.privateKey),
+    prevOuts: [trOutput],
+  );
+
+  print("TR Tx hex = ${trTx.toHex()}");
 
 }
