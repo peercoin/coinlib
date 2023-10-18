@@ -435,6 +435,67 @@ void main() {
 
     });
 
+    test("sign key-path P2TR input", () {
+      // Sent on testnet:
+      //   5bfa50b41c372e8ec5710766e9d5292845ba2c22d7d144dfff622d1c3eaa6dbf
+      // Includes 6ppc input via:
+      //   ec68cf7fa9599c96b87c176c9d2fa0ee2fcc8a0f3469b7da5b637963e67470c1
+      // And includes 2ppc input via:
+      //   cada1d0756465151d8fe7195f5702d48ff5e8f56b5d19ecd7815c8e82687211e
+
+      final taproot = Taproot(internalKey: keyVec.publicObj);
+      final tx = Transaction(
+        inputs: [
+          TaprootKeyInput(
+            prevOut: OutPoint.fromHex(
+              "ec68cf7fa9599c96b87c176c9d2fa0ee2fcc8a0f3469b7da5b637963e67470c1",
+              1,
+            ),
+          ),
+          TaprootKeyInput(
+            prevOut: OutPoint.fromHex(
+              "cada1d0756465151d8fe7195f5702d48ff5e8f56b5d19ecd7815c8e82687211e",
+              1,
+            ),
+          ),
+        ],
+        outputs: [exampleOutput],
+      );
+      final program = P2TR.fromTaproot(taproot);
+      final prevOuts = [
+        Output.fromProgram(BigInt.from(6000000), program),
+        Output.fromProgram(BigInt.from(2000000), program),
+      ];
+      final tweakedPriv = taproot.tweakPrivateKey(keyVec.privateObj);
+
+      final signed = tx.sign(
+        inputN: 0,
+        key: tweakedPriv,
+        prevOuts: prevOuts,
+      ).sign(
+        inputN: 1,
+        key: tweakedPriv,
+        prevOuts: prevOuts,
+        hashType: SigHashType.all(anyOneCanPay: true),
+      );
+
+      expect(signed.complete, true);
+
+      expect(
+        signed.toHex(),
+        "03000000000102c17074e66379635bdab769340f8acc2feea02f9d6c177cb8969c59a97fcf68ec0100000000ffffffff1e218726e8c81578cd9ed1b5568f5eff482d70f59571fed851514656071ddaca0100000000ffffffff01a0860100000000001976a914c42e7ef92fdb603af844d064faad95db9bcdfd3d88ac0141525f7f8e98fe4a116131c1d51aba29bbe15852260faa5308d23768d4d99251004b56306396f5f07018e7a94b41594a485455107b818d1c8899a18afbc98618b0010141399278f778c70fc3a7eee1997cb53acbef4a86ab65d85c12d40286f26cb50b189656df26d86e9be4f16bfe0b574d3f632e2b537d19d0e04d545e61c3d76b07058100000000",
+      );
+
+      // Invalidates first input and keeps ANYONECANPAY when adding new input
+      final newTx = signed.addInput(
+        P2PKHInput(prevOut: examplePrevOut, publicKey: keyVec.publicObj),
+      );
+      expect((newTx.inputs[0] as TaprootKeyInput).insig, null);
+      // Should be same object as there is no change
+      expect(newTx.inputs[1], signed.inputs[1]);
+
+    });
+
     test("sign P2SH multisig and add inputs/outputs", () {
       // Sign 3-of-4 with keys 3, 1, 2 on the second input
       // Sent on testnet: 665d6d195bd128e99cf4ca2c78d5fcd5b67c54a3c111dfb8a3f8c8a82b0f1f1b
