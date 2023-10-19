@@ -133,6 +133,9 @@ final scriptOpNameToCode = {
   "NOP9": 0xb8,
   "NOP10": 0xb9,
 
+  // Added for Tapscript
+  "CHECKSIGADD": 0xba,
+
   "INVALIDOPCODE": 0xff,
 };
 final scriptOpCodeToName = scriptOpNameToCode.map(

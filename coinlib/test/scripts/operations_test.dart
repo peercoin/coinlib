@@ -274,8 +274,11 @@ final vectors = [
     number: -1,
   ),
 
+  // New Tapscript op code
+  OperationVector(inputHex: "ba", outputAsm: "OP_CHECKSIGADD", isPush: false),
+
   // Unknown op code
-  OperationVector(inputHex: "ba", outputAsm: "OP_UNKNOWN", isPush: false),
+  OperationVector(inputHex: "bb", outputAsm: "OP_UNKNOWN", isPush: false),
 
 ];
 
