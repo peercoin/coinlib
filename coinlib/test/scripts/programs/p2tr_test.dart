@@ -9,8 +9,7 @@ void main() {
 
     setUpAll(loadCoinlib);
 
-    final internalKey = taprootVectors[0].xInternalPubKeyHex;
-    final tweakedKey = taprootVectors[0].xTweakedKeyHex;
+    final tweakedKey = "53a1f6e454df1aa2776a2814a721372d6258050de330b3c6d10ee8f4e0dda343";
     final asm = "1 $tweakedKey";
     final script = Script.fromAsm(asm);
 
@@ -42,11 +41,7 @@ void main() {
 
     test(
       "fromTaproot() success",
-      () => expectP2TR(
-        P2TR.fromTaproot(
-          Taproot(internalKey: ECPublicKey.fromXOnlyHex(internalKey)),
-        ),
-      ),
+      () => expectP2TR(P2TR.fromTaproot(taprootVectors[0].object)),
     );
 
     test("Program.match()", () => expectP2TR(Program.fromAsm(asm) as P2TR));

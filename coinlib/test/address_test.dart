@@ -206,11 +206,7 @@ void main() {
         "pc1p2wsldez5mud2yam29q22wgfh9439spgduvct83k3pm50fcxa5dpsxcz8x2",
         NetworkParams.mainnet,
         P2TRAddress.fromTaproot(
-          Taproot(
-            internalKey: ECPublicKey.fromXOnlyHex(
-              taprootVectors[0].xInternalPubKeyHex,
-            ),
-          ),
+          taprootVectors[0].object,
           hrp: NetworkParams.mainnet.bech32Hrp,
         ),
       );
