@@ -22,13 +22,6 @@ void main() {
 
     test("valid key-path taproot inputs inc. addSignature", () {
 
-      final rawBytes = Uint8List.fromList([
-        ...prevOutHash,
-        0xef, 0xbe, 0xed, 0xfe,
-        0,
-        0xed, 0xfe, 0xef, 0xbe,
-      ]);
-
       expectTaprootKeyInput(TaprootKeyInput input, bool hasSig) {
 
         expectInput(input);
@@ -44,8 +37,8 @@ void main() {
         }
 
         expect(input.witness, getWitness(hasSig));
-        expect(input.size, rawBytes.length);
-        expect(input.toBytes(), rawBytes);
+        expect(input.size, rawWitnessInputBytes.length);
+        expect(input.toBytes(), rawWitnessInputBytes);
 
       }
 
@@ -64,7 +57,7 @@ void main() {
       // Expect match only when there is a Schnorr signature present, as there
       // is no way to distinguish otherwise
       final matched = Input.match(
-        RawInput.fromReader(BytesReader(rawBytes)),
+        RawInput.fromReader(BytesReader(rawWitnessInputBytes)),
         getWitness(true),
       );
       expect(matched, isA<TaprootKeyInput>());

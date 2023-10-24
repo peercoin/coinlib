@@ -160,10 +160,11 @@ class TapBranch implements TapNode {
 class TapLeaf with Writable implements TapNode {
 
   static final leafHash = getTaggedHasher("TapLeaf");
+  static const int tapscriptVersion = 0xc0;
 
   /// The Tapscript version is fixed as 0xc0 as this is the only implemented and
   /// enforced version
-  final int version = 0xc0;
+  final int version = tapscriptVersion;
   final Script script;
 
   TapLeaf(this.script);

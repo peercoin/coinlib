@@ -33,13 +33,6 @@ void main() {
 
     test("valid p2wpkh inputs inc. addSignature", () {
 
-      final rawBytes = Uint8List.fromList([
-        ...prevOutHash,
-        0xef, 0xbe, 0xed, 0xfe,
-        0,
-        0xed, 0xfe, 0xef, 0xbe,
-      ]);
-
       expectP2WPKHInput(P2WPKHInput input, bool hasSig) {
 
         expectInput(input);
@@ -56,8 +49,8 @@ void main() {
         }
 
         expect(input.witness, getWitness(hasSig));
-        expect(input.size, rawBytes.length);
-        expect(input.toBytes(), rawBytes);
+        expect(input.size, rawWitnessInputBytes.length);
+        expect(input.toBytes(), rawWitnessInputBytes);
 
       }
 
@@ -80,7 +73,7 @@ void main() {
 
       expectMatched(bool hasSig) {
         final matched = Input.match(
-          RawInput.fromReader(BytesReader(rawBytes)),
+          RawInput.fromReader(BytesReader(rawWitnessInputBytes)),
           getWitness(hasSig),
         );
         expect(matched, isA<P2WPKHInput>());
