@@ -34,6 +34,15 @@ class ECPublicKey {
   );
   ECPublicKey.fromXOnlyHex(String hex) : this.fromXOnly(hexToBytes(hex));
 
+  /// Tweaks the public key with a scalar multiplied by the generator point. In
+  /// the instance a new key cannot be created (practically impossible for
+  /// random 32-bit scalars), then null will be returned.
+  ECPublicKey? tweak(Uint8List scalar) {
+    checkBytes(scalar, 32, name: "Scalar");
+    final newKey = secp256k1.pubKeyTweak(_data, scalar, compressed);
+    return newKey == null ? null : ECPublicKey(newKey);
+  }
+
   String get hex => bytesToHex(_data);
   bool get compressed => _data.length == 33;
   Uint8List get data => Uint8List.fromList(_data);
@@ -65,14 +74,5 @@ class ECPublicKey {
 
   @override
   int get hashCode => _data[1] | _data[2] << 8 | _data[3] << 16 | _data[4] << 24;
-
-  /// Tweaks the public key with a scalar multiplied by the generator point. In
-  /// the instance a new key cannot be created (practically impossible for
-  /// random 32-bit scalars), then null will be returned.
-  ECPublicKey? tweak(Uint8List scalar) {
-    checkBytes(scalar, 32, name: "Scalar");
-    final newKey = secp256k1.pubKeyTweak(_data, scalar, compressed);
-    return newKey == null ? null : ECPublicKey(newKey);
-  }
 
 }

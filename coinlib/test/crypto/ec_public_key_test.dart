@@ -83,7 +83,7 @@ void main() {
       }
     });
 
-    test(".equal", () {
+    test("allows equality comparison", () {
       for (int i = 0; i < validPubKeys.length; i++) {
         expect(
           ECPublicKey.fromHex(validPubKeys[i].hex),
