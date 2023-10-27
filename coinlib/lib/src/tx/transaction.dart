@@ -6,6 +6,7 @@ import 'package:coinlib/src/crypto/ec_private_key.dart';
 import 'package:coinlib/src/crypto/hash.dart';
 import 'package:coinlib/src/tx/inputs/taproot_key_input.dart';
 import 'inputs/input.dart';
+import 'inputs/input_signature.dart';
 import 'inputs/legacy_input.dart';
 import 'inputs/legacy_witness_input.dart';
 import 'inputs/raw_input.dart';
@@ -184,7 +185,9 @@ class Transaction with Writable {
 
   /// Sign the input at [inputN] with the [key] and [hashType] and return a new
   /// [Transaction] with the signed input. The input must be a signable
-  /// P2PKH, P2WPKH or P2SH multisig input or [CannotSignInput] will be thrown.
+  /// [P2PKHInput], [P2WPKHInput], [P2SHMultisigInput] or [TaprootKeyInput].
+  /// Otherwise [CannotSignInput] will be thrown. Other inputs may be signed
+  /// seperately and inserted back into the transaction via [replaceInput].
   /// [value] is only required for P2WPKH.
   /// [prevOuts] is only required for Taproot inputs.
   Transaction sign({
@@ -271,24 +274,61 @@ class Transaction with Writable {
 
   }
 
-  /// Returns a new [Transaction] with the [input] added to the end of the input
-  /// list.
-  Transaction addInput(Input input) {
 
-    // For existing inputs, remove any signatures without ANYONECANPAY
-    final modifiedInputs = inputs.map(
-      (input) => input.filterSignatures((insig) => insig.hashType.anyOneCanPay),
-    );
+  /// Replaces the input at [n] with the new [input] and invalidates other
+  /// input signatures that have standard sighash types accordingly. This is
+  /// useful for signing or otherwise updating inputs that cannot be signed with
+  /// the [sign] method.
+  Transaction replaceInput(Input input, int n) {
 
-    // Add new input to end of inputs of new transaction
+    final oldInput = inputs[n];
+
+    if (input == oldInput) return this;
+
+    final newPrevOut = input.prevOut != oldInput.prevOut;
+    final newSequence = input.sequence != oldInput.sequence;
+
+    final filtered = inputs.map(
+      (input) => input.filterSignatures(
+        (insig)
+          // Allow ANYONECANPAY
+          => insig.hashType.anyOneCanPay
+          // Allow signature if previous output hasn't changed and the sequence
+          // has not changed for taproot inputs or when using SIGHASH_ALL.
+          || !(
+            newPrevOut || (
+              newSequence
+              && (insig.hashType.all || insig is SchnorrInputSignature)
+            )
+          ),
+      ),
+    ).toList();
+
     return Transaction(
       version: version,
-      inputs: [...modifiedInputs, input],
+      inputs: [...filtered.take(n), input, ...filtered.sublist(n+1)],
       outputs: outputs,
       locktime: locktime,
     );
 
   }
+
+  /// Returns a new [Transaction] with the [input] added to the end of the input
+  /// list.
+  Transaction addInput(Input input) => Transaction(
+    version: version,
+    inputs: [
+      // Only keep ANYONECANPAY signatures when adding a new input
+      ...inputs.map(
+        (input) => input.filterSignatures(
+          (insig) => insig.hashType.anyOneCanPay,
+        ),
+      ),
+      input,
+    ],
+    outputs: outputs,
+    locktime: locktime,
+  );
 
   /// Returns a new [Transaction] with the [output] added to the end of the
   /// output list.

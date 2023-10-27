@@ -10,6 +10,8 @@ void main() {
 
     setUpAll(loadCoinlib);
 
+    final keyVec = keyPairVectors[0];
+
     expectVectorWithoutObj(Transaction tx, TxVector vec) {
       expect(tx.toHex(), vec.hex);
 
@@ -306,9 +308,6 @@ void main() {
       expect(() => tx.outputs[0] = exampleOutput, throwsA(anything));
     });
 
-
-    final keyVec = keyPairVectors[0];
-
     test("sign P2PKH", () {
 
       expectP2PKH({
@@ -592,33 +591,191 @@ void main() {
 
     });
 
-  });
+    test("invalid SIGHASH_SINGLE when adding corresponding output", () {
 
-  test("invalid SIGHASH_SINGLE when adding corresponding output", () {
+      final privkey = ECPrivateKey.generate();
+      final pubkey = privkey.pubkey;
 
-    final privkey = ECPrivateKey.generate();
-    final pubkey = privkey.pubkey;
+      var tx = Transaction(
+        inputs: [
+          P2PKHInput(prevOut: examplePrevOut, publicKey: pubkey),
+          P2PKHInput(prevOut: examplePrevOut, publicKey: pubkey),
+        ],
+        outputs: [exampleOutput],
+      );
 
-    var tx = Transaction(
-      inputs: [
-        P2PKHInput(prevOut: examplePrevOut, publicKey: pubkey),
-        P2PKHInput(prevOut: examplePrevOut, publicKey: pubkey),
-      ],
-      outputs: [exampleOutput],
-    );
+      for (int i = 0; i < 2; i++) {
+        expect(tx.complete, false);
+        tx = tx.sign(inputN: i, key: privkey, hashType: SigHashType.single());
+      }
 
-    for (int i = 0; i < 2; i++) {
+      expect(tx.complete, true);
+      tx = tx.addOutput(exampleOutput);
       expect(tx.complete, false);
-      tx = tx.sign(inputN: i, key: privkey, hashType: SigHashType.single());
-    }
 
-    expect(tx.complete, true);
-    tx = tx.addOutput(exampleOutput);
-    expect(tx.complete, false);
+      // Added output for second input which is therefore invalidated
+      expect((tx.inputs[0] as P2PKHInput).insig, isNotNull);
+      expect((tx.inputs[1] as P2PKHInput).insig, isNull);
 
-    // Added output for second input which is therefore invalidated
-    expect((tx.inputs[0] as P2PKHInput).insig, isNotNull);
-    expect((tx.inputs[1] as P2PKHInput).insig, isNull);
+    });
+
+    test("replaceInput", () {
+
+      // Create tx with 4 legacy (the 2nd to be replaced), 3 witness and 3
+      // taproot inputs to test invalidation when an input is replaced
+
+      final value = BigInt.from(1000000);
+      final taprootPrevOuts = [
+        ...List.filled(
+          4,
+          Output.fromProgram(value, P2PKH.fromPublicKey(keyVec.publicObj)),
+        ),
+        ...List.filled(
+          3,
+          Output.fromProgram(value, P2WPKH.fromPublicKey(keyVec.publicObj)),
+        ),
+        ...List.filled(
+          3,
+          Output.fromProgram(value, P2TR.fromTweakedKey(keyVec.publicObj)),
+        ),
+      ];
+
+      final tx = Transaction(
+        inputs: [
+          // Legacy inputs
+          ...List.generate(
+            4,
+            (i) => P2PKHInput(prevOut: examplePrevOut, publicKey: keyVec.publicObj),
+          ),
+          // Witness inputs
+          ...List.generate(
+            3,
+            (i) => P2WPKHInput(prevOut: examplePrevOut, publicKey: keyVec.publicObj),
+          ),
+          // Taproot inputs
+          ...List.generate(
+            3,
+            (i) => TaprootKeyInput(prevOut: examplePrevOut),
+          ),
+        ],
+        outputs: [exampleOutput],
+      )
+      // Sign legacy
+      .sign(inputN: 0, key: keyVec.privateObj)
+      .sign(
+        inputN: 2,
+        key: keyVec.privateObj,
+        hashType: SigHashType.all(anyOneCanPay: true),
+      )
+      .sign(
+        inputN: 3,
+        key: keyVec.privateObj,
+        hashType: SigHashType.single(),
+      )
+      // Sign witness
+      .sign(inputN: 4, key: keyVec.privateObj, value: value)
+      .sign(
+        inputN: 5,
+        key: keyVec.privateObj,
+        hashType: SigHashType.all(anyOneCanPay: true),
+        value: value,
+      )
+      .sign(
+        inputN: 6,
+        key: keyVec.privateObj,
+        hashType: SigHashType.none(),
+        value: value,
+      )
+      // Sign taproot
+      .sign(inputN: 7, key: keyVec.privateObj, prevOuts: taprootPrevOuts)
+      .sign(
+        inputN: 8,
+        key: keyVec.privateObj,
+        hashType: SigHashType.all(anyOneCanPay: true),
+        prevOuts: taprootPrevOuts,
+      )
+      .sign(
+        inputN: 9,
+        key: keyVec.privateObj,
+        hashType: SigHashType.none(),
+        prevOuts: taprootPrevOuts,
+      );
+
+      void expectComplete(Transaction tx, Iterable<bool> completes)
+        => expect(tx.inputs.map((i) => i.complete), completes);
+
+      // All but the 2nd input is complete
+      expectComplete(tx, Iterable.generate(10, (i) => i != 1));
+
+      // Do not invalidate anything when prevout and sequence is the same
+      expectComplete(
+        tx.replaceInput(
+          RawInput(
+            prevOut: examplePrevOut,
+            scriptSig: hexToBytes("00"),
+          ),
+          1,
+        ),
+        Iterable.generate(10, (i) => true),
+      );
+
+      // Only invalidate SIGHASH_ALL or taproot inputs without ANYONECANPAY when
+      // sequence changes
+      expectComplete(
+        tx.replaceInput(
+          RawInput(
+            prevOut: examplePrevOut,
+            scriptSig: hexToBytes("00"),
+            sequence: 0,
+          ),
+          1,
+        ),
+        [
+          // Legacy
+          false, true, true, true,
+          // Witness
+          false, true, true,
+          // Taproot
+          false, true, false,
+        ],
+      );
+
+
+      // Only keep ANYONECANPAY when prevout changes
+      expectComplete(
+        tx.replaceInput(
+          RawInput(
+            prevOut: OutPoint(examplePrevOut.hash, 1),
+            scriptSig: hexToBytes("00"),
+          ),
+          1,
+        ),
+        [
+          // Legacy
+          false, true, true, false,
+          // Witness
+          false, true, false,
+          // Taproot
+          false, true, false,
+        ],
+      );
+
+      // Sign second input outside tx and check it is OK
+      final signedIn = (tx.inputs[1] as P2PKHInput).sign(
+        tx: tx,
+        inputN: 1,
+        key: keyVec.privateObj,
+      );
+      final signedTx = tx.replaceInput(signedIn, 1);
+
+      expectComplete(signedTx, Iterable.generate(10, (i) => true));
+
+      expect(
+        signedTx.toHex(),
+        "0300000000010af1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe000000006a473044022079f777b6059975ce333332bb3ecde653be038dcbddefc7920072124b1ffe43fc022030926798d6440ea69aab4e28a3ebf84fa46f3f31ae2c1c38b04c73120abea2cf01210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798fffffffff1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe000000006a47304402201e8ab341d37d9cdd8563d649e710eee973ae601fe61b57da6e1d7ae10ba21a7a022023a9d5b20a43df3c60697c876ba2030d754dda0e07804a699222616ffce3cf3801210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798fffffffff1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe000000006a47304402202c2f712bbef221026214ae9e54e817eb73df6c73aca4d35b5190caf28c454cd102207dc3750935a86b4431e55476a1e049d3d8ee7cf13162f264ce9964afa4b09c7181210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798fffffffff1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe000000006a47304402205a0d9a76a926bce5a74db8fa127d8c8779d868de26c1422f4b8acd3f8735ba580220381287903eeb349023c8d6a0d77ddcdf9fcbc01ce968627183f124ecd5e860c203210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798fffffffff1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe0000000000fffffffff1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe0000000000fffffffff1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe0000000000fffffffff1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe0000000000fffffffff1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe0000000000fffffffff1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe0000000000ffffffff01a0860100000000001976a914c42e7ef92fdb603af844d064faad95db9bcdfd3d88ac00000000024730440220487c6b12556adc75a199a8b390d38b928bd4efbb831f2010250389995fee821302204dfa74a4e7711a8b96249a6ec7836e4cc374d6dbf3864fdd142a25a67663ebfe01210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f817980247304402206e47c35235a3f5dab7420ad3e2ecdc395cb402b9fc29e8ada89ff6e380ac4df3022010812c5beacf5ef47ac380511989d204804b33a664ffe9019ea8be23ccf56f2981210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f817980247304402202b4600fe4e9823210f36074f9e3d1fa442d940e00970b707014630f2a2f695b402203e2468c4c2501959a92fafe6475cff1ba1497b5e50c77701188923399654d1d602210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f8179801416dc042d6c7ada370318f0d33e16421154964ad39c8b7ee275fcaa681a2ebfe48d9b53033672b232821e94aafa0772174d20c99a97e8b44b53937a0cd9caf904d010141af1a113a9cd6f83655cb1444e8f8e3bf07751381a942a3a35b40bac08f61c56a8736a49d8998380305e488e156ecd0516b40474db401ba359ef46cd49d96743d810141f2edfd966b88a16e30c840bf8a93e05bd2bc2bed954a01712bc0ff2fbfcdff654f6262054ba965b09c08e03c8e29c2bd19fd6a2294e5464fa45f58908fab0c8e0200000000",
+      );
+
+    });
 
   });
 
