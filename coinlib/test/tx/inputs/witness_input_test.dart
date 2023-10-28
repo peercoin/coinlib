@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'package:coinlib/coinlib.dart';
 import 'package:test/test.dart';
 import '../../vectors/inputs.dart';
+import '../../vectors/tx.dart';
 
 void main() {
 
@@ -37,6 +38,22 @@ void main() {
         sequence: 0,
       );
       expect(WitnessInput.match(rawWithScriptSig, witness), null);
+    });
+
+    test("witness elements are immutable", () {
+
+      final mutatedWitness = [hexToBytes("0000")];
+
+      final input = WitnessInput(
+        prevOut: examplePrevOut,
+        witness: mutatedWitness,
+      );
+
+      mutatedWitness[0] = hexToBytes("ffff");
+      expect(input.witness, [hexToBytes("0000")]);
+
+      expect(() => input.witness[0] = Uint8List(1), throwsA(anything));
+
     });
 
   });

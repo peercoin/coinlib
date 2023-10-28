@@ -13,9 +13,9 @@ class WitnessInput extends RawInput {
 
   WitnessInput({
     required OutPoint prevOut,
-    required this.witness,
+    required List<Uint8List> witness,
     int sequence = Input.sequenceFinal,
-  }) : super(
+  }) : witness = List.unmodifiable(witness), super(
     prevOut: prevOut,
     scriptSig: Uint8List(0),
     sequence: sequence,
