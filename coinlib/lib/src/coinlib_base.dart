@@ -11,6 +11,7 @@ export 'package:coinlib/src/crypto/ecdsa_recoverable_signature.dart';
 export 'package:coinlib/src/crypto/hash.dart';
 export 'package:coinlib/src/crypto/hd_key.dart';
 export 'package:coinlib/src/crypto/message_signature.dart';
+export 'package:coinlib/src/crypto/nums_public_key.dart';
 export 'package:coinlib/src/crypto/random.dart';
 export 'package:coinlib/src/crypto/schnorr_signature.dart';
 
