@@ -3,6 +3,7 @@ import 'package:coinlib/coinlib.dart';
 import 'package:test/test.dart';
 import '../../vectors/inputs.dart';
 import '../../vectors/taproot.dart';
+import '../../vectors/tx.dart';
 
 // Placed in global for lazy initialisation after loadCoinlib
 final taprootVec = taprootVectors[3];
@@ -127,6 +128,20 @@ void main() {
       expectNoMatch("", [hexToBytes("0201"), controlBlock]);
       expectNoMatch("", [hexToBytes("0101"), controlBlock]);
     });
+
+    test("sign() not implemented", () => expect(
+      () => TaprootScriptInput.fromTaprootLeaf(
+        prevOut: prevOut,
+        taproot: taprootVec.object,
+        leaf: taprootVec.object.leaves[0],
+      ).sign(
+        tx: Transaction(inputs: [], outputs: []),
+        inputN: 0,
+        key: ECPrivateKey.generate(),
+        prevOuts: [],
+      ),
+      throwsA(isA<CannotSignInput>()),
+    ),);
 
   });
 

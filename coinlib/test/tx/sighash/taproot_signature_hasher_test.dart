@@ -128,16 +128,24 @@ void main() {
     }
   });
 
-  test("input out of range", () {
-    expect(
-      () => TaprootSignatureHasher(
-        tx: tx,
-        inputN: 9,
-        prevOuts: prevOuts,
-        hashType: SigHashType.all(),
-      ),
-      throwsArgumentError,
-    );
-  });
+  test("input out of range", () => expect(
+    () => TaprootSignatureHasher(
+      tx: tx,
+      inputN: 9,
+      prevOuts: prevOuts,
+      hashType: SigHashType.all(),
+    ),
+    throwsArgumentError,
+  ),);
+
+  test("prevOuts length incorrect", () => expect(
+    () => TaprootSignatureHasher(
+      tx: tx,
+      inputN: 0,
+      prevOuts: prevOuts.sublist(0, prevOuts.length-1),
+      hashType: SigHashType.all(),
+    ),
+    throwsArgumentError,
+  ),);
 
 }
