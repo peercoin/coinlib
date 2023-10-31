@@ -3,7 +3,6 @@ import 'package:coinlib/coinlib.dart';
 import 'package:test/test.dart';
 import '../../vectors/inputs.dart';
 import '../../vectors/taproot.dart';
-import '../../vectors/tx.dart';
 
 // Placed in global for lazy initialisation after loadCoinlib
 final taprootVec = taprootVectors[3];
