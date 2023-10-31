@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:coinlib/coinlib.dart';
 import 'package:test/test.dart';
 
@@ -20,6 +21,12 @@ void main() {
       expect(
         NUMSPublicKey.fromRTweak(hexToBytes(exampleTweakHex)).hex,
         "0353b6c45433a55b4c83a3d967ca54bc11e0e6329f00a31282f255201c508a7b99",
+      );
+    });
+
+    test("require 32-byte tweak scalar", () {
+      expect(
+        () => NUMSPublicKey.fromRTweak(Uint8List(31)), throwsArgumentError,
       );
     });
 

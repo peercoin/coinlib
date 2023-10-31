@@ -1,17 +1,24 @@
 import 'dart:typed_data';
 import 'package:coinlib/src/common/serial.dart';
+import 'package:coinlib/src/crypto/ec_private_key.dart';
 import 'package:coinlib/src/scripts/operations.dart';
 import 'package:coinlib/src/scripts/script.dart';
 import 'package:coinlib/src/taproot.dart';
 import 'package:coinlib/src/tx/inputs/taproot_input.dart';
 import 'package:coinlib/src/tx/outpoint.dart';
+import 'package:coinlib/src/tx/output.dart';
+import 'package:coinlib/src/tx/sighash/sighash_type.dart';
+import 'package:coinlib/src/tx/transaction.dart';
 import 'input.dart';
+import 'input_signature.dart';
 import 'raw_input.dart';
 
 /// A [TaprootInput] which spends using the script-path for 0xc0 version
 /// Tapscripts. There is no signing logic and sign() is not implemented.
-/// Subclasses should handle signing. [createInputSignature] can be used to
-/// create signatures for insertion as necessary.
+/// Subclasses should handle signing. [createScriptSignature] can be used to
+/// create signatures as necessary. Insertion of signatures and other data can
+/// be done manually via [updateStack]. These signatures must be handled by the
+/// consumer and will not be filtered upon a transaction update.
 class TaprootScriptInput extends TaprootInput {
 
   /// The tapscript embedded in the witness data, not to be confused with the
@@ -84,6 +91,35 @@ class TaprootScriptInput extends TaprootInput {
     }
 
   }
+
+  /// Replaces the stack to update the data required to spend the input
+  TaprootScriptInput updateStack(List<Uint8List> newStack)
+    => TaprootScriptInput(
+      prevOut: prevOut,
+      controlBlock: controlBlock,
+      tapscript: tapscript,
+      stack: newStack,
+      sequence: sequence,
+    );
+
+  /// Creates a [SchnorrInputSignature] to be used for the input's script data.
+  /// Provides the leaf hash to an underlying call to [createInputSignature].
+  SchnorrInputSignature createScriptSignature({
+    required Transaction tx,
+    required int inputN,
+    required ECPrivateKey key,
+    required List<Output> prevOuts,
+    hashType = const SigHashType.all(),
+    int codeSeperatorPos = 0xFFFFFFFF,
+  }) => createInputSignature(
+    tx: tx,
+    inputN: inputN,
+    key: key,
+    prevOuts: prevOuts,
+    hashType: hashType,
+    leafHash: TapLeaf(tapscript).hash,
+    codeSeperatorPos: codeSeperatorPos,
+  );
 
   Uint8List get controlBlock => witness.last;
 

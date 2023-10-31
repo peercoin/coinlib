@@ -495,6 +495,81 @@ void main() {
 
     });
 
+    test("sign script-path P2TR input with NUMS key", () {
+      // Sent on testnet:
+      //  7353bd0fd3c2f572b45f144b1c8ad17b555b52eee6493b27d41b168783bec0f2
+      // Includes 12ppc input via:
+      //  980d55a017d166d4b26e45c81e958f2c751bc0abb8e3116bd3354158be44c53c
+
+      TapLeaf checkSigLeafForVector(KeyTestVector vec) => TapLeaf(
+        Script([
+          ScriptPushData(vec.publicObj.x),
+          ScriptOpCode.fromName("CHECKSIG"),
+        ]),
+      );
+
+      final rTweak = hexToBytes(
+        "b8bbb28a422ab2f235f27b7e40f0189bd1c581bf44342fb6e8f3b6e772b29627",
+      );
+
+      final taproot = Taproot(
+        internalKey: NUMSPublicKey.fromRTweak(rTweak),
+        mast: TapBranch(
+          TapBranch(
+            checkSigLeafForVector(keyPairVectors[1]),
+            checkSigLeafForVector(keyPairVectors[2]),
+          ),
+          checkSigLeafForVector(keyPairVectors[3]),
+        ),
+      );
+
+      final secondLeaf = taproot.leaves[1];
+
+      final tx = Transaction(
+        inputs: [
+          TaprootScriptInput.fromTaprootLeaf(
+            prevOut: OutPoint.fromHex(
+              "980d55a017d166d4b26e45c81e958f2c751bc0abb8e3116bd3354158be44c53c",
+              1,
+            ),
+            taproot: taproot,
+            leaf: secondLeaf,
+          ),
+        ],
+        outputs: [exampleOutput],
+      );
+
+      // Doesn't know when arbitrary taproot script input is complete so assume
+      // it is even when it isn't.
+      expect(tx.complete, true);
+
+      // Manual signing of input as Transaction.sign doesn't know how to handle
+      // these arbitrary inputs.
+      final inputToSign = tx.inputs[0] as TaprootScriptInput;
+      final prevOut = Output.fromProgram(
+        BigInt.from(12000000),
+        P2TR.fromTaproot(taproot),
+      );
+
+      final solvedTx = tx.replaceInput(
+        inputToSign.updateStack([
+          inputToSign.createScriptSignature(
+            tx: tx,
+            inputN: 0,
+            key: keyPairVectors[2].privateObj,
+            prevOuts: [prevOut],
+          ).bytes,
+        ]),
+        0,
+      );
+
+      expect(
+        solvedTx.toHex(),
+        "030000000001013cc544be584135d36b11e3b8abc01b752c8f951ec8456eb2d466d117a0550d980100000000ffffffff01a0860100000000001976a914c42e7ef92fdb603af844d064faad95db9bcdfd3d88ac034194435688998751de388e3a240d488f68f86d70a631a90355472673ccfa14e323a147eedea0b4da14a73195abe22be29fcafeb60cf3bb9de94891969f2c546088012220b80011a883a0fd621ad46dfc405df1e74bf075cbaf700fd4aebef6e96f848340ac61c1b33ff3fab0fd16daef5f4916bfbd83244bf3b9f446eb0f1b7b5b1f97a9e99065763e9da064b9dc0471fb0f3c8fa2c84b4b84d2ca992497c12d2274386795aa8ef91bcc8ea862a20c20ecb36adc4a8c29ca24475f9685d07e76e19379328e847e00000000",
+      );
+
+    });
+
     test("sign P2SH multisig and add inputs/outputs", () {
       // Sign 3-of-4 with keys 3, 1, 2 on the second input
       // Sent on testnet: 665d6d195bd128e99cf4ca2c78d5fcd5b67c54a3c111dfb8a3f8c8a82b0f1f1b
