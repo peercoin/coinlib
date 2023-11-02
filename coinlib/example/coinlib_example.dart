@@ -54,7 +54,7 @@ void main() async {
   // Create a transaction that spends a P2PKH input to the address generated
   // earlier. The version is set to 3 by default with a 0 locktime.
 
-  print("\nP2PKH tranasction");
+  print("\nP2PKH transaction");
 
   // hexToBytes is a convenience function.
   final prevHash = hexToBytes(
