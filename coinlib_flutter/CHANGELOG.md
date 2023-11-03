@@ -1,3 +1,8 @@
+## 2.0.0-rc.1
+
+Adds Taproot support and minor breaking changes. See changes for the underlying
+coinlib library 2.0.0-rc.1.
+
 ## 1.0.0
 
 Final release for 1.0.0

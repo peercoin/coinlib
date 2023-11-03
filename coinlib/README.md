@@ -18,8 +18,8 @@
 # Coinlib
 
 Coinlib is a straight-forward and modular library for Peercoin and other similar
-cryptocoins. This library allows for the construction and signing of
-transactions and management of BIP32 wallets.
+cryptocoins including Taproot support. This library allows for the construction
+and signing of transactions and management of BIP32 wallets.
 
 ## Installation and Usage
 
@@ -101,4 +101,3 @@ Bindings for the native libraries (excluding WebAssembly) are generated from the
 The WebAssembly module has been pre-built to
 `lib/src/generated/secp256k1.wasm.g.dart`. It may be rebuilt using `dart run
 bin/build_wasm.dart` in the `coinlib` root directory.
-
