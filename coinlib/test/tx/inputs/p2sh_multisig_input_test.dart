@@ -1,16 +1,16 @@
 import 'dart:typed_data';
 import 'package:coinlib/coinlib.dart';
 import 'package:test/test.dart';
-import '../vectors/inputs.dart';
-import '../vectors/keys.dart';
-import '../vectors/signatures.dart';
+import '../../vectors/inputs.dart';
+import '../../vectors/keys.dart';
+import '../../vectors/signatures.dart';
 
 void main() {
 
   group("P2SHMultisigInput", () {
 
     late List<ECPublicKey> pks;
-    late List<InputSignature> insigs;
+    late List<ECDSAInputSignature> insigs;
     late MultisigProgram multisig;
 
     setUpAll(() async {
@@ -19,12 +19,12 @@ void main() {
 
       pks = validPubKeys
         .getRange(0, 4)
-        .map((hex) => ECPublicKey.fromHex(pubkeyVec))
+        .map((vec) => ECPublicKey.fromHex(vec.hex))
         .toList();
 
       insigs = validDerSigs
         .getRange(0, 4)
-        .map((der) => InputSignature(ECDSASignature.fromDerHex(der)))
+        .map((der) => ECDSAInputSignature(ECDSASignature.fromDerHex(der)))
         .toList();
 
       multisig = MultisigProgram(3, pks);
@@ -175,7 +175,7 @@ void main() {
         4,
         (i) {
           final hashType = SigHashType.fromValue(i % 3 + 1);
-          return InputSignature(
+          return ECDSAInputSignature(
             ECDSASignature.sign(keys[i], getSigHash(hashType)),
             hashType,
           );

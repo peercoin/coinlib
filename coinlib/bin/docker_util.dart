@@ -9,7 +9,7 @@ Future<String> getDockerCmd() async {
   } else if (await cmdAvailable("docker")) {
     return "docker";
   } else {
-    print("Could not find podman or docker to use for wasm build");
+    print("Could not find podman or docker to use for build");
     exit(1);
   }
 

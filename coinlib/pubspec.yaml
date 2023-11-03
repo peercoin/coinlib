@@ -2,7 +2,7 @@ name: coinlib
 description:
   A straight-forward, modular library for Peercoin and other Satoshi-based UTXO
   blockchains
-version: 1.0.0
+version: 1.0.0-dev
 repository: https://github.com/peercoin/coinlib
 
 environment:
@@ -30,3 +30,4 @@ ffigen:
   headers:
     entry-points:
       - '../coinlib_flutter/src/secp256k1/include/secp256k1_recovery.h'
+      - '../coinlib_flutter/src/secp256k1/include/secp256k1_schnorrsig.h'

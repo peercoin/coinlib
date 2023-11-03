@@ -13,7 +13,9 @@ typedef IntFunc5 = int Function(int, int, int, int, int);
 typedef IntFunc6 = int Function(int, int, int, int, int, int);
 
 /// Loads and wraps WASM code to be run via the browser JS APIs
-class Secp256k1 extends Secp256k1Base<int, int, int, int,int, int, int, int> {
+class Secp256k1 extends Secp256k1Base<
+  int, int, int, int, int, int, int, int, int, int
+> {
 
   static final int _ptrBytes = 4; // 32-bit architecture
   static final int _intBytes = 8; // Allocate 8 bytes to be on the safe side
@@ -83,6 +85,19 @@ class Secp256k1 extends Secp256k1Base<int, int, int, int,int, int, int, int> {
     extEcPubkeyTweakAdd
       = inst.functions["secp256k1_ec_pubkey_tweak_add"]
       as IntFunc3;
+    extEcSeckeyNegate
+      = inst.functions["secp256k1_ec_seckey_negate"]
+      as IntFunc2;
+    extKeypairCreate = inst.functions["secp256k1_keypair_create"] as IntFunc3;
+    extXOnlyPubkeyParse
+      = inst.functions["secp256k1_xonly_pubkey_parse"]
+      as IntFunc3;
+    extSchnorrSign32
+      = inst.functions["secp256k1_schnorrsig_sign32"]
+      as IntFunc5;
+    extSchnorrVerify
+      = inst.functions["secp256k1_schnorrsig_verify"]
+      as IntFunc5;
 
     // Local functions for loading purposes
     final contextCreate = inst.functions["secp256k1_context_create"]
@@ -95,7 +110,7 @@ class Secp256k1 extends Secp256k1Base<int, int, int, int,int, int, int, int> {
 
     // Heap arrays
     final arrayFactory = HeapArrayWasmFactory(_memory, malloc, free);
-    privKeyArray = arrayFactory.create(Secp256k1Base.privkeySize);
+    key32Array = arrayFactory.create(Secp256k1Base.privkeySize);
     scalarArray = arrayFactory.create(Secp256k1Base.privkeySize);
     hashArray = arrayFactory.create(Secp256k1Base.hashSize);
     entropyArray = arrayFactory.create(Secp256k1Base.entropySize);
@@ -106,10 +121,12 @@ class Secp256k1 extends Secp256k1Base<int, int, int, int,int, int, int, int> {
     derSigArray = arrayFactory.create(Secp256k1Base.derSigSize);
 
     // Other pointers
-    sigPtr = malloc(Secp256k1Base.sigSize);
-    recSigPtr = malloc(Secp256k1Base.recSigSize);
     pubKeyPtr = malloc(Secp256k1Base.pubkeySize);
     sizeTPtr = malloc(_ptrBytes);
+    sigPtr = malloc(Secp256k1Base.sigSize);
+    recSigPtr = malloc(Secp256k1Base.recSigSize);
+    keyPairPtr = malloc(Secp256k1Base.keyPairSize);
+    xPubKeyPtr = malloc(Secp256k1Base.xonlySize);
     recIdPtr = malloc(_intBytes);
     nullPtr = 0;
 

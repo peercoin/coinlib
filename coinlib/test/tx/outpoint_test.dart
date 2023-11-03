@@ -45,6 +45,24 @@ void main() {
       expect(op.hash, Uint8List(32));
     });
 
+    test("allows equality comparison", () {
+
+      final hash = Uint8List(32);
+      final outp = OutPoint(hash, 0);
+      final identical = OutPoint(hash, 0);
+
+      final diff1 = OutPoint(hash, 1);
+
+      hash[0] = 1;
+      final diff2 = OutPoint(hash, 0);
+
+      expect(outp, identical);
+      expect(outp, outp);
+      expect(outp, isNot(equals(diff1)));
+      expect(outp, isNot(equals(diff2)));
+
+    });
+
   });
 
 }

@@ -19,15 +19,17 @@ void main() {
       expect(p2wsh.script.match(script), true);
     }
 
-    test("decompile() success", () {
-      expectP2WSH(P2WSH.decompile(hexToBytes("0020$scriptHash")));
-    });
+    test(
+      "decompile() success",
+      () => expectP2WSH(P2WSH.decompile(hexToBytes("0020$scriptHash"))),
+    );
 
     test("fromAsm() success", () => expectP2WSH(P2WSH.fromAsm(asm)));
 
-    test("fromHash() success", () {
-      expectP2WSH(P2WSH.fromHash(hexToBytes(scriptHash)));
-    });
+    test(
+      "fromHash() success",
+      () => expectP2WSH(P2WSH.fromHash(hexToBytes(scriptHash))),
+    );
 
     test("fromRedeemScript() success", () {
       expectP2WSH(P2WSH.fromRedeemScript(redeemScript));

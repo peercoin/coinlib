@@ -37,13 +37,6 @@ class ECPrivateKey {
     generateRandomBytes(privateKeyLength), compressed: compressed,
   );
 
-  ECPublicKey? _pubkeyCache;
-  /// The public key associated with this private key
-  ECPublicKey get pubkey => _pubkeyCache ??= ECPublicKey(
-    secp256k1.privToPubKey(_data, compressed),
-  );
-  Uint8List get data => Uint8List.fromList(_data);
-
   /// Tweaks the private key with a scalar. In the instance a new key cannot be
   /// created (practically impossible for random 32-bit scalars), then null will
   /// be returned.
@@ -52,5 +45,18 @@ class ECPrivateKey {
     final newScalar = secp256k1.privKeyTweak(_data, scalar);
     return newScalar == null ? null : ECPrivateKey(newScalar, compressed: compressed);
   }
+
+  /// Get the private key where the public key always has an even Y-coordinate
+  /// for any X-coordinate. This is used for Schnorr signatures.
+  ECPrivateKey get xonly => pubkey.yIsEven
+    ? this
+    : ECPrivateKey(secp256k1.privKeyNegate(_data), compressed: compressed);
+
+  ECPublicKey? _pubkeyCache;
+  /// The public key associated with this private key
+  ECPublicKey get pubkey => _pubkeyCache ??= ECPublicKey(
+    secp256k1.privToPubKey(_data, compressed),
+  );
+  Uint8List get data => Uint8List.fromList(_data);
 
 }

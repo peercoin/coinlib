@@ -12,20 +12,15 @@ class ECDSASignature {
 
   static const compactLength = 64;
 
-  /// A compact representation of a ECDSASignature containing a big-endian
-  /// 32-byte R value and big-endian 32-byte S value.
   final Uint8List _compact;
 
   /// Takes a 64-byte compact signature representation. See [this.compact].
   /// [InvalidECDSASignature] will be thrown if the signature is not valid.
   ECDSASignature.fromCompact(Uint8List compact)
-    : _compact = Uint8List.fromList(compact) {
-    if (compact.length != compactLength) {
-      throw ArgumentError(
-        "Compact signatures should be $compactLength-bytes",
-        "this.compact",
-      );
-    }
+    : _compact = copyCheckBytes(
+      compact, compactLength,
+      name: "Compact ECDSA signature",
+  ) {
     if (!secp256k1.ecdsaCompactSignatureVerify(compact)) {
       throw InvalidECDSASignature();
     }
@@ -101,6 +96,8 @@ class ECDSASignature {
 
   /// Returns the DER encoding for the signature
   Uint8List get der => secp256k1.ecdsaSignatureToDer(_compact);
+  /// A compact representation of a ECDSASignature containing a big-endian
+  /// 32-byte R value and big-endian 32-byte S value.
   Uint8List get compact => Uint8List.fromList(_compact);
 
 }

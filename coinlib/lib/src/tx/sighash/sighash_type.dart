@@ -4,6 +4,10 @@
 /// used.
 class SigHashType {
 
+  /// Special value representing the default Schnorr behaviour to sign
+  /// everything. This is encoded as an absent byte.
+  static const schnorrDefaultValue = 0;
+
   /// Value to sign all outputs
   static const allValue = 1;
   /// Value to sign no outputs
@@ -18,7 +22,7 @@ class SigHashType {
   /// [single] and [anyonecanpay] to extract details of the type.
   final int value;
 
-  /// Returns true if the sighash type value is valid
+  /// Returns true if the sighash type value is valid.
   static bool validValue(int value) {
     final valueMod = value & ~anyOneCanPayFlag;
     return valueMod >= allValue && valueMod <= singleValue;
@@ -37,8 +41,14 @@ class SigHashType {
     checkValue(value);
   }
 
+  /// Functions as [SigHashType.all] but produces distinct signatures and is
+  /// only acceptable for Taproot Schnorr signatures.
+  const SigHashType.schnorrDefault() : value = schnorrDefaultValue;
+
   /// Sign all of the outputs. If [anyOneCanPay] is true, then only the input
   /// containing the signature will be signed.
+  /// If [anyOneCanPay] is false and a Taproot input is being signed, this will
+  /// be treated as "SIGHASH_DEFAULT".
   const SigHashType.all({ bool anyOneCanPay = false })
     : value = allValue | (anyOneCanPay ? anyOneCanPayFlag : 0);
 
@@ -52,8 +62,12 @@ class SigHashType {
   const SigHashType.single({ bool anyOneCanPay = false })
     : value = singleValue | (anyOneCanPay ? anyOneCanPayFlag : 0);
 
+  /// If this is the default hash type for a Schnorr signature.
+  bool get schnorrDefault => value == schnorrDefaultValue;
+
   /// All outputs shall be signed
-  bool get all => (value & ~anyOneCanPayFlag) == allValue;
+  bool get all => value == schnorrDefaultValue
+    || (value & ~anyOneCanPayFlag) == allValue;
   /// No outputs shall be signed
   bool get none => (value & ~anyOneCanPayFlag) == noneValue;
   /// Only the output with the same index as the input shall be signed
@@ -66,6 +80,5 @@ class SigHashType {
 
   @override
   int get hashCode => value;
-
 
 }

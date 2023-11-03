@@ -3,20 +3,16 @@ import 'package:coinlib/src/common/checks.dart';
 import 'package:coinlib/src/common/hex.dart';
 import 'package:coinlib/src/common/serial.dart';
 import 'package:coinlib/src/crypto/ec_private_key.dart';
-import 'package:coinlib/src/crypto/ec_public_key.dart';
-import 'package:coinlib/src/crypto/ecdsa_signature.dart';
 import 'package:coinlib/src/crypto/hash.dart';
-import 'package:coinlib/src/scripts/operations.dart';
-import 'package:coinlib/src/scripts/programs/p2pkh.dart';
-import 'package:coinlib/src/scripts/script.dart';
-import 'p2sh_multisig_input.dart';
-import 'pkh_input.dart';
-import 'sighash_type.dart';
-import 'input.dart';
-import 'input_signature.dart';
+import 'package:coinlib/src/tx/inputs/taproot_key_input.dart';
+import 'inputs/input.dart';
+import 'inputs/input_signature.dart';
+import 'inputs/legacy_input.dart';
+import 'inputs/legacy_witness_input.dart';
+import 'inputs/raw_input.dart';
+import 'inputs/witness_input.dart';
+import 'sighash/sighash_type.dart';
 import 'output.dart';
-import 'raw_input.dart';
-import 'witness_input.dart';
 
 class TransactionTooLarge implements Exception {}
 class InvalidTransaction implements Exception {}
@@ -30,9 +26,6 @@ class CannotSignInput implements Exception {
 /// Allows construction and signing of Peercoin transactions including those
 /// with witness data.
 class Transaction with Writable {
-
-  static final hashZero = Uint8List(32);
-  static final hashOne = Uint8List(32)..last = 1;
 
   static const currentVersion = 3;
   static const maxSize = 1000000;
@@ -190,149 +183,19 @@ class Transaction with Writable {
 
   }
 
-  _requireInputRange(int n) {
-    if (n < 0 || n >= inputs.length) throw RangeError.index(n, inputs, "n");
-  }
-
-  static final ScriptOp _codeseperator = ScriptOpCode.fromName("CODESEPARATOR");
-
-  /// Obtains the hash for an input signature for a non-witness input at
-  /// [inputN]. The [scriptCode] of the redeem script is necessary. [hashType]
-  /// controls what data is included in the signature.
-  Uint8List signatureHash(int inputN, Script scriptCode, SigHashType hashType) {
-
-    _requireInputRange(inputN);
-
-    // Remove OP_CODESEPERATOR from the script code
-    final correctedScriptSig = Script(
-      scriptCode.ops.where((op) => !op.match(_codeseperator)),
-    ).compiled;
-
-    // If there is no matching output for SIGHASH_SINGLE, then return all null
-    // bytes apart from the last byte that should be 1
-    if (hashType.single && inputN >= outputs.length) return hashOne;
-
-    // Create modified transaction for obtaining a signature hash
-
-    final modifiedInputs = (
-      hashType.anyOneCanPay ? [inputs[inputN]] : inputs
-    ).asMap().map(
-      (index, input) {
-        final isThisInput = hashType.anyOneCanPay || index == inputN;
-        return MapEntry(
-          index,
-          RawInput(
-            prevOut: input.prevOut,
-            // Use the corrected previous output script for the input being signed
-            // and blank scripts for all the others
-            scriptSig: isThisInput ? correctedScriptSig : Uint8List(0),
-            // Make sequence 0 for other inputs unless using SIGHASH_ALL
-            sequence: isThisInput || hashType.all ? input.sequence : 0,
-          ),
-        );
-      }
-    ).values;
-
-    final modifiedOutputs = hashType.all ? outputs : (
-      hashType.none ? <Output>[] : [
-        // Single output
-        // Include blank outputs upto output index
-        ...Iterable.generate(inputN, (i) => Output.blank()),
-        outputs[inputN],
-      ]
-    );
-
-    final modifiedTx = Transaction(
-      version: version,
-      inputs: modifiedInputs,
-      outputs: modifiedOutputs,
-      locktime: locktime,
-    );
-
-    // Add sighash type onto the end
-    final bytes = Uint8List(modifiedTx.size + 4);
-    final writer = BytesWriter(bytes);
-    modifiedTx.write(writer);
-    writer.writeUInt32(hashType.value);
-
-    // Use sha256d for signature hash
-    return sha256DoubleHash(bytes);
-
-  }
-
-  // Obtains the hash of the concatenation of each serialized writable object
-  Uint8List _hashConcatWritable(Iterable<Writable> list) => sha256DoubleHash(
-    Uint8List.fromList(
-      list
-      .map((e) => e.toBytes().toList())
-      .reduce((a, b) => a+b),
-    ),
-  );
-
-  /// Obtains the hash for an input signature for a witness input at [inputN].
-  /// The [scriptCode] should be provided as necessary for the given witness
-  /// program. [hashType] controls what data is included in the signature.
-  Uint8List signatureHashForWitness(
-    int inputN, Script scriptCode, BigInt value, SigHashType hashType,
-  ) {
-
-    _requireInputRange(inputN);
-
-    final hashPrevouts = !hashType.anyOneCanPay
-      ? _hashConcatWritable(inputs.map((i) => i.prevOut))
-      : hashZero;
-
-    late Uint8List hashSequence;
-    if (!hashType.anyOneCanPay && !hashType.single && !hashType.none) {
-      final bytes = Uint8List(4*inputs.length);
-      final writer = BytesWriter(bytes);
-      for (final input in inputs) {
-        writer.writeUInt32(input.sequence);
-      }
-      hashSequence = sha256DoubleHash(bytes);
-    } else {
-      hashSequence = hashZero;
-    }
-
-    final hashOutputs = !hashType.single && !hashType.none
-      ? _hashConcatWritable(outputs)
-      : (
-        hashType.single && inputN < outputs.length
-        // For SIGHASH_SINGLE, only hash the output at the same index
-        ? sha256DoubleHash(outputs[inputN].toBytes())
-        : hashZero
-      );
-
-    final compiledScript = scriptCode.compiled;
-    final thisIn = inputs[inputN];
-
-    final size = 156 + (MeasureWriter()..writeVarSlice(compiledScript)).size;
-    final bytes = Uint8List(size);
-    final writer = BytesWriter(bytes);
-    writer.writeUInt32(version);
-    writer.writeSlice(hashPrevouts);
-    writer.writeSlice(hashSequence);
-    thisIn.prevOut.write(writer);
-    writer.writeVarSlice(compiledScript);
-    writer.writeUInt64(value);
-    writer.writeUInt32(thisIn.sequence);
-    writer.writeSlice(hashOutputs);
-    writer.writeUInt32(locktime);
-    writer.writeUInt32(hashType.value);
-
-    return sha256DoubleHash(bytes);
-
-  }
-
   /// Sign the input at [inputN] with the [key] and [hashType] and return a new
   /// [Transaction] with the signed input. The input must be a signable
-  /// P2PKH, P2WPKH or P2SH multisig input or [CannotSignInput] will be thrown.
+  /// [P2PKHInput], [P2WPKHInput], [P2SHMultisigInput] or [TaprootKeyInput].
+  /// Otherwise [CannotSignInput] will be thrown. Other inputs may be signed
+  /// seperately and inserted back into the transaction via [replaceInput].
   /// [value] is only required for P2WPKH.
+  /// [prevOuts] is only required for Taproot inputs.
   Transaction sign({
     required int inputN,
     required ECPrivateKey key,
     hashType = const SigHashType.all(),
     BigInt? value,
+    List<Output>? prevOuts,
   }) {
 
     if (inputN >= inputs.length) {
@@ -345,54 +208,60 @@ class Transaction with Writable {
 
     final input = inputs[inputN];
 
-    if (input is WitnessInput && value == null) {
-      throw CannotSignInput("Prevout values are required for witness inputs");
-    }
+    // Sign input
+    late Input signedIn;
 
-    // Get data for input
-    late List<ECPublicKey> pubkeys;
-    late Script scriptCode;
+    if (input is LegacyInput) {
+      signedIn = input.sign(
+        tx: this,
+        inputN: inputN,
+        key: key,
+        hashType: hashType,
+      );
+    } else if (input is LegacyWitnessInput) {
 
-    if (input is PKHInput) {
-      // Require explicit cast for a mixin
-      final pk = (input as PKHInput).publicKey;
-      pubkeys = [pk];
-      scriptCode = P2PKH.fromPublicKey(pk).script;
-    } else if (input is P2SHMultisigInput) {
-      pubkeys = input.program.pubkeys;
-      // For P2SH the script code is the redeem script
-      scriptCode = input.program.script;
+      if (value == null) {
+        throw CannotSignInput("Prevout values are required for witness inputs");
+      }
+
+      signedIn = input.sign(
+        tx: this,
+        inputN: inputN,
+        key: key,
+        value: value,
+        hashType: hashType,
+      );
+
+    } else if (input is TaprootKeyInput) {
+
+      if (prevOuts == null) {
+        throw CannotSignInput(
+          "Previous outputs are required when signing a taproot input",
+        );
+      }
+
+      if (prevOuts.length != inputs.length) {
+        throw CannotSignInput(
+          "The number of previous outputs must match the number of inputs",
+        );
+      }
+
+      signedIn = input.sign(
+        tx: this,
+        inputN: inputN,
+        key: key,
+        prevOuts: prevOuts,
+        hashType: hashType,
+      );
+
     } else {
       throw CannotSignInput("${input.runtimeType} not a signable input");
-    }
-
-    if (!pubkeys.contains(key.pubkey)) {
-      throw CannotSignInput("Public key not part of input");
-    }
-
-    // Create signature
-    final signHash = input is WitnessInput
-      ? signatureHashForWitness(inputN, scriptCode, value!, hashType)
-      : signatureHash(inputN, scriptCode, hashType);
-    final insig = InputSignature(ECDSASignature.sign(key, signHash), hashType);
-
-    // Get input with new signature
-    late Input newInput;
-    if (input is PKHInput) {
-      newInput = (input as PKHInput).addSignature(insig) as Input;
-    } else if (input is P2SHMultisigInput) {
-      // Add signature in the correct order
-      newInput = input.insertSignature(
-        insig,
-        key.pubkey,
-        (hashType) => signatureHash(inputN, scriptCode, hashType),
-      );
     }
 
     // Replace input in input list
     final newInputs = inputs.asMap().map(
       (index, input) => MapEntry(
-        index, index == inputN ? newInput : input,
+        index, index == inputN ? signedIn : input,
       ),
     ).values;
 
@@ -405,24 +274,61 @@ class Transaction with Writable {
 
   }
 
-  /// Returns a new [Transaction] with the [input] added to the end of the input
-  /// list.
-  Transaction addInput(Input input) {
 
-    // For existing inputs, remove any signatures without ANYONECANPAY
-    final modifiedInputs = inputs.map(
-      (input) => input.filterSignatures((insig) => insig.hashType.anyOneCanPay),
-    );
+  /// Replaces the input at [n] with the new [input] and invalidates other
+  /// input signatures that have standard sighash types accordingly. This is
+  /// useful for signing or otherwise updating inputs that cannot be signed with
+  /// the [sign] method.
+  Transaction replaceInput(Input input, int n) {
 
-    // Add new input to end of inputs of new transaction
+    final oldInput = inputs[n];
+
+    if (input == oldInput) return this;
+
+    final newPrevOut = input.prevOut != oldInput.prevOut;
+    final newSequence = input.sequence != oldInput.sequence;
+
+    final filtered = inputs.map(
+      (input) => input.filterSignatures(
+        (insig)
+          // Allow ANYONECANPAY
+          => insig.hashType.anyOneCanPay
+          // Allow signature if previous output hasn't changed and the sequence
+          // has not changed for taproot inputs or when using SIGHASH_ALL.
+          || !(
+            newPrevOut || (
+              newSequence
+              && (insig.hashType.all || insig is SchnorrInputSignature)
+            )
+          ),
+      ),
+    ).toList();
+
     return Transaction(
       version: version,
-      inputs: [...modifiedInputs, input],
+      inputs: [...filtered.take(n), input, ...filtered.sublist(n+1)],
       outputs: outputs,
       locktime: locktime,
     );
 
   }
+
+  /// Returns a new [Transaction] with the [input] added to the end of the input
+  /// list.
+  Transaction addInput(Input input) => Transaction(
+    version: version,
+    inputs: [
+      // Only keep ANYONECANPAY signatures when adding a new input
+      ...inputs.map(
+        (input) => input.filterSignatures(
+          (insig) => insig.hashType.anyOneCanPay,
+        ),
+      ),
+      input,
+    ],
+    outputs: outputs,
+    locktime: locktime,
+  );
 
   /// Returns a new [Transaction] with the [output] added to the end of the
   /// output list.

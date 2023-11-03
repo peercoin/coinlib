@@ -18,19 +18,22 @@ void main() {
       expect(p2wpkh.script.match(script), true);
     }
 
-    test("decompile() success", () {
-      expectP2WPKH(P2WPKH.decompile(hexToBytes("0014$pubkeyhashVec")));
-    });
+    test(
+      "decompile() success",
+      () => expectP2WPKH(P2WPKH.decompile(hexToBytes("0014$pubkeyhashVec"))),
+    );
 
     test("fromAsm() success", () => expectP2WPKH(P2WPKH.fromAsm(asm)));
 
-    test("fromHash() success", () {
-      expectP2WPKH(P2WPKH.fromHash(hexToBytes(pubkeyhashVec)));
-    });
+    test(
+      "fromHash() success",
+      () => expectP2WPKH(P2WPKH.fromHash(hexToBytes(pubkeyhashVec))),
+    );
 
-    test("fromPublicKey() success", () {
-      expectP2WPKH(P2WPKH.fromPublicKey(ECPublicKey.fromHex(pubkeyVec)));
-    });
+    test(
+      "fromPublicKey() success",
+      () => expectP2WPKH(P2WPKH.fromPublicKey(ECPublicKey.fromHex(pubkeyVec))),
+    );
 
     test("Program.match()", () => expectP2WPKH(Program.fromAsm(asm) as P2WPKH));
 

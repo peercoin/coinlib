@@ -1,23 +1,27 @@
 import 'dart:typed_data';
+import 'package:coinlib/src/crypto/ec_private_key.dart';
 import 'package:coinlib/src/crypto/ec_public_key.dart';
-import 'package:coinlib/src/tx/input.dart';
-import 'package:coinlib/src/tx/input_signature.dart';
 import 'package:coinlib/src/tx/outpoint.dart';
+import 'package:coinlib/src/tx/sighash/sighash_type.dart';
+import 'package:coinlib/src/tx/transaction.dart';
+import 'input.dart';
+import 'input_signature.dart';
 import 'pkh_input.dart';
 import 'raw_input.dart';
-import 'witness_input.dart';
+import 'legacy_witness_input.dart';
 
 /// An input for a Pay-to-Witness-Public-Key-Hash output ([P2WPKH]). This
 /// contains the public key that should match the hash in the associated output.
-/// It is either signed or unsigned and the [addSignature] method can be used to
-/// add a signature. Signature and public key data is stored in the witness
-/// data.
-class P2WPKHInput extends WitnessInput with PKHInput {
+/// It is either signed or unsigned. The [sign] method can be used to sign the
+/// input with the corresponding [ECPrivateKey] or a signature can be added
+/// without checks using [addSignature]. Signature and public key data is
+/// stored in the witness data.
+class P2WPKHInput extends LegacyWitnessInput with PKHInput {
 
   @override
   final ECPublicKey publicKey;
   @override
-  final InputSignature? insig;
+  final ECDSAInputSignature? insig;
 
   P2WPKHInput({
     required OutPoint prevOut,
@@ -44,7 +48,7 @@ class P2WPKHInput extends WitnessInput with PKHInput {
     try {
 
       final insig = witness.length == 2
-        ? InputSignature.fromBytes(witness[0])
+        ? ECDSAInputSignature.fromBytes(witness[0])
         : null;
       final publicKey = ECPublicKey(witness.last);
 
@@ -64,9 +68,27 @@ class P2WPKHInput extends WitnessInput with PKHInput {
   }
 
   @override
-  /// Returns a new [P2WPKHInput] with the [InputSignature] added. Any existing
-  /// signature is replaced.
-  P2WPKHInput addSignature(InputSignature insig) => P2WPKHInput(
+  LegacyWitnessInput sign({
+    required Transaction tx,
+    required int inputN,
+    required ECPrivateKey key,
+    required BigInt value,
+    hashType = const SigHashType.all(),
+  }) => addSignature(
+    createInputSignature(
+      tx: tx,
+      inputN: inputN,
+      key: checkKey(key),
+      scriptCode: scriptCode,
+      value: value,
+      hashType: hashType,
+    ),
+  );
+
+  @override
+  /// Returns a new [P2WPKHInput] with the [ECDSAInputSignature] added. Any
+  /// existing signature is replaced.
+  P2WPKHInput addSignature(ECDSAInputSignature insig) => P2WPKHInput(
     prevOut: prevOut,
     publicKey: publicKey,
     insig: insig,

@@ -65,6 +65,11 @@ RUN ${WASI_SDK_PATH}/bin/wasm-ld \
   --export secp256k1_ecdsa_recover \
   --export secp256k1_ec_seckey_tweak_add \
   --export secp256k1_ec_pubkey_tweak_add \
+  --export secp256k1_ec_seckey_negate \
+  --export secp256k1_keypair_create \
+  --export secp256k1_xonly_pubkey_parse \
+  --export secp256k1_schnorrsig_sign32 \
+  --export secp256k1_schnorrsig_verify \
   # The secp256k1 library object files
   src/libsecp256k1_la-secp256k1.o \
   src/libsecp256k1_precomputed_la-precomputed_ecmult.o \

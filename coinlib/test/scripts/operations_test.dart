@@ -274,8 +274,11 @@ final vectors = [
     number: -1,
   ),
 
+  // New Tapscript op code
+  OperationVector(inputHex: "ba", outputAsm: "OP_CHECKSIGADD", isPush: false),
+
   // Unknown op code
-  OperationVector(inputHex: "ba", outputAsm: "OP_UNKNOWN", isPush: false),
+  OperationVector(inputHex: "bb", outputAsm: "OP_UNKNOWN", isPush: false),
 
 ];
 
@@ -452,13 +455,21 @@ void main() {
       expect(matchOp.match(ScriptPushData(hexToBytes("01020303"))), false);
     });
 
-    test("provides insig", () {
+    test("provides ecdsaSig", () {
       final der = hexToBytes(validDerSigs[0]);
       final bytes = Uint8List.fromList([ ...der, SigHashType.allValue]);
-      final insig = ScriptPushData(bytes).insig;
+      final insig = ScriptPushData(bytes).ecdsaSig;
       expect(insig, isNotNull);
       expect(insig!.signature.der, der);
       expect(insig.hashType.all, true);
+    });
+
+    test("provides schnorrSig", () {
+      final sig = hexToBytes(validSchnorrSig);
+      final insig = ScriptPushData(sig).schnorrSig;
+      expect(insig, isNotNull);
+      expect(insig!.signature.data, sig);
+      expect(insig.hashType, SigHashType.schnorrDefault());
     });
 
     test("provides public key", () {

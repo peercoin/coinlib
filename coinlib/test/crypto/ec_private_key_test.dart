@@ -47,27 +47,6 @@ void main() {
       expect(key1.data, isNot(equals(key2.data)));
     });
 
-    test(".data", () {
-      for (final vector in keyPairVectors) {
-        expect(bytesToHex(vector.privateObj.data), vector.private);
-      }
-    });
-
-    test(".compressed", () {
-      for (final vector in keyPairVectors) {
-        expect(vector.privateObj.compressed, vector.compressed);
-      }
-    });
-
-    test(".pubkey", () {
-      for (final vector in keyPairVectors) {
-        // Should work twice with cache
-        for (int i = 0; i < 2; i++) {
-          expect(vector.privateObj.pubkey.hex, vector.public);
-        }
-      }
-    });
-
     test("tweak() produces correct key and keeps compression flag", () {
 
       expectTweak(String keyHex, String tweakHex, String resultHex, bool compressed) {
@@ -106,6 +85,47 @@ void main() {
     test("invalid tweak scalar returns null", () {
       for (final invalid in invalidTweaks) {
         expect(keyPairVectors[0].privateObj.tweak(hexToBytes(invalid)), null);
+      }
+    });
+
+    test(".xonly", () {
+
+      // Already even-y = 1
+      final privEvenHex
+        = "0000000000000000000000000000000000000000000000000000000000000001";
+      final privEven = ECPrivateKey.fromHex(privEvenHex);
+      expect(privEven.pubkey.yIsEven, true);
+      // Gives same object
+      expect(privEven.xonly, privEven);
+
+      // Odd-y = order - 1
+      final privOdd = ECPrivateKey.fromHex(
+        "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140",
+      );
+      expect(privOdd.pubkey.yIsEven, false);
+      // Negates back to 1
+      expect(bytesToHex(privOdd.xonly.data), privEvenHex);
+
+    });
+
+    test(".data", () {
+      for (final vector in keyPairVectors) {
+        expect(bytesToHex(vector.privateObj.data), vector.private);
+      }
+    });
+
+    test(".compressed", () {
+      for (final vector in keyPairVectors) {
+        expect(vector.privateObj.compressed, vector.compressed);
+      }
+    });
+
+    test(".pubkey", () {
+      for (final vector in keyPairVectors) {
+        // Should work twice with cache
+        for (int i = 0; i < 2; i++) {
+          expect(vector.privateObj.pubkey.hex, vector.public);
+        }
       }
     });
 

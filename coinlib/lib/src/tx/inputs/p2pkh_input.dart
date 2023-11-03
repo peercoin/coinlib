@@ -1,21 +1,28 @@
+import 'package:coinlib/src/crypto/ec_private_key.dart';
 import 'package:coinlib/src/crypto/ec_public_key.dart';
 import 'package:coinlib/src/scripts/operations.dart';
-import 'package:coinlib/src/tx/input_signature.dart';
+import 'package:coinlib/src/scripts/programs/p2pkh.dart';
+import 'package:coinlib/src/scripts/script.dart';
 import 'package:coinlib/src/tx/outpoint.dart';
-import 'package:coinlib/src/tx/pkh_input.dart';
-import '../scripts/script.dart';
+import 'package:coinlib/src/tx/sighash/sighash_type.dart';
+import 'package:coinlib/src/tx/transaction.dart';
 import 'input.dart';
+import 'input_signature.dart';
+import 'legacy_input.dart';
+import 'pkh_input.dart';
 import 'raw_input.dart';
 
 /// An input for a Pay-to-Public-Key-Hash output ([P2PKH]). This contains the
 /// public key that should match the hash in the associated output. It is either
-/// signed or unsigned and the [addSignature] method can be used to add a signature.
-class P2PKHInput extends RawInput with PKHInput {
+/// signed or unsigned. The [sign] method can be used to sign the input with the
+/// corresponding [ECPrivateKey] or a signature can be added without checks
+/// using [addSignature].
+class P2PKHInput extends LegacyInput with PKHInput {
 
   @override
   final ECPublicKey publicKey;
   @override
-  final InputSignature? insig;
+  final ECDSAInputSignature? insig;
 
   P2PKHInput({
     required OutPoint prevOut,
@@ -41,7 +48,7 @@ class P2PKHInput extends RawInput with PKHInput {
     final ops = script.ops;
     if (ops.isEmpty || ops.length > 2) return null;
 
-    final insig = ops.length == 2 ? ops[0].insig : null;
+    final insig = ops.length == 2 ? ops[0].ecdsaSig : null;
     if (insig == null && ops.length == 2) return null;
 
     final publicKey = ops.last.publicKey;
@@ -57,9 +64,25 @@ class P2PKHInput extends RawInput with PKHInput {
   }
 
   @override
-  /// Returns a new [P2PKHInput] with the [InputSignature] added. Any existing
-  /// signature is replaced.
-  P2PKHInput addSignature(InputSignature insig) => P2PKHInput(
+  P2PKHInput sign({
+    required Transaction tx,
+    required int inputN,
+    required ECPrivateKey key,
+    hashType = const SigHashType.all(),
+  }) => addSignature(
+    createInputSignature(
+      tx: tx,
+      inputN: inputN,
+      key: checkKey(key),
+      scriptCode: scriptCode,
+      hashType: hashType,
+    ),
+  );
+
+  @override
+  /// Returns a new [P2PKHInput] with the [ECDSAInputSignature] added. Any
+  /// existing signature is replaced.
+  P2PKHInput addSignature(ECDSAInputSignature insig) => P2PKHInput(
     prevOut: prevOut,
     publicKey: publicKey,
     insig: insig,

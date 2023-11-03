@@ -1,6 +1,8 @@
 import 'dart:typed_data';
 import 'package:coinlib/coinlib.dart';
 import 'package:test/test.dart';
+import '../../vectors/inputs.dart';
+import '../../vectors/tx.dart';
 
 void main() {
 
@@ -10,13 +12,7 @@ void main() {
     final prevOutN = 0xfeedbeef;
     final sequence = 0xbeeffeed;
 
-    final rawBytes = Uint8List.fromList([
-      ...prevOutHash,
-      0xef, 0xbe, 0xed, 0xfe,
-      0,
-      0xed, 0xfe, 0xef, 0xbe,
-    ]);
-    final raw = RawInput.fromReader(BytesReader(rawBytes));
+    final raw = RawInput.fromReader(BytesReader(rawWitnessInputBytes));
     final witness = [Uint8List.fromList([0, 1, 0xff])];
 
     test("matches witness inputs", () {
@@ -42,6 +38,22 @@ void main() {
         sequence: 0,
       );
       expect(WitnessInput.match(rawWithScriptSig, witness), null);
+    });
+
+    test("witness elements are immutable", () {
+
+      final mutatedWitness = [hexToBytes("0000")];
+
+      final input = WitnessInput(
+        prevOut: examplePrevOut,
+        witness: mutatedWitness,
+      );
+
+      mutatedWitness[0] = hexToBytes("ffff");
+      expect(input.witness, [hexToBytes("0000")]);
+
+      expect(() => input.witness[0] = Uint8List(1), throwsA(anything));
+
     });
 
   });

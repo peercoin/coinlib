@@ -163,9 +163,9 @@ class NativeSecp256k1 {
   }
 
   late final _secp256k1_context_destroyPtr = _lookup<
-      ffi.NativeFunction<
-          ffi.Void Function(
-              ffi.Pointer<secp256k1_context>)>>('secp256k1_context_destroy');
+          ffi
+          .NativeFunction<ffi.Void Function(ffi.Pointer<secp256k1_context>)>>(
+      'secp256k1_context_destroy');
   late final _secp256k1_context_destroy = _secp256k1_context_destroyPtr
       .asFunction<void Function(ffi.Pointer<secp256k1_context>)>();
 
@@ -1472,6 +1472,638 @@ class NativeSecp256k1 {
           ffi.Pointer<secp256k1_pubkey>,
           ffi.Pointer<secp256k1_ecdsa_recoverable_signature>,
           ffi.Pointer<ffi.UnsignedChar>)>();
+
+  /// Parse a 32-byte sequence into a xonly_pubkey object.
+  ///
+  /// Returns: 1 if the public key was fully valid.
+  /// 0 if the public key could not be parsed or is invalid.
+  ///
+  /// Args:   ctx: a secp256k1 context object.
+  /// Out: pubkey: pointer to a pubkey object. If 1 is returned, it is set to a
+  /// parsed version of input. If not, it's set to an invalid value.
+  /// In: input32: pointer to a serialized xonly_pubkey.
+  int secp256k1_xonly_pubkey_parse(
+    ffi.Pointer<secp256k1_context> ctx,
+    ffi.Pointer<secp256k1_xonly_pubkey> pubkey,
+    ffi.Pointer<ffi.UnsignedChar> input32,
+  ) {
+    return _secp256k1_xonly_pubkey_parse(
+      ctx,
+      pubkey,
+      input32,
+    );
+  }
+
+  late final _secp256k1_xonly_pubkey_parsePtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<secp256k1_xonly_pubkey>,
+              ffi.Pointer<ffi.UnsignedChar>)>>('secp256k1_xonly_pubkey_parse');
+  late final _secp256k1_xonly_pubkey_parse =
+      _secp256k1_xonly_pubkey_parsePtr.asFunction<
+          int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<secp256k1_xonly_pubkey>,
+              ffi.Pointer<ffi.UnsignedChar>)>();
+
+  /// Serialize an xonly_pubkey object into a 32-byte sequence.
+  ///
+  /// Returns: 1 always.
+  ///
+  /// Args:     ctx: a secp256k1 context object.
+  /// Out: output32: a pointer to a 32-byte array to place the serialized key in.
+  /// In:    pubkey: a pointer to a secp256k1_xonly_pubkey containing an initialized public key.
+  int secp256k1_xonly_pubkey_serialize(
+    ffi.Pointer<secp256k1_context> ctx,
+    ffi.Pointer<ffi.UnsignedChar> output32,
+    ffi.Pointer<secp256k1_xonly_pubkey> pubkey,
+  ) {
+    return _secp256k1_xonly_pubkey_serialize(
+      ctx,
+      output32,
+      pubkey,
+    );
+  }
+
+  late final _secp256k1_xonly_pubkey_serializePtr = _lookup<
+          ffi.NativeFunction<
+              ffi.Int Function(
+                  ffi.Pointer<secp256k1_context>,
+                  ffi.Pointer<ffi.UnsignedChar>,
+                  ffi.Pointer<secp256k1_xonly_pubkey>)>>(
+      'secp256k1_xonly_pubkey_serialize');
+  late final _secp256k1_xonly_pubkey_serialize =
+      _secp256k1_xonly_pubkey_serializePtr.asFunction<
+          int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              ffi.Pointer<secp256k1_xonly_pubkey>)>();
+
+  /// Compare two x-only public keys using lexicographic order
+  ///
+  /// Returns: <0 if the first public key is less than the second
+  /// >0 if the first public key is greater than the second
+  /// 0 if the two public keys are equal
+  /// Args: ctx:      a secp256k1 context object.
+  /// In:   pubkey1:  first public key to compare
+  /// pubkey2:  second public key to compare
+  int secp256k1_xonly_pubkey_cmp(
+    ffi.Pointer<secp256k1_context> ctx,
+    ffi.Pointer<secp256k1_xonly_pubkey> pk1,
+    ffi.Pointer<secp256k1_xonly_pubkey> pk2,
+  ) {
+    return _secp256k1_xonly_pubkey_cmp(
+      ctx,
+      pk1,
+      pk2,
+    );
+  }
+
+  late final _secp256k1_xonly_pubkey_cmpPtr = _lookup<
+          ffi.NativeFunction<
+              ffi.Int Function(
+                  ffi.Pointer<secp256k1_context>,
+                  ffi.Pointer<secp256k1_xonly_pubkey>,
+                  ffi.Pointer<secp256k1_xonly_pubkey>)>>(
+      'secp256k1_xonly_pubkey_cmp');
+  late final _secp256k1_xonly_pubkey_cmp =
+      _secp256k1_xonly_pubkey_cmpPtr.asFunction<
+          int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<secp256k1_xonly_pubkey>,
+              ffi.Pointer<secp256k1_xonly_pubkey>)>();
+
+  /// Converts a secp256k1_pubkey into a secp256k1_xonly_pubkey.
+  ///
+  /// Returns: 1 always.
+  ///
+  /// Args:         ctx: pointer to a context object.
+  /// Out: xonly_pubkey: pointer to an x-only public key object for placing the converted public key.
+  /// pk_parity: Ignored if NULL. Otherwise, pointer to an integer that
+  /// will be set to 1 if the point encoded by xonly_pubkey is
+  /// the negation of the pubkey and set to 0 otherwise.
+  /// In:        pubkey: pointer to a public key that is converted.
+  int secp256k1_xonly_pubkey_from_pubkey(
+    ffi.Pointer<secp256k1_context> ctx,
+    ffi.Pointer<secp256k1_xonly_pubkey> xonly_pubkey,
+    ffi.Pointer<ffi.Int> pk_parity,
+    ffi.Pointer<secp256k1_pubkey> pubkey,
+  ) {
+    return _secp256k1_xonly_pubkey_from_pubkey(
+      ctx,
+      xonly_pubkey,
+      pk_parity,
+      pubkey,
+    );
+  }
+
+  late final _secp256k1_xonly_pubkey_from_pubkeyPtr = _lookup<
+          ffi.NativeFunction<
+              ffi.Int Function(
+                  ffi.Pointer<secp256k1_context>,
+                  ffi.Pointer<secp256k1_xonly_pubkey>,
+                  ffi.Pointer<ffi.Int>,
+                  ffi.Pointer<secp256k1_pubkey>)>>(
+      'secp256k1_xonly_pubkey_from_pubkey');
+  late final _secp256k1_xonly_pubkey_from_pubkey =
+      _secp256k1_xonly_pubkey_from_pubkeyPtr.asFunction<
+          int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<secp256k1_xonly_pubkey>,
+              ffi.Pointer<ffi.Int>,
+              ffi.Pointer<secp256k1_pubkey>)>();
+
+  /// Tweak an x-only public key by adding the generator multiplied with tweak32
+  /// to it.
+  ///
+  /// Note that the resulting point can not in general be represented by an x-only
+  /// pubkey because it may have an odd Y coordinate. Instead, the output_pubkey
+  /// is a normal secp256k1_pubkey.
+  ///
+  /// Returns: 0 if the arguments are invalid or the resulting public key would be
+  /// invalid (only when the tweak is the negation of the corresponding
+  /// secret key). 1 otherwise.
+  ///
+  /// Args:           ctx: pointer to a context object.
+  /// Out:  output_pubkey: pointer to a public key to store the result. Will be set
+  /// to an invalid value if this function returns 0.
+  /// In: internal_pubkey: pointer to an x-only pubkey to apply the tweak to.
+  /// tweak32: pointer to a 32-byte tweak. If the tweak is invalid
+  /// according to secp256k1_ec_seckey_verify, this function
+  /// returns 0. For uniformly random 32-byte arrays the
+  /// chance of being invalid is negligible (around 1 in 2^128).
+  int secp256k1_xonly_pubkey_tweak_add(
+    ffi.Pointer<secp256k1_context> ctx,
+    ffi.Pointer<secp256k1_pubkey> output_pubkey,
+    ffi.Pointer<secp256k1_xonly_pubkey> internal_pubkey,
+    ffi.Pointer<ffi.UnsignedChar> tweak32,
+  ) {
+    return _secp256k1_xonly_pubkey_tweak_add(
+      ctx,
+      output_pubkey,
+      internal_pubkey,
+      tweak32,
+    );
+  }
+
+  late final _secp256k1_xonly_pubkey_tweak_addPtr = _lookup<
+          ffi.NativeFunction<
+              ffi.Int Function(
+                  ffi.Pointer<secp256k1_context>,
+                  ffi.Pointer<secp256k1_pubkey>,
+                  ffi.Pointer<secp256k1_xonly_pubkey>,
+                  ffi.Pointer<ffi.UnsignedChar>)>>(
+      'secp256k1_xonly_pubkey_tweak_add');
+  late final _secp256k1_xonly_pubkey_tweak_add =
+      _secp256k1_xonly_pubkey_tweak_addPtr.asFunction<
+          int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<secp256k1_pubkey>,
+              ffi.Pointer<secp256k1_xonly_pubkey>,
+              ffi.Pointer<ffi.UnsignedChar>)>();
+
+  /// Checks that a tweaked pubkey is the result of calling
+  /// secp256k1_xonly_pubkey_tweak_add with internal_pubkey and tweak32.
+  ///
+  /// The tweaked pubkey is represented by its 32-byte x-only serialization and
+  /// its pk_parity, which can both be obtained by converting the result of
+  /// tweak_add to a secp256k1_xonly_pubkey.
+  ///
+  /// Note that this alone does _not_ verify that the tweaked pubkey is a
+  /// commitment. If the tweak is not chosen in a specific way, the tweaked pubkey
+  /// can easily be the result of a different internal_pubkey and tweak.
+  ///
+  /// Returns: 0 if the arguments are invalid or the tweaked pubkey is not the
+  /// result of tweaking the internal_pubkey with tweak32. 1 otherwise.
+  /// Args:            ctx: pointer to a context object.
+  /// In: tweaked_pubkey32: pointer to a serialized xonly_pubkey.
+  /// tweaked_pk_parity: the parity of the tweaked pubkey (whose serialization
+  /// is passed in as tweaked_pubkey32). This must match the
+  /// pk_parity value that is returned when calling
+  /// secp256k1_xonly_pubkey with the tweaked pubkey, or
+  /// this function will fail.
+  /// internal_pubkey: pointer to an x-only public key object to apply the tweak to.
+  /// tweak32: pointer to a 32-byte tweak.
+  int secp256k1_xonly_pubkey_tweak_add_check(
+    ffi.Pointer<secp256k1_context> ctx,
+    ffi.Pointer<ffi.UnsignedChar> tweaked_pubkey32,
+    int tweaked_pk_parity,
+    ffi.Pointer<secp256k1_xonly_pubkey> internal_pubkey,
+    ffi.Pointer<ffi.UnsignedChar> tweak32,
+  ) {
+    return _secp256k1_xonly_pubkey_tweak_add_check(
+      ctx,
+      tweaked_pubkey32,
+      tweaked_pk_parity,
+      internal_pubkey,
+      tweak32,
+    );
+  }
+
+  late final _secp256k1_xonly_pubkey_tweak_add_checkPtr = _lookup<
+          ffi.NativeFunction<
+              ffi.Int Function(
+                  ffi.Pointer<secp256k1_context>,
+                  ffi.Pointer<ffi.UnsignedChar>,
+                  ffi.Int,
+                  ffi.Pointer<secp256k1_xonly_pubkey>,
+                  ffi.Pointer<ffi.UnsignedChar>)>>(
+      'secp256k1_xonly_pubkey_tweak_add_check');
+  late final _secp256k1_xonly_pubkey_tweak_add_check =
+      _secp256k1_xonly_pubkey_tweak_add_checkPtr.asFunction<
+          int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              int,
+              ffi.Pointer<secp256k1_xonly_pubkey>,
+              ffi.Pointer<ffi.UnsignedChar>)>();
+
+  /// Compute the keypair for a secret key.
+  ///
+  /// Returns: 1: secret was valid, keypair is ready to use
+  /// 0: secret was invalid, try again with a different secret
+  /// Args:    ctx: pointer to a context object (not secp256k1_context_static).
+  /// Out: keypair: pointer to the created keypair.
+  /// In:   seckey: pointer to a 32-byte secret key.
+  int secp256k1_keypair_create(
+    ffi.Pointer<secp256k1_context> ctx,
+    ffi.Pointer<secp256k1_keypair> keypair,
+    ffi.Pointer<ffi.UnsignedChar> seckey,
+  ) {
+    return _secp256k1_keypair_create(
+      ctx,
+      keypair,
+      seckey,
+    );
+  }
+
+  late final _secp256k1_keypair_createPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<secp256k1_keypair>,
+              ffi.Pointer<ffi.UnsignedChar>)>>('secp256k1_keypair_create');
+  late final _secp256k1_keypair_create =
+      _secp256k1_keypair_createPtr.asFunction<
+          int Function(ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<secp256k1_keypair>, ffi.Pointer<ffi.UnsignedChar>)>();
+
+  /// Get the secret key from a keypair.
+  ///
+  /// Returns: 1 always.
+  /// Args:   ctx: pointer to a context object.
+  /// Out: seckey: pointer to a 32-byte buffer for the secret key.
+  /// In: keypair: pointer to a keypair.
+  int secp256k1_keypair_sec(
+    ffi.Pointer<secp256k1_context> ctx,
+    ffi.Pointer<ffi.UnsignedChar> seckey,
+    ffi.Pointer<secp256k1_keypair> keypair,
+  ) {
+    return _secp256k1_keypair_sec(
+      ctx,
+      seckey,
+      keypair,
+    );
+  }
+
+  late final _secp256k1_keypair_secPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              ffi.Pointer<secp256k1_keypair>)>>('secp256k1_keypair_sec');
+  late final _secp256k1_keypair_sec = _secp256k1_keypair_secPtr.asFunction<
+      int Function(ffi.Pointer<secp256k1_context>,
+          ffi.Pointer<ffi.UnsignedChar>, ffi.Pointer<secp256k1_keypair>)>();
+
+  /// Get the public key from a keypair.
+  ///
+  /// Returns: 1 always.
+  /// Args:    ctx: pointer to a context object.
+  /// Out: pubkey: pointer to a pubkey object. If 1 is returned, it is set to
+  /// the keypair public key. If not, it's set to an invalid value.
+  /// In: keypair: pointer to a keypair.
+  int secp256k1_keypair_pub(
+    ffi.Pointer<secp256k1_context> ctx,
+    ffi.Pointer<secp256k1_pubkey> pubkey,
+    ffi.Pointer<secp256k1_keypair> keypair,
+  ) {
+    return _secp256k1_keypair_pub(
+      ctx,
+      pubkey,
+      keypair,
+    );
+  }
+
+  late final _secp256k1_keypair_pubPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<secp256k1_pubkey>,
+              ffi.Pointer<secp256k1_keypair>)>>('secp256k1_keypair_pub');
+  late final _secp256k1_keypair_pub = _secp256k1_keypair_pubPtr.asFunction<
+      int Function(ffi.Pointer<secp256k1_context>,
+          ffi.Pointer<secp256k1_pubkey>, ffi.Pointer<secp256k1_keypair>)>();
+
+  /// Get the x-only public key from a keypair.
+  ///
+  /// This is the same as calling secp256k1_keypair_pub and then
+  /// secp256k1_xonly_pubkey_from_pubkey.
+  ///
+  /// Returns: 1 always.
+  /// Args:   ctx: pointer to a context object.
+  /// Out: pubkey: pointer to an xonly_pubkey object. If 1 is returned, it is set
+  /// to the keypair public key after converting it to an
+  /// xonly_pubkey. If not, it's set to an invalid value.
+  /// pk_parity: Ignored if NULL. Otherwise, pointer to an integer that will be set to the
+  /// pk_parity argument of secp256k1_xonly_pubkey_from_pubkey.
+  /// In: keypair: pointer to a keypair.
+  int secp256k1_keypair_xonly_pub(
+    ffi.Pointer<secp256k1_context> ctx,
+    ffi.Pointer<secp256k1_xonly_pubkey> pubkey,
+    ffi.Pointer<ffi.Int> pk_parity,
+    ffi.Pointer<secp256k1_keypair> keypair,
+  ) {
+    return _secp256k1_keypair_xonly_pub(
+      ctx,
+      pubkey,
+      pk_parity,
+      keypair,
+    );
+  }
+
+  late final _secp256k1_keypair_xonly_pubPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<secp256k1_xonly_pubkey>,
+              ffi.Pointer<ffi.Int>,
+              ffi.Pointer<secp256k1_keypair>)>>('secp256k1_keypair_xonly_pub');
+  late final _secp256k1_keypair_xonly_pub =
+      _secp256k1_keypair_xonly_pubPtr.asFunction<
+          int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<secp256k1_xonly_pubkey>,
+              ffi.Pointer<ffi.Int>,
+              ffi.Pointer<secp256k1_keypair>)>();
+
+  /// Tweak a keypair by adding tweak32 to the secret key and updating the public
+  /// key accordingly.
+  ///
+  /// Calling this function and then secp256k1_keypair_pub results in the same
+  /// public key as calling secp256k1_keypair_xonly_pub and then
+  /// secp256k1_xonly_pubkey_tweak_add.
+  ///
+  /// Returns: 0 if the arguments are invalid or the resulting keypair would be
+  /// invalid (only when the tweak is the negation of the keypair's
+  /// secret key). 1 otherwise.
+  ///
+  /// Args:       ctx: pointer to a context object.
+  /// In/Out: keypair: pointer to a keypair to apply the tweak to. Will be set to
+  /// an invalid value if this function returns 0.
+  /// In:     tweak32: pointer to a 32-byte tweak. If the tweak is invalid according
+  /// to secp256k1_ec_seckey_verify, this function returns 0. For
+  /// uniformly random 32-byte arrays the chance of being invalid
+  /// is negligible (around 1 in 2^128).
+  int secp256k1_keypair_xonly_tweak_add(
+    ffi.Pointer<secp256k1_context> ctx,
+    ffi.Pointer<secp256k1_keypair> keypair,
+    ffi.Pointer<ffi.UnsignedChar> tweak32,
+  ) {
+    return _secp256k1_keypair_xonly_tweak_add(
+      ctx,
+      keypair,
+      tweak32,
+    );
+  }
+
+  late final _secp256k1_keypair_xonly_tweak_addPtr = _lookup<
+          ffi.NativeFunction<
+              ffi.Int Function(
+                  ffi.Pointer<secp256k1_context>,
+                  ffi.Pointer<secp256k1_keypair>,
+                  ffi.Pointer<ffi.UnsignedChar>)>>(
+      'secp256k1_keypair_xonly_tweak_add');
+  late final _secp256k1_keypair_xonly_tweak_add =
+      _secp256k1_keypair_xonly_tweak_addPtr.asFunction<
+          int Function(ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<secp256k1_keypair>, ffi.Pointer<ffi.UnsignedChar>)>();
+
+  /// An implementation of the nonce generation function as defined in Bitcoin
+  /// Improvement Proposal 340 "Schnorr Signatures for secp256k1"
+  /// (https://github.com/bitcoin/bips/blob/master/bip-0340.mediawiki).
+  ///
+  /// If a data pointer is passed, it is assumed to be a pointer to 32 bytes of
+  /// auxiliary random data as defined in BIP-340. If the data pointer is NULL,
+  /// the nonce derivation procedure follows BIP-340 by setting the auxiliary
+  /// random data to zero. The algo argument must be non-NULL, otherwise the
+  /// function will fail and return 0. The hash will be tagged with algo.
+  /// Therefore, to create BIP-340 compliant signatures, algo must be set to
+  /// "BIP0340/nonce" and algolen to 13.
+  late final ffi.Pointer<secp256k1_nonce_function_hardened>
+      _secp256k1_nonce_function_bip340 =
+      _lookup<secp256k1_nonce_function_hardened>(
+          'secp256k1_nonce_function_bip340');
+
+  secp256k1_nonce_function_hardened get secp256k1_nonce_function_bip340 =>
+      _secp256k1_nonce_function_bip340.value;
+
+  set secp256k1_nonce_function_bip340(
+          secp256k1_nonce_function_hardened value) =>
+      _secp256k1_nonce_function_bip340.value = value;
+
+  /// Create a Schnorr signature.
+  ///
+  /// Does _not_ strictly follow BIP-340 because it does not verify the resulting
+  /// signature. Instead, you can manually use secp256k1_schnorrsig_verify and
+  /// abort if it fails.
+  ///
+  /// This function only signs 32-byte messages. If you have messages of a
+  /// different size (or the same size but without a context-specific tag
+  /// prefix), it is recommended to create a 32-byte message hash with
+  /// secp256k1_tagged_sha256 and then sign the hash. Tagged hashing allows
+  /// providing an context-specific tag for domain separation. This prevents
+  /// signatures from being valid in multiple contexts by accident.
+  ///
+  /// Returns 1 on success, 0 on failure.
+  /// Args:    ctx: pointer to a context object (not secp256k1_context_static).
+  /// Out:   sig64: pointer to a 64-byte array to store the serialized signature.
+  /// In:    msg32: the 32-byte message being signed.
+  /// keypair: pointer to an initialized keypair.
+  /// aux_rand32: 32 bytes of fresh randomness. While recommended to provide
+  /// this, it is only supplemental to security and can be NULL. A
+  /// NULL argument is treated the same as an all-zero one. See
+  /// BIP-340 "Default Signing" for a full explanation of this
+  /// argument and for guidance if randomness is expensive.
+  int secp256k1_schnorrsig_sign32(
+    ffi.Pointer<secp256k1_context> ctx,
+    ffi.Pointer<ffi.UnsignedChar> sig64,
+    ffi.Pointer<ffi.UnsignedChar> msg32,
+    ffi.Pointer<secp256k1_keypair> keypair,
+    ffi.Pointer<ffi.UnsignedChar> aux_rand32,
+  ) {
+    return _secp256k1_schnorrsig_sign32(
+      ctx,
+      sig64,
+      msg32,
+      keypair,
+      aux_rand32,
+    );
+  }
+
+  late final _secp256k1_schnorrsig_sign32Ptr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              ffi.Pointer<secp256k1_keypair>,
+              ffi.Pointer<ffi.UnsignedChar>)>>('secp256k1_schnorrsig_sign32');
+  late final _secp256k1_schnorrsig_sign32 =
+      _secp256k1_schnorrsig_sign32Ptr.asFunction<
+          int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              ffi.Pointer<secp256k1_keypair>,
+              ffi.Pointer<ffi.UnsignedChar>)>();
+
+  /// Same as secp256k1_schnorrsig_sign32, but DEPRECATED. Will be removed in
+  /// future versions.
+  int secp256k1_schnorrsig_sign(
+    ffi.Pointer<secp256k1_context> ctx,
+    ffi.Pointer<ffi.UnsignedChar> sig64,
+    ffi.Pointer<ffi.UnsignedChar> msg32,
+    ffi.Pointer<secp256k1_keypair> keypair,
+    ffi.Pointer<ffi.UnsignedChar> aux_rand32,
+  ) {
+    return _secp256k1_schnorrsig_sign(
+      ctx,
+      sig64,
+      msg32,
+      keypair,
+      aux_rand32,
+    );
+  }
+
+  late final _secp256k1_schnorrsig_signPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              ffi.Pointer<secp256k1_keypair>,
+              ffi.Pointer<ffi.UnsignedChar>)>>('secp256k1_schnorrsig_sign');
+  late final _secp256k1_schnorrsig_sign =
+      _secp256k1_schnorrsig_signPtr.asFunction<
+          int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              ffi.Pointer<secp256k1_keypair>,
+              ffi.Pointer<ffi.UnsignedChar>)>();
+
+  /// Create a Schnorr signature with a more flexible API.
+  ///
+  /// Same arguments as secp256k1_schnorrsig_sign except that it allows signing
+  /// variable length messages and accepts a pointer to an extraparams object that
+  /// allows customizing signing by passing additional arguments.
+  ///
+  /// Equivalent to secp256k1_schnorrsig_sign32(..., aux_rand32) if msglen is 32
+  /// and extraparams is initialized as follows:
+  /// ```
+  /// secp256k1_schnorrsig_extraparams extraparams = SECP256K1_SCHNORRSIG_EXTRAPARAMS_INIT;
+  /// extraparams.ndata = (unsigned char*)aux_rand32;
+  /// ```
+  ///
+  /// Returns 1 on success, 0 on failure.
+  /// Args:   ctx: pointer to a context object (not secp256k1_context_static).
+  /// Out:  sig64: pointer to a 64-byte array to store the serialized signature.
+  /// In:     msg: the message being signed. Can only be NULL if msglen is 0.
+  /// msglen: length of the message.
+  /// keypair: pointer to an initialized keypair.
+  /// extraparams: pointer to an extraparams object (can be NULL).
+  int secp256k1_schnorrsig_sign_custom(
+    ffi.Pointer<secp256k1_context> ctx,
+    ffi.Pointer<ffi.UnsignedChar> sig64,
+    ffi.Pointer<ffi.UnsignedChar> msg,
+    int msglen,
+    ffi.Pointer<secp256k1_keypair> keypair,
+    ffi.Pointer<secp256k1_schnorrsig_extraparams> extraparams,
+  ) {
+    return _secp256k1_schnorrsig_sign_custom(
+      ctx,
+      sig64,
+      msg,
+      msglen,
+      keypair,
+      extraparams,
+    );
+  }
+
+  late final _secp256k1_schnorrsig_sign_customPtr = _lookup<
+          ffi.NativeFunction<
+              ffi.Int Function(
+                  ffi.Pointer<secp256k1_context>,
+                  ffi.Pointer<ffi.UnsignedChar>,
+                  ffi.Pointer<ffi.UnsignedChar>,
+                  ffi.Size,
+                  ffi.Pointer<secp256k1_keypair>,
+                  ffi.Pointer<secp256k1_schnorrsig_extraparams>)>>(
+      'secp256k1_schnorrsig_sign_custom');
+  late final _secp256k1_schnorrsig_sign_custom =
+      _secp256k1_schnorrsig_sign_customPtr.asFunction<
+          int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              int,
+              ffi.Pointer<secp256k1_keypair>,
+              ffi.Pointer<secp256k1_schnorrsig_extraparams>)>();
+
+  /// Verify a Schnorr signature.
+  ///
+  /// Returns: 1: correct signature
+  /// 0: incorrect signature
+  /// Args:    ctx: a secp256k1 context object.
+  /// In:    sig64: pointer to the 64-byte signature to verify.
+  /// msg: the message being verified. Can only be NULL if msglen is 0.
+  /// msglen: length of the message
+  /// pubkey: pointer to an x-only public key to verify with (cannot be NULL)
+  int secp256k1_schnorrsig_verify(
+    ffi.Pointer<secp256k1_context> ctx,
+    ffi.Pointer<ffi.UnsignedChar> sig64,
+    ffi.Pointer<ffi.UnsignedChar> msg,
+    int msglen,
+    ffi.Pointer<secp256k1_xonly_pubkey> pubkey,
+  ) {
+    return _secp256k1_schnorrsig_verify(
+      ctx,
+      sig64,
+      msg,
+      msglen,
+      pubkey,
+    );
+  }
+
+  late final _secp256k1_schnorrsig_verifyPtr = _lookup<
+          ffi.NativeFunction<
+              ffi.Int Function(
+                  ffi.Pointer<secp256k1_context>,
+                  ffi.Pointer<ffi.UnsignedChar>,
+                  ffi.Pointer<ffi.UnsignedChar>,
+                  ffi.Size,
+                  ffi.Pointer<secp256k1_xonly_pubkey>)>>(
+      'secp256k1_schnorrsig_verify');
+  late final _secp256k1_schnorrsig_verify =
+      _secp256k1_schnorrsig_verifyPtr.asFunction<
+          int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              int,
+              ffi.Pointer<secp256k1_xonly_pubkey>)>();
 }
 
 final class max_align_t extends ffi.Opaque {}
@@ -1583,6 +2215,93 @@ typedef secp256k1_nonce_function = ffi.Pointer<
 final class secp256k1_ecdsa_recoverable_signature extends ffi.Struct {
   @ffi.Array.multi([65])
   external ffi.Array<ffi.UnsignedChar> data;
+}
+
+/// Opaque data structure that holds a parsed and valid "x-only" public key.
+/// An x-only pubkey encodes a point whose Y coordinate is even. It is
+/// serialized using only its X coordinate (32 bytes). See BIP-340 for more
+/// information about x-only pubkeys.
+///
+/// The exact representation of data inside is implementation defined and not
+/// guaranteed to be portable between different platforms or versions. It is
+/// however guaranteed to be 64 bytes in size, and can be safely copied/moved.
+/// If you need to convert to a format suitable for storage, transmission, use
+/// use secp256k1_xonly_pubkey_serialize and secp256k1_xonly_pubkey_parse. To
+/// compare keys, use secp256k1_xonly_pubkey_cmp.
+final class secp256k1_xonly_pubkey extends ffi.Struct {
+  @ffi.Array.multi([64])
+  external ffi.Array<ffi.UnsignedChar> data;
+}
+
+/// Opaque data structure that holds a keypair consisting of a secret and a
+/// public key.
+///
+/// The exact representation of data inside is implementation defined and not
+/// guaranteed to be portable between different platforms or versions. It is
+/// however guaranteed to be 96 bytes in size, and can be safely copied/moved.
+final class secp256k1_keypair extends ffi.Struct {
+  @ffi.Array.multi([96])
+  external ffi.Array<ffi.UnsignedChar> data;
+}
+
+/// A pointer to a function to deterministically generate a nonce.
+///
+/// Same as secp256k1_nonce function with the exception of accepting an
+/// additional pubkey argument and not requiring an attempt argument. The pubkey
+/// argument can protect signature schemes with key-prefixed challenge hash
+/// inputs against reusing the nonce when signing with the wrong precomputed
+/// pubkey.
+///
+/// Returns: 1 if a nonce was successfully generated. 0 will cause signing to
+/// return an error.
+/// Out:  nonce32: pointer to a 32-byte array to be filled by the function
+/// In:       msg: the message being verified. Is NULL if and only if msglen
+/// is 0.
+/// msglen: the length of the message
+/// key32: pointer to a 32-byte secret key (will not be NULL)
+/// xonly_pk32: the 32-byte serialized xonly pubkey corresponding to key32
+/// (will not be NULL)
+/// algo: pointer to an array describing the signature
+/// algorithm (will not be NULL)
+/// algolen: the length of the algo array
+/// data: arbitrary data pointer that is passed through
+///
+/// Except for test cases, this function should compute some cryptographic hash of
+/// the message, the key, the pubkey, the algorithm description, and data.
+typedef secp256k1_nonce_function_hardened = ffi.Pointer<
+    ffi.NativeFunction<
+        ffi.Int Function(
+            ffi.Pointer<ffi.UnsignedChar> nonce32,
+            ffi.Pointer<ffi.UnsignedChar> msg,
+            ffi.Size msglen,
+            ffi.Pointer<ffi.UnsignedChar> key32,
+            ffi.Pointer<ffi.UnsignedChar> xonly_pk32,
+            ffi.Pointer<ffi.UnsignedChar> algo,
+            ffi.Size algolen,
+            ffi.Pointer<ffi.Void> data)>>;
+
+/// Data structure that contains additional arguments for schnorrsig_sign_custom.
+///
+/// A schnorrsig_extraparams structure object can be initialized correctly by
+/// setting it to SECP256K1_SCHNORRSIG_EXTRAPARAMS_INIT.
+///
+/// Members:
+/// magic: set to SECP256K1_SCHNORRSIG_EXTRAPARAMS_MAGIC at initialization
+/// and has no other function than making sure the object is
+/// initialized.
+/// noncefp: pointer to a nonce generation function. If NULL,
+/// secp256k1_nonce_function_bip340 is used
+/// ndata: pointer to arbitrary data used by the nonce generation function
+/// (can be NULL). If it is non-NULL and
+/// secp256k1_nonce_function_bip340 is used, then ndata must be a
+/// pointer to 32-byte auxiliary randomness as per BIP-340.
+final class secp256k1_schnorrsig_extraparams extends ffi.Struct {
+  @ffi.Array.multi([4])
+  external ffi.Array<ffi.UnsignedChar> magic;
+
+  external secp256k1_nonce_function_hardened noncefp;
+
+  external ffi.Pointer<ffi.Void> ndata;
 }
 
 const int NULL = 0;

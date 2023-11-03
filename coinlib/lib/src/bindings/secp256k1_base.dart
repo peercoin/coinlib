@@ -16,7 +16,7 @@ class SigWithRecId {
 
 abstract class Secp256k1Base<
   CtxPtr, HeapArrayPtr, PubKeyPtr, SizeTPtr, SignaturePtr,
-  RecoverableSignaturePtr, IntPtr, NullPtr
+  RecoverableSignaturePtr, KeyPairPtr, XPubKeyPtr, IntPtr, NullPtr
 > {
 
   static const contextNone = 1;
@@ -31,6 +31,8 @@ abstract class Secp256k1Base<
   static const sigSize = 64;
   static const derSigSize = 72;
   static const recSigSize = 65;
+  static const keyPairSize = 96;
+  static const xonlySize = 32;
 
   // Functions
   late int Function(CtxPtr, HeapArrayPtr) extEcSeckeyVerify;
@@ -75,9 +77,20 @@ abstract class Secp256k1Base<
   ) extEcdsaRecover;
   late int Function(CtxPtr, HeapArrayPtr, HeapArrayPtr) extEcSeckeyTweakAdd;
   late int Function(CtxPtr, PubKeyPtr, HeapArrayPtr) extEcPubkeyTweakAdd;
+  late int Function(CtxPtr, HeapArrayPtr) extEcSeckeyNegate;
+
+  // Schnorr functions
+  late int Function(CtxPtr, KeyPairPtr, HeapArrayPtr) extKeypairCreate;
+  late int Function(CtxPtr, XPubKeyPtr, HeapArrayPtr) extXOnlyPubkeyParse;
+  late int Function(
+    CtxPtr, HeapArrayPtr, HeapArrayPtr, KeyPairPtr, HeapArrayPtr,
+  ) extSchnorrSign32;
+  late int Function(
+    CtxPtr, HeapArrayPtr, HeapArrayPtr, int, XPubKeyPtr,
+  ) extSchnorrVerify;
 
   // Heap arrays
-  late HeapArrayBase privKeyArray;
+  late HeapArrayBase key32Array; // Used for private keys and x-only public keys
   late HeapArrayBase scalarArray;
   late HeapArrayBase serializedPubKeyArray;
   late HeapArrayBase hashArray;
@@ -91,6 +104,8 @@ abstract class Secp256k1Base<
   late SizeTPtr sizeTPtr;
   late SignaturePtr sigPtr;
   late RecoverableSignaturePtr recSigPtr;
+  late KeyPairPtr keyPairPtr;
+  late XPubKeyPtr xPubKeyPtr;
   late IntPtr recIdPtr;
   late NullPtr nullPtr;
 
@@ -151,6 +166,20 @@ abstract class Secp256k1Base<
     }
   }
 
+  void _parsePrivKeyIntoKeyPairPtr(Uint8List privKey) {
+    key32Array.load(privKey);
+    if (extKeypairCreate(ctxPtr, keyPairPtr, key32Array.ptr) != 1) {
+      throw Secp256k1Exception("Invalid private key");
+    }
+  }
+
+  void _parseXPubKeyIntoPtr(Uint8List pubKey) {
+    key32Array.load(pubKey);
+    if (extXOnlyPubkeyParse(ctxPtr, xPubKeyPtr, key32Array.ptr) != 1) {
+      throw Secp256k1Exception("Invalid x-only public key");
+    }
+  }
+
   bool _noRaiseAfterRequireLoad(void Function() fn) {
     _requireLoad();
     try {
@@ -180,8 +209,8 @@ abstract class Secp256k1Base<
   /// Returns true if a 32-byte [privKey] is valid.
   bool privKeyVerify(Uint8List privKey) {
     _requireLoad();
-    privKeyArray.load(privKey);
-    return extEcSeckeyVerify(ctxPtr, privKeyArray.ptr) == 1;
+    key32Array.load(privKey);
+    return extEcSeckeyVerify(ctxPtr, key32Array.ptr) == 1;
   }
 
   /// Returns true if a compressed or uncompressed public key is valid.
@@ -205,10 +234,10 @@ abstract class Secp256k1Base<
   Uint8List privToPubKey(Uint8List privKey, bool compressed) {
     _requireLoad();
 
-    privKeyArray.load(privKey);
+    key32Array.load(privKey);
 
     // Derive public key from private key
-    if (extEcPubkeyCreate(ctxPtr, pubKeyPtr, privKeyArray.ptr) != 1) {
+    if (extEcPubkeyCreate(ctxPtr, pubKeyPtr, key32Array.ptr) != 1) {
       throw Secp256k1Exception("Cannot compute public key from private key");
     }
 
@@ -268,14 +297,14 @@ abstract class Secp256k1Base<
   ) {
     _requireLoad();
 
-    privKeyArray.load(privKey);
+    key32Array.load(privKey);
     hashArray.load(hash);
     if (extraEntropy != null) entropyArray.load(extraEntropy);
 
     // Sign
     if (
       extEcdsaSign(
-        ctxPtr, sigPtr, hashArray.ptr, privKeyArray.ptr,
+        ctxPtr, sigPtr, hashArray.ptr, key32Array.ptr,
         // Passing null will give secp256k1_nonce_function_rfc6979. If secp256k1
         // changes this default function in the future,
         // secp256k1_nonce_function_rfc6979 should be used directly.
@@ -292,7 +321,7 @@ abstract class Secp256k1Base<
 
   }
 
-  /// Verifys a compact [signature] against a 32-byte [hash] for a [pubKey] that
+  /// Verifies a compact [signature] against a 32-byte [hash] for a [pubKey] that
   /// is either compressed or uncompressed in size
   bool ecdsaVerify(Uint8List signature, Uint8List hash, Uint8List pubKey) {
     _requireLoad();
@@ -308,12 +337,12 @@ abstract class Secp256k1Base<
   SigWithRecId ecdsaSignRecoverable(Uint8List hash, Uint8List privKey) {
     _requireLoad();
 
-    privKeyArray.load(privKey);
+    key32Array.load(privKey);
     hashArray.load(hash);
 
     if (
       extEcdsaSignRecoverable(
-        ctxPtr, recSigPtr, hashArray.ptr, privKeyArray.ptr, nullPtr, nullPtr,
+        ctxPtr, recSigPtr, hashArray.ptr, key32Array.ptr, nullPtr, nullPtr,
       ) != 1
     ) {
       throw Secp256k1Exception("Cannot sign message with private key");
@@ -346,20 +375,20 @@ abstract class Secp256k1Base<
 
   }
 
-  /// Tweaks a private key ([privKey]) by a [scalar]. Returns null if a tweaked
-  /// private key could not be created.
+  /// Tweaks a 32-byte private key ([privKey]) by a [scalar]. Returns null if a
+  /// tweaked private key could not be created.
   Uint8List? privKeyTweak(Uint8List privKey, Uint8List scalar) {
     _requireLoad();
 
-    privKeyArray.load(privKey);
+    key32Array.load(privKey);
     scalarArray.load(scalar);
 
-    if (extEcSeckeyTweakAdd(ctxPtr, privKeyArray.ptr, scalarArray.ptr) != 1) {
+    if (extEcSeckeyTweakAdd(ctxPtr, key32Array.ptr, scalarArray.ptr) != 1) {
       return null;
     }
 
     // Return copy of private key or contents are subject to change
-    return Uint8List.fromList(privKeyArray.list);
+    return Uint8List.fromList(key32Array.list);
 
   }
 
@@ -379,6 +408,61 @@ abstract class Secp256k1Base<
     }
 
     return _serializePubKeyFromPtr(compressed);
+
+  }
+
+  /// Takes a 32-byte private key ([privKey]) and negates it.
+  Uint8List privKeyNegate(Uint8List privKey) {
+    _requireLoad();
+
+    key32Array.load(privKey);
+
+    if (extEcSeckeyNegate(ctxPtr, key32Array.ptr) != 1) {
+      throw Secp256k1Exception("Invalid private key for negation");
+    }
+
+    return Uint8List.fromList(key32Array.list);
+
+  }
+
+  /// Constructs a 64-byte Schnorr signature for the 32-byte message [hash] and
+  /// [privKey] scalar. [extraEntropy] (known as auxiliary data) is optional. It
+  /// is recommended by secp256k1 for protection against side-channel attacks
+  /// but the Peercoin client does not use it and it causes signatures to lose
+  /// determinism.
+  Uint8List schnorrSign(
+    Uint8List hash, Uint8List privKey, [Uint8List? extraEntropy,]
+  ) {
+    _requireLoad();
+
+    _parsePrivKeyIntoKeyPairPtr(privKey);
+    hashArray.load(hash);
+
+    if (
+      extSchnorrSign32(
+        ctxPtr, serializedSigArray.ptr, hashArray.ptr, keyPairPtr,
+        extraEntropy == null ? nullPtr : entropyArray.ptr,
+      ) != 1
+    ) {
+      throw Secp256k1Exception("Cannot sign Schnorr signature");
+    }
+
+    return serializedSigArray.list.sublist(0);
+
+  }
+
+  /// Verifies a 64-byte Schnorr [signature] against a 32-byte [hash] with a
+  /// 32-byte x-only public key ([xPubKey]).
+  bool schnorrVerify(Uint8List signature, Uint8List hash, Uint8List xPubKey) {
+    _requireLoad();
+
+    serializedSigArray.load(signature);
+    hashArray.load(hash);
+    _parseXPubKeyIntoPtr(xPubKey);
+
+    return extSchnorrVerify(
+      ctxPtr, serializedSigArray.ptr, hashArray.ptr, 32, xPubKeyPtr,
+    ) == 1;
 
   }
 

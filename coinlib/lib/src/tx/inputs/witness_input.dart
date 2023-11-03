@@ -1,8 +1,10 @@
 import 'dart:typed_data';
+import 'package:coinlib/src/tx/outpoint.dart';
 import 'input.dart';
-import 'outpoint.dart';
 import 'raw_input.dart';
 import 'p2wpkh_input.dart';
+import 'taproot_key_input.dart';
+import 'taproot_script_input.dart';
 
 /// The base-class for all witness inputs
 class WitnessInput extends RawInput {
@@ -11,9 +13,9 @@ class WitnessInput extends RawInput {
 
   WitnessInput({
     required OutPoint prevOut,
-    required this.witness,
+    required List<Uint8List> witness,
     int sequence = Input.sequenceFinal,
-  }) : super(
+  }) : witness = List.unmodifiable(witness), super(
     prevOut: prevOut,
     scriptSig: Uint8List(0),
     sequence: sequence,
@@ -27,6 +29,8 @@ class WitnessInput extends RawInput {
       ? (
         // Is a witness input, so match with the specific input type
         P2WPKHInput.match(raw, witness)
+        ?? TaprootKeyInput.match(raw, witness)
+        ?? TaprootScriptInput.match(raw, witness)
         ?? WitnessInput(
           prevOut: raw.prevOut,
           witness: witness,
