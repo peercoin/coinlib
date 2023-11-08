@@ -22,6 +22,8 @@ class P2WPKHInput extends LegacyWitnessInput with PKHInput {
   final ECPublicKey publicKey;
   @override
   final ECDSAInputSignature? insig;
+  @override
+  final int? signedSize = 147;
 
   P2WPKHInput({
     required OutPoint prevOut,

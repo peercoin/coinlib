@@ -21,6 +21,12 @@ abstract class Input with Writable {
   /// True when the input is fully signed and ready for broadcast
   bool get complete;
 
+  /// The maximum total size when fully signed via the default hash type
+  /// including any witness data of the input. If this is unknown, this is
+  /// null. The actual signed size may be lower according to the data being
+  /// encoded.
+  int? get signedSize => null;
+
   Input();
 
   /// Given a [RawInput] and witness data, the specific [Input] subclass is

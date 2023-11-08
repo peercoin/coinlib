@@ -40,6 +40,10 @@ void main() {
       expect(mapToHex(tx.outputs), mapToHex(vec.obj.outputs));
     }
 
+    expectInputSignedSize(Input input) => expect(
+      input.size, lessThanOrEqualTo(input.signedSize!),
+    );
+
     test("valid txs", () {
       for (final vec in validTxVecs) {
 
@@ -331,6 +335,7 @@ void main() {
             key: keyVec.privateObj,
             hashType: hashType,
           );
+          expectInputSignedSize(signed.inputs[i]);
         }
 
         expect(tx.complete, false);
@@ -426,6 +431,7 @@ void main() {
         inputN: 1, key: keyVec.privateObj, value: BigInt.from(3000000),
       );
       expect(signed.complete, true);
+      expectInputSignedSize(signed.inputs[1]);
 
       expect(
         signed.toHex(),
@@ -479,6 +485,9 @@ void main() {
       );
 
       expect(signed.complete, true);
+      for (final input in signed.inputs) {
+        expectInputSignedSize(input);
+      }
 
       expect(
         signed.toHex(),
@@ -602,6 +611,8 @@ void main() {
         outputs: [exampleOutput, exampleOutput],
       );
 
+      final signedSizeFromUnsigned = tx.inputs[1].signedSize;
+
       // Sign first P2PKH input
       var signed = tx.sign(inputN: 0, key: privkeys[0]);
       expect(signed.complete, false);
@@ -638,6 +649,8 @@ void main() {
 
       // Check final tx
       expect(signed.complete, true);
+      expectInputSignedSize(signed.inputs[1]);
+      expect(signed.inputs[1].signedSize, signedSizeFromUnsigned);
       expectMultisigSigs(
         signed, [
           SigHashType.single(),
