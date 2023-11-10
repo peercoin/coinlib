@@ -203,7 +203,17 @@ class BytesWriter extends _ReadWriteBase with Writer {
 /// Measures the serialized size of data written to it without writing to a
 /// Uint8List
 class MeasureWriter with Writer {
+
   int size = 0;
+
+  static int varIntSizeOf(BigInt i) {
+    if (i.compareTo(BigInt.from(0xfd)) < 0) return 1;
+    if (i.compareTo(BigInt.from(0xffff)) <= 0) return 3;
+    if (i.compareTo(BigInt.from(0xffffffff)) <= 0) return 5;
+    return 9;
+  }
+  static int varIntSizeOfInt(int i) => varIntSizeOf(BigInt.from(i));
+
   @override
   writeUInt8(int i) => size++;
   @override
@@ -217,20 +227,8 @@ class MeasureWriter with Writer {
   @override
   writeSlice(Uint8List slice) => size += slice.length;
   @override
-  writeVarInt(BigInt i) {
-    if (i.compareTo(BigInt.from(0xfd)) < 0) {
-      size++;
-    } else if (i.compareTo(BigInt.from(0xffff)) <= 0) {
-      // 16 bit
-      size += 3;
-    } else if (i.compareTo(BigInt.from(0xffffffff)) <= 0) {
-      // 32 bit
-      size += 5;
-    } else {
-      // 64 bit
-      size += 9;
-    }
-  }
+  writeVarInt(BigInt i) => size += varIntSizeOf(i);
+
 }
 
 /// Classes that use this mixin are serializable to a [Writer] via [write] and

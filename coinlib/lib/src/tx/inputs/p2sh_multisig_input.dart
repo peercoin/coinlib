@@ -211,6 +211,6 @@ class P2SHMultisigInput extends LegacyInput {
   int? get signedSize
     => 40 // Outpoint plus sequence
     + _signedScriptSize
-    + (_signedScriptSize < 0xfd ? 1 : 3); // Varint size
+    + MeasureWriter.varIntSizeOfInt(_signedScriptSize); // Varint size
 
 }
