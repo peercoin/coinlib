@@ -3,7 +3,7 @@ import 'package:coinlib/coinlib.dart';
 import 'package:test/test.dart';
 import 'vectors/taproot.dart';
 
-const wrongNetwork = NetworkParams(
+final wrongNetwork = NetworkParams(
   wifPrefix: 0,
   p2pkhPrefix: 0xfa,
   p2shPrefix: 0xfb,
@@ -11,6 +11,9 @@ const wrongNetwork = NetworkParams(
   pubHDPrefix: 0,
   bech32Hrp: "wrong",
   messagePrefix: "",
+  feePerKb: BigInt.from(10000),
+  minFee: BigInt.from(1000),
+  minOutput: BigInt.from(10000),
 );
 
 expectBase58Equal(Base58Address addr, Base58Address expected) {
@@ -366,6 +369,9 @@ void main() {
           wifPrefix: 0, p2shPrefix: 0, p2pkhPrefix: 0,
           privHDPrefix: 0, pubHDPrefix: 0,
           bech32Hrp: longHrp, messagePrefix: "",
+          feePerKb: BigInt.from(10000),
+          minFee: BigInt.from(1000),
+          minOutput: BigInt.from(10000),
         ),
         addr,
       );

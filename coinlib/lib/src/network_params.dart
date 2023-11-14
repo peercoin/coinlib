@@ -1,15 +1,11 @@
 
 class NetworkParams {
 
-  final int wifPrefix;
-  final int p2pkhPrefix;
-  final int p2shPrefix;
-  final int privHDPrefix;
-  final int pubHDPrefix;
-  final String bech32Hrp;
-  final String messagePrefix;
+  final int wifPrefix, p2pkhPrefix, p2shPrefix, privHDPrefix, pubHDPrefix;
+  final String bech32Hrp, messagePrefix;
+  final BigInt minFee, minOutput, feePerKb;
 
-  const NetworkParams({
+  NetworkParams({
     required this.wifPrefix,
     required this.p2pkhPrefix,
     required this.p2shPrefix,
@@ -17,9 +13,12 @@ class NetworkParams {
     required this.pubHDPrefix,
     required this.bech32Hrp,
     required this.messagePrefix,
+    required this.minFee,
+    required this.minOutput,
+    required this.feePerKb,
   });
 
-  static const mainnet = NetworkParams(
+  static final mainnet = NetworkParams(
     wifPrefix: 183,
     p2pkhPrefix: 55,
     p2shPrefix: 117,
@@ -27,9 +26,12 @@ class NetworkParams {
     pubHDPrefix: 0x0488b21e,
     bech32Hrp: "pc",
     messagePrefix: "Peercoin Signed Message:\n",
+    minFee: BigInt.from(1000),
+    minOutput: BigInt.from(10000),
+    feePerKb: BigInt.from(10000),
   );
 
-  static const testnet = NetworkParams(
+  static final testnet = NetworkParams(
     wifPrefix: 239,
     p2pkhPrefix: 111,
     p2shPrefix: 196,
@@ -37,6 +39,9 @@ class NetworkParams {
     pubHDPrefix: 0x04358394,
     bech32Hrp: "tpc",
     messagePrefix: "Peercoin Signed Message:\n",
+    minFee: BigInt.from(1000),
+    minOutput: BigInt.from(10000),
+    feePerKb: BigInt.from(10000),
   );
 
 }

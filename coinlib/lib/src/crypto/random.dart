@@ -14,3 +14,8 @@ Uint8List generateRandomBytes(int size) {
   return bytes;
 }
 
+List<T> insertRandom<T>(List<T> list, T element) {
+  final newList = List<T>.from(list);
+  newList.insert(Random.secure().nextInt(newList.length+1), element);
+  return newList;
+}
