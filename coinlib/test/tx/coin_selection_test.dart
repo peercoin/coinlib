@@ -272,6 +272,40 @@ void main() {
 
     });
 
+    void expectSelectedValues(CoinSelection selection, List<int> values) => expect(
+      selection.selected.map((candidate) => candidate.value.toInt()),
+      unorderedEquals(values),
+    );
+
+    test(".largestFirst()", () {
+
+      final candidates = [coin*4, coin, coin*3, coin, coin*2];
+
+      void expectLargestFirst(List<int> selected, int outValue) {
+        final selection = CoinSelection.largestFirst(
+          version: 1234,
+          candidates: candidates.map((value) => candidateForValue(value)),
+          recipients: [outputForValue(outValue)],
+          changeProgram: changeProgram,
+          feePerKb: feePerKb, minFee: minFee, minChange: minChange,
+          locktime: 0xabcd1234,
+        );
+        expectSelectedValues(selection, selected);
+        expect(selection.version, 1234);
+        expect(selection.locktime, 0xabcd1234);
+      }
+
+      // Can cover with single largest
+      expectLargestFirst([coin*4], coin*3);
+      // Can cover with two
+      expectLargestFirst([coin*4, coin*3], coin*4);
+      // Need all
+      expectLargestFirst(candidates, coin*10);
+      // Select all, though they aren't enough
+      expectLargestFirst(candidates, coin*12);
+
+    });
+
   });
 
 }

@@ -1,6 +1,7 @@
 import 'package:coinlib/src/common/serial.dart';
 import 'package:coinlib/src/crypto/random.dart';
 import 'package:coinlib/src/scripts/program.dart';
+import 'package:collection/collection.dart';
 import 'inputs/input.dart';
 import 'output.dart';
 import 'transaction.dart';
@@ -122,6 +123,49 @@ class CoinSelection {
 
   }
 
+  /// A simple selection algorithm that selects inputs from the [candidates]
+  /// starting from the largest value until the required amount has been
+  /// reached and then the selected inputs are given a random order.
+  factory CoinSelection.largestFirst({
+    int version = Transaction.currentVersion,
+    required Iterable<InputCandidate> candidates,
+    required Iterable<Output> recipients,
+    required Program changeProgram,
+    required BigInt feePerKb,
+    required BigInt minFee,
+    required BigInt minChange,
+    int locktime = 0,
+  }) {
+
+    final sorted = candidates.toList().sorted(
+      (a, b) => b.value.compareTo(a.value),
+    );
+
+    CoinSelection trySelection(Iterable<InputCandidate> selected)
+      => CoinSelection(
+        version: version,
+        selected: selected,
+        recipients: recipients,
+        changeProgram: changeProgram,
+        feePerKb: feePerKb,
+        minFee: minFee,
+        minChange: minChange,
+        locktime: locktime,
+      );
+
+    CoinSelection selection = trySelection([]);
+    for (int i = 0; i < sorted.length; i++) {
+      selection = trySelection(sorted.take(i+1));
+      if (selection.enoughFunds) break;
+    }
+
+    // Randomising makes it less obvious this algo is being used
+    final selected = selection.selected.toList();
+    selected.shuffle();
+    return trySelection(selected);
+
+  }
+
   /// Obtains the transaction with selected inputs and outputs including any
   /// change at a random location, ready to be signed. Throws
   /// [InsufficientFunds] if there is not enough input value to meet the output
@@ -147,7 +191,7 @@ class CoinSelection {
   bool get changeless => changeValue.compareTo(BigInt.zero) == 0;
   /// True if the resulting fully signed transaction will be too large
   bool get tooLarge => signedSize > Transaction.maxSize;
-  /// True if a signable solution have been found
+  /// True if a signable solution has been found
   bool get ready => enoughFunds && !tooLarge;
 
 }
