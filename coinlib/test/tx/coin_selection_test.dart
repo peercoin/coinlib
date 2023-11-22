@@ -272,14 +272,74 @@ void main() {
 
     });
 
-    void expectSelectedValues(CoinSelection selection, List<int> values) => expect(
-      selection.selected.map((candidate) => candidate.value.toInt()),
-      unorderedEquals(values),
-    );
+    void expectSelectedValues(CoinSelection selection, List<int> values) {
+      print(selection.selected.map((candidate) => candidate.value.toInt()));
+      expect(
+        selection.selected.map((candidate) => candidate.value.toInt()),
+        unorderedEquals(values),
+      );
+      expect(selection.version, 1234);
+      expect(selection.locktime, 0xabcd1234);
+    }
+
+    final candidates = [coin*4, coin, coin*3, coin, coin*2];
+
+    test(".inOrderUntilEnough()", () {
+
+      void expectInOrder(List<int> selected, int outValue) {
+        final selection = CoinSelection.inOrderUntilEnough(
+          version: 1234,
+          candidates: candidates.map((value) => candidateForValue(value)),
+          recipients: [outputForValue(outValue)],
+          changeProgram: changeProgram,
+          feePerKb: feePerKb, minFee: minFee, minChange: minChange,
+          locktime: 0xabcd1234,
+        );
+        expectSelectedValues(selection, selected);
+      }
+
+      // Single input required
+      expectInOrder(candidates.sublist(0, 1), coin*3);
+      // Covers with first three, even if only two needed
+      expectInOrder(candidates.sublist(0, 3), coin*5);
+      // Need all
+      expectInOrder(candidates, coin*10);
+      // Select all even though not enough
+      expectInOrder(candidates, coin*12);
+
+    });
+
+    test(".random", () {
+
+      CoinSelection getRandom(int outValue) => CoinSelection.random(
+        version: 1234,
+        candidates: candidates.map((value) => candidateForValue(value)),
+        recipients: [outputForValue(outValue)],
+        changeProgram: changeProgram,
+        feePerKb: feePerKb, minFee: minFee, minChange: minChange,
+        locktime: 0xabcd1234,
+      );
+
+      // Only need one
+      {
+        final selected = getRandom(coin~/2).selected;
+        expect(selected.length, 1);
+        expect(selected[0].value.toInt(), isIn(candidates));
+      }
+      // Need multiple
+      {
+        final selection = getRandom(coin*2);
+        expect(selection.selected.length, lessThanOrEqualTo(3));
+        expect(selection.inputValue.toInt(), greaterThan(coin*2));
+      }
+      // Need all
+      expectSelectedValues(getRandom(coin*10), candidates);
+      // Select all even though not enough
+      expectSelectedValues(getRandom(coin*12), candidates);
+
+    });
 
     test(".largestFirst()", () {
-
-      final candidates = [coin*4, coin, coin*3, coin, coin*2];
 
       void expectLargestFirst(List<int> selected, int outValue) {
         final selection = CoinSelection.largestFirst(
@@ -291,8 +351,6 @@ void main() {
           locktime: 0xabcd1234,
         );
         expectSelectedValues(selection, selected);
-        expect(selection.version, 1234);
-        expect(selection.locktime, 0xabcd1234);
       }
 
       // Can cover with single largest

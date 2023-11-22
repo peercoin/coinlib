@@ -124,9 +124,13 @@ class CoinSelection {
   }
 
   /// A simple selection algorithm that selects inputs from the [candidates]
-  /// starting from the largest value until the required amount has been
-  /// reached and then the selected inputs are given a random order.
-  factory CoinSelection.largestFirst({
+  /// in the order that they are given until the required amount has been
+  /// reached. If there are not enough coins, all shall be selected and
+  /// [enoughFunds] shall be false.
+  /// If [randomise] is set to true, the order of inputs shall be randomised
+  /// after being selected. This is useful for candidates that are not already
+  /// randomised as it may avoid giving clues to the algorithm being used.
+  factory CoinSelection.inOrderUntilEnough({
     int version = Transaction.currentVersion,
     required Iterable<InputCandidate> candidates,
     required Iterable<Output> recipients,
@@ -134,12 +138,9 @@ class CoinSelection {
     required BigInt feePerKb,
     required BigInt minFee,
     required BigInt minChange,
+    bool randomise = false,
     int locktime = 0,
   }) {
-
-    final sorted = candidates.toList().sorted(
-      (a, b) => b.value.compareTo(a.value),
-    );
 
     CoinSelection trySelection(Iterable<InputCandidate> selected)
       => CoinSelection(
@@ -153,18 +154,67 @@ class CoinSelection {
         locktime: locktime,
       );
 
+    final list = candidates.toList();
+
     CoinSelection selection = trySelection([]);
-    for (int i = 0; i < sorted.length; i++) {
-      selection = trySelection(sorted.take(i+1));
+    for (int i = 0; i < list.length; i++) {
+      selection = trySelection(list.take(i+1));
       if (selection.enoughFunds) break;
     }
 
-    // Randomising makes it less obvious this algo is being used
-    final selected = selection.selected.toList();
-    selected.shuffle();
-    return trySelection(selected);
+    return randomise
+      ? trySelection(selection.selected.toList()..shuffle())
+      : selection;
 
   }
+
+  /// A simple selection algorithm that selects inputs randomly from the
+  /// [candidates] until the required amount has been reached.
+  factory CoinSelection.random({
+    int version = Transaction.currentVersion,
+    required Iterable<InputCandidate> candidates,
+    required Iterable<Output> recipients,
+    required Program changeProgram,
+    required BigInt feePerKb,
+    required BigInt minFee,
+    required BigInt minChange,
+    int locktime = 0,
+  }) => CoinSelection.inOrderUntilEnough(
+    version: version,
+    candidates: candidates.toList()..shuffle(),
+    recipients: recipients,
+    changeProgram: changeProgram,
+    feePerKb: feePerKb,
+    minFee: minFee,
+    minChange: minChange,
+    locktime: locktime,
+  );
+
+  /// A simple selection algorithm that selects inputs from the [candidates]
+  /// starting from the largest value until the required amount has been
+  /// reached. The order of the selected inputs are randomised.
+  factory CoinSelection.largestFirst({
+    int version = Transaction.currentVersion,
+    required Iterable<InputCandidate> candidates,
+    required Iterable<Output> recipients,
+    required Program changeProgram,
+    required BigInt feePerKb,
+    required BigInt minFee,
+    required BigInt minChange,
+    int locktime = 0,
+  }) => CoinSelection.inOrderUntilEnough(
+    version: version,
+    candidates: candidates.toList().sorted(
+      (a, b) => b.value.compareTo(a.value),
+    ),
+    recipients: recipients,
+    changeProgram: changeProgram,
+    feePerKb: feePerKb,
+    minFee: minFee,
+    minChange: minChange,
+    randomise: true,
+    locktime: locktime,
+  );
 
   /// Obtains the transaction with selected inputs and outputs including any
   /// change at a random location, ready to be signed. Throws
