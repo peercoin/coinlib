@@ -1,3 +1,7 @@
+## 2.0.0-rc.2
+
+Adds coin selection algorithm from underlying coinlib library.
+
 ## 2.0.0-rc.1
 
 Adds Taproot support and minor breaking changes. See changes for the underlying

@@ -1,3 +1,7 @@
+## 2.0.0-rc.2
+
+Adds `CoinSelection` class with coin selection algorithms.
+
 ## 2.0.0-rc.1
 
 - Add Taproot support for key-path spends and script-path spends.
