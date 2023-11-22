@@ -123,6 +123,48 @@ class CoinSelection {
 
   }
 
+  /// A useful default coin selection algorithm.
+  /// Currently this will first select candidates at random until the required
+  /// input amount is reached. If the resulting transaction is too large or not
+  /// enough funds have been reached it will fall back to adding the largest
+  /// input values first.
+  factory CoinSelection.optimal({
+    int version = Transaction.currentVersion,
+    required Iterable<InputCandidate> candidates,
+    required Iterable<Output> recipients,
+    required Program changeProgram,
+    required BigInt feePerKb,
+    required BigInt minFee,
+    required BigInt minChange,
+    int locktime = 0,
+  }) {
+
+    final randomSelection = CoinSelection.random(
+      version: version,
+      candidates: candidates,
+      recipients: recipients,
+      changeProgram: changeProgram,
+      feePerKb: feePerKb,
+      minFee: minFee,
+      minChange: minChange,
+      locktime: locktime,
+    );
+
+    return randomSelection.tooLarge || !randomSelection.enoughFunds
+      ? CoinSelection.largestFirst(
+        version: version,
+        candidates: candidates,
+        recipients: recipients,
+        changeProgram: changeProgram,
+        feePerKb: feePerKb,
+        minFee: minFee,
+        minChange: minChange,
+        locktime: locktime,
+      )
+      : randomSelection;
+
+  }
+
   /// A simple selection algorithm that selects inputs from the [candidates]
   /// in the order that they are given until the required amount has been
   /// reached. If there are not enough coins, all shall be selected and
@@ -130,6 +172,9 @@ class CoinSelection {
   /// If [randomise] is set to true, the order of inputs shall be randomised
   /// after being selected. This is useful for candidates that are not already
   /// randomised as it may avoid giving clues to the algorithm being used.
+  /// The algorithm will only take upto 6800 candidates by default to avoid
+  /// taking too long and due to size limitations. This can be changed with
+  /// [maxCandidates].
   factory CoinSelection.inOrderUntilEnough({
     int version = Transaction.currentVersion,
     required Iterable<InputCandidate> candidates,
@@ -138,8 +183,9 @@ class CoinSelection {
     required BigInt feePerKb,
     required BigInt minFee,
     required BigInt minChange,
-    bool randomise = false,
     int locktime = 0,
+    bool randomise = false,
+    int maxCandidates = 6800,
   }) {
 
     CoinSelection trySelection(Iterable<InputCandidate> selected)
@@ -154,7 +200,8 @@ class CoinSelection {
         locktime: locktime,
       );
 
-    final list = candidates.toList();
+    // Restrict number of candidates due to size limitation and for efficiency
+    final list = candidates.take(maxCandidates).toList();
 
     CoinSelection selection = trySelection([]);
     for (int i = 0; i < list.length; i++) {

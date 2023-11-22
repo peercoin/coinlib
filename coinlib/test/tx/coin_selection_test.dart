@@ -273,7 +273,6 @@ void main() {
     });
 
     void expectSelectedValues(CoinSelection selection, List<int> values) {
-      print(selection.selected.map((candidate) => candidate.value.toInt()));
       expect(
         selection.selected.map((candidate) => candidate.value.toInt()),
         unorderedEquals(values),
@@ -361,6 +360,51 @@ void main() {
       expectLargestFirst(candidates, coin*10);
       // Select all, though they aren't enough
       expectLargestFirst(candidates, coin*12);
+
+    });
+
+    test(".optimal()", () {
+
+      CoinSelection getOptimal(List<int> candidates, int outValue)
+        => CoinSelection.optimal(
+          version: 1234,
+          candidates: candidates.map((value) => candidateForValue(value)),
+          recipients: [outputForValue(outValue)],
+          changeProgram: changeProgram,
+          feePerKb: feePerKb, minFee: minFee, minChange: minChange,
+          locktime: 0xabcd1234,
+        );
+
+      // Defaults to random where possible
+      {
+        final selected = getOptimal(candidates, coin~/2).selected;
+        expect(selected.length, 1);
+        expect(selected[0].value.toInt(), isIn(candidates));
+      }
+
+      // Fallback to largestFirst where needed
+      // Create a long list of small inputs that would lead to a too large
+      // transaction with only a few larger inputs able to satisfy the transaction.
+      // Create lots of inputs to reduce probability of randomly selecting
+      // larger inputs.
+      {
+        final selection = getOptimal(
+          [
+            ...List.filled(1000, coin*100),
+            ...List.filled(100000, coin),
+          ], coin*100000,
+        );
+        expect(selection.tooLarge, false);
+        expect(selection.enoughFunds, true);
+        expect(selection.version, 1234);
+        expect(selection.locktime, 0xabcd1234);
+        expect(
+          selection.selected.where(
+            (candidate) => candidate.value.toInt() == coin*100,
+          ).length,
+          isNonZero,
+        );
+      }
 
     });
 
