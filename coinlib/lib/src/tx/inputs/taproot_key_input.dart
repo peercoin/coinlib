@@ -3,7 +3,6 @@ import 'package:coinlib/src/crypto/ec_private_key.dart';
 import 'package:coinlib/src/scripts/programs/p2tr.dart';
 import 'package:coinlib/src/taproot.dart';
 import 'package:coinlib/src/tx/inputs/taproot_input.dart';
-import 'package:coinlib/src/tx/outpoint.dart';
 import 'package:coinlib/src/tx/output.dart';
 import 'package:coinlib/src/tx/sighash/sighash_type.dart';
 import 'package:coinlib/src/tx/transaction.dart';
@@ -21,14 +20,10 @@ class TaprootKeyInput extends TaprootInput {
   final int? signedSize = 41 + 65;
 
   TaprootKeyInput({
-    required OutPoint prevOut,
+    required super.prevOut,
     this.insig,
-    int sequence = Input.sequenceFinal,
-  }) : super(
-    prevOut: prevOut,
-    sequence: sequence,
-    witness: [if (insig != null) insig.bytes],
-  );
+    super.sequence = Input.sequenceFinal,
+  }) : super(witness: [if (insig != null) insig.bytes]);
 
   /// Checks if the [raw] input and [witness] data match the expected format for
   /// a [TaprootKeyInput], with a signature. If it does it returns a

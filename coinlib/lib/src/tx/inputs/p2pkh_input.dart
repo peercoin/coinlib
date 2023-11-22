@@ -3,7 +3,6 @@ import 'package:coinlib/src/crypto/ec_public_key.dart';
 import 'package:coinlib/src/scripts/operations.dart';
 import 'package:coinlib/src/scripts/programs/p2pkh.dart';
 import 'package:coinlib/src/scripts/script.dart';
-import 'package:coinlib/src/tx/outpoint.dart';
 import 'package:coinlib/src/tx/sighash/sighash_type.dart';
 import 'package:coinlib/src/tx/transaction.dart';
 import 'input.dart';
@@ -27,17 +26,15 @@ class P2PKHInput extends LegacyInput with PKHInput {
   final int? signedSize = 147;
 
   P2PKHInput({
-    required OutPoint prevOut,
+    required super.prevOut,
     required this.publicKey,
     this.insig,
-    int sequence = Input.sequenceFinal,
+    super.sequence = Input.sequenceFinal,
   }) : super(
-    prevOut: prevOut,
     scriptSig: Script([
       if (insig != null) ScriptPushData(insig.bytes),
       ScriptPushData(publicKey.data),
     ]).compiled,
-    sequence: sequence,
   );
 
   /// Checks if the [RawInput] matches the expected format for a [P2PKHInput],

@@ -6,7 +6,6 @@ import 'package:coinlib/src/scripts/operations.dart';
 import 'package:coinlib/src/scripts/program.dart';
 import 'package:coinlib/src/scripts/programs/multisig.dart';
 import 'package:coinlib/src/scripts/script.dart';
-import 'package:coinlib/src/tx/outpoint.dart';
 import 'package:coinlib/src/tx/sighash/legacy_signature_hasher.dart';
 import 'package:coinlib/src/tx/sighash/sighash_type.dart';
 import 'package:coinlib/src/tx/transaction.dart';
@@ -25,18 +24,16 @@ class P2SHMultisigInput extends LegacyInput {
   final List<ECDSAInputSignature> sigs;
 
   P2SHMultisigInput({
-    required OutPoint prevOut,
+    required super.prevOut,
     required this.program,
     Iterable<ECDSAInputSignature> sigs = const [],
-    int sequence = Input.sequenceFinal,
+    super.sequence = Input.sequenceFinal,
   }) : sigs = List.unmodifiable(sigs), super(
-    prevOut: prevOut,
     scriptSig: Script([
       ScriptOp.fromNumber(0),
       ...sigs.map((sig) => ScriptPushData(sig.bytes)),
       ScriptPushData(program.script.compiled),
     ]).compiled,
-    sequence: sequence,
   ) {
     if (sigs.length > program.threshold) {
       throw ArgumentError(

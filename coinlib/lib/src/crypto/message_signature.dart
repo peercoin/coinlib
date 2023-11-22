@@ -15,7 +15,7 @@ class MagicHash with Writable {
   MagicHash(this.message, this.prefix);
 
   static _writeUtf8(Writer writer, String msg)
-    => writer.writeVarSlice(utf8.encode(msg) as Uint8List);
+    => writer.writeVarSlice(utf8.encode(msg));
 
   @override
   void write(Writer writer) {

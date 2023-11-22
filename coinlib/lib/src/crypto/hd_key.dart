@@ -231,16 +231,11 @@ class HDPrivateKey extends HDKey {
 
   HDPrivateKey({
     required this.privateKey,
-    required Uint8List chaincode,
-    required int depth,
-    required int index,
-    required int parentFingerprint,
-  }) : super._(
-    chaincode: chaincode,
-    depth: depth,
-    index: index,
-    parentFingerprint: parentFingerprint,
-  );
+    required super.chaincode,
+    required super.depth,
+    required super.index,
+    required super.parentFingerprint,
+  }) : super._();
 
   /// Creates a master key from an existing private key and chain code.
   HDPrivateKey.fromKeyAndChainCode(this.privateKey, Uint8List chaincode)
@@ -261,7 +256,7 @@ class HDPrivateKey extends HDKey {
       throw ArgumentError("Seed should be between 16 and 64 bytes", "seed");
     }
 
-    final hash = hmacSha512(utf8.encode("Bitcoin seed") as Uint8List, seed);
+    final hash = hmacSha512(utf8.encode("Bitcoin seed"), seed);
     return HDPrivateKey(
       privateKey: ECPrivateKey(hash.sublist(0, 32)),
       chaincode: hash.sublist(32),
@@ -308,16 +303,11 @@ class HDPublicKey extends HDKey {
 
   HDPublicKey({
     required this.publicKey,
-    required Uint8List chaincode,
-    required int depth,
-    required int index,
-    required int parentFingerprint,
-  }) : super._(
-    chaincode: chaincode,
-    depth: depth,
-    index: index,
-    parentFingerprint: parentFingerprint,
-  );
+    required super.chaincode,
+    required super.depth,
+    required super.index,
+    required super.parentFingerprint,
+  }) : super._();
 
   /// Creates a HD public key from a base58 encoded representation ([b58]). May
   /// throw [InvalidBase58], [InvalidBase58Checksum] or [InvalidHDKey].

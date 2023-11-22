@@ -17,7 +17,7 @@ Uint8List hmacSha512(Uint8List key, Uint8List msg) => Uint8List.fromList(
 );
 
 Uint8List Function(Uint8List msg) getTaggedHasher(String tag) {
-  final hashedTag = sha256Hash(utf8.encode(tag) as Uint8List);
+  final hashedTag = sha256Hash(utf8.encode(tag));
   return (Uint8List msg) => sha256Hash(
     Uint8List.fromList([...hashedTag, ...hashedTag, ...msg]),
   );

@@ -10,7 +10,7 @@ import 'package:coinlib/src/taproot.dart';
 class P2TR extends P2Witness {
 
   /// Construct using an output script.
-  P2TR.fromScript(Script script) : super.fromScript(script) {
+  P2TR.fromScript(super.script) : super.fromScript() {
     if (data.length != 32 || version != 1) throw NoProgramMatch();
   }
 

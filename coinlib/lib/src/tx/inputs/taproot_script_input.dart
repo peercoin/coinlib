@@ -26,14 +26,12 @@ class TaprootScriptInput extends TaprootInput {
   final Script tapscript;
 
   TaprootScriptInput({
-    required OutPoint prevOut,
+    required super.prevOut,
     required Uint8List controlBlock,
     required this.tapscript,
     List<Uint8List>? stack,
-    int sequence = Input.sequenceFinal,
+    super.sequence = Input.sequenceFinal,
   }) : super(
-    prevOut: prevOut,
-    sequence: sequence,
     witness: [if (stack != null) ...stack, tapscript.compiled, controlBlock],
   );
 

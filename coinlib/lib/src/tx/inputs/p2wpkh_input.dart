@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 import 'package:coinlib/src/crypto/ec_private_key.dart';
 import 'package:coinlib/src/crypto/ec_public_key.dart';
-import 'package:coinlib/src/tx/outpoint.dart';
 import 'package:coinlib/src/tx/sighash/sighash_type.dart';
 import 'package:coinlib/src/tx/transaction.dart';
 import 'input.dart';
@@ -26,13 +25,11 @@ class P2WPKHInput extends LegacyWitnessInput with PKHInput {
   final int? signedSize = 147;
 
   P2WPKHInput({
-    required OutPoint prevOut,
+    required super.prevOut,
     required this.publicKey,
     this.insig,
-    int sequence = Input.sequenceFinal,
+    super.sequence = Input.sequenceFinal,
   }) : super(
-    prevOut: prevOut,
-    sequence: sequence,
     witness: [
       if (insig != null) insig.bytes,
       publicKey.data,

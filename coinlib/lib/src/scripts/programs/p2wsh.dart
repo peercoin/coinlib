@@ -12,7 +12,7 @@ class P2WSH extends P2Witness {
 
   /// Construct using an output script, not to be confused with the redeem
   /// script. For that use [fromRedeemScript].
-  P2WSH.fromScript(Script script) : super.fromScript(script) {
+  P2WSH.fromScript(super.script) : super.fromScript() {
     if (data.length != 32 || version != 0) throw NoProgramMatch();
   }
 

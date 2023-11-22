@@ -2189,15 +2189,22 @@ typedef secp256k1_scratch_space = secp256k1_scratch_space_struct;
 ///
 /// Except for test cases, this function should compute some cryptographic hash of
 /// the message, the algorithm, the key and the attempt.
-typedef secp256k1_nonce_function = ffi.Pointer<
-    ffi.NativeFunction<
-        ffi.Int Function(
-            ffi.Pointer<ffi.UnsignedChar> nonce32,
-            ffi.Pointer<ffi.UnsignedChar> msg32,
-            ffi.Pointer<ffi.UnsignedChar> key32,
-            ffi.Pointer<ffi.UnsignedChar> algo16,
-            ffi.Pointer<ffi.Void> data,
-            ffi.UnsignedInt attempt)>>;
+typedef secp256k1_nonce_function
+    = ffi.Pointer<ffi.NativeFunction<secp256k1_nonce_functionFunction>>;
+typedef secp256k1_nonce_functionFunction = ffi.Int Function(
+    ffi.Pointer<ffi.UnsignedChar> nonce32,
+    ffi.Pointer<ffi.UnsignedChar> msg32,
+    ffi.Pointer<ffi.UnsignedChar> key32,
+    ffi.Pointer<ffi.UnsignedChar> algo16,
+    ffi.Pointer<ffi.Void> data,
+    ffi.UnsignedInt attempt);
+typedef Dartsecp256k1_nonce_functionFunction = int Function(
+    ffi.Pointer<ffi.UnsignedChar> nonce32,
+    ffi.Pointer<ffi.UnsignedChar> msg32,
+    ffi.Pointer<ffi.UnsignedChar> key32,
+    ffi.Pointer<ffi.UnsignedChar> algo16,
+    ffi.Pointer<ffi.Void> data,
+    int attempt);
 
 /// Opaque data structured that holds a parsed ECDSA signature,
 /// supporting pubkey recovery.
@@ -2268,17 +2275,26 @@ final class secp256k1_keypair extends ffi.Struct {
 ///
 /// Except for test cases, this function should compute some cryptographic hash of
 /// the message, the key, the pubkey, the algorithm description, and data.
-typedef secp256k1_nonce_function_hardened = ffi.Pointer<
-    ffi.NativeFunction<
-        ffi.Int Function(
-            ffi.Pointer<ffi.UnsignedChar> nonce32,
-            ffi.Pointer<ffi.UnsignedChar> msg,
-            ffi.Size msglen,
-            ffi.Pointer<ffi.UnsignedChar> key32,
-            ffi.Pointer<ffi.UnsignedChar> xonly_pk32,
-            ffi.Pointer<ffi.UnsignedChar> algo,
-            ffi.Size algolen,
-            ffi.Pointer<ffi.Void> data)>>;
+typedef secp256k1_nonce_function_hardened = ffi
+    .Pointer<ffi.NativeFunction<secp256k1_nonce_function_hardenedFunction>>;
+typedef secp256k1_nonce_function_hardenedFunction = ffi.Int Function(
+    ffi.Pointer<ffi.UnsignedChar> nonce32,
+    ffi.Pointer<ffi.UnsignedChar> msg,
+    ffi.Size msglen,
+    ffi.Pointer<ffi.UnsignedChar> key32,
+    ffi.Pointer<ffi.UnsignedChar> xonly_pk32,
+    ffi.Pointer<ffi.UnsignedChar> algo,
+    ffi.Size algolen,
+    ffi.Pointer<ffi.Void> data);
+typedef Dartsecp256k1_nonce_function_hardenedFunction = int Function(
+    ffi.Pointer<ffi.UnsignedChar> nonce32,
+    ffi.Pointer<ffi.UnsignedChar> msg,
+    int msglen,
+    ffi.Pointer<ffi.UnsignedChar> key32,
+    ffi.Pointer<ffi.UnsignedChar> xonly_pk32,
+    ffi.Pointer<ffi.UnsignedChar> algo,
+    int algolen,
+    ffi.Pointer<ffi.Void> data);
 
 /// Data structure that contains additional arguments for schnorrsig_sign_custom.
 ///

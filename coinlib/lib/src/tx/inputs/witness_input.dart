@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-import 'package:coinlib/src/tx/outpoint.dart';
 import 'input.dart';
 import 'raw_input.dart';
 import 'p2wpkh_input.dart';
@@ -12,14 +11,10 @@ class WitnessInput extends RawInput {
   final List<Uint8List> witness;
 
   WitnessInput({
-    required OutPoint prevOut,
+    required super.prevOut,
     required List<Uint8List> witness,
-    int sequence = Input.sequenceFinal,
-  }) : witness = List.unmodifiable(witness), super(
-    prevOut: prevOut,
-    scriptSig: Uint8List(0),
-    sequence: sequence,
-  );
+    super.sequence = Input.sequenceFinal,
+  }) : witness = List.unmodifiable(witness), super(scriptSig: Uint8List(0));
 
   /// Matches a [raw] input with witness data to a corresponding [WitnessInput]
   /// or specialised sub-class object. If this is not a witness input, null is

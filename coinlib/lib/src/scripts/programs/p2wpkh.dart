@@ -10,7 +10,7 @@ import 'package:coinlib/src/scripts/script.dart';
 /// can satisfy this script with a signature provided as witness data.
 class P2WPKH extends P2Witness {
 
-  P2WPKH.fromScript(Script script) : super.fromScript(script) {
+  P2WPKH.fromScript(super.script) : super.fromScript() {
     if (data.length != 20 || version != 0) throw NoProgramMatch();
   }
 

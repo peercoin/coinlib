@@ -20,8 +20,8 @@ class NUMSPublicKey extends ECPublicKey {
 
   final Uint8List _rTweak;
 
-  NUMSPublicKey._(Uint8List rTweak, Uint8List data)
-    : _rTweak = Uint8List.fromList(rTweak), super(data);
+  NUMSPublicKey._(Uint8List rTweak, super.data)
+    : _rTweak = Uint8List.fromList(rTweak), super();
 
   /// Constructs a NUMS key from a given [rTweak].
   /// Throws [ArgumentError] if [rTweak] cannot produce a valid public key.
