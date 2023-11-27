@@ -1,3 +1,7 @@
+## 2.0.0-rc.3
+
+Update to underlying coinlib 2.0.0-rc.3
+
 ## 2.0.0-rc.2
 
 Adds coin selection algorithm from underlying coinlib library.

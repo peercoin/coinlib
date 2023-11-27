@@ -1,3 +1,7 @@
+## 2.0.0-rc.3
+
+Move secp256k1 code to secp256k1 directory
+
 ## 2.0.0-rc.2
 
 Adds `CoinSelection` class with coin selection algorithms.
