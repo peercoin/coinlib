@@ -113,7 +113,7 @@ void main() async {
   // Convert secp256k1.wasm file into Uint8List in dart file
   binaryFileToDart(
     "$tmpDir/secp256k1.wasm",
-    "${Directory.current.path}/lib/src/generated/secp256k1.wasm.g.dart",
+    "${Directory.current.path}/lib/src/secp256k1/secp256k1.wasm.g.dart",
     "secp256k1WasmData",
   );
   print("Output secp256k1.wasm.g.dart successfully");

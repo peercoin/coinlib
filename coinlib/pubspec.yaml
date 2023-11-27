@@ -26,7 +26,7 @@ dependencies:
 ffigen:
   name: NativeSecp256k1
   description: Raw generated bindings to secp256k1
-  output: 'lib/src/generated/secp256k1.ffi.g.dart'
+  output: 'lib/src/secp256k1/secp256k1.ffi.g.dart'
   headers:
     entry-points:
       - '../coinlib_flutter/src/secp256k1/include/secp256k1_recovery.h'

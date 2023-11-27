@@ -99,5 +99,5 @@ Bindings for the native libraries (excluding WebAssembly) are generated from the
 `headers/secp256k1.h` file using `dart run ffigen` within the `coinlib` package.
 
 The WebAssembly module has been pre-built to
-`lib/src/generated/secp256k1.wasm.g.dart`. It may be rebuilt using `dart run
+`lib/src/secp256k1/secp256k1.wasm.g.dart`. It may be rebuilt using `dart run
 bin/build_wasm.dart` in the `coinlib` root directory.

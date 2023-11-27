@@ -1,9 +1,9 @@
 import "dart:typed_data";
+import 'package:wasm_interop/wasm_interop.dart';
 import 'package:coinlib/src/crypto/random.dart';
 import 'heap_array_wasm.dart';
 import "secp256k1_base.dart";
-import 'package:wasm_interop/wasm_interop.dart';
-import 'package:coinlib/src/generated/secp256k1.wasm.g.dart';
+import 'secp256k1.wasm.g.dart';
 
 typedef IntFunc1 = int Function(int);
 typedef IntFunc2 = int Function(int, int);

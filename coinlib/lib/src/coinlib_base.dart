@@ -1,4 +1,4 @@
-import 'package:coinlib/src/bindings/secp256k1.dart';
+import 'package:coinlib/src/secp256k1/secp256k1.dart';
 
 export 'package:coinlib/src/common/bytes.dart';
 export 'package:coinlib/src/common/hex.dart';
