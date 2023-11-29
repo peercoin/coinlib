@@ -4,7 +4,7 @@ import 'docker_util.dart';
 /// Build the linux shared library for secp256k1 using the Dockerfile string
 
 String dockerfile = r"""
-FROM debian:bullseye
+FROM debian:bookworm
 
 # Install dependenices
 RUN apt-get update -y \
@@ -47,7 +47,7 @@ void main() async {
       cmd,
       dockerfile,
       "coinlib_build_secp256k1_linux",
-      "/secp256k1/output/libsecp256k1.so",
+      "output/libsecp256k1.so",
   )) {
     exit(1);
   }

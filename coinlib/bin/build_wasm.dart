@@ -6,7 +6,7 @@ import 'util.dart';
 /// file with the wasm as a Uint8List static variable
 
 String dockerfile = r"""
-FROM debian:bullseye
+FROM debian:bookworm
 
 # Install dependenices
 RUN apt-get update -y \
@@ -105,7 +105,7 @@ void main() async {
       dockerfile,
       "coinlib_build_secp256k1_wasm",
       tmpDir,
-      "cp /secp256k1/output/secp256k1.wasm /host/secp256k1.wasm",
+      "cp output/secp256k1.wasm /host/secp256k1.wasm",
   )) {
     exit(1);
   }

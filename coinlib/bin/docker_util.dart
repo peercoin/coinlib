@@ -37,7 +37,10 @@ Future<bool> dockerRun(
   // Run
   print("Running $containerCmd");
   exitCode = await execWithStdio(
-    dockerCmd, ["run", "--volume", "$bindDir:/host", tag, "bash", "-c", containerCmd],
+    dockerCmd, [
+      "run", "--rm", "--volume", "$bindDir:/host:Z", tag, "bash", "-c",
+      containerCmd,
+    ],
   );
 
   if (exitCode != 0) {
