@@ -1,3 +1,7 @@
+## 2.0.0-rc.4
+
+Fixed issues with build scripts
+
 ## 2.0.0-rc.3
 
 Move secp256k1 code to secp256k1 directory
