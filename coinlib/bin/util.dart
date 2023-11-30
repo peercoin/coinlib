@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 Future<bool> cmdAvailable(String cmd) async {
@@ -18,17 +19,14 @@ Future<int> execWithStdio(
 
   final process = await Process.start(
     executable, arguments, workingDirectory: workingDir,
-    mode: (stdin == null)
-      ? ProcessStartMode.inheritStdio
-      : ProcessStartMode.normal,
   );
 
   if (stdin != null) {
-    process.stdout.pipe(stdout);
     process.stdin.write(stdin);
-    await process.stdin.flush();
     await process.stdin.close();
   }
+
+  await process.stdout.transform(utf8.decoder).forEach(stdout.write);
 
   return await process.exitCode;
 
