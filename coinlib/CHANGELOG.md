@@ -1,3 +1,7 @@
+## 2.0.0-rc.5
+
+Reduce output size of JavaScript by encoding WASM as base64
+
 ## 2.0.0-rc.4
 
 Fixed issues with build scripts
