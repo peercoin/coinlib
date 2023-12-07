@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'docker_util.dart';
 import 'util.dart';
@@ -83,10 +84,10 @@ RUN ${WASI_SDK_PATH}/bin/wasm-ld \
 
 void binaryFileToDart(String inPath, String outPath, String name) {
   final bytes = File(inPath).readAsBytesSync();
-  final hexList = bytes.map((b) => "0x${b.toRadixString(16)}").join(",");
+  final b64 = base64Encode(bytes);
   final output = """\
-import 'dart:typed_data';
-final $name = Uint8List.fromList([$hexList]);""";
+import 'dart:convert';
+final $name = base64Decode("$b64");""";
   File(outPath).writeAsStringSync(output, flush: true);
 }
 
