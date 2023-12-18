@@ -85,11 +85,11 @@ place the library under a `build` directory.
 ## Building for Windows
 ### Building for Windows on Linux
 
-Cross-compile a secp256k1 DLL for Windows on an Ubuntu 20.04 host with `dart run coinlib:build_windows` or `dart run bin/build_windows.dart`, which scripts [bitcoin-core/secp256k1's "Cross compiling" guide](https://github.com/bitcoin-core/secp256k1?tab=readme-ov-file#cross-compiling).
+Cross-compile a secp256k1 DLL for Windows on an Ubuntu 20.04 host with `dart run coinlib:build_windows` or `dart run bin/build_windows.dart`.
 
 ### Building for Windows on Windows
 
-The above ["Building for Windows on Linux"](#building-for-windows-on-linux) can be completed in an Ubuntu 20.04 WSL2 instance on a Windows host.
+The above ["Building for Windows on Linux"](#building-for-windows-on-linux) can be completed in an Ubuntu 20.04 WSL2 instance on a Windows host.  You can also complete the build without installing Flutter to the WSL2 host by following [bitcoin-core/secp256k1's "Cross compiling" guide](https://github.com/bitcoin-core/secp256k1?tab=readme-ov-file#cross-compiling).
 
 Building on Windows manually may also be possible by following [bitcoin-core/secp256k1's guide for Building on Windows](https://github.com/bitcoin-core/secp256k1?tab=readme-ov-file#building-on-windows) and placing the DLL at `src/secp256k1/lib/src/libsecp256k1-2.dll`.
 
