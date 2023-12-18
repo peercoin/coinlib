@@ -32,12 +32,9 @@ dart pub add coinlib
 ```
 
 If you are using the library for web, the library is ready to use. If you are
-using the library on Linux or macOS then please see
-["Building for Linux"](#building-for-linux) and
-["Building for macOS"](#building-for-macos) below.
-
-No script is included for building on Windows at the present time, however a
-`secp256k1.dll` may be built into your `build/` directory separately.
+using the library on Linux, macOS, or Windows, then please see
+["Building for Linux"](#building-for-linux),
+["Building for macOS"](#building-for-macos), or ["Building for Windows"](#building-for-windows) below.
 
 The library can be imported via:
 
@@ -84,6 +81,17 @@ framework named `secp256k1.framework`.
 
 To build the dynamic library, run `dart run coinlib:build_macos` which will
 place the library under a `build` directory.
+
+## Building for Windows
+### Building for Windows on Linux
+
+Cross-compile a secp256k1 DLL for Windows on an Ubuntu 20.04 host with `dart run coinlib:build_windows` or `dart run bin/build_windows.dart`, which scripts [bitcoin-core/secp256k1's "Cross compiling" guide](https://github.com/bitcoin-core/secp256k1?tab=readme-ov-file#cross-compiling).
+
+### Building for Windows on Windows
+
+The above ["Building for Windows on Linux"](#building-for-windows-on-linux) can be completed in an Ubuntu 20.04 WSL2 instance on a Windows host.
+
+Building on Windows manually may also be possible by following [bitcoin-core/secp256k1's guide for Building on Windows](https://github.com/bitcoin-core/secp256k1?tab=readme-ov-file#building-on-windows) and placing the DLL at `src/secp256k1/lib/src/libsecp256k1-2.dll`.
 
 ## Development
 
