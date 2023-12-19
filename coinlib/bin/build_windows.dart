@@ -1,22 +1,46 @@
 import 'dart:io';
+import 'docker_util.dart';
 
-/// Follows bitcoin-core/secp256k1's "Cross compiling" instructions.  Run in WSL/WSL2.
-void main() {
-  // Install dependencies.
-  Process.runSync("apt-get", ["update", "-y"]);
-  Process.runSync("apt-get", ["install", "-y", "autoconf", "libtool", "build-essential", "git", "cmake", "mingw-w64"]);
+/// Build a Windows DLL for secp256k1 using a Dockerfile string.
 
-  // Clone bitcoin-core/secp256k1.
-  Process.runSync("git", ["clone", "https://github.com/bitcoin-core/secp256k1", "src/secp256k1"]);
-  Process.runSync("git", ["checkout", "346a053d4c442e08191f075c3932d03140579d47"]);
+String dockerfile = r"""
+FROM debian:bullseye
 
-  // Build in "src/secp256k1/lib".
-  Directory("src/secp256k1/lib").createSync();
-  Directory.current = Directory("src/secp256k1/lib");
+# Install dependenices.
+RUN apt-get update -y \
+  && apt-get install -y autoconf libtool build-essential git
 
-  // Run cmake with the provided toolchain file.
-  Process.runSync("cmake", ["..", "-DCMAKE_TOOLCHAIN_FILE=../cmake/x86_64-w64-mingw32.toolchain.cmake"]);
+# Clone libsecp256k1 0.3.1 release.
+RUN git clone https://github.com/bitcoin-core/secp256k1 \
+  && cd secp256k1 \
+  && git checkout 346a053d4c442e08191f075c3932d03140579d47
+  && mkdir -p secp256k1/build
 
-  // Build the project using "make".
-  Process.runSync("make", []);
+WORKDIR /secp256k1/build
+
+# Build shared library for Windows.
+RUN cmake .. -DCMAKE_TOOLCHAIN_FILE=../cmake/x86_64-w64-mingw32.toolchain.cmake
+RUN make
+
+# Build DLL and copy into output.
+RUN make install
+RUN cp src/libsecp256k1-2.dll output/libsecp256k1.dll
+""";
+
+void main() async {
+
+  String cmd = await getDockerCmd();
+  print("Using $cmd to run dockerfile");
+
+  // Build secp256k1 and copy shared library to build directory
+  if (!await dockerBuild(
+    cmd,
+    dockerfile,
+    "coinlib_build_secp256k1_windows",
+    "/secp256k1/output/libsecp256k1.dll",
+  )) {
+    exit(1);
+  }
+
+
 }
