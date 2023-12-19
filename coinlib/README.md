@@ -34,7 +34,8 @@ dart pub add coinlib
 If you are using the library for web, the library is ready to use. If you are
 using the library on Linux, macOS, or Windows, then please see
 ["Building for Linux"](#building-for-linux),
-["Building for macOS"](#building-for-macos), or ["Building for Windows"](#building-for-windows) below.
+["Building for macOS"](#building-for-macos), or 
+["Building for Windows"](#building-for-windows) below.
 
 The library can be imported via:
 
@@ -117,7 +118,7 @@ installing Flutter to WSL by following
 
 Building natively on Windows without WSL2 may also be possible by following 
 [bitcoin-core/secp256k1's guide for Building on Windows](https://github.com/bitcoin-core/secp256k1?tab=readme-ov-file#building-on-windows)
-and placing the DLL at `src/secp256k1/lib/src/libsecp256k1-2.dll`.
+and placing the DLL at `build/secp256k1.dll`.
 
 ## Development
 
