@@ -90,12 +90,29 @@ Cross-compile a secp256k1 DLL for Windows on an Ubuntu 20.04 host with
 
 ### Building for Windows on Windows
 
-Builds on Windows can be accomplished using WSL (Windows Subsystem for Linux).
-Cross-compile a secp256k1 DLL for Windows on an Ubuntu 20.04 WSL2 instance on a
-Windows host with `dart run coinlib:build_wsl` or `dart run bin/build_wsl.dart`,
-or complete the above ["Building for Windows on Linux"](#building-for-windows-on-linux)
-after installing Docker or Podman in WSL.  The build can also be completed 
-without installing Flutter to WSL by following 
+Builds on Windows can be accomplished using WSL2 (Windows Subsystem for Linux).
+First, install the following packages to the WSL(2) host:
+
+ - `autoconf`
+ - `libtool`
+ - `build-essential`
+ - `git`
+ - `cmake`
+ - `mingw-w64`
+
+as in:
+
+```
+apt-get update -y
+apt-get install -y autoconf libtool build-essential git cmake mingw-w64
+```
+
+Then, cross-compile a secp256k1 DLL for Windows on an Ubuntu 20.04 WSL2
+instance on a Windows host with `dart run coinlib:build_wsl` or 
+`dart run bin/build_wsl.dart`, or complete the above 
+["Building for Windows on Linux"](#building-for-windows-on-linux) after 
+installing Docker or Podman in WSL.  The build can also be completed without 
+installing Flutter to WSL by following 
 [bitcoin-core/secp256k1's "Cross compiling" guide](https://github.com/bitcoin-core/secp256k1?tab=readme-ov-file#cross-compiling).
 
 Building natively on Windows without WSL2 may also be possible by following 
