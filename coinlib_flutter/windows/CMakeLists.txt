@@ -19,6 +19,6 @@ set(coinlib_flutter_bundled_libraries
   # Defined in ../src/CMakeLists.txt.
   # This can be changed to accommodate different builds.
   $<TARGET_FILE:coinlib_flutter>
-  ${CMAKE_BINARY_DIR}/../src/secp256k1/lib/src/libsecp256k1-2.dll
+  ${CMAKE_BINARY_DIR}/../build/secp256k1.dll
   PARENT_SCOPE
 )

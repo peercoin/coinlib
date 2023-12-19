@@ -32,4 +32,8 @@ void main() async {
 
   // Build the project using "make".
   await execWithStdio("make", []);
+
+  // Copy the DLL to build/libsecp256k1.dll.
+  Directory("../build").createSync();
+  File("src/libsecp256k1-2.dll").copySync("../build/libsecp256k1.dll");
 }
