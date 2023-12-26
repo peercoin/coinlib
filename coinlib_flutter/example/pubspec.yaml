@@ -2,7 +2,7 @@ name: coinlib_flutter_example
 description: Demonstrates how to use the coinlib_flutter plugin.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.0.0
+version: 2.1.0
 
 environment:
   sdk: '>=3.2.0 <4.0.0'
@@ -10,7 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  coinlib_flutter: ^2.0.0-rc.5
+  coinlib_flutter: ^2.0.0-rc.6
   cupertino_icons: ^1.0.2
 
 dev_dependencies:
