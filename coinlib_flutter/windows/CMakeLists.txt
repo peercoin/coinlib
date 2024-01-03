@@ -21,6 +21,6 @@ set(coinlib_flutter_bundled_libraries
   # This can be changed to accommodate different builds.
   # $<TARGET_FILE:coinlib_flutter>
   # TODO re-enable the above line if/when the CMake process is made Windows-compatible.  See also above.
-  ${CMAKE_BINARY_DIR}/../secp256k1.dll
+  ${CMAKE_BINARY_DIR}/../../secp256k1.dll
   PARENT_SCOPE
 )

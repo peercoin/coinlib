@@ -19,8 +19,7 @@ String _libraryPath() {
     localLib = "lib$_name.dylib";
     flutterLib = "$_name.framework/$_name";
   } else if (Platform.isWindows) {
-    // Built in build\windows.
-    flutterLib = localLib = "windows/$_name.dll";
+    flutterLib = localLib = "$_name.dll";
   } else {
     throw UnsupportedError('Unknown platform: ${Platform.operatingSystem}');
   }
