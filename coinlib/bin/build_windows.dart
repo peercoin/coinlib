@@ -1,45 +1,51 @@
 import 'dart:io';
-import 'docker_util.dart';
 
-/// Build a Windows DLL for secp256k1 using a Dockerfile string.
+import 'util.dart';
 
-String dockerfile = r"""
-FROM debian:bullseye
-
-# Install dependenices.
-RUN apt-get update -y \
-  && apt-get install -y autoconf libtool build-essential git
-
-# Clone libsecp256k1 0.3.1 release.
-RUN git clone https://github.com/bitcoin-core/secp256k1 \
-  && cd secp256k1 \
-  && git checkout 346a053d4c442e08191f075c3932d03140579d47
-  && mkdir -p secp256k1/build
-
-WORKDIR /secp256k1/build
-
-# Build shared library for Windows.
-RUN cmake .. -DCMAKE_TOOLCHAIN_FILE=../cmake/x86_64-w64-mingw32.toolchain.cmake
-RUN make
-
-# Build DLL and copy into output.
-RUN make install
-RUN cp src/libsecp256k1-2.dll output/libsecp256k1.dll
-""";
+/// Follows bitcoin-core/secp256k1's "Building on Windows" instructions.
+///
+/// Runnable in "Developer Command Prompt for VS 2022".
 
 void main() async {
+  // Make temporary directory.
+  final workDir = Directory.current.path;
+  final tmpDir = createTmpDir();
 
-  String cmd = await getDockerCmd();
-  print("Using $cmd to run dockerfile");
+  // Clone bitcoin-core/secp256k1.
+  await execWithStdio(
+    "git",
+    ["clone", "https://github.com/bitcoin-core/secp256k1", "$tmpDir/secp256k1"],
+  );
+  Directory.current = Directory("$tmpDir/secp256k1");
+  await execWithStdio(
+    "git",
+    ["checkout", "346a053d4c442e08191f075c3932d03140579d47"],
+  );
 
-  // Build secp256k1 and copy shared library to build directory
-  if (!await dockerBuild(
-    cmd,
-    dockerfile,
-    "coinlib_build_secp256k1_windows",
-    "/secp256k1/output/libsecp256k1.dll",
-  )) {
-    exit(1);
-  }
+  // Build in tmpDir/secp256k1/build.
+  Directory("build").createSync();
 
+  // Configure cmake.
+  await execWithStdio("cmake", [
+    "-G",
+    "Visual Studio 17 2022",
+    "-A",
+    "x64",
+    "-S",
+    ".",
+    "-B",
+    "build",
+  ]);
+
+  // Build.
+  await execWithStdio("cmake", [
+    "--build",
+    "build",
+    "--config",
+    "RelWithDebInfo"
+  ]);
+
+  // Copy the DLL to build/windows/x64/secp256k1.dll.
+  Directory("$workDir/build/windows/x64").createSync();
+  File("$tmpDir/secp256k1/build/src/RelWithDebInfo/secp256k1.dll").copySync("$workDir/build/windows/x64/secp256k1.dll");
 }

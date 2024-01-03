@@ -84,12 +84,19 @@ To build the dynamic library, run `dart run coinlib:build_macos` which will
 place the library under a `build` directory.
 
 ## Building for Windows
-### Building for Windows on Linux
+### Native Windows build
+
+The Windows shared library can be built using `dart run coinlib:build_windows` in
+the root directory of your package which will produce a shared library into
+`build/libsecp256k1.dll`.  This can also be run in the `coinlib` root directory
+via `dart run bin/build_linux.dart`.
+
+### Cross-compiling for Windows from Linux
 
 Cross-compile a secp256k1 DLL for Windows on an Ubuntu 20.04 host with
-`dart run coinlib:build_windows` or `dart run bin/build_windows.dart`.
+`dart run coinlib:build_windows_crosscompile` or `dart run bin/build_windows_crosscompile.dart`.
 
-### Building for Windows on Windows
+### Cross-compiling for Windows using WSL
 
 Builds on Windows can be accomplished using WSL2 (Windows Subsystem for Linux).
 First, install the following packages to the WSL(2) host:
@@ -115,10 +122,6 @@ instance on a Windows host with `dart run coinlib:build_wsl` or
 installing Docker or Podman in WSL.  The build can also be completed without 
 installing Flutter to WSL by following 
 [bitcoin-core/secp256k1's "Cross compiling" guide](https://github.com/bitcoin-core/secp256k1?tab=readme-ov-file#cross-compiling).
-
-Building natively on Windows without WSL2 may also be possible by following 
-[bitcoin-core/secp256k1's guide for Building on Windows](https://github.com/bitcoin-core/secp256k1?tab=readme-ov-file#building-on-windows)
-and placing the DLL at `build/secp256k1.dll`.
 
 ## Development
 
