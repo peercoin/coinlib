@@ -91,6 +91,8 @@ the root directory of your package which will produce a shared library into
 `build/libsecp256k1.dll`.  This can also be run in the `coinlib` root directory
 via `dart run bin/build_linux.dart`.
 
+Windows builds use the Visual Studio 17 2022 generator.  Earlier Visual Studio toolchains may work by editing `bin/build_windows.dart`.
+
 ### Cross-compiling for Windows from Linux
 
 Cross-compile a secp256k1 DLL for Windows on an Ubuntu 20.04 host with
