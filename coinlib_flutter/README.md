@@ -26,4 +26,4 @@ An example app is provided in `example/` that demonstrates use of the loader
 widget. Beyond this, the [coinlib](https://pub.dev/packages/coinlib) library
 documentation can be followed.
 
-Android, iOS, Linux, macOS and Web are supported.
+Android, iOS, Linux, macOS, web, and Windows are supported.  If you are using the library for web, Android, or iOS, the library is ready to use.  For desktop platforms, see [coinlib's documentation](https://pub.dev/packages/coinlib) for instructions on building the native library.
