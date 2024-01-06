@@ -32,12 +32,10 @@ dart pub add coinlib
 ```
 
 If you are using the library for web, the library is ready to use. If you are
-using the library on Linux or macOS then please see
-["Building for Linux"](#building-for-linux) and
-["Building for macOS"](#building-for-macos) below.
-
-No script is included for building on Windows at the present time, however a
-`secp256k1.dll` may be built into your `build/` directory separately.
+using the library on Linux, macOS, or Windows, then please see
+["Building for Linux"](#building-for-linux),
+["Building for macOS"](#building-for-macos), or 
+["Building for Windows"](#building-for-windows) below.
 
 The library can be imported via:
 
@@ -84,6 +82,48 @@ framework named `secp256k1.framework`.
 
 To build the dynamic library, run `dart run coinlib:build_macos` which will
 place the library under a `build` directory.
+
+## Building for Windows
+### Native Windows build
+
+The Windows shared library can be built using `dart run coinlib:build_windows` in
+the root directory of your package which will produce a shared library into
+`build/libsecp256k1.dll`.  This can also be run in the `coinlib` root directory
+via `dart run bin/build_windows.dart`.
+
+Windows builds use the Visual Studio 17 2022 generator.  Earlier Visual Studio toolchains may work by editing `bin/build_windows.dart`.
+
+### Cross-compiling for Windows from Linux
+
+Cross-compile a secp256k1 DLL for Windows on an Ubuntu 20.04 host with
+`dart run coinlib:build_windows_crosscompile` or `dart run bin/build_windows_crosscompile.dart`.
+
+### Cross-compiling for Windows using WSL
+
+Builds on Windows can be accomplished using WSL2 (Windows Subsystem for Linux).
+First, install the following packages to the WSL(2) host:
+
+ - `autoconf`
+ - `libtool`
+ - `build-essential`
+ - `git`
+ - `cmake`
+ - `mingw-w64`
+
+as in:
+
+```
+apt-get update -y
+apt-get install -y autoconf libtool build-essential git cmake mingw-w64
+```
+
+Then, cross-compile a secp256k1 DLL for Windows on an Ubuntu 20.04 WSL2
+instance on a Windows host with `dart run coinlib:build_wsl` or 
+`dart run bin/build_wsl.dart`, or complete the above 
+["Building for Windows on Linux"](#building-for-windows-on-linux) after 
+installing Docker or Podman in WSL.  The build can also be completed without 
+installing Flutter to WSL by following 
+[bitcoin-core/secp256k1's "Cross compiling" guide](https://github.com/bitcoin-core/secp256k1?tab=readme-ov-file#cross-compiling).
 
 ## Development
 
