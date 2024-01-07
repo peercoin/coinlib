@@ -8,13 +8,13 @@ FROM debian:bullseye
 
 # Install dependenices.
 RUN apt-get update -y \
-  && apt-get install -y autoconf libtool build-essential git
+  && apt-get install -y autoconf libtool build-essential git cmake
 
 # Clone libsecp256k1 0.3.1 release.
 RUN git clone https://github.com/bitcoin-core/secp256k1 \
   && cd secp256k1 \
-  && git checkout 346a053d4c442e08191f075c3932d03140579d47
-  && mkdir -p secp256k1/build
+  && git checkout 346a053d4c442e08191f075c3932d03140579d47 \
+  && mkdir build
 
 WORKDIR /secp256k1/build
 
