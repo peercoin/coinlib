@@ -7,6 +7,7 @@ import 'util.dart';
 /// Runnable in "Developer Command Prompt for VS 2022".
 
 void main() async {
+
   // Make temporary directory.
   final workDir = Directory.current.path;
   final tmpDir = createTmpDir();
@@ -42,10 +43,12 @@ void main() async {
     "--build",
     "build",
     "--config",
-    "RelWithDebInfo"
+    "RelWithDebInfo",
   ]);
 
   // Copy the DLL to build/windows/x64/secp256k1.dll.
   Directory("$workDir/build").createSync();
-  File("$tmpDir/secp256k1/build/src/RelWithDebInfo/secp256k1.dll").copySync("$workDir/build/secp256k1.dll");
+  File("$tmpDir/secp256k1/build/src/RelWithDebInfo/secp256k1.dll")
+    .copySync("$workDir/build/secp256k1.dll");
+
 }
