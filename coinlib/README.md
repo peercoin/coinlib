@@ -123,9 +123,10 @@ apt-get install -y autoconf libtool build-essential git cmake mingw-w64
 Then, cross-compile a secp256k1 DLL for Windows on an Ubuntu 20.04 WSL2 instance
 on a Windows host with `dart run coinlib:build_wsl` or
 `dart run bin/build_wsl.dart` in the `coinlib` root directory, or complete the
-above ["Building for Windows on Linux"](#building-for-windows-on-linux) after
-installing Docker or Podman in WSL. The build can also be completed without
-installing Flutter to WSL by following
+above
+["Cross-compiling for Windows on Linux"](#cross-compiling-for-windows-from-linux)
+after installing Docker or Podman in WSL. The build can also be completed
+without installing Flutter to WSL by following
 [bitcoin-core/secp256k1's "Cross compiling" guide](https://github.com/bitcoin-core/secp256k1?tab=readme-ov-file#cross-compiling).
 
 ## Development
