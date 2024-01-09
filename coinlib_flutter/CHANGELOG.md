@@ -1,3 +1,7 @@
+## 2.0.0-rc.6
+
+Update to underlying coinlib 2.0.0-rc.6
+
 ## 2.0.0-rc.5
 
 Update to underlying coinlib 2.0.0-rc.5
