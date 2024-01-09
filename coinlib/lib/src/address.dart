@@ -121,7 +121,7 @@ class P2SHAddress extends Base58Address {
     : super._(copyCheckBytes(hash, 20), version);
 
   /// Constructs a P2SH address for a redeemScript
-  P2SHAddress.fromScript(Script script, { required int version })
+  P2SHAddress.fromRedeemScript(Script script, { required int version })
     : super._(hash160(script.compiled), version);
 
   @override
@@ -263,7 +263,7 @@ class P2WSHAddress extends Bech32Address {
     : super._(0, copyCheckBytes(hash, 32), hrp);
 
   /// Constructs a P2WSH address for a witnessScript
-  P2WSHAddress.fromScript(Script script, { required String hrp })
+  P2WSHAddress.fromWitnessScript(Script script, { required String hrp })
     : super._(0, sha256Hash(script.compiled), hrp);
 
   @override

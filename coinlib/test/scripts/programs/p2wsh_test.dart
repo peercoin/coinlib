@@ -7,7 +7,7 @@ void main() {
 
     setUpAll(loadCoinlib);
 
-    final redeemScript = Script.fromAsm("0");
+    final witnessScript = Script.fromAsm("0");
     final scriptHash = "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d";
     final asm = "0 $scriptHash";
     final script = Script.fromAsm(asm);
@@ -31,8 +31,8 @@ void main() {
       () => expectP2WSH(P2WSH.fromHash(hexToBytes(scriptHash))),
     );
 
-    test("fromRedeemScript() success", () {
-      expectP2WSH(P2WSH.fromRedeemScript(redeemScript));
+    test("fromWitnessScript() success", () {
+      expectP2WSH(P2WSH.fromWitnessScript(witnessScript));
     });
 
     test("Program.match()", () => expectP2WSH(Program.fromAsm(asm) as P2WSH));

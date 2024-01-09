@@ -128,7 +128,7 @@ void main() {
       expectValidAddress(
         "pL5vkwAVx6Qo1AVm7dzW5XKxP4meAjZQS1",
         NetworkParams.mainnet,
-        P2SHAddress.fromScript(
+        P2SHAddress.fromRedeemScript(
           Script.fromAsm("0"),
           version: NetworkParams.mainnet.p2shPrefix,
         ),
@@ -173,7 +173,7 @@ void main() {
       expectValidAddress(
         "pc1qdc6qh88lkdaf3899gnntk7q293ufq8flkvmnsa59zx3sv9a05qwsgzh235",
         NetworkParams.mainnet,
-        P2WSHAddress.fromScript(
+        P2WSHAddress.fromWitnessScript(
           Script.fromAsm("0"),
           hrp: NetworkParams.mainnet.bech32Hrp,
         ),
