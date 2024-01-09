@@ -25,11 +25,11 @@ final correctVectors = [
     pubkeys: [pubkeyVec, longPubkeyVec],
     threshold: 1,
   ),
-  // 2-of-2
+  // 2-of-2 with largest key first
   MultisigVector(
-    asm: "02 $pubkeyVec $longPubkeyVec 02 OP_CHECKMULTISIG",
-    hex: "5221${pubkeyVec}41${longPubkeyVec}52ae",
-    pubkeys: [pubkeyVec, longPubkeyVec],
+    asm: "02 $longPubkeyVec $pubkeyVec 02 OP_CHECKMULTISIG",
+    hex: "5241${longPubkeyVec}21${pubkeyVec}52ae",
+    pubkeys: [longPubkeyVec, pubkeyVec],
     threshold: 2,
   ),
   // 20-of-20
@@ -103,6 +103,35 @@ void main() {
         expect(program, isA<MultisigProgram>());
         expectMultisig(vec, program as MultisigProgram);
       }
+
+    });
+
+    test("MultisigProgram.sorted()", () {
+
+      final pkA
+        = "024289801366bcee6172b771cf5a7f13aaecd237a0b9a1ff9d769cabc2e6b70a34";
+      final pkB
+        = "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798";
+      final pkC
+        = "0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798";
+      final pkD
+        = "0479be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8";
+
+      // Public keys given out of order
+      final multisig = MultisigProgram.sorted(
+        3, [pkC, pkB, pkD, pkA].map((hex) => ECPublicKey.fromHex(hex)),
+      );
+
+      // Public keys should be in the correct order
+      expectMultisig(
+        MultisigVector(
+          asm: "",
+          hex: "5321${pkA}21${pkB}21${pkC}41${pkD}54ae",
+          pubkeys: [pkA, pkB, pkC, pkD],
+          threshold: 3,
+        ),
+        multisig,
+      );
 
     });
 
