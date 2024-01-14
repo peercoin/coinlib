@@ -57,6 +57,7 @@ export 'package:coinlib/src/tx/sighash/taproot_signature_hasher.dart';
 export 'package:coinlib/src/tx/sighash/witness_signature_hasher.dart';
 
 export 'package:coinlib/src/address.dart';
+export 'package:coinlib/src/coin_unit.dart';
 export 'package:coinlib/src/network_params.dart';
 export 'package:coinlib/src/taproot.dart';
 
