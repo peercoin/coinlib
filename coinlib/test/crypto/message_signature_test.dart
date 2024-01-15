@@ -4,14 +4,14 @@ import '../vectors/keys.dart';
 
 final privKey = WIF.fromString(
   "UBGjv7kuxKmN1JHLJxQypz9jE7mYkKTZ9U6C1p1N2nEWbPZLiEkT",
-  version: NetworkParams.mainnet.wifPrefix,
+  version: Network.mainnet.wifPrefix,
 ).privkey;
 final addrs = [
   P2PKHAddress.fromPublicKey(
-    privKey.pubkey, version: NetworkParams.mainnet.p2pkhPrefix,
+    privKey.pubkey, version: Network.mainnet.p2pkhPrefix,
   ),
   P2WPKHAddress.fromPublicKey(
-    privKey.pubkey, hrp: NetworkParams.mainnet.bech32Hrp,
+    privKey.pubkey, hrp: Network.mainnet.bech32Hrp,
   ),
 ];
 final msgSigs = [
@@ -25,7 +25,7 @@ final msgSigs = [
   ],
 ];
 
-final prefix = NetworkParams.mainnet.messagePrefix;
+final prefix = Network.mainnet.messagePrefix;
 
 void main() {
   group("MessageSignature", () {
@@ -81,7 +81,7 @@ void main() {
         msgSig.verifyAddress(
           address: Address.fromString(
             "P8bB9yPr3vVByqfmM5KXftyGckAtAdu6f8",
-            NetworkParams.mainnet,
+            Network.mainnet,
           ),
           message: msgSigs[0][0],
           prefix: prefix,

@@ -39,7 +39,7 @@ final exampleOutput = Output.fromAddress(
   BigInt.from(100000),
   Address.fromString(
     "PSUVJAon4oTrVZgHEKg3UfppFEDP7gBSkt",
-    NetworkParams.mainnet,
+    Network.mainnet,
   ),
 );
 
@@ -128,14 +128,14 @@ final validTxVecs = [
           BigInt.from(52680000),
           Address.fromString(
             "PAe4rizffK1jrg84AEoaYv75uyLoWgtbB1",
-            NetworkParams.mainnet,
+            Network.mainnet,
           ),
         ),
         Output.fromAddress(
           BigInt.from(3032597),
           Address.fromString(
             "PCLHR5x8X2bitLes8DiSMTswpc46zt6THo",
-            NetworkParams.mainnet,
+            Network.mainnet,
           ),
         ),
       ],
@@ -350,7 +350,7 @@ final validTxVecs = [
           BigInt.from(2501463873),
           Address.fromString(
             "PQfazmXYxj7BKQG9jGbjKaQzYyi8AGEkH1",
-            NetworkParams.mainnet,
+            Network.mainnet,
           ),
         ),
       ],

@@ -3,7 +3,7 @@ import 'package:coinlib/src/common/bytes.dart';
 import 'package:coinlib/src/common/hex.dart';
 import 'package:coinlib/src/crypto/ec_public_key.dart';
 import 'package:coinlib/src/crypto/hash.dart';
-import 'package:coinlib/src/network_params.dart';
+import 'package:coinlib/src/network.dart';
 import 'package:coinlib/src/encode/base58.dart';
 import 'package:coinlib/src/encode/bech32.dart';
 import 'package:coinlib/src/scripts/program.dart';
@@ -27,7 +27,7 @@ abstract class Address {
   /// the type of address. Throws [InvalidAddress], [InvalidAddressNetwork],
   /// [InvalidBech32Checksum] or [InvalidBase58Checksum] if there is an error
   /// with the address. The address must match the [network] provided.
-  factory Address.fromString(String encoded, NetworkParams network) {
+  factory Address.fromString(String encoded, Network network) {
     // Try base58
     try {
       return Base58Address.fromString(encoded, network);
@@ -68,7 +68,7 @@ abstract class Base58Address implements Address {
     }
   }
 
-  factory Base58Address.fromString(String encoded, NetworkParams network) {
+  factory Base58Address.fromString(String encoded, Network network) {
 
     final data = base58Decode(encoded);
     if (data.length != 21) throw InvalidAddress();
@@ -172,7 +172,7 @@ abstract class Bech32Address implements Address {
 
   }
 
-  factory Bech32Address.fromString(String encoded, NetworkParams network) {
+  factory Bech32Address.fromString(String encoded, Network network) {
 
     final bech32 = Bech32.decode(encoded);
 
