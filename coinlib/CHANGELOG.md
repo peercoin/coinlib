@@ -1,3 +1,8 @@
+## 2.0.0-rc.7
+
+- Add `CoinUnit` class to convert between amount strings and satoshis.
+- Change `NetworkParams` to `Network`.
+
 ## 2.0.0-rc.6
 
 - `P2WSHAddress.fromScript` is now `P2WSHAddress.fromRedeemScript` and
