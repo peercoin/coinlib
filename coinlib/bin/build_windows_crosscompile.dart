@@ -25,7 +25,7 @@ RUN make
 # Build DLL and copy into output.
 RUN make install
 RUN mkdir output
-RUN cp src/libsecp256k1.dll output/libsecp256k1.dll
+RUN cp src/libsecp256k1.dll output/secp256k1.dll
 """;
 
 void main() async {
@@ -38,7 +38,7 @@ void main() async {
     cmd,
     dockerfile,
     "coinlib_build_secp256k1_windows",
-    "output/libsecp256k1.dll",
+    "output/secp256k1.dll",
   )) {
     exit(1);
   }
