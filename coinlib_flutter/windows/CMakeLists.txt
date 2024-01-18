@@ -22,11 +22,8 @@ find_file(SECP256K1_DLL
     NAMES secp256k1.dll
     PATHS
         "${CMAKE_BINARY_DIR}/../" # Check one level up.
-        "${CMAKE_BINARY_DIR}/../secp256k1.dll"
         "${CMAKE_BINARY_DIR}/../../" # Check two levels up.
-        "${CMAKE_BINARY_DIR}/../../secp256k1.dll"
         "${CMAKE_BINARY_DIR}/../../../" # Should only be used for the example app.
-        "${CMAKE_BINARY_DIR}/../../../secp256k1.dll"
         "${CMAKE_SOURCE_DIR}/../build" # Also search in CMAKE_SOURCE_DIR.
         "${CMAKE_SOURCE_DIR}/../../build" # Works for the example app.
     NO_DEFAULT_PATH
