@@ -11,7 +11,8 @@ project(${PROJECT_NAME} LANGUAGES CXX)
 # Invoke the build for native code shared with the other target platforms.
 # This can be changed to accommodate different builds.
 # add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/../src" "${CMAKE_CURRENT_BINARY_DIR}/shared")
-# TODO re-enable the above line if/when the CMake process is made Windows-compatible.  See also below.
+# TODO re-enable the above line if/when the CMake process is made Windows-compatible.
+# See also below.
 
 # Search for secp256k1.dll in multiple possible directories.
 #
@@ -21,11 +22,11 @@ project(${PROJECT_NAME} LANGUAGES CXX)
 find_file(SECP256K1_DLL
     NAMES secp256k1.dll
     PATHS
-        "${CMAKE_BINARY_DIR}/../" # Check one level up.
-        "${CMAKE_BINARY_DIR}/../../" # Check two levels up.
-        "${CMAKE_BINARY_DIR}/../../../" # Should only be used for the example app.
-        "${CMAKE_SOURCE_DIR}/../build" # Also search in CMAKE_SOURCE_DIR.
-        "${CMAKE_SOURCE_DIR}/../../build" # Works for the example app.
+        "${CMAKE_BINARY_DIR}/../"           # Check one level up.
+        "${CMAKE_BINARY_DIR}/../../"        # Check two levels up.
+        "${CMAKE_BINARY_DIR}/../../../"     # Used for the example app.
+        "${CMAKE_SOURCE_DIR}/../build"
+        "${CMAKE_SOURCE_DIR}/../../build"   # Works for the example app.
     NO_DEFAULT_PATH
 )
 
@@ -38,7 +39,8 @@ if (SECP256K1_DLL)
         # Defined in ../src/CMakeLists.txt.
         # This can be changed to accommodate different builds.
         # $<TARGET_FILE:coinlib_flutter>
-        # TODO re-enable the above line if/when the CMake process is made Windows-compatible.  See also above.
+        # TODO re-enable if/when the CMake process is made Windows-compatible.
+        # See also above.
         ${SECP256K1_DLL}
         PARENT_SCOPE
     )
