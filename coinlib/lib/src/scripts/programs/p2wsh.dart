@@ -5,13 +5,13 @@ import 'package:coinlib/src/scripts/program.dart';
 import 'package:coinlib/src/scripts/programs/p2witness.dart';
 import 'package:coinlib/src/scripts/script.dart';
 
-/// Pay-to-Witness-Script-Hash program taking a 32-byte script hash for a redeem
-/// script whereby the redeem script and other push data is to be provided as
-/// witness data.
+/// Pay-to-Witness-Script-Hash program taking a 32-byte script hash for a
+/// witness script whereby the witness script and other push data is to be
+/// provided as witness data.
 class P2WSH extends P2Witness {
 
-  /// Construct using an output script, not to be confused with the redeem
-  /// script. For that use [fromRedeemScript].
+  /// Construct using an output script, not to be confused with the witness
+  /// script. For that use [fromWitnessScript].
   P2WSH.fromScript(super.script) : super.fromScript() {
     if (data.length != 32 || version != 0) throw NoProgramMatch();
   }
@@ -24,8 +24,8 @@ class P2WSH extends P2Witness {
   P2WSH.fromHash(Uint8List scriptHash)
     : super.fromData(0, checkBytes(scriptHash, 32, name: "Script hash"));
 
-  P2WSH.fromRedeemScript(Script redeemScript)
-    : this.fromHash(sha256Hash(redeemScript.compiled));
+  P2WSH.fromWitnessScript(Script witnessScript)
+    : this.fromHash(sha256Hash(witnessScript.compiled));
 
   Uint8List get scriptHash => data;
 

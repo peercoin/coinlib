@@ -28,7 +28,7 @@ void main() async {
   // Generate a P2PKH address with the mainnet prefix
   final address = P2PKHAddress.fromPublicKey(
     key1.publicKey,
-    version: NetworkParams.mainnet.p2pkhPrefix,
+    version: Network.mainnet.p2pkhPrefix,
   );
   print("Address: $address");
 
@@ -38,14 +38,14 @@ void main() async {
   final msgSig = MessageSignature.sign(
     key: key1.privateKey,
     message: msg,
-    prefix: NetworkParams.mainnet.messagePrefix,
+    prefix: Network.mainnet.messagePrefix,
   );
 
   if (
     msgSig.verifyAddress(
       address: address,
       message: msg,
-      prefix: NetworkParams.mainnet.messagePrefix,
+      prefix: Network.mainnet.messagePrefix,
     )
   ) {
     print("Msg signature is valid: $msgSig");
@@ -92,7 +92,7 @@ void main() async {
 
   // Print P2TR address
   final trAddr = P2TRAddress.fromTaproot(
-    taproot, hrp: NetworkParams.mainnet.bech32Hrp,
+    taproot, hrp: Network.mainnet.bech32Hrp,
   );
   print("Taproot address: $trAddr");
 

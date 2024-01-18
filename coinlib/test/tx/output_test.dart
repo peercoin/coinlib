@@ -82,7 +82,7 @@ void main() {
           expectOutput(
             Output.fromAddress(
               vec.value,
-              Address.fromString(vec.address!, NetworkParams.mainnet),
+              Address.fromString(vec.address!, Network.mainnet),
             ),
             vec,
           );

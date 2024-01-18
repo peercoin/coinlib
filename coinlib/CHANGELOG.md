@@ -1,3 +1,18 @@
+## 2.0.0-rc.7
+
+- Add `CoinUnit` class to convert between amount strings and satoshis.
+- Change `NetworkParams` to `Network`.
+
+## 2.0.0-rc.6
+
+- `P2WSHAddress.fromScript` is now `P2WSHAddress.fromRedeemScript` and
+    `P2WSHAddress.fromScript` is now `P2WSHAddress.fromWitnessScript` to remove
+    ambiguity.
+- `P2WSH.fromRedeemScript` is now `P2WSH.fromWitnessScript` in accordance with
+    usual naming for P2WSH.
+- Added `MultisigProgram.sorted` to allow multisig programs with ordered public
+    keys.
+
 ## 2.0.0-rc.5
 
 Reduce output size of JavaScript by encoding WASM as base64

@@ -3,7 +3,7 @@ import 'package:coinlib/coinlib.dart';
 import 'package:test/test.dart';
 import 'vectors/taproot.dart';
 
-final wrongNetwork = NetworkParams(
+final wrongNetwork = Network(
   wifPrefix: 0,
   p2pkhPrefix: 0xfa,
   p2shPrefix: 0xfb,
@@ -43,7 +43,7 @@ expectBech32Equal(Bech32Address addr, Bech32Address expected) {
 }
 
 expectValidAddress<T extends Address>(
-  String encoded, NetworkParams network, T expected,
+  String encoded, Network network, T expected,
 ) {
 
   final baseDecoded = Address.fromString(encoded, network);
@@ -97,18 +97,18 @@ void main() {
 
       expectValidAddress(
         "P8bB9yPr3vVByqfmM5KXftyGckAtAdu6f8",
-        NetworkParams.mainnet,
+        Network.mainnet,
         P2PKHAddress.fromHash(
           hexToBytes("0000000000000000000000000000000000000000"),
-          version: NetworkParams.mainnet.p2pkhPrefix,
+          version: Network.mainnet.p2pkhPrefix,
         ),
       );
 
       expectValidAddress(
         "PGkLtYrKeMDbBCaFy4yMRhN9ZTjJp2y8Pb",
-        NetworkParams.mainnet,
+        Network.mainnet,
         P2PKHAddress.fromPublicKey(
-          pubkey, version: NetworkParams.mainnet.p2pkhPrefix,
+          pubkey, version: Network.mainnet.p2pkhPrefix,
         ),
       );
 
@@ -118,19 +118,19 @@ void main() {
 
       expectValidAddress(
         "pUtBBpAznHgPW9TDtWJcDo7qGXQJqnf1W9",
-        NetworkParams.mainnet,
+        Network.mainnet,
         P2SHAddress.fromHash(
           hexToBytes("ffffffffffffffffffffffffffffffffffffffff"),
-          version: NetworkParams.mainnet.p2shPrefix,
+          version: Network.mainnet.p2shPrefix,
         ),
       );
 
       expectValidAddress(
         "pL5vkwAVx6Qo1AVm7dzW5XKxP4meAjZQS1",
-        NetworkParams.mainnet,
-        P2SHAddress.fromScript(
+        Network.mainnet,
+        P2SHAddress.fromRedeemScript(
           Script.fromAsm("0"),
-          version: NetworkParams.mainnet.p2shPrefix,
+          version: Network.mainnet.p2shPrefix,
         ),
       );
 
@@ -140,18 +140,18 @@ void main() {
 
       expectValidAddress(
         "pc1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqmtd2rq",
-        NetworkParams.mainnet,
+        Network.mainnet,
         P2WPKHAddress.fromHash(
           hexToBytes("0000000000000000000000000000000000000000"),
-          hrp: NetworkParams.mainnet.bech32Hrp,
+          hrp: Network.mainnet.bech32Hrp,
         ),
       );
 
       expectValidAddress(
         "pc1qt97wqg464zrhnx23upykca5annqvwkwuvqmpk5",
-        NetworkParams.mainnet,
+        Network.mainnet,
         P2WPKHAddress.fromPublicKey(
-          pubkey, hrp: NetworkParams.mainnet.bech32Hrp,
+          pubkey, hrp: Network.mainnet.bech32Hrp,
         ),
       );
 
@@ -161,21 +161,21 @@ void main() {
 
       expectValidAddress(
         "pc1qlllllllllllllllllllllllllllllllllllllllllllllllllllsm5knxw",
-        NetworkParams.mainnet,
+        Network.mainnet,
         P2WSHAddress.fromHash(
           hexToBytes(
             "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
           ),
-          hrp: NetworkParams.mainnet.bech32Hrp,
+          hrp: Network.mainnet.bech32Hrp,
         ),
       );
 
       expectValidAddress(
         "pc1qdc6qh88lkdaf3899gnntk7q293ufq8flkvmnsa59zx3sv9a05qwsgzh235",
-        NetworkParams.mainnet,
-        P2WSHAddress.fromScript(
+        Network.mainnet,
+        P2WSHAddress.fromWitnessScript(
           Script.fromAsm("0"),
-          hrp: NetworkParams.mainnet.bech32Hrp,
+          hrp: Network.mainnet.bech32Hrp,
         ),
       );
 
@@ -185,32 +185,32 @@ void main() {
 
       expectValidAddress(
         "pc1punvppl2stp38f7kwv2u2spltjuvuaayuqsthe34hd2dyy5w4g58qj5f0v2",
-        NetworkParams.mainnet,
+        Network.mainnet,
         P2TRAddress.fromTweakedKeyX(
           hexToBytes(
             "e4d810fd50586274face62b8a807eb9719cef49c04177cc6b76a9a4251d5450e",
           ),
-          hrp: NetworkParams.mainnet.bech32Hrp,
+          hrp: Network.mainnet.bech32Hrp,
         ),
       );
 
       expectValidAddress(
         "pc1pz37fc4cn9ah8anwm4xqqhvxygjf9rjf2resrw8h8w4tmvcs0863s0hvxry",
-        NetworkParams.mainnet,
+        Network.mainnet,
         P2TRAddress.fromTweakedKey(
           ECPublicKey.fromXOnlyHex(
             "147c9c57132f6e7ecddba9800bb0c4449251c92a1e60371ee77557b6620f3ea3",
           ),
-          hrp: NetworkParams.mainnet.bech32Hrp,
+          hrp: Network.mainnet.bech32Hrp,
         ),
       );
 
       expectValidAddress(
         "pc1p2wsldez5mud2yam29q22wgfh9439spgduvct83k3pm50fcxa5dpsxcz8x2",
-        NetworkParams.mainnet,
+        Network.mainnet,
         P2TRAddress.fromTaproot(
           taprootVectors[0].object,
-          hrp: NetworkParams.mainnet.bech32Hrp,
+          hrp: Network.mainnet.bech32Hrp,
         ),
       );
 
@@ -221,22 +221,22 @@ void main() {
       // 40 program bytes
       expectValidAddress(
         "pc1sqqqsyqcyq5rqwzqfpg9scrgwpugpzysnzs23v9ccrydpk8qarc0jqgfzyvjz2f38pj2w3g",
-        NetworkParams.mainnet,
+        Network.mainnet,
         UnknownWitnessAddress.fromHex(
           "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f2021222324252627",
           version: 16,
-          hrp: NetworkParams.mainnet.bech32Hrp,
+          hrp: Network.mainnet.bech32Hrp,
         ),
       );
 
       // 2 program bytes
       expectValidAddress(
         "pc1sqqqsfrujuz",
-        NetworkParams.mainnet,
+        Network.mainnet,
         UnknownWitnessAddress.fromHex(
           "0001",
           version: 16,
-          hrp: NetworkParams.mainnet.bech32Hrp,
+          hrp: Network.mainnet.bech32Hrp,
         ),
       );
 
@@ -271,7 +271,7 @@ void main() {
         "pc1qqqqsyqcyq5rqwzqfpg9scrgwpugpzysnzs23v9ccrydpk8qarc0pcfzdx",
       ]) {
         expect(
-          () => Address.fromString(invalid, NetworkParams.mainnet),
+          () => Address.fromString(invalid, Network.mainnet),
           throwsA(isA<InvalidAddress>()),
           reason: invalid,
         );
@@ -282,14 +282,14 @@ void main() {
     test("invalid checksums", () {
       expect(
         () => Address.fromString(
-          "P8bB9yPr3vVByqfmM5KXftyGckAtAdu6f9", NetworkParams.mainnet,
+          "P8bB9yPr3vVByqfmM5KXftyGckAtAdu6f9", Network.mainnet,
         ),
         throwsA(isA<InvalidBase58Checksum>()),
       );
       expect(
         () => Address.fromString(
           "pc1qlllllllllllllllllllllllllllllllllllllllllllllllllllsm5knxx",
-          NetworkParams.mainnet,
+          Network.mainnet,
         ),
         throwsA(isA<InvalidBech32Checksum>()),
       );
@@ -311,7 +311,7 @@ void main() {
         () => UnknownWitnessAddress.fromHex(
           "00",
           version: 16,
-          hrp: NetworkParams.mainnet.bech32Hrp,
+          hrp: Network.mainnet.bech32Hrp,
         ),
         throwsArgumentError,
       );
@@ -321,7 +321,7 @@ void main() {
         () => UnknownWitnessAddress.fromHex(
           "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728",
           version: 16,
-          hrp: NetworkParams.mainnet.bech32Hrp,
+          hrp: Network.mainnet.bech32Hrp,
         ),
         throwsArgumentError,
       );
@@ -341,7 +341,7 @@ void main() {
         () => UnknownWitnessAddress.fromHex(
           "0001",
           version: 17,
-          hrp: NetworkParams.mainnet.bech32Hrp,
+          hrp: Network.mainnet.bech32Hrp,
         ),
         throwsArgumentError,
       );
@@ -349,7 +349,7 @@ void main() {
         () => UnknownWitnessAddress.fromHex(
           "0001",
           version: -1,
-          hrp: NetworkParams.mainnet.bech32Hrp,
+          hrp: Network.mainnet.bech32Hrp,
         ),
         throwsArgumentError,
       );
@@ -365,7 +365,7 @@ void main() {
 
       expectValidAddress(
         "${longHrp}1sqqqs3t97ut",
-        NetworkParams(
+        Network(
           wifPrefix: 0, p2shPrefix: 0, p2pkhPrefix: 0,
           privHDPrefix: 0, pubHDPrefix: 0,
           bech32Hrp: longHrp, messagePrefix: "",

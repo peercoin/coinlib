@@ -1,11 +1,10 @@
-
-class NetworkParams {
+class Network {
 
   final int wifPrefix, p2pkhPrefix, p2shPrefix, privHDPrefix, pubHDPrefix;
   final String bech32Hrp, messagePrefix;
   final BigInt minFee, minOutput, feePerKb;
 
-  NetworkParams({
+  Network({
     required this.wifPrefix,
     required this.p2pkhPrefix,
     required this.p2shPrefix,
@@ -18,7 +17,7 @@ class NetworkParams {
     required this.feePerKb,
   });
 
-  static final mainnet = NetworkParams(
+  static final mainnet = Network(
     wifPrefix: 183,
     p2pkhPrefix: 55,
     p2shPrefix: 117,
@@ -31,7 +30,7 @@ class NetworkParams {
     feePerKb: BigInt.from(10000),
   );
 
-  static final testnet = NetworkParams(
+  static final testnet = Network(
     wifPrefix: 239,
     p2pkhPrefix: 111,
     p2shPrefix: 196,
