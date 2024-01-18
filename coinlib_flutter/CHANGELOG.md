@@ -1,3 +1,7 @@
+## 2.0.0-rc.8
+
+Add windows build support
+
 ## 2.0.0-rc.7
 
 Update to underlying coinlib 2.0.0-rc.7
