@@ -51,4 +51,6 @@ void main() async {
   File("$tmpDir/secp256k1/build/src/RelWithDebInfo/secp256k1.dll")
     .copySync("$workDir/build/secp256k1.dll");
 
+  print("Output libsecp256k1.dll successfully");
+
 }
