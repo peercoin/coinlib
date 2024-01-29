@@ -87,9 +87,11 @@ place the library under a `build` directory.
 
 ### Native Windows build
 
+Building on Windows requires CMake as a dependency.
+
 The Windows shared library can be built using `dart run coinlib:build_windows` in
 the root directory of your package which will produce a shared library into
-`build/libsecp256k1.dll`.  This can also be run in the `coinlib` root directory
+`build/libsecp256k1.dll`. This can also be run in the `coinlib` root directory
 via `dart run bin/build_windows.dart`.
 
 Windows builds use the Visual Studio 17 2022 generator.  Earlier Visual Studio
