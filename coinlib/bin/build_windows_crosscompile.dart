@@ -10,10 +10,10 @@ FROM debian:bullseye
 RUN apt-get update -y \
   && apt-get install -y autoconf libtool build-essential git cmake gcc-mingw-w64
 
-# Clone libsecp256k1 0.3.1 release.
+# Clone libsecp256k1 0.4.1 release.
 RUN git clone https://github.com/bitcoin-core/secp256k1 \
   && cd secp256k1 \
-  && git checkout 346a053d4c442e08191f075c3932d03140579d47 \
+  && git checkout 1ad5185cd42c0636104129fcc9f6a4bf9c67cc40 \
   && mkdir build
 
 WORKDIR /secp256k1/build
@@ -25,7 +25,7 @@ RUN make
 # Build DLL and copy into output.
 RUN make install
 RUN mkdir output
-RUN cp src/libsecp256k1.dll output/secp256k1.dll
+RUN cp src/libsecp256k1-2.dll output/secp256k1.dll
 """;
 
 void main() async {

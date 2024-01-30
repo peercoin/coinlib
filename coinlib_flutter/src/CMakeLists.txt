@@ -45,7 +45,7 @@ ExternalProject_Add(
   secp256k1
 
   GIT_REPOSITORY https://github.com/bitcoin-core/secp256k1
-  GIT_TAG acf5c55ae6a94e5ca847e07def40427547876101 # v0.3.2 with cmake system
+  GIT_TAG 1ad5185cd42c0636104129fcc9f6a4bf9c67cc40 # v0.4.1 with cmake system
 
   PREFIX ${SECP256K1_PREFIX}
 
