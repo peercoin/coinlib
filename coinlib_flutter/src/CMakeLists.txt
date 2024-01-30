@@ -59,7 +59,7 @@ ExternalProject_Add(
 # Post-build processing of library file
 # Move output library to the correct place
 
-set(SECP256K1_VERSIONEDLIB ${SECP256K1_PREFIX}/lib/libsecp256k1.so.2.0.2)
+set(SECP256K1_VERSIONEDLIB ${SECP256K1_PREFIX}/lib/libsecp256k1.so.2.1.1)
 set(SECP255K1_FINALLIB ${SECP256K1_PREFIX}/lib/libsecp256k1.so)
 
 # Move any versioned .so file to an unversioned .so file.
