@@ -752,9 +752,6 @@ class NativeSecp256k1 {
   secp256k1_nonce_function get secp256k1_nonce_function_rfc6979 =>
       _secp256k1_nonce_function_rfc6979.value;
 
-  set secp256k1_nonce_function_rfc6979(secp256k1_nonce_function value) =>
-      _secp256k1_nonce_function_rfc6979.value = value;
-
   /// A default safe nonce generation function (currently equal to secp256k1_nonce_function_rfc6979).
   late final ffi.Pointer<secp256k1_nonce_function>
       _secp256k1_nonce_function_default =
@@ -762,9 +759,6 @@ class NativeSecp256k1 {
 
   secp256k1_nonce_function get secp256k1_nonce_function_default =>
       _secp256k1_nonce_function_default.value;
-
-  set secp256k1_nonce_function_default(secp256k1_nonce_function value) =>
-      _secp256k1_nonce_function_default.value = value;
 
   /// Create an ECDSA signature.
   ///
@@ -1908,10 +1902,6 @@ class NativeSecp256k1 {
 
   secp256k1_nonce_function_hardened get secp256k1_nonce_function_bip340 =>
       _secp256k1_nonce_function_bip340.value;
-
-  set secp256k1_nonce_function_bip340(
-          secp256k1_nonce_function_hardened value) =>
-      _secp256k1_nonce_function_bip340.value = value;
 
   /// Create a Schnorr signature.
   ///
