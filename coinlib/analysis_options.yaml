@@ -1,10 +1,5 @@
 include: package:lints/recommended.yaml
 
-analyzer:
-  exclude:
-    # Exclude generated files which often use alternative styling
-    - lib/src/generated/
-
 # Lint rules and documentation, see http://dart-lang.github.io/linter/lints
 linter:
   rules:
