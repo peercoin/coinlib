@@ -34,7 +34,7 @@ dart pub add coinlib
 If you are using the library for web, the library is ready to use. If you are
 using the library on Linux, macOS, or Windows, then please see
 ["Building for Linux"](#building-for-linux),
-["Building for macOS"](#building-for-macos), or 
+["Building for macOS"](#building-for-macos), or
 ["Building for Windows"](#building-for-windows) below.
 
 The library can be imported via:
@@ -86,6 +86,11 @@ place the library under a `build` directory.
 ## Building for Windows
 
 ### Native Windows build
+
+**Please note that native windows builds under this section can sometimes freeze
+during the build process.** If this happens please use the WSL build process
+described in
+["Cross-compiling for Windows using WSL"](#cross-compiling-for-windows-using-wsl).
 
 Building on Windows requires CMake as a dependency.
 
