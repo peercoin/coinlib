@@ -1,3 +1,15 @@
+## 2.0.0-rc.10
+
+Fix regression of secp256k1 library filename
+
+## 2.0.0-rc.9
+
+Update secp256k1 to 0.4.1 and to underlying coinlib 2.0.0-rc.9
+
+## 2.0.0-rc.8
+
+Add windows build support
+
 ## 2.0.0-rc.7
 
 Update to underlying coinlib 2.0.0-rc.7
