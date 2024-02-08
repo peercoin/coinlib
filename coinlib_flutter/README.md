@@ -26,8 +26,8 @@ An example app is provided in `example/` that demonstrates use of the loader
 widget. Beyond this, the [coinlib](https://pub.dev/packages/coinlib) library
 documentation can be followed.
 
-Android, iOS, Linux, macOS, web, and Windows are supported.  If you are using
-the library for web, Android, or iOS, the library is ready to use.  For Windows,
-run `dart run coinlib:build_windows` to build the library.  See
+Android, iOS, Linux, macOS, web, and Windows are supported. If you are using the
+package for Android, iOS, Linux, macOS or web, the library is ready to use. For
+Windows, run `dart run coinlib:build_windows` to build the library. See
 [coinlib's documentation](https://pub.dev/packages/coinlib) for more detailed
 instructions on and options for building the native library.
