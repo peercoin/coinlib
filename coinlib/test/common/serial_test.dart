@@ -77,7 +77,7 @@ void main() {
       expect(reader.readVarInt(), BigInt.one);
       expect(reader.readSlice(32), prevOutHash);
       expect(reader.readUInt32(), 0);
-      expect(reader.readVarSlice(), []);
+      expect(reader.readVarSlice(), Uint8List(0));
       expect(reader.readUInt32(), 0xffffffff);
 
       // Output

@@ -1,4 +1,3 @@
-
 final validSignatures = [
   "a951b0cf98bd51c614c802a65a418fa42482dc5c45c9394e39c0d98773c51cd530104fdc36d91582b5757e1de73d982e803cc14d75e82c65daf924e38d27d834",
   "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
@@ -43,7 +42,7 @@ class RecSigVector {
     required this.recid,
     required this.pubkey,
   });
-  get signature => compact.substring(2);
+  String get signature => compact.substring(2);
 }
 
 final validRecoverableSigs = [

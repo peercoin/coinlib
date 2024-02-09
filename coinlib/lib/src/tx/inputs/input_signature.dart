@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'package:coinlib/src/crypto/ecdsa_signature.dart';
 import 'package:coinlib/src/crypto/schnorr_signature.dart';
 import 'package:coinlib/src/tx/sighash/sighash_type.dart';
+import 'input.dart';
 
 class InvalidInputSignature implements Exception {}
 

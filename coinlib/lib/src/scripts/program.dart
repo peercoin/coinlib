@@ -20,8 +20,8 @@ abstract class Program {
 
   /// Takes a [script] and constructs a matching Program subclass if one exists,
   /// or a basic [RawProgram] if there is no match. The script should use
-  /// minimal pushes. [decompile] can be used directly on compiled scripts or
-  /// [fromAsm] can be used to match directly against ASM.
+  /// minimal pushes. [Program.decompile] can be used directly on compiled
+  /// scripts or [Program.fromAsm] can be used to match directly against ASM.
   factory Program.match(Script script) {
 
     try {

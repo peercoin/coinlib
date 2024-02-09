@@ -14,7 +14,7 @@ class MagicHash with Writable {
   final String prefix;
   MagicHash(this.message, this.prefix);
 
-  static _writeUtf8(Writer writer, String msg)
+  static void _writeUtf8(Writer writer, String msg)
     => writer.writeVarSlice(utf8.encode(msg));
 
   @override
@@ -33,7 +33,7 @@ class MessageSignature {
 
   final ECDSARecoverableSignature signature;
 
-  static magicHash(String message, String prefix)
+  static Uint8List magicHash(String message, String prefix)
     => MagicHash(message, prefix).hash;
 
   MessageSignature.fromBase64(String str)

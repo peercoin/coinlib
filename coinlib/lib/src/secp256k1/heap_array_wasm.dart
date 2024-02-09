@@ -46,6 +46,6 @@ class HeapArrayWasmFactory {
 
   HeapArrayWasmFactory(this.memory, this.malloc, this.free);
 
-  create(int size) => HeapArrayWasm(size, memory, malloc, free);
+  HeapArrayWasm create(int size) => HeapArrayWasm(size, memory, malloc, free);
 
 }

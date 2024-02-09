@@ -16,7 +16,7 @@ final wrongNetwork = Network(
   minOutput: BigInt.from(10000),
 );
 
-expectBase58Equal(Base58Address addr, Base58Address expected) {
+void expectBase58Equal(Base58Address addr, Base58Address expected) {
   expect(addr.hash, expected.hash);
   expect(addr.version, expected.version);
   expect(addr.toString(), expected.toString());
@@ -27,7 +27,7 @@ expectBase58Equal(Base58Address addr, Base58Address expected) {
   }
 }
 
-expectBech32Equal(Bech32Address addr, Bech32Address expected) {
+void expectBech32Equal(Bech32Address addr, Bech32Address expected) {
   expect(addr.data, expected.data);
   expect(addr.hrp, expected.hrp);
   expect(addr.toString(), expected.toString());
@@ -42,7 +42,7 @@ expectBech32Equal(Bech32Address addr, Bech32Address expected) {
   }
 }
 
-expectValidAddress<T extends Address>(
+void expectValidAddress<T extends Address>(
   String encoded, Network network, T expected,
 ) {
 

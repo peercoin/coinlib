@@ -5,6 +5,7 @@ import 'package:coinlib/src/crypto/ec_public_key.dart';
 import 'package:coinlib/src/scripts/operations.dart';
 import 'package:coinlib/src/scripts/program.dart';
 import 'package:coinlib/src/scripts/programs/multisig.dart';
+import 'package:coinlib/src/scripts/programs/p2sh.dart';
 import 'package:coinlib/src/scripts/script.dart';
 import 'package:coinlib/src/tx/sighash/legacy_signature_hasher.dart';
 import 'package:coinlib/src/tx/sighash/sighash_type.dart';

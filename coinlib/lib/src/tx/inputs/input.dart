@@ -8,8 +8,8 @@ import 'p2sh_multisig_input.dart';
 import 'raw_input.dart';
 import 'witness_input.dart';
 
-/// The base class for all inputs, providing the [match] factory constructor to
-/// determine the appropriate subclass from a [RawInput]
+/// The base class for all inputs, providing the [Input.match] factory
+/// constructor to determine the appropriate subclass from a [RawInput]
 abstract class Input with Writable {
 
   static const sequenceFinal = 0xffffffff;

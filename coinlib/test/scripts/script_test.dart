@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:test/test.dart';
 import 'package:coinlib/coinlib.dart';
 import 'common.dart';
@@ -136,7 +137,7 @@ void main() {
         [hexToBytes("0102030405"), hexToBytes("000000"), hexToBytes("0102")],
         [hexToBytes("0102030405"), 5],
         [hexToBytes("0102030405"), [0,0,0]],
-        [],
+        Uint8List(0),
       ]) {
         expect(
           () => template.fill(bad),

@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:coinlib/src/common/bytes.dart';
 import 'package:coinlib/src/common/serial.dart';
 import 'package:coinlib/src/crypto/ec_private_key.dart';
 import 'package:coinlib/src/crypto/ec_public_key.dart';
@@ -186,7 +187,7 @@ class TapLeaf with Writable implements TapNode {
   bool operator ==(Object other)
     => (other is TapLeaf)
     && version == other.version
-    && ListEquality().equals(script.compiled, other.script.compiled);
+    && bytesEqual(script.compiled, other.script.compiled);
 
   @override
   int get hashCode => hash[0] | hash[1] << 8 | hash[2] << 16 | hash[3] << 24;

@@ -19,7 +19,7 @@ class SigHashType {
   static const anyOneCanPayFlag = 0x80;
 
   /// The single byte representation of the sighash type. Use [all], [none],
-  /// [single] and [anyonecanpay] to extract details of the type.
+  /// [single] and [anyOneCanPay] to extract details of the type.
   final int value;
 
   /// Returns true if the sighash type value is valid.
@@ -30,7 +30,7 @@ class SigHashType {
 
   /// Checks if the sighash value is valid and returns an [ArgumentError] if
   /// not.
-  static checkValue(int value) {
+  static void checkValue(int value) {
     if (!validValue(value)) {
       throw ArgumentError.value(value, "value", "not a valid hash type");
     }

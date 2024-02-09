@@ -45,7 +45,7 @@ class ECDSASignature {
     }
   }
 
-  /// Takes a BIP66 DER formatted [signature] as a HEX string.
+  /// Takes a BIP66 DER formatted signature as a HEX string.
   /// See [ECDSASignature.fromDer].
   factory ECDSASignature.fromDerHex(String hex)
     => ECDSASignature.fromDer(hexToBytes(hex));

@@ -11,7 +11,7 @@ import 'package:coinlib/src/scripts/script.dart';
 class P2WSH extends P2Witness {
 
   /// Construct using an output script, not to be confused with the witness
-  /// script. For that use [fromWitnessScript].
+  /// script. For that use [P2WSH.fromWitnessScript].
   P2WSH.fromScript(super.script) : super.fromScript() {
     if (data.length != 32 || version != 0) throw NoProgramMatch();
   }

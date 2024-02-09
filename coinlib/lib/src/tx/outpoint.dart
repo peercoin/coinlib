@@ -3,7 +3,7 @@ import 'package:coinlib/src/common/bytes.dart';
 import 'package:coinlib/src/common/checks.dart';
 import 'package:coinlib/src/common/hex.dart';
 import 'package:coinlib/src/common/serial.dart';
-import 'package:collection/collection.dart';
+import 'output.dart';
 
 /// Reference to an [Output] by transaction hash and index
 class OutPoint with Writable {
@@ -36,7 +36,7 @@ class OutPoint with Writable {
   @override
   bool operator ==(Object other)
     => (other is OutPoint)
-    && ListEquality().equals(_hash, other._hash)
+    && bytesEqual(_hash, other._hash)
     && n == other.n;
 
   @override

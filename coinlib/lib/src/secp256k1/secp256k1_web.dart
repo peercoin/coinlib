@@ -31,9 +31,9 @@ class Secp256k1 extends Secp256k1Base<
       // Dummy WASI imports. No file descriptor support provided.
       importMap: {
         "wasi_snapshot_preview1" : {
-          "fd_close": () => {},
-          "fd_seek": () => {},
-          "fd_write": () => {},
+          "fd_close": () => Object(),
+          "fd_seek": () => Object(),
+          "fd_write": () => Object(),
         },
       },
     );

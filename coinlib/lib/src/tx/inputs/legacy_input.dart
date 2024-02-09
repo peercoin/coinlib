@@ -6,6 +6,8 @@ import 'package:coinlib/src/tx/sighash/sighash_type.dart';
 import 'package:coinlib/src/tx/transaction.dart';
 import 'input.dart';
 import 'input_signature.dart';
+import 'p2pkh_input.dart';
+import 'p2sh_multisig_input.dart';
 import 'raw_input.dart';
 
 /// Inputs that are not witness inputs: [P2PKHInput] and [P2SHMultisigInput].
@@ -24,7 +26,7 @@ abstract class LegacyInput extends RawInput {
     required Transaction tx,
     required int inputN,
     required ECPrivateKey key,
-    hashType = const SigHashType.all(),
+    SigHashType hashType = const SigHashType.all(),
   });
 
   /// Creates a signature for the input. Used by subclasses to implement
@@ -34,7 +36,7 @@ abstract class LegacyInput extends RawInput {
     required int inputN,
     required ECPrivateKey key,
     required Script scriptCode,
-    hashType = const SigHashType.all(),
+    SigHashType hashType = const SigHashType.all(),
   }) => ECDSAInputSignature(
     ECDSASignature.sign(
       key,

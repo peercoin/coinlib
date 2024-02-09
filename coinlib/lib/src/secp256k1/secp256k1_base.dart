@@ -90,13 +90,16 @@ abstract class Secp256k1Base<
   ) extSchnorrVerify;
 
   // Heap arrays
-  late HeapArrayBase key32Array; // Used for private keys and x-only public keys
-  late HeapArrayBase scalarArray;
-  late HeapArrayBase serializedPubKeyArray;
-  late HeapArrayBase hashArray;
-  late HeapArrayBase entropyArray;
-  late HeapArrayBase serializedSigArray;
-  late HeapArrayBase derSigArray;
+
+  // Used for private keys and x-only public keys
+  late HeapArrayBase<HeapArrayPtr> key32Array;
+
+  late HeapArrayBase<HeapArrayPtr> scalarArray;
+  late HeapArrayBase<HeapArrayPtr> serializedPubKeyArray;
+  late HeapArrayBase<HeapArrayPtr> hashArray;
+  late HeapArrayBase<HeapArrayPtr> entropyArray;
+  late HeapArrayBase<HeapArrayPtr> serializedSigArray;
+  late HeapArrayBase<HeapArrayPtr> derSigArray;
 
   // Other pointers
   late CtxPtr ctxPtr;
@@ -194,7 +197,7 @@ abstract class Secp256k1Base<
   Future<void> internalLoad() async {}
 
   bool _loaded = false;
-  _requireLoad() {
+  void _requireLoad() {
     if (!_loaded) throw Secp256k1Exception("load() not called");
   }
 
@@ -311,7 +314,9 @@ abstract class Secp256k1Base<
         // Using null as it doesn't require passing an additional constant from
         // the web and io implementations.
         nullPtr,
-        extraEntropy == null ? nullPtr : entropyArray.ptr,
+        // The pointer is not actually null when entropy is provided but NullPtr
+        // works for void pointers too
+        extraEntropy == null ? nullPtr : entropyArray.ptr as NullPtr,
       ) != 1
     ) {
       throw Secp256k1Exception("Cannot sign message with private key");
@@ -441,7 +446,7 @@ abstract class Secp256k1Base<
     if (
       extSchnorrSign32(
         ctxPtr, serializedSigArray.ptr, hashArray.ptr, keyPairPtr,
-        extraEntropy == null ? nullPtr : entropyArray.ptr,
+        extraEntropy == null ? nullPtr as HeapArrayPtr : entropyArray.ptr,
       ) != 1
     ) {
       throw Secp256k1Exception("Cannot sign Schnorr signature");

@@ -14,7 +14,7 @@ final rawWitnessInputBytes = Uint8List.fromList([
   0xed, 0xfe, 0xef, 0xbe,
 ]);
 
-expectInput(Input input) {
+void expectInput(Input input) {
   expect(input.prevOut.hash, prevOutHash);
   expect(input.prevOut.n, prevOutN);
   expect(input.sequence, sequence);

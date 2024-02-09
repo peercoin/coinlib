@@ -1,9 +1,9 @@
 import 'dart:typed_data';
+import 'package:coinlib/src/common/bytes.dart';
 import 'package:coinlib/src/common/hex.dart';
 import 'package:coinlib/src/common/serial.dart';
 import 'package:coinlib/src/crypto/ec_public_key.dart';
 import 'package:coinlib/src/tx/inputs/input_signature.dart';
-import 'package:collection/collection.dart';
 import 'codes.dart';
 
 class InvalidScriptAsm implements Exception {}
@@ -312,7 +312,7 @@ class ScriptPushData implements ScriptOp {
 
   @override
   bool match(ScriptOp other)
-    => (other is ScriptPushData && ListEquality().equals(_data, other._data))
+    => (other is ScriptPushData && bytesEqual(_data, other._data))
     || (other is ScriptPushDataMatcher && _data.length == other.size);
 
 }

@@ -22,7 +22,7 @@ final class TaprootSignatureHasher with Writable implements SignatureHasher {
   final int codeSeperatorPos;
 
   /// Produces the hash for a Taproot input signature at [inputN].
-  /// Unless [SigHashType.anyonecanpay] is true, [prevOuts] must contain the
+  /// Unless [SigHashType.anyOneCanPay] is true, [prevOuts] must contain the
   /// full list of previous outputs being spent.
   /// The [hashType] controls what data is included. If ommitted it will be
   /// treated as SIGHASH_DEFAULT which includes the same data as SIGHASH_ALL but

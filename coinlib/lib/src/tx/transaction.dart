@@ -9,6 +9,9 @@ import 'inputs/input.dart';
 import 'inputs/input_signature.dart';
 import 'inputs/legacy_input.dart';
 import 'inputs/legacy_witness_input.dart';
+import 'inputs/p2pkh_input.dart';
+import 'inputs/p2sh_multisig_input.dart';
+import 'inputs/p2wpkh_input.dart';
 import 'inputs/raw_input.dart';
 import 'inputs/witness_input.dart';
 import 'sighash/sighash_type.dart';
@@ -144,12 +147,12 @@ class Transaction with Writable {
 
   }
 
-  /// Constructs a transaction from serialised bytes. See [fromReader].
+  /// Constructs a transaction from serialised bytes. See [fromReader()].
   factory Transaction.fromBytes(Uint8List bytes, { bool? expectWitness })
     => Transaction.fromReader(BytesReader(bytes), expectWitness: expectWitness);
 
   /// Constructs a transaction from the serialised data encoded as hex. See
-  /// [fromReader].
+  /// [fromReader()].
   factory Transaction.fromHex(String hex, { bool? expectWitness })
     => Transaction.fromBytes(hexToBytes(hex), expectWitness: expectWitness);
 
@@ -193,7 +196,7 @@ class Transaction with Writable {
   Transaction sign({
     required int inputN,
     required ECPrivateKey key,
-    hashType = const SigHashType.all(),
+    SigHashType hashType = const SigHashType.all(),
     BigInt? value,
     List<Output>? prevOuts,
   }) {

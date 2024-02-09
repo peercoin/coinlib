@@ -4,13 +4,13 @@ import 'package:coinlib/src/tx/transaction.dart';
 
 abstract interface class SignatureHasher {
 
-  static checkInputN(Transaction tx, int inputN) {
+  static void checkInputN(Transaction tx, int inputN) {
     if (inputN < 0 || inputN >= tx.inputs.length) {
       throw RangeError.index(inputN, tx.inputs, "inputN");
     }
   }
 
-  static checkSchnorrDisallowed(SigHashType type) {
+  static void checkSchnorrDisallowed(SigHashType type) {
     if (type.schnorrDefault) {
       throw ArgumentError(
         "Cannot create signature hash for legacy input using default Schnorr"

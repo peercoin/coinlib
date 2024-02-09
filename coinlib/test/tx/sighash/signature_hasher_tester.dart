@@ -3,7 +3,7 @@ import 'package:coinlib/coinlib.dart';
 import 'package:test/test.dart';
 import '../../vectors/tx.dart';
 
-signatureHasherTester(
+void signatureHasherTester(
   String name,
   Uint8List Function(Transaction tx, int inputN, SigHashVector vec) hasher,
   String Function(SigHashVector vec) hashFromVec,

@@ -15,7 +15,7 @@ class P2SH implements Program {
   late final Uint8List _scriptHash;
 
   /// Construct using an output script, not to be confused with the redeem
-  /// script. For that use [fromRedeemScript].
+  /// script. For that use [fromRedeemScript()].
   P2SH.fromScript(this.script) {
     if (!template.match(script)) throw NoProgramMatch();
     _scriptHash = (script[1] as ScriptPushData).data;

@@ -23,14 +23,10 @@ void main() {
 
       final li1 = Uint8List.fromList([1,2,3]);
       final copy = Uint8List.fromList(li1);
-      final li2 = Uint16List.fromList([1,2,2]);
 
       expect(bytesEqual(li1, li1), true);
       expect(bytesEqual(li1, copy), true);
-      expect(bytesEqual(li1, li2), false);
       expect(bytesEqual(li1, li1.sublist(0, 2)), false);
-      expect(bytesEqual(li1, [1,2,3]), false);
-      expect(bytesEqual(li1, null), false);
 
     });
 

@@ -27,7 +27,7 @@ abstract class LegacyWitnessInput extends WitnessInput {
     required int inputN,
     required ECPrivateKey key,
     required BigInt value,
-    hashType = const SigHashType.all(),
+    SigHashType hashType = const SigHashType.all(),
   });
 
   /// Creates a signature for the input. Used by subclasses to implement
@@ -38,7 +38,7 @@ abstract class LegacyWitnessInput extends WitnessInput {
     required ECPrivateKey key,
     required Script scriptCode,
     required BigInt value,
-    hashType = const SigHashType.all(),
+    SigHashType hashType = const SigHashType.all(),
   }) => ECDSAInputSignature(
     ECDSASignature.sign(
       key,

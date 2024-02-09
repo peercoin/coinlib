@@ -1,5 +1,11 @@
 include: package:lints/recommended.yaml
 
+analyzer:
+  language:
+    strict-casts: true
+    strict-inference: true
+    strict-raw-types: true
+
 # Lint rules and documentation, see http://dart-lang.github.io/linter/lints
 linter:
   rules:
@@ -10,3 +16,4 @@ linter:
     - unrelated_type_equality_checks
     - valid_regexps
     - require_trailing_commas
+    - comment_references

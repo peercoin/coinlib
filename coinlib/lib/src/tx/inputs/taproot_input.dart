@@ -27,7 +27,7 @@ abstract class TaprootInput extends WitnessInput {
     required int inputN,
     required ECPrivateKey key,
     required List<Output> prevOuts,
-    hashType = const SigHashType.all(),
+    SigHashType hashType = const SigHashType.all(),
   }) => throw CannotSignInput("Unimplemented sign() for {this.runtimeType}");
 
   /// Creates a signature for the input. Used by subclasses to implement
@@ -37,7 +37,7 @@ abstract class TaprootInput extends WitnessInput {
     required int inputN,
     required ECPrivateKey key,
     required List<Output> prevOuts,
-    hashType = const SigHashType.all(),
+    SigHashType hashType = const SigHashType.all(),
     Uint8List? leafHash,
     int codeSeperatorPos = 0xFFFFFFFF,
   }) => SchnorrInputSignature(

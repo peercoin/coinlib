@@ -4,10 +4,10 @@ import 'package:coinlib/src/crypto/random.dart';
 
 /// A "nothing up my sleeve" [ECPublicKey] that is created from a point with no
 /// known private key and tweaked with a scalar value named [rTweak]. The key is
-/// reproduceable from this scalar using [fromRTweak]. Any of these keys have no
-/// known associted private key. Sharing the [rTweak] allows others to verify
-/// this. These keys can be used as Taproot internal keys where no key-path
-/// spending is desired.
+/// reproduceable from this scalar using [fromRTweak()]. Any of
+/// these keys have no known associted private key. Sharing the [rTweak] allows
+/// others to verify this. These keys can be used as Taproot internal keys where
+/// no key-path spending is desired.
 class NUMSPublicKey extends ECPublicKey {
 
   /// To prove that this point does not have an associated private key, the

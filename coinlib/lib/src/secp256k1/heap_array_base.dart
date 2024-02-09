@@ -4,5 +4,5 @@ import 'dart:typed_data';
 abstract class HeapArrayBase<Ptr> {
   Ptr get ptr;
   Uint8List get list;
-  load(Uint8List data);
+  void load(Uint8List data);
 }
