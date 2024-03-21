@@ -1,3 +1,7 @@
+## 2.0.0
+
+Final release for 2.0.0
+
 ## 2.0.0-rc.10
 
 Fix regression of secp256k1 library filename

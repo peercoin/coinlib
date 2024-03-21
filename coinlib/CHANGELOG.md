@@ -1,3 +1,11 @@
+## 2.0.0
+
+Final release for 2.0.0
+
+## 2.0.0-rc.10
+
+Fixes documentation links and improves usage of `bytesEqual`.
+
 ## 2.0.0-rc.9
 
 - Update secp256k1 to 0.4.1
