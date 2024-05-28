@@ -98,6 +98,7 @@ class Secp256k1 extends Secp256k1Base<
     extSchnorrVerify
       = inst.functions["secp256k1_schnorrsig_verify"]
       as IntFunc5;
+    extEcdh = inst.functions["secp256k1_ecdh"] as IntFunc6;
 
     // Local functions for loading purposes
     final contextCreate = inst.functions["secp256k1_context_create"]

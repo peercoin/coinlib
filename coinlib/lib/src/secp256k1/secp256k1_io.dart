@@ -83,6 +83,7 @@ class Secp256k1 extends Secp256k1Base<
     extXOnlyPubkeyParse = _lib.secp256k1_xonly_pubkey_parse;
     extSchnorrSign32 = _lib.secp256k1_schnorrsig_sign32;
     extSchnorrVerify = _lib.secp256k1_schnorrsig_verify;
+    extEcdh = _lib.secp256k1_ecdh;
 
     // Set heap arrays
     key32Array = HeapArrayFfi(Secp256k1Base.privkeySize);

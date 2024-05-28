@@ -71,6 +71,7 @@ RUN ${WASI_SDK_PATH}/bin/wasm-ld \
   --export secp256k1_xonly_pubkey_parse \
   --export secp256k1_schnorrsig_sign32 \
   --export secp256k1_schnorrsig_verify \
+  --export secp256k1_ecdh \
   # The secp256k1 library object files
   src/libsecp256k1_la-secp256k1.o \
   src/libsecp256k1_precomputed_la-precomputed_ecmult.o \

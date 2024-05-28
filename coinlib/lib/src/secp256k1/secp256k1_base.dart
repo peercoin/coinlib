@@ -88,6 +88,9 @@ abstract class Secp256k1Base<
   late int Function(
     CtxPtr, HeapArrayPtr, HeapArrayPtr, int, XPubKeyPtr,
   ) extSchnorrVerify;
+  late int Function(
+    CtxPtr, HeapArrayPtr, PubKeyPtr, HeapArrayPtr, NullPtr, NullPtr,
+  ) extEcdh;
 
   // Heap arrays
 
@@ -468,6 +471,27 @@ abstract class Secp256k1Base<
     return extSchnorrVerify(
       ctxPtr, serializedSigArray.ptr, hashArray.ptr, 32, xPubKeyPtr,
     ) == 1;
+
+  }
+
+  /// Generates a Diffie-Hellman shared 32-byte hash between a private and
+  /// public key where the hash can be used as a shared key.
+  Uint8List ecdh(Uint8List privKey, Uint8List pubkey) {
+    _requireLoad();
+
+    key32Array.load(privKey);
+    _parsePubkeyIntoPtr(pubkey);
+
+    if (
+      extEcdh(
+        ctxPtr, hashArray.ptr, pubKeyPtr, key32Array.ptr, nullPtr,
+        nullPtr,
+      ) != 1
+    ) {
+      throw Secp256k1Exception("Cannot generate ECDH shared key");
+    }
+
+    return hashArray.list.sublist(0);
 
   }
 

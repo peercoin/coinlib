@@ -88,6 +88,18 @@ void main() {
       }
     });
 
+    test(".diffieHellman()", () {
+      final k1 = keyPairVectors.first.privateObj;
+      final k2 = keyPairVectors.last.privateObj;
+      final s1 = k1.diffieHellman(k2.pubkey);
+      final s2 = k2.diffieHellman(k1.pubkey);
+      final other = k1.diffieHellman(k1.pubkey);
+      // Secrets match
+      expect(bytesToHex(s1), bytesToHex(s2));
+      // Not the same as secret generated not by same key pairs
+      expect(bytesToHex(s1), isNot(bytesToHex(other)));
+    });
+
     test(".xonly", () {
 
       // Already even-y = 1
