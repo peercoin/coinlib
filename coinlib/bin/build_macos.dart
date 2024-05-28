@@ -18,13 +18,13 @@ void main() async {
     "Could not clone secp256k1 to temporary build directory",
   );
 
-  // Checkout to 0.4.1 commit
+  // Checkout to 0.5.0 commit
   exitOnCode(
     await execWithStdio(
-      "git", ["checkout", "1ad5185cd42c0636104129fcc9f6a4bf9c67cc40"],
+      "git", ["checkout", "e3a885d42a7800c1ccebad94ad1e2b82c4df5c65"],
       workingDir: libDir,
     ),
-    "Could not checkout to v0.4.1 commit",
+    "Could not checkout to v0.5.0 commit",
   );
 
   // Generate configure

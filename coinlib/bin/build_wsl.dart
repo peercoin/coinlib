@@ -22,8 +22,8 @@ void main() async {
   Directory.current = Directory("$tmpDir/secp256k1");
   await execWithStdio(
     "git",
-    // Use version 0.4.1
-    ["checkout", "1ad5185cd42c0636104129fcc9f6a4bf9c67cc40"],
+    // Use version 0.5.0
+    ["checkout", "e3a885d42a7800c1ccebad94ad1e2b82c4df5c65"],
   );
 
   // Build in tmpDir/secp256k1/lib.

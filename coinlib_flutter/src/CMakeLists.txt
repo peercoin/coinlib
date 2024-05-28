@@ -45,7 +45,7 @@ ExternalProject_Add(
   secp256k1
 
   GIT_REPOSITORY https://github.com/bitcoin-core/secp256k1
-  GIT_TAG 1ad5185cd42c0636104129fcc9f6a4bf9c67cc40 # v0.4.1 with cmake system
+  GIT_TAG e3a885d42a7800c1ccebad94ad1e2b82c4df5c65 # v0.5.0
 
   PREFIX ${SECP256K1_PREFIX}
 
@@ -59,7 +59,7 @@ ExternalProject_Add(
 # Post-build processing of library file
 # Move output library to the correct place
 
-set(SECP256K1_VERSIONEDLIB ${SECP256K1_PREFIX}/lib/libsecp256k1.so.2.1.1)
+set(SECP256K1_VERSIONEDLIB ${SECP256K1_PREFIX}/lib/libsecp256k1.so.2.2.0)
 set(SECP255K1_FINALLIB ${SECP256K1_PREFIX}/lib/libsecp256k1.so)
 
 # Move any versioned .so file to an unversioned .so file.
