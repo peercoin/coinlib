@@ -82,7 +82,7 @@ class NativeSecp256k1 {
   /// memory allocation entirely, see secp256k1_context_static and the functions in
   /// secp256k1_preallocated.h.
   ///
-  /// Returns: a newly created context object.
+  /// Returns: pointer to a newly created context object.
   /// In:      flags: Always set to SECP256K1_CONTEXT_NONE (see below).
   ///
   /// The only valid non-deprecated flag in recent library versions is
@@ -123,8 +123,8 @@ class NativeSecp256k1 {
   /// Cloning secp256k1_context_static is not possible, and should not be emulated by
   /// the caller (e.g., using memcpy). Create a new context instead.
   ///
-  /// Returns: a newly created context object.
-  /// Args:    ctx: an existing context to copy (not secp256k1_context_static)
+  /// Returns: pointer to a newly created context object.
+  /// Args:    ctx: pointer to a context to copy (not secp256k1_context_static).
   ffi.Pointer<secp256k1_context> secp256k1_context_clone(
     ffi.Pointer<secp256k1_context> ctx,
   ) {
@@ -151,7 +151,7 @@ class NativeSecp256k1 {
   /// behaviour is undefined. In that case, secp256k1_context_preallocated_destroy must
   /// be used instead.
   ///
-  /// Args:   ctx: an existing context to destroy, constructed using
+  /// Args:   ctx: pointer to a context to destroy, constructed using
   /// secp256k1_context_create or secp256k1_context_clone
   /// (i.e., not secp256k1_context_static).
   void secp256k1_context_destroy(
@@ -198,8 +198,8 @@ class NativeSecp256k1 {
   /// fails. In this case, the corresponding default handler will be called with
   /// the data pointer argument set to NULL.
   ///
-  /// Args: ctx:  an existing context object.
-  /// In:   fun:  a pointer to a function to call when an illegal argument is
+  /// Args: ctx:  pointer to a context object.
+  /// In:   fun:  pointer to a function to call when an illegal argument is
   /// passed to the API, taking a message and an opaque pointer.
   /// (NULL restores the default handler.)
   /// data: the opaque pointer to pass to fun above, must be NULL for the default handler.
@@ -254,8 +254,8 @@ class NativeSecp256k1 {
   /// for that). After this callback returns, anything may happen, including
   /// crashing.
   ///
-  /// Args: ctx:  an existing context object.
-  /// In:   fun:  a pointer to a function to call when an internal error occurs,
+  /// Args: ctx:  pointer to a context object.
+  /// In:   fun:  pointer to a function to call when an internal error occurs,
   /// taking a message and an opaque pointer (NULL restores the
   /// default handler, see secp256k1_context_set_illegal_callback
   /// for details).
@@ -300,7 +300,7 @@ class NativeSecp256k1 {
   /// Create a secp256k1 scratch space object.
   ///
   /// Returns: a newly created scratch space.
-  /// Args: ctx:  an existing context object.
+  /// Args: ctx:  pointer to a context object.
   /// In:   size: amount of memory to be available as scratch space. Some extra
   /// (<100 bytes) will be allocated for extra accounting.
   ffi.Pointer<secp256k1_scratch_space> secp256k1_scratch_space_create(
@@ -326,7 +326,7 @@ class NativeSecp256k1 {
   /// Destroy a secp256k1 scratch space.
   ///
   /// The pointer may not be used afterwards.
-  /// Args:       ctx: a secp256k1 context object.
+  /// Args:       ctx: pointer to a context object.
   /// scratch: space to destroy
   void secp256k1_scratch_space_destroy(
     ffi.Pointer<secp256k1_context> ctx,
@@ -352,7 +352,7 @@ class NativeSecp256k1 {
   ///
   /// Returns: 1 if the public key was fully valid.
   /// 0 if the public key could not be parsed or is invalid.
-  /// Args: ctx:      a secp256k1 context object.
+  /// Args: ctx:      pointer to a context object.
   /// Out:  pubkey:   pointer to a pubkey object. If 1 is returned, it is set to a
   /// parsed version of input. If not, its value is undefined.
   /// In:   input:    pointer to a serialized public key
@@ -393,14 +393,14 @@ class NativeSecp256k1 {
   /// Serialize a pubkey object into a serialized byte sequence.
   ///
   /// Returns: 1 always.
-  /// Args:   ctx:        a secp256k1 context object.
-  /// Out:    output:     a pointer to a 65-byte (if compressed==0) or 33-byte (if
+  /// Args:   ctx:        pointer to a context object.
+  /// Out:    output:     pointer to a 65-byte (if compressed==0) or 33-byte (if
   /// compressed==1) byte array to place the serialized key
   /// in.
-  /// In/Out: outputlen:  a pointer to an integer which is initially set to the
+  /// In/Out: outputlen:  pointer to an integer which is initially set to the
   /// size of output, and is overwritten with the written
   /// size.
-  /// In:     pubkey:     a pointer to a secp256k1_pubkey containing an
+  /// In:     pubkey:     pointer to a secp256k1_pubkey containing an
   /// initialized public key.
   /// flags:      SECP256K1_EC_COMPRESSED if serialization should be in
   /// compressed format, otherwise SECP256K1_EC_UNCOMPRESSED.
@@ -442,7 +442,7 @@ class NativeSecp256k1 {
   /// Returns: <0 if the first public key is less than the second
   /// >0 if the first public key is greater than the second
   /// 0 if the two public keys are equal
-  /// Args: ctx:      a secp256k1 context object.
+  /// Args: ctx:      pointer to a context object
   /// In:   pubkey1:  first public key to compare
   /// pubkey2:  second public key to compare
   int secp256k1_ec_pubkey_cmp(
@@ -467,12 +467,42 @@ class NativeSecp256k1 {
       int Function(ffi.Pointer<secp256k1_context>,
           ffi.Pointer<secp256k1_pubkey>, ffi.Pointer<secp256k1_pubkey>)>();
 
+  /// Sort public keys using lexicographic (of compressed serialization) order
+  ///
+  /// Returns: 0 if the arguments are invalid. 1 otherwise.
+  ///
+  /// Args:     ctx: pointer to a context object
+  /// In:   pubkeys: array of pointers to pubkeys to sort
+  /// n_pubkeys: number of elements in the pubkeys array
+  int secp256k1_ec_pubkey_sort(
+    ffi.Pointer<secp256k1_context> ctx,
+    ffi.Pointer<ffi.Pointer<secp256k1_pubkey>> pubkeys,
+    int n_pubkeys,
+  ) {
+    return _secp256k1_ec_pubkey_sort(
+      ctx,
+      pubkeys,
+      n_pubkeys,
+    );
+  }
+
+  late final _secp256k1_ec_pubkey_sortPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<ffi.Pointer<secp256k1_pubkey>>,
+              ffi.Size)>>('secp256k1_ec_pubkey_sort');
+  late final _secp256k1_ec_pubkey_sort =
+      _secp256k1_ec_pubkey_sortPtr.asFunction<
+          int Function(ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<ffi.Pointer<secp256k1_pubkey>>, int)>();
+
   /// Parse an ECDSA signature in compact (64 bytes) format.
   ///
   /// Returns: 1 when the signature could be parsed, 0 otherwise.
-  /// Args: ctx:      a secp256k1 context object
-  /// Out:  sig:      a pointer to a signature object
-  /// In:   input64:  a pointer to the 64-byte array to parse
+  /// Args: ctx:      pointer to a context object
+  /// Out:  sig:      pointer to a signature object
+  /// In:   input64:  pointer to the 64-byte array to parse
   ///
   /// The signature must consist of a 32-byte big endian R value, followed by a
   /// 32-byte big endian S value. If R or S fall outside of [0..order-1], the
@@ -510,9 +540,9 @@ class NativeSecp256k1 {
   /// Parse a DER ECDSA signature.
   ///
   /// Returns: 1 when the signature could be parsed, 0 otherwise.
-  /// Args: ctx:      a secp256k1 context object
-  /// Out:  sig:      a pointer to a signature object
-  /// In:   input:    a pointer to the signature to be parsed
+  /// Args: ctx:      pointer to a context object
+  /// Out:  sig:      pointer to a signature object
+  /// In:   input:    pointer to the signature to be parsed
   /// inputlen: the length of the array pointed to be input
   ///
   /// This function will accept any valid DER encoded signature, even if the
@@ -553,13 +583,13 @@ class NativeSecp256k1 {
   /// Serialize an ECDSA signature in DER format.
   ///
   /// Returns: 1 if enough space was available to serialize, 0 otherwise
-  /// Args:   ctx:       a secp256k1 context object
-  /// Out:    output:    a pointer to an array to store the DER serialization
-  /// In/Out: outputlen: a pointer to a length integer. Initially, this integer
+  /// Args:   ctx:       pointer to a context object
+  /// Out:    output:    pointer to an array to store the DER serialization
+  /// In/Out: outputlen: pointer to a length integer. Initially, this integer
   /// should be set to the length of output. After the call
   /// it will be set to the length of the serialization (even
   /// if 0 was returned).
-  /// In:     sig:       a pointer to an initialized signature object
+  /// In:     sig:       pointer to an initialized signature object
   int secp256k1_ecdsa_signature_serialize_der(
     ffi.Pointer<secp256k1_context> ctx,
     ffi.Pointer<ffi.UnsignedChar> output,
@@ -593,9 +623,9 @@ class NativeSecp256k1 {
   /// Serialize an ECDSA signature in compact (64 byte) format.
   ///
   /// Returns: 1
-  /// Args:   ctx:       a secp256k1 context object
-  /// Out:    output64:  a pointer to a 64-byte array to store the compact serialization
-  /// In:     sig:       a pointer to an initialized signature object
+  /// Args:   ctx:       pointer to a context object
+  /// Out:    output64:  pointer to a 64-byte array to store the compact serialization
+  /// In:     sig:       pointer to an initialized signature object
   ///
   /// See secp256k1_ecdsa_signature_parse_compact for details about the encoding.
   int secp256k1_ecdsa_signature_serialize_compact(
@@ -628,7 +658,7 @@ class NativeSecp256k1 {
   ///
   /// Returns: 1: correct signature
   /// 0: incorrect or unparseable signature
-  /// Args:    ctx:       a secp256k1 context object.
+  /// Args:    ctx:       pointer to a context object
   /// In:      sig:       the signature being verified.
   /// msghash32: the 32-byte message hash being verified.
   /// The verifier must make sure to apply a cryptographic
@@ -679,12 +709,12 @@ class NativeSecp256k1 {
   /// Convert a signature to a normalized lower-S form.
   ///
   /// Returns: 1 if sigin was not normalized, 0 if it already was.
-  /// Args: ctx:    a secp256k1 context object
-  /// Out:  sigout: a pointer to a signature to fill with the normalized form,
+  /// Args: ctx:    pointer to a context object
+  /// Out:  sigout: pointer to a signature to fill with the normalized form,
   /// or copy if the input was already normalized. (can be NULL if
   /// you're only interested in whether the input was already
   /// normalized).
-  /// In:   sigin:  a pointer to a signature to check/normalize (can be identical to sigout)
+  /// In:   sigin:  pointer to a signature to check/normalize (can be identical to sigout)
   ///
   /// With ECDSA a third-party can forge a second distinct signature of the same
   /// message, given a single initial signature, but without knowing the key. This
@@ -956,10 +986,10 @@ class NativeSecp256k1 {
   /// invalid according to secp256k1_ec_seckey_verify, this
   /// function returns 0. seckey will be set to some unspecified
   /// value if this function returns 0.
-  /// In:    tweak32: pointer to a 32-byte tweak. If the tweak is invalid according to
-  /// secp256k1_ec_seckey_verify, this function returns 0. For
-  /// uniformly random 32-byte arrays the chance of being invalid
-  /// is negligible (around 1 in 2^128).
+  /// In:    tweak32: pointer to a 32-byte tweak, which must be valid according to
+  /// secp256k1_ec_seckey_verify or 32 zero bytes. For uniformly
+  /// random 32-byte tweaks, the chance of being invalid is
+  /// negligible (around 1 in 2^128).
   int secp256k1_ec_seckey_tweak_add(
     ffi.Pointer<secp256k1_context> ctx,
     ffi.Pointer<ffi.UnsignedChar> seckey,
@@ -1017,10 +1047,10 @@ class NativeSecp256k1 {
   /// Args:    ctx:   pointer to a context object.
   /// In/Out: pubkey: pointer to a public key object. pubkey will be set to an
   /// invalid value if this function returns 0.
-  /// In:    tweak32: pointer to a 32-byte tweak. If the tweak is invalid according to
-  /// secp256k1_ec_seckey_verify, this function returns 0. For
-  /// uniformly random 32-byte arrays the chance of being invalid
-  /// is negligible (around 1 in 2^128).
+  /// In:    tweak32: pointer to a 32-byte tweak, which must be valid according to
+  /// secp256k1_ec_seckey_verify or 32 zero bytes. For uniformly
+  /// random 32-byte tweaks, the chance of being invalid is
+  /// negligible (around 1 in 2^128).
   int secp256k1_ec_pubkey_tweak_add(
     ffi.Pointer<secp256k1_context> ctx,
     ffi.Pointer<secp256k1_pubkey> pubkey,
@@ -1279,9 +1309,9 @@ class NativeSecp256k1 {
   /// Parse a compact ECDSA signature (64 bytes + recovery id).
   ///
   /// Returns: 1 when the signature could be parsed, 0 otherwise
-  /// Args: ctx:     a secp256k1 context object
-  /// Out:  sig:     a pointer to a signature object
-  /// In:   input64: a pointer to a 64-byte compact signature
+  /// Args: ctx:     pointer to a context object
+  /// Out:  sig:     pointer to a signature object
+  /// In:   input64: pointer to a 64-byte compact signature
   /// recid:   the recovery id (0, 1, 2 or 3)
   int secp256k1_ecdsa_recoverable_signature_parse_compact(
     ffi.Pointer<secp256k1_context> ctx,
@@ -1315,9 +1345,9 @@ class NativeSecp256k1 {
   /// Convert a recoverable signature into a normal signature.
   ///
   /// Returns: 1
-  /// Args: ctx:    a secp256k1 context object.
-  /// Out:  sig:    a pointer to a normal signature.
-  /// In:   sigin:  a pointer to a recoverable signature.
+  /// Args: ctx:    pointer to a context object.
+  /// Out:  sig:    pointer to a normal signature.
+  /// In:   sigin:  pointer to a recoverable signature.
   int secp256k1_ecdsa_recoverable_signature_convert(
     ffi.Pointer<secp256k1_context> ctx,
     ffi.Pointer<secp256k1_ecdsa_signature> sig,
@@ -1347,10 +1377,10 @@ class NativeSecp256k1 {
   /// Serialize an ECDSA signature in compact format (64 bytes + recovery id).
   ///
   /// Returns: 1
-  /// Args: ctx:      a secp256k1 context object.
-  /// Out:  output64: a pointer to a 64-byte array of the compact signature.
-  /// recid:    a pointer to an integer to hold the recovery id.
-  /// In:   sig:      a pointer to an initialized signature object.
+  /// Args: ctx:      pointer to a context object.
+  /// Out:  output64: pointer to a 64-byte array of the compact signature.
+  /// recid:    pointer to an integer to hold the recovery id.
+  /// In:   sig:      pointer to an initialized signature object.
   int secp256k1_ecdsa_recoverable_signature_serialize_compact(
     ffi.Pointer<secp256k1_context> ctx,
     ffi.Pointer<ffi.UnsignedChar> output64,
@@ -1472,7 +1502,7 @@ class NativeSecp256k1 {
   /// Returns: 1 if the public key was fully valid.
   /// 0 if the public key could not be parsed or is invalid.
   ///
-  /// Args:   ctx: a secp256k1 context object.
+  /// Args:   ctx: pointer to a context object.
   /// Out: pubkey: pointer to a pubkey object. If 1 is returned, it is set to a
   /// parsed version of input. If not, it's set to an invalid value.
   /// In: input32: pointer to a serialized xonly_pubkey.
@@ -1505,9 +1535,9 @@ class NativeSecp256k1 {
   ///
   /// Returns: 1 always.
   ///
-  /// Args:     ctx: a secp256k1 context object.
-  /// Out: output32: a pointer to a 32-byte array to place the serialized key in.
-  /// In:    pubkey: a pointer to a secp256k1_xonly_pubkey containing an initialized public key.
+  /// Args:     ctx: pointer to a context object.
+  /// Out: output32: pointer to a 32-byte array to place the serialized key in.
+  /// In:    pubkey: pointer to a secp256k1_xonly_pubkey containing an initialized public key.
   int secp256k1_xonly_pubkey_serialize(
     ffi.Pointer<secp256k1_context> ctx,
     ffi.Pointer<ffi.UnsignedChar> output32,
@@ -1539,7 +1569,7 @@ class NativeSecp256k1 {
   /// Returns: <0 if the first public key is less than the second
   /// >0 if the first public key is greater than the second
   /// 0 if the two public keys are equal
-  /// Args: ctx:      a secp256k1 context object.
+  /// Args: ctx:      pointer to a context object.
   /// In:   pubkey1:  first public key to compare
   /// pubkey2:  second public key to compare
   int secp256k1_xonly_pubkey_cmp(
@@ -1623,10 +1653,10 @@ class NativeSecp256k1 {
   /// Out:  output_pubkey: pointer to a public key to store the result. Will be set
   /// to an invalid value if this function returns 0.
   /// In: internal_pubkey: pointer to an x-only pubkey to apply the tweak to.
-  /// tweak32: pointer to a 32-byte tweak. If the tweak is invalid
-  /// according to secp256k1_ec_seckey_verify, this function
-  /// returns 0. For uniformly random 32-byte arrays the
-  /// chance of being invalid is negligible (around 1 in 2^128).
+  /// tweak32: pointer to a 32-byte tweak, which must be valid
+  /// according to secp256k1_ec_seckey_verify or 32 zero
+  /// bytes. For uniformly random 32-byte tweaks, the chance of
+  /// being invalid is negligible (around 1 in 2^128).
   int secp256k1_xonly_pubkey_tweak_add(
     ffi.Pointer<secp256k1_context> ctx,
     ffi.Pointer<secp256k1_pubkey> output_pubkey,
@@ -1774,9 +1804,8 @@ class NativeSecp256k1 {
   /// Get the public key from a keypair.
   ///
   /// Returns: 1 always.
-  /// Args:    ctx: pointer to a context object.
-  /// Out: pubkey: pointer to a pubkey object. If 1 is returned, it is set to
-  /// the keypair public key. If not, it's set to an invalid value.
+  /// Args:   ctx: pointer to a context object.
+  /// Out: pubkey: pointer to a pubkey object, set to the keypair public key.
   /// In: keypair: pointer to a keypair.
   int secp256k1_keypair_pub(
     ffi.Pointer<secp256k1_context> ctx,
@@ -1807,9 +1836,8 @@ class NativeSecp256k1 {
   ///
   /// Returns: 1 always.
   /// Args:   ctx: pointer to a context object.
-  /// Out: pubkey: pointer to an xonly_pubkey object. If 1 is returned, it is set
-  /// to the keypair public key after converting it to an
-  /// xonly_pubkey. If not, it's set to an invalid value.
+  /// Out: pubkey: pointer to an xonly_pubkey object, set to the keypair
+  /// public key after converting it to an xonly_pubkey.
   /// pk_parity: Ignored if NULL. Otherwise, pointer to an integer that will be set to the
   /// pk_parity argument of secp256k1_xonly_pubkey_from_pubkey.
   /// In: keypair: pointer to a keypair.
@@ -1856,10 +1884,10 @@ class NativeSecp256k1 {
   /// Args:       ctx: pointer to a context object.
   /// In/Out: keypair: pointer to a keypair to apply the tweak to. Will be set to
   /// an invalid value if this function returns 0.
-  /// In:     tweak32: pointer to a 32-byte tweak. If the tweak is invalid according
-  /// to secp256k1_ec_seckey_verify, this function returns 0. For
-  /// uniformly random 32-byte arrays the chance of being invalid
-  /// is negligible (around 1 in 2^128).
+  /// In:     tweak32: pointer to a 32-byte tweak, which must be valid according to
+  /// secp256k1_ec_seckey_verify or 32 zero bytes. For uniformly
+  /// random 32-byte tweaks, the chance of being invalid is
+  /// negligible (around 1 in 2^128).
   int secp256k1_keypair_xonly_tweak_add(
     ffi.Pointer<secp256k1_context> ctx,
     ffi.Pointer<secp256k1_keypair> keypair,
@@ -2056,11 +2084,11 @@ class NativeSecp256k1 {
   ///
   /// Returns: 1: correct signature
   /// 0: incorrect signature
-  /// Args:    ctx: a secp256k1 context object.
+  /// Args:    ctx: pointer to a context object.
   /// In:    sig64: pointer to the 64-byte signature to verify.
   /// msg: the message being verified. Can only be NULL if msglen is 0.
   /// msglen: length of the message
-  /// pubkey: pointer to an x-only public key to verify with (cannot be NULL)
+  /// pubkey: pointer to an x-only public key to verify with
   int secp256k1_schnorrsig_verify(
     ffi.Pointer<secp256k1_context> ctx,
     ffi.Pointer<ffi.UnsignedChar> sig64,
@@ -2121,7 +2149,7 @@ class NativeSecp256k1 {
   /// 0: scalar was invalid (zero or overflow) or hashfp returned 0
   /// Args:    ctx:        pointer to a context object.
   /// Out:     output:     pointer to an array to be filled by hashfp.
-  /// In:      pubkey:     a pointer to a secp256k1_pubkey containing an initialized public key.
+  /// In:      pubkey:     pointer to a secp256k1_pubkey containing an initialized public key.
   /// seckey:     a 32-byte scalar with which to multiply the point.
   /// hashfp:     pointer to a hash function. If NULL,
   /// secp256k1_ecdh_hash_function_sha256 is used
