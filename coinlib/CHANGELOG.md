@@ -1,3 +1,9 @@
+## 2.1.0-rc.1
+
+- Add `diffieHellman` method to `ECPrivateKey` to allow generation of ECDH
+    shared keys between two EC keys.
+- Update secp256k1 to 0.5.0
+
 ## 2.0.0
 
 Final release for 2.0.0

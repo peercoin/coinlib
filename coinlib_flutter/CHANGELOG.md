@@ -1,3 +1,8 @@
+## 2.1.0-rc.1
+
+- Update to underlying coinlib 2.1.0-rc.1
+- Remove secp256k1 from codebase in favour of git clone for macOS and iOS
+
 ## 2.0.0
 
 Final release for 2.0.0
