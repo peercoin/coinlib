@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:coinlib_flutter/coinlib_flutter.dart' as coinlib;
 
@@ -33,8 +34,14 @@ class MyApp extends StatelessWidget {
         "0000000000000000000000000000000000000000000000000000000000000001",
       );
 
+      final schnorrSignature = coinlib.SchnorrSignature.sign(
+        privKey, Uint8List(32),
+      );
+
       return Text(
         "Public key is ${privKey.pubkey.hex} and should equal $expPubkey."
+        " An example Schnorr signature is"
+        " ${coinlib.bytesToHex(schnorrSignature.data)}."
       );
 
     }
