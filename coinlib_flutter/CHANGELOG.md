@@ -1,3 +1,7 @@
+## 2.1.0
+
+Final release for 2.1.0. Fixes missing symbols for macOS and iOS.
+
 ## 2.1.0-rc.1
 
 - Update to underlying coinlib 2.1.0-rc.1
