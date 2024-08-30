@@ -14,11 +14,11 @@ void main() {
 
       for (final failing in [
         // Too small
-        "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
-        "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+        pubkeyVec.substring(0, 32*2),
+        longPubkeyVec.substring(0, 32*2),
         // Too large
-        "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f2021",
-        "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f2021",
+        "${pubkeyVec}ff",
+        "${longPubkeyVec}ff",
       ]) {
         expect(
           () => ECPublicKey.fromHex(failing),
@@ -46,10 +46,8 @@ void main() {
     test(".fromXOnly", () {
 
       expect(
-        ECPublicKey.fromXOnlyHex(
-          "d69c3509bb99e412e68b0fe8544e72837dfa30746d8be2aa65975f29d22dc7b9",
-        ).hex,
-        "02d69c3509bb99e412e68b0fe8544e72837dfa30746d8be2aa65975f29d22dc7b9",
+        ECCompressedPublicKey.fromXOnlyHex(xOnlyPubkeyVec).hex,
+        "02$xOnlyPubkeyVec",
       );
 
       for (final invalid in [

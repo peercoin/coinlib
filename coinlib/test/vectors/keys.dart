@@ -20,6 +20,7 @@ class KeyTestVector {
 final pubkeyVec = "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798";
 final longPubkeyVec = "0479be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8";
 final pubkeyhashVec = "751e76e8199196d454941c45d1b3a323f1433bd6";
+final xOnlyPubkeyVec = "d69c3509bb99e412e68b0fe8544e72837dfa30746d8be2aa65975f29d22dc7b9";
 
 final keyPairVectors = [
   KeyTestVector(

@@ -4,6 +4,7 @@ export 'package:coinlib/src/common/bytes.dart';
 export 'package:coinlib/src/common/hex.dart';
 export 'package:coinlib/src/common/serial.dart';
 
+export 'package:coinlib/src/crypto/ec_compressed_public_key.dart';
 export 'package:coinlib/src/crypto/ec_private_key.dart';
 export 'package:coinlib/src/crypto/ec_public_key.dart';
 export 'package:coinlib/src/crypto/ecdsa_signature.dart';
