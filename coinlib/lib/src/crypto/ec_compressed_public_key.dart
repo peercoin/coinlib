@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-
 import 'package:coinlib/src/common/hex.dart';
 import 'ec_public_key.dart';
 

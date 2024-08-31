@@ -1,3 +1,7 @@
+## 2.2.0
+
+Update to underlying coinlib 2.2.0 with new `ECCompressedPublicKey` class.
+
 ## 2.1.0
 
 Final release for 2.1.0. Fixes missing symbols for macOS and iOS.

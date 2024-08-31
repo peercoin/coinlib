@@ -1,3 +1,7 @@
+## 2.2.0
+
+Add `ECCompressedPublicKey` class that forces compressed public keys.
+
 ## 2.1.0
 
 Final release for 2.1.0
