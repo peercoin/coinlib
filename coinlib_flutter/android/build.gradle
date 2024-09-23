@@ -76,8 +76,6 @@ android {
         main {
             jniLibs.srcDirs = ['src/main/jniLibs']
         }
-        main.java.srcDirs += "src/main/kotlin"
-        test.java.srcDirs += "src/test/kotlin"
     }
 
 }
