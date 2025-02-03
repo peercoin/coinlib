@@ -107,7 +107,7 @@ class TaprootScriptInput extends TaprootInput {
     required int inputN,
     required ECPrivateKey key,
     required List<Output> prevOuts,
-    SigHashType hashType = const SigHashType.all(),
+    SigHashType hashType = const SigHashType.schnorrDefault(),
     int codeSeperatorPos = 0xFFFFFFFF,
   }) => createInputSignature(
     tx: tx,

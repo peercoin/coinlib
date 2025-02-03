@@ -34,7 +34,7 @@ final class TaprootSignatureHasher with Writable implements SignatureHasher {
     required this.tx,
     required this.inputN,
     required this.prevOuts,
-    required this.hashType,
+    this.hashType = const SigHashType.schnorrDefault(),
     this.leafHash,
     this.codeSeperatorPos = 0xFFFFFFFF,
   }) : txHashes = TransactionSignatureHashes(tx),

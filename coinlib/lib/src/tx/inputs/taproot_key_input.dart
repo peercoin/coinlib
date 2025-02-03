@@ -53,7 +53,7 @@ class TaprootKeyInput extends TaprootInput {
     required int inputN,
     required ECPrivateKey key,
     required List<Output> prevOuts,
-    SigHashType hashType = const SigHashType.all(),
+    SigHashType hashType = const SigHashType.schnorrDefault(),
   }) {
 
     if (inputN >= prevOuts.length) {

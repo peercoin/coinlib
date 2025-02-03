@@ -506,9 +506,9 @@ void main() {
 
     test("sign script-path P2TR input with NUMS key", () {
       // Sent on testnet:
-      //  7353bd0fd3c2f572b45f144b1c8ad17b555b52eee6493b27d41b168783bec0f2
+      //  d035cbb954abade234a186870d8ff2cdf5f663930f4954e13bfcd3e9fee6cbd0
       // Includes 12ppc input via:
-      //  980d55a017d166d4b26e45c81e958f2c751bc0abb8e3116bd3354158be44c53c
+      //  63ea0ecff27d9bffd00b09b92b682900e6093a2729f9f0a36746be32dbdeb074
 
       TapLeaf checkSigLeafForVector(KeyTestVector vec) => TapLeaf(
         Script([
@@ -538,7 +538,7 @@ void main() {
         inputs: [
           TaprootScriptInput.fromTaprootLeaf(
             prevOut: OutPoint.fromHex(
-              "980d55a017d166d4b26e45c81e958f2c751bc0abb8e3116bd3354158be44c53c",
+              "63ea0ecff27d9bffd00b09b92b682900e6093a2729f9f0a36746be32dbdeb074",
               1,
             ),
             taproot: taproot,
@@ -560,21 +560,26 @@ void main() {
         P2TR.fromTaproot(taproot),
       );
 
-      final solvedTx = tx.replaceInput(
-        inputToSign.updateStack([
-          inputToSign.createScriptSignature(
-            tx: tx,
-            inputN: 0,
-            key: keyPairVectors[2].privateObj,
-            prevOuts: [prevOut],
-          ).bytes,
-        ]),
-        0,
+      final solvedInput = inputToSign.updateStack([
+        inputToSign.createScriptSignature(
+          tx: tx,
+          inputN: 0,
+          key: keyPairVectors[2].privateObj,
+          prevOuts: [prevOut],
+        ).bytes,
+      ]);
+      final solvedTx = tx.replaceInput(solvedInput, 0);
+
+      // Should've created a default schnorr siganture
+      expect(
+        SchnorrInputSignature.fromBytes(solvedInput.witness.first)
+        .hashType.schnorrDefault,
+        true,
       );
 
       expect(
         solvedTx.toHex(),
-        "030000000001013cc544be584135d36b11e3b8abc01b752c8f951ec8456eb2d466d117a0550d980100000000ffffffff01a0860100000000001976a914c42e7ef92fdb603af844d064faad95db9bcdfd3d88ac034194435688998751de388e3a240d488f68f86d70a631a90355472673ccfa14e323a147eedea0b4da14a73195abe22be29fcafeb60cf3bb9de94891969f2c546088012220b80011a883a0fd621ad46dfc405df1e74bf075cbaf700fd4aebef6e96f848340ac61c1b33ff3fab0fd16daef5f4916bfbd83244bf3b9f446eb0f1b7b5b1f97a9e99065763e9da064b9dc0471fb0f3c8fa2c84b4b84d2ca992497c12d2274386795aa8ef91bcc8ea862a20c20ecb36adc4a8c29ca24475f9685d07e76e19379328e847e00000000",
+        "0300000000010174b0dedb32be4667a3f0f929273a09e60029682bb9090bd0ff9b7df2cf0eea630100000000ffffffff01a0860100000000001976a914c42e7ef92fdb603af844d064faad95db9bcdfd3d88ac0340e41ed624484087c25a210f34ade142ad706dded5fbca1787092531bb47a4251b8187e789ee1f1d41f9f22431eb43c979f009afe00e25aaaedf68a5db606c08b32220b80011a883a0fd621ad46dfc405df1e74bf075cbaf700fd4aebef6e96f848340ac61c1b33ff3fab0fd16daef5f4916bfbd83244bf3b9f446eb0f1b7b5b1f97a9e99065763e9da064b9dc0471fb0f3c8fa2c84b4b84d2ca992497c12d2274386795aa8ef91bcc8ea862a20c20ecb36adc4a8c29ca24475f9685d07e76e19379328e847e00000000",
       );
 
     });

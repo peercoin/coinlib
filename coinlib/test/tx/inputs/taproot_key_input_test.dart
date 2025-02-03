@@ -1,8 +1,10 @@
 import 'dart:typed_data';
 import 'package:coinlib/coinlib.dart';
 import 'package:test/test.dart';
+import '../../vectors/keys.dart';
 import '../../vectors/signatures.dart';
 import '../../vectors/inputs.dart';
+import '../../vectors/tx.dart';
 
 void main() {
 
@@ -97,10 +99,29 @@ void main() {
 
     });
 
-    test("filterSignatures", () {
+    test(".filterSignatures()", () {
       final input = TaprootKeyInput(prevOut: prevOut, insig: insig);
       expect(input.filterSignatures((insig) => false).insig, isNull);
       expect(input.filterSignatures((insig) => true).insig, isNotNull);
+    });
+
+    test(".sign() should sign as SIGHASH_DEFAULT by default", () {
+      final input = TaprootKeyInput(prevOut: prevOut);
+      final signedInput = input.sign(
+        tx: Transaction(
+          inputs: [input],
+          outputs: [exampleOutput],
+        ),
+        inputN: 0,
+        key: keyPairVectors[0].privateObj,
+        prevOuts: [
+          Output.fromProgram(
+            BigInt.from(10000),
+            P2TR.fromTweakedKey(keyPairVectors[0].publicObj),
+          ),
+        ],
+      );
+      expect(signedInput.insig!.hashType.schnorrDefault, true);
     });
 
   });
