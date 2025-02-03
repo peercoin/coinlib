@@ -19,7 +19,9 @@ class P2Witness implements Program {
       script.ops.length != 2
       || script[0] is! ScriptOpCode
       || script[1] is! ScriptPushData
-    ) throw NoProgramMatch();
+    ) {
+      throw NoProgramMatch();
+    }
 
     final ver = (script[0] as ScriptOpCode).number;
     final push = script[1] as ScriptPushData;

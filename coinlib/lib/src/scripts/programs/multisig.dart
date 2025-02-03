@@ -66,7 +66,9 @@ class MultisigProgram implements Program {
     if (
       pknum == null || pknum < 1 || pknum > maxPubkeys
       || script.length != pknum+3
-    ) throw NoProgramMatch();
+    ) {
+      throw NoProgramMatch();
+    }
 
     final firstNum = script[0].number;
     if (firstNum == null) throw NoProgramMatch();
@@ -82,7 +84,9 @@ class MultisigProgram implements Program {
         (op) => op is! ScriptPushData
         || (op.data.length != 33 && op.data.length != 65),
       )
-    ) throw NoProgramMatch();
+    ) {
+      throw NoProgramMatch();
+    }
 
     try {
       pubkeys = List.unmodifiable(
