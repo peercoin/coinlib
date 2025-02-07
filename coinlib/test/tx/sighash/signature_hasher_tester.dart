@@ -3,6 +3,7 @@ import 'package:coinlib/coinlib.dart';
 import 'package:test/test.dart';
 import '../../vectors/tx.dart';
 
+/// Used for legacy and legacy-segwit hashers
 void signatureHasherTester(
   String name,
   Uint8List Function(Transaction tx, int inputN, SigHashVector vec) hasher,
@@ -25,20 +26,32 @@ void signatureHasherTester(
     expect(() => hasher(tx, 2, sighashVectors[0]), throwsArgumentError);
   });
 
-  test("doesn't allow SIGHASH_DEFAULT", () {
-    expect(
-      () => hasher(
-        tx, 0,
-        SigHashVector(
-          inputN: 0,
-          scriptCodeAsm: "",
-          type: SigHashType.schnorrDefault(),
-          hash: "",
-          witnessHash: "",
-        ),
+  test("doesn't allow DEFAULT or ANYPREVOUT", () {
+    for (final type in [
+      SigHashType.schnorrDefault(),
+      SigHashType(
+        outputs: OutputSigHashOption.all,
+        inputs: InputSigHashOption.anyPrevOut,
       ),
-      throwsArgumentError,
-    );
+      SigHashType(
+        outputs: OutputSigHashOption.all,
+        inputs: InputSigHashOption.anyPrevOutAnyScript,
+      ),
+    ]) {
+      expect(
+        () => hasher(
+          tx, 0,
+          SigHashVector(
+            inputN: 0,
+            scriptCodeAsm: "",
+            type: type,
+            hash: "",
+            witnessHash: "",
+          ),
+        ),
+        throwsArgumentError,
+      );
+    }
   });
 
 });

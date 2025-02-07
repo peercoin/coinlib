@@ -7,7 +7,9 @@ import 'input.dart';
 class InvalidInputSignature implements Exception {}
 
 SigHashType _hashTypeFromValueWithCheck(int value) {
-  if (!SigHashType.validValue(value)) throw InvalidInputSignature();
+  if (value == 0 || !SigHashType.validValue(value)) {
+    throw InvalidInputSignature();
+  }
   return SigHashType.fromValue(value);
 }
 
@@ -25,7 +27,12 @@ class ECDSAInputSignature implements InputSignature {
   @override
   final SigHashType hashType;
 
-  ECDSAInputSignature(this.signature, [this.hashType = const SigHashType.all()]);
+  ECDSAInputSignature(
+    this.signature,
+    [this.hashType = const SigHashType.all(),]
+  ) {
+    if (!hashType.supportsLegacy) throw InvalidInputSignature();
+  }
 
   factory ECDSAInputSignature.fromBytes(Uint8List bytes) {
 

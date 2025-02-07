@@ -7,55 +7,173 @@ void main() {
 
     test("valid values", () {
 
-      expectValid(
-        SigHashType obj, int value, bool all, bool none, bool single,
-        bool anyOneCanPay,
+      void expectValid(
+        int value,
+        SigHashType obj,
+        OutputSigHashOption outputs,
+        InputSigHashOption inputs,
+        String string,
+        {
+          required bool schnorrDefault,
+          required bool supportsLegacy,
+          required bool requiresApo,
+        }
       ) {
 
         expect(SigHashType.validValue(value), true);
+        final fromValue = SigHashType.fromValue(value);
 
-        final objs = [obj, SigHashType.fromValue(value)];
+        expect(obj, fromValue);
 
-        expect(objs[0], objs[1]);
-
-        for (final o in objs) {
-          expect(o.all, all);
-          expect(o.none, none);
-          expect(o.single, single);
-          expect(o.anyOneCanPay, anyOneCanPay);
-          expect(o.schnorrDefault, false);
+        for (final o in [obj, fromValue]) {
+          expect(o.outputs, outputs);
+          expect(o.inputs, inputs);
+          expect(o.value, value);
+          expect(o.schnorrDefault, schnorrDefault);
         }
 
       }
 
-      expectValid(SigHashType.all(), 1, true, false, false, false);
-      expectValid(
-        SigHashType.all(anyOneCanPay: true), 0x81, true, false, false, true,
-      );
-      expectValid(SigHashType.none(), 2, false, true, false, false);
-      expectValid(
-        SigHashType.none(anyOneCanPay: true), 0x82, false, true, false, true,
-      );
-      expectValid(SigHashType.single(), 3, false, false, true, false);
-      expectValid(
-        SigHashType.single(anyOneCanPay: true), 0x83, false, false, true, true,
+      void expectValidOpts(
+        int value, OutputSigHashOption outputs, InputSigHashOption inputs,
+        String string,
+        {
+          required bool supportsLegacy,
+          required bool requiresApo,
+        }
+      ) => expectValid(
+        value,
+        SigHashType(outputs: outputs, inputs: inputs),
+        outputs,
+        inputs,
+        string,
+        schnorrDefault: false,
+        supportsLegacy: supportsLegacy,
+        requiresApo: requiresApo,
       );
 
-    });
+      expectValid(
+        0, SigHashType.schnorrDefault(),
+        OutputSigHashOption.all,
+        InputSigHashOption.all,
+        "DEFAULT",
+        schnorrDefault: true,
+        supportsLegacy: false,
+        requiresApo: false,
+      );
 
-    test("default Schnorr", () {
-      final hashType = SigHashType.schnorrDefault();
-      expect(hashType.schnorrDefault, true);
-      expect(hashType.value, 0);
-      expect(hashType.all, true);
-      expect(hashType.none, false);
-      expect(hashType.single, false);
-      expect(hashType.anyOneCanPay, false);
-      expect(hashType, isNot(SigHashType.all()));
+      expectValid(
+        1, SigHashType.all(),
+        OutputSigHashOption.all,
+        InputSigHashOption.all,
+        "ALL",
+        schnorrDefault: false,
+        supportsLegacy: true,
+        requiresApo: false,
+      );
+
+      expectValid(
+        2, SigHashType.none(),
+        OutputSigHashOption.none,
+        InputSigHashOption.all,
+        "NONE",
+        schnorrDefault: false,
+        supportsLegacy: true,
+        requiresApo: false,
+      );
+
+      expectValid(
+        0x43, SigHashType.single(inputs: InputSigHashOption.anyPrevOut),
+        OutputSigHashOption.single,
+        InputSigHashOption.anyPrevOut,
+        "SINGLE|ANYPREVOUT",
+        schnorrDefault: false,
+        supportsLegacy: false,
+        requiresApo: true,
+      );
+
+      expectValidOpts(
+        1, OutputSigHashOption.all, InputSigHashOption.all,
+        "ALL",
+        supportsLegacy: true,
+        requiresApo: false,
+      );
+      expectValidOpts(
+        2, OutputSigHashOption.none, InputSigHashOption.all,
+        "NONE",
+        supportsLegacy: true,
+        requiresApo: false,
+      );
+      expectValidOpts(
+        3, OutputSigHashOption.single, InputSigHashOption.all,
+        "SINGLE",
+        supportsLegacy: true,
+        requiresApo: false,
+      );
+
+      expectValidOpts(
+        0x81, OutputSigHashOption.all, InputSigHashOption.anyOneCanPay,
+        "ALL|ANYONECANPAY",
+        supportsLegacy: true,
+        requiresApo: false,
+      );
+      expectValidOpts(
+        0x82, OutputSigHashOption.none, InputSigHashOption.anyOneCanPay,
+        "NONE|ANYONECANPAY",
+        supportsLegacy: true,
+        requiresApo: false,
+      );
+      expectValidOpts(
+        0x83, OutputSigHashOption.single, InputSigHashOption.anyOneCanPay,
+        "SINGLE|ANYONECANPAY",
+        supportsLegacy: true,
+        requiresApo: false,
+      );
+
+      expectValidOpts(
+        0x41, OutputSigHashOption.all, InputSigHashOption.anyPrevOut,
+        "ALL|ANYPREVOUT",
+        supportsLegacy: false,
+        requiresApo: true,
+      );
+      expectValidOpts(
+        0x42, OutputSigHashOption.none, InputSigHashOption.anyPrevOut,
+        "NONE|ANYPREVOUT",
+        supportsLegacy: false,
+        requiresApo: true,
+      );
+      expectValidOpts(
+        0x43, OutputSigHashOption.single, InputSigHashOption.anyPrevOut,
+        "SINGLE|ANYPREVOUT",
+        supportsLegacy: false,
+        requiresApo: true,
+      );
+
+      expectValidOpts(
+        0xc1, OutputSigHashOption.all, InputSigHashOption.anyPrevOutAnyScript,
+        "ALL|ANYPREVOUTANYSCRIPT",
+        supportsLegacy: false,
+        requiresApo: true,
+      );
+      expectValidOpts(
+        0xc2, OutputSigHashOption.none,
+        InputSigHashOption.anyPrevOutAnyScript,
+        "NONE|ANYPREVOUTANYSCRIPT",
+        supportsLegacy: false,
+        requiresApo: true,
+      );
+      expectValidOpts(
+        0xc3, OutputSigHashOption.single,
+        InputSigHashOption.anyPrevOutAnyScript,
+        "SINGLE|ANYPREVOUTANYSCRIPT",
+        supportsLegacy: false,
+        requiresApo: true,
+      );
+
     });
 
     test("invalid values", () {
-      for (final invalid in [0, 4, 0x80, 0x84, 0x11, 0xc1, 0x181]) {
+      for (final invalid in [-1, 4, 0x80, 0x84, 0x11, 0x181]) {
         expect(SigHashType.validValue(invalid), false);
         expect(() => SigHashType.checkValue(invalid), throwsArgumentError);
         expect(() => SigHashType.fromValue(invalid), throwsArgumentError);

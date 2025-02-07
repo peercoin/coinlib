@@ -26,7 +26,7 @@ void main() {
     getWitness(bool hasSig) => [
       if (hasSig) Uint8List.fromList([
         ...hexToBytes(der),
-        SigHashType.noneValue,
+        SigHashType.none().value,
       ]),
       hexToBytes(pubkeyVec),
     ];

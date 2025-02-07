@@ -1,6 +1,6 @@
 import 'dart:typed_data';
-import 'package:coinlib/src/tx/sighash/sighash_type.dart';
 import 'package:coinlib/src/tx/transaction.dart';
+import 'sighash_type.dart';
 
 abstract interface class SignatureHasher {
 
@@ -10,11 +10,11 @@ abstract interface class SignatureHasher {
     }
   }
 
-  static void checkSchnorrDisallowed(SigHashType type) {
-    if (type.schnorrDefault) {
-      throw ArgumentError(
-        "Cannot create signature hash for legacy input using default Schnorr"
-        "hash type",
+  static void checkLegacySigHashType(SigHashType type) {
+    if (!type.supportsLegacy) {
+      throw ArgumentError.value(
+        type, "type",
+        "hash type is not supported for legacy signature hashes",
       );
     }
   }

@@ -64,7 +64,7 @@ final taprootSigVectors = [
   ),
   TaprootSignatureVector(
     inputN: 1,
-    hashType: SigHashType.single(anyOneCanPay: true),
+    hashType: SigHashType.single(inputs: InputSigHashOption.anyOneCanPay),
     sigHashHex: "325a644af47e8a5a2591cda0ab0723978537318f10e6a63d4eed783b96a71a4d",
   ),
   TaprootSignatureVector(
@@ -84,12 +84,12 @@ final taprootSigVectors = [
   ),
   TaprootSignatureVector(
     inputN: 7,
-    hashType: SigHashType.none(anyOneCanPay: true),
+    hashType: SigHashType.none(inputs: InputSigHashOption.anyOneCanPay),
     sigHashHex: "cd292de50313804dabe4685e83f923d2969577191a3e1d2882220dca88cbeb10",
   ),
   TaprootSignatureVector(
     inputN: 8,
-    hashType: SigHashType.all(anyOneCanPay: true),
+    hashType: SigHashType.all(inputs: InputSigHashOption.anyOneCanPay),
     sigHashHex: "cccb739eca6c13a8a89e6e5cd317ffe55669bbda23f2fd37b0f18755e008edd2",
   ),
   TaprootSignatureVector(

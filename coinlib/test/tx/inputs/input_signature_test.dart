@@ -9,10 +9,11 @@ void main() {
 
     setUpAll(loadCoinlib);
 
+    final der = hexToBytes(validDerSigs[0]);
+
     test("valid input signature", () {
 
-      final der = hexToBytes(validDerSigs[0]);
-      final hashType = SigHashType.all(anyOneCanPay: true);
+      final hashType = SigHashType.all(inputs: InputSigHashOption.anyOneCanPay);
       final bytes = Uint8List.fromList([...der, 0x81]);
 
       expectSig(ECDSAInputSignature sig) {
@@ -30,8 +31,12 @@ void main() {
       for (final list in <List<int>>[
         [],
         [1],
-        hexToBytes(validDerSigs[0]),
-        [...hexToBytes(validDerSigs[0]), 0],
+        der,
+        [...der, 0],
+        [
+          ...der,
+          SigHashType.all(inputs: InputSigHashOption.anyPrevOut).value,
+        ],
         [...hexToBytes(invalidDerSigs[0]), 1],
       ]) {
         expect(
@@ -59,8 +64,12 @@ void main() {
       }
 
       expectSig(
-        SigHashType.all(anyOneCanPay: true),
+        SigHashType.all(inputs: InputSigHashOption.anyOneCanPay),
         Uint8List.fromList([...sig, 0x81]),
+      );
+      expectSig(
+        SigHashType.all(inputs: InputSigHashOption.anyPrevOut),
+        Uint8List.fromList([...sig, 0x41]),
       );
       expectSig(SigHashType.all(), Uint8List.fromList([...sig, 1]));
       expectSig(SigHashType.schnorrDefault(), Uint8List.fromList([...sig]));

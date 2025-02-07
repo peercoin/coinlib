@@ -92,7 +92,7 @@ void main() {
         [
           Uint8List.fromList([
             ...hexToBytes(validDerSigs[0]),
-            SigHashType.noneValue,
+            SigHashType.none().value,
           ]),
         ],
       );

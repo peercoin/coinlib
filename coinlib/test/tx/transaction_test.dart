@@ -367,7 +367,7 @@ void main() {
       // Sent 6tppc via f47fe6ce6a79734f252ceac7a0468a077b3d27e5289c5c0fb5294e0c7c07a51a
       expectP2PKH(
         prevTxIds: ["f47fe6ce6a79734f252ceac7a0468a077b3d27e5289c5c0fb5294e0c7c07a51a"],
-        hashType: SigHashType.single(anyOneCanPay: true),
+        hashType: SigHashType.single(inputs: InputSigHashOption.anyOneCanPay),
         hex: "03000000011aa5077c0c4e29b50f5c9c28e5273d7b078a46a0c7ea2c254f73796acee67ff4010000006a47304402206716517f2f9ee8d4fbcbc186f2e31e366e54821b2cbf4d1f9df480be300a4657022016572e39f86552958e043252390f4a17cd08caf1667a08e342b93b9b3ac020ab83210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ffffffff01a0860100000000001976a914c42e7ef92fdb603af844d064faad95db9bcdfd3d88ac00000000",
       );
 
@@ -393,7 +393,7 @@ void main() {
           "c8d7587c66e8d803a2a802658d51e2accb6ede1e472ecd1e55b6202a47447e7f",
           "ead28731d0bf3d5d2ac014edb5b4edfa862d9ea6a67ae1147e32b5c4c6cfebab",
         ],
-        hashType: SigHashType.all(anyOneCanPay: true),
+        hashType: SigHashType.all(inputs: InputSigHashOption.anyOneCanPay),
         hex: "03000000027f7e44472a20b6551ecd2e471ede6ecbace2518d6502a8a203d8e8667c58d7c8010000006a47304402201117e6fb5b1cb0fd893c506051f60b1a7b0cf7bd404a1793a6a02c3fca6b0d5b0220761bef6978d8820694707de4569cd8ece2226ad8f67b6d97b5156cfc17697c3081210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ffffffffabebcfc6c4b5327e14e17aa6a69e2d86faedb4b5ed14c02a5d3dbfd03187d2ea010000006a47304402202afa1ec80ed42799869da5698b5ee0341a25bcdf3a4eafd142be5b4f90f4a03e022019bb83ad4b12a7ea7c65d8bdc4f112825ba2327f502377fa18f0395854bfa77581210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ffffffff01a0860100000000001976a914c42e7ef92fdb603af844d064faad95db9bcdfd3d88ac00000000",
       );
 
@@ -481,7 +481,7 @@ void main() {
         inputN: 1,
         key: tweakedPriv,
         prevOuts: prevOuts,
-        hashType: SigHashType.all(anyOneCanPay: true),
+        hashType: SigHashType.all(inputs: InputSigHashOption.anyOneCanPay),
       );
 
       expect(signed.complete, true);
@@ -626,7 +626,7 @@ void main() {
       signed = signed.sign(
         inputN: 1,
         key: privkeys[3],
-        hashType: SigHashType.all(anyOneCanPay: true),
+        hashType: SigHashType.all(inputs: InputSigHashOption.anyOneCanPay),
       );
       expect(signed.complete, false);
 
@@ -660,7 +660,7 @@ void main() {
         signed, [
           SigHashType.single(),
           SigHashType.none(),
-          SigHashType.all(anyOneCanPay: true),
+          SigHashType.all(inputs: InputSigHashOption.anyOneCanPay),
         ],
       );
       expect(
@@ -673,7 +673,7 @@ void main() {
         signed.addInput(
           P2PKHInput(prevOut: examplePrevOut, publicKey: examplePubkey),
         ),
-        [SigHashType.all(anyOneCanPay: true)],
+        [SigHashType.all(inputs: InputSigHashOption.anyOneCanPay)],
       );
 
       // addOutput only invalidates SIGHASH_ALL
@@ -758,7 +758,7 @@ void main() {
       .sign(
         inputN: 2,
         key: keyVec.privateObj,
-        hashType: SigHashType.all(anyOneCanPay: true),
+        hashType: SigHashType.all(inputs: InputSigHashOption.anyOneCanPay),
       )
       .sign(
         inputN: 3,
@@ -770,7 +770,7 @@ void main() {
       .sign(
         inputN: 5,
         key: keyVec.privateObj,
-        hashType: SigHashType.all(anyOneCanPay: true),
+        hashType: SigHashType.all(inputs: InputSigHashOption.anyOneCanPay),
         value: value,
       )
       .sign(
@@ -784,7 +784,7 @@ void main() {
       .sign(
         inputN: 8,
         key: keyVec.privateObj,
-        hashType: SigHashType.all(anyOneCanPay: true),
+        hashType: SigHashType.all(inputs: InputSigHashOption.anyOneCanPay),
         prevOuts: taprootPrevOuts,
       )
       .sign(
