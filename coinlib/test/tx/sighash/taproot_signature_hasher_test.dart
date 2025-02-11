@@ -114,13 +114,17 @@ void main() {
       expect(
         bytesToHex(
           TaprootSignatureHasher(
-            tx: tx,
-            inputN: vec.inputN,
-            prevOuts: prevOuts,
-            leafHash: vec.leafHashHex == null
-              ? null
-              : hexToBytes(vec.leafHashHex!),
-            hashType: vec.hashType,
+            TaprootSignDetails(
+              tx: tx,
+              inputN: vec.inputN,
+              prevOuts: vec.hashType.anyOneCanPay
+                ? [prevOuts[vec.inputN]]
+                : prevOuts,
+              leafHash: vec.leafHashHex == null
+                ? null
+                : hexToBytes(vec.leafHashHex!),
+              hashType: vec.hashType,
+            ),
           ).hash,
         ),
         vec.sigHashHex,
@@ -130,22 +134,41 @@ void main() {
 
   test("input out of range", () => expect(
     () => TaprootSignatureHasher(
-      tx: tx,
-      inputN: 9,
-      prevOuts: prevOuts,
-      hashType: SigHashType.all(),
+      TaprootKeySignDetails(
+        tx: tx,
+        inputN: 9,
+        prevOuts: prevOuts,
+        hashType: SigHashType.all(),
+      ),
     ),
     throwsArgumentError,
   ),);
 
-  test("prevOuts length incorrect", () => expect(
-    () => TaprootSignatureHasher(
-      tx: tx,
-      inputN: 0,
-      prevOuts: prevOuts.sublist(0, prevOuts.length-1),
-      hashType: SigHashType.all(),
-    ),
-    throwsArgumentError,
-  ),);
+  test("prevOuts length incorrect", () {
+    for(final (hashType, length) in [
+      (SigHashType.all(), prevOuts.length-1),
+      (SigHashType.all(inputs: InputSigHashOption.anyOneCanPay), prevOuts.length),
+      (SigHashType.all(inputs: InputSigHashOption.anyPrevOut), prevOuts.length),
+      (
+        SigHashType.all(inputs: InputSigHashOption.anyPrevOutAnyScript),
+        prevOuts.length,
+      ),
+      (SigHashType.all(inputs: InputSigHashOption.anyOneCanPay), 2),
+      (SigHashType.all(inputs: InputSigHashOption.anyPrevOut), 2),
+      (SigHashType.all(inputs: InputSigHashOption.anyPrevOutAnyScript), 1),
+    ]) {
+      () => expect(
+        () => TaprootSignatureHasher(
+          TaprootKeySignDetails(
+            tx: tx,
+            inputN: 0,
+            prevOuts: prevOuts.sublist(0, length),
+            hashType: hashType,
+          ),
+        ),
+        throwsArgumentError,
+      );
+    }
+  });
 
 }

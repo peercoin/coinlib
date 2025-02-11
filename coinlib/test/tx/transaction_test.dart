@@ -175,11 +175,16 @@ void main() {
 
     });
 
-    test("sign() failure", () {
+    void expectCannotSign(void Function() doSign) => expect(
+      doSign, throwsA(isA<CannotSignInput>()),
+    );
+
+    test("sign failures", () {
 
       final privkey = ECPrivateKey.generate();
       final pubkey = privkey.pubkey;
       final wrongkey = ECPrivateKey.generate();
+      final value = BigInt.parse("10000");
 
       final txNoOutput = Transaction(
         inputs: [
@@ -196,59 +201,47 @@ void main() {
 
       // SIGHASH_NONE OK with no outputs
       expect(
-        txNoOutput.sign(inputN: 1, key: privkey, hashType: SigHashType.none()),
+        txNoOutput.signLegacy(
+          inputN: 1, key: privkey, hashType: SigHashType.none(),
+        ),
         isA<Transaction>(),
       );
 
       // No outputs
-      expect(
-        () => txNoOutput.sign(inputN: 1, key: privkey),
-        throwsA(isA<CannotSignInput>()),
-      );
+      expectCannotSign(() => txNoOutput.signLegacy(inputN: 1, key: privkey));
 
       final tx = txNoOutput.addOutput(exampleOutput);
 
       // OK
-      expect(tx.sign(inputN: 1, key: privkey), isA<Transaction>());
+      expect(tx.signLegacy(inputN: 1, key: privkey), isA<Transaction>());
 
       // Input out of range
-      expect(() => tx.sign(inputN: 4, key: privkey), throwsArgumentError);
+      expect(() => tx.signLegacy(inputN: 4, key: privkey), throwsRangeError);
 
       // Wrong key for P2PKH
-      expect(
-        () => tx.sign(inputN: 1, key: wrongkey),
-        throwsA(isA<CannotSignInput>()),
-      );
+      expectCannotSign(() => tx.signLegacy(inputN: 1, key: wrongkey));
 
-      // Cannot sign witness input without value
-      expect(
-        () => tx.sign(inputN: 0, key: privkey),
-        throwsA(isA<CannotSignInput>()),
-      );
+      // Cannot sign witness input as legacy
+      expectCannotSign(() => tx.signLegacy(inputN: 0, key: privkey));
 
       // Cannot sign raw unmatched input
-      expect(
-        () => tx.sign(inputN: 3, key: privkey),
-        throwsA(isA<CannotSignInput>()),
-      );
+      expectCannotSign(() => tx.signLegacy(inputN: 3, key: privkey));
 
       // Cannot use schnorrDefault to sign legacy inputs
-      expect(
-        () => tx.sign(
+      expectCannotSign(
+        () => tx.signLegacy(
           inputN: 1,
           key: privkey,
           hashType: SigHashType.schnorrDefault(),
         ),
-        throwsA(isA<CannotSignInput>()),
       );
-      expect(
-        () => tx.sign(
+      expectCannotSign(
+        () => tx.signLegacyWitness(
           inputN: 0,
           key: privkey,
           hashType: SigHashType.schnorrDefault(),
-          value: BigInt.parse("10000"),
+          value: value,
         ),
-        throwsA(isA<CannotSignInput>()),
       );
 
       // Taproot tests
@@ -263,40 +256,75 @@ void main() {
         Output.blank(),
       ];
 
-      // Require prev outs for TR
-      expect(
-        () => tx.sign(
-          inputN: 2,
-          key: tweakedKey,
-        ),
-        throwsA(isA<CannotSignInput>()),
+      // Cannot sign taproot as legacy
+      expectCannotSign(() => tx.signLegacy(inputN: 2, key: tweakedKey));
+      expectCannotSign(
+        () => tx.signLegacyWitness(inputN: 2, key: tweakedKey, value: value),
       );
 
-      // Require prev out number to match number of inputs
-      expect(
-        () => tx.sign(
+      // Require prev out number to match number of inputs when signing all
+      // inputs
+      expectCannotSign(
+        () => tx.signTaproot(
           inputN: 2,
           key: tweakedKey,
-          prevOuts: prevOuts.sublist(0, 3),
+          prevOuts: prevOuts.take(3).toList(),
         ),
-        throwsA(isA<CannotSignInput>()),
+      );
+
+      /// Should have only one prevOut for ANYONECANPAY
+      expectCannotSign(
+        () => tx.signTaproot(
+          inputN: 2,
+          key: tweakedKey,
+          prevOuts: prevOuts,
+          hashType: SigHashType.all(inputs: InputSigHashOption.anyOneCanPay),
+        ),
       );
 
       // Wrong (untweaked) key for TR
-      expect(
-        () => tx.sign(
+      expectCannotSign(
+        () => tx.signTaproot(inputN: 2, key: privkey, prevOuts: prevOuts),
+      );
+
+      // Require matching output for SIGHASH_SINGLE
+      expectCannotSign(
+        () => tx.signTaproot(
           inputN: 2,
-          key: privkey,
+          key: tweakedKey,
           prevOuts: prevOuts,
+          hashType: SigHashType.single(),
         ),
-        throwsA(isA<CannotSignInput>()),
       );
 
       // Ensure it does work with correct key
       expect(
-        tx.sign(inputN: 2, key: tweakedKey, prevOuts: prevOuts),
+        tx.signTaproot(inputN: 2, key: tweakedKey, prevOuts: prevOuts),
         isA<Transaction>(),
       );
+
+      // Disallow APO
+      for (final apoType in [
+        SigHashType.all(inputs: InputSigHashOption.anyPrevOut),
+        SigHashType.all(inputs: InputSigHashOption.anyPrevOutAnyScript),
+      ]) {
+        expectCannotSign(
+          () => tx.signLegacy(inputN: 1, key: privkey, hashType: apoType),
+        );
+        expectCannotSign(
+          () => tx.signLegacyWitness(
+            inputN: 0, key: privkey, value: value, hashType: apoType,
+          ),
+        );
+        expectCannotSign(
+          () => tx.signTaproot(
+            inputN: 2,
+            key: privkey,
+            prevOuts: apoType.anyPrevOutAnyScript ? [] : [prevOuts[2]],
+            hashType: apoType,
+          ),
+        );
+      }
 
     });
 
@@ -330,7 +358,7 @@ void main() {
 
         var signed = tx;
         for (int i = 0; i < tx.inputs.length; i++) {
-          signed = signed.sign(
+          signed = signed.signLegacy(
             inputN: i,
             key: keyVec.privateObj,
             hashType: hashType,
@@ -424,10 +452,10 @@ void main() {
       );
       expect(tx.complete, false);
 
-      final partSigned = tx.sign(inputN: 0, key: keyVec.privateObj);
+      final partSigned = tx.signLegacy(inputN: 0, key: keyVec.privateObj);
       expect(partSigned.complete, false);
 
-      final signed = partSigned.sign(
+      final signed = partSigned.signLegacyWitness(
         inputN: 1, key: keyVec.privateObj, value: BigInt.from(3000000),
       );
       expect(signed.complete, true);
@@ -473,14 +501,14 @@ void main() {
       ];
       final tweakedPriv = taproot.tweakPrivateKey(keyVec.privateObj);
 
-      final signed = tx.sign(
+      final signed = tx.signTaproot(
         inputN: 0,
         key: tweakedPriv,
         prevOuts: prevOuts,
-      ).sign(
+      ).signTaproot(
         inputN: 1,
         key: tweakedPriv,
-        prevOuts: prevOuts,
+        prevOuts: [prevOuts[1]],
         hashType: SigHashType.all(inputs: InputSigHashOption.anyOneCanPay),
       );
 
@@ -491,7 +519,7 @@ void main() {
 
       expect(
         signed.toHex(),
-        "03000000000102c17074e66379635bdab769340f8acc2feea02f9d6c177cb8969c59a97fcf68ec0100000000ffffffff1e218726e8c81578cd9ed1b5568f5eff482d70f59571fed851514656071ddaca0100000000ffffffff01a0860100000000001976a914c42e7ef92fdb603af844d064faad95db9bcdfd3d88ac0141525f7f8e98fe4a116131c1d51aba29bbe15852260faa5308d23768d4d99251004b56306396f5f07018e7a94b41594a485455107b818d1c8899a18afbc98618b0010141399278f778c70fc3a7eee1997cb53acbef4a86ab65d85c12d40286f26cb50b189656df26d86e9be4f16bfe0b574d3f632e2b537d19d0e04d545e61c3d76b07058100000000",
+        "03000000000102c17074e66379635bdab769340f8acc2feea02f9d6c177cb8969c59a97fcf68ec0100000000ffffffff1e218726e8c81578cd9ed1b5568f5eff482d70f59571fed851514656071ddaca0100000000ffffffff01a0860100000000001976a914c42e7ef92fdb603af844d064faad95db9bcdfd3d88ac0140b9fa12df36bdab8b63eb647986da6b66d8f64210cd73f5c4a6a1ce0d772590da21aece30df4cd3bd5174206d46cc837b71af3fbd0f54de27e44c6abfbb170d1f0141399278f778c70fc3a7eee1997cb53acbef4a86ab65d85c12d40286f26cb50b189656df26d86e9be4f16bfe0b574d3f632e2b537d19d0e04d545e61c3d76b07058100000000",
       );
 
       // Invalidates first input and keeps ANYONECANPAY when adding new input
@@ -562,10 +590,12 @@ void main() {
 
       final solvedInput = inputToSign.updateStack([
         inputToSign.createScriptSignature(
-          tx: tx,
-          inputN: 0,
+          details: TaprootKeySignDetails(
+            tx: tx,
+            inputN: 0,
+            prevOuts: [prevOut],
+          ),
           key: keyPairVectors[2].privateObj,
-          prevOuts: [prevOut],
         ).bytes,
       ]);
       final solvedTx = tx.replaceInput(solvedInput, 0);
@@ -619,11 +649,11 @@ void main() {
       final signedSizeFromUnsigned = tx.inputs[1].signedSize;
 
       // Sign first P2PKH input
-      var signed = tx.sign(inputN: 0, key: privkeys[0]);
+      var signed = tx.signLegacy(inputN: 0, key: privkeys[0]);
       expect(signed.complete, false);
 
       // Sign 3 with SIGHASH_ALL and ANYONECANPAY
-      signed = signed.sign(
+      signed = signed.signLegacy(
         inputN: 1,
         key: privkeys[3],
         hashType: SigHashType.all(inputs: InputSigHashOption.anyOneCanPay),
@@ -631,7 +661,7 @@ void main() {
       expect(signed.complete, false);
 
       // Sign 1 with SIGHASH_SINGLE
-      signed = signed.sign(
+      signed = signed.signLegacy(
         inputN: 1,
         key: privkeys[1],
         hashType: SigHashType.single(),
@@ -639,7 +669,7 @@ void main() {
       expect(signed.complete, false);
 
       // Sign 2 with SIGHASH_NONE
-      signed = signed.sign(
+      signed = signed.signLegacy(
         inputN: 1,
         key: privkeys[2],
         hashType: SigHashType.none(),
@@ -699,7 +729,11 @@ void main() {
 
       for (int i = 0; i < 2; i++) {
         expect(tx.complete, false);
-        tx = tx.sign(inputN: i, key: privkey, hashType: SigHashType.single());
+        tx = tx.signLegacy(
+          inputN: i,
+          key: privkey,
+          hashType: SigHashType.single(),
+        );
       }
 
       expect(tx.complete, true);
@@ -754,40 +788,40 @@ void main() {
         outputs: [exampleOutput],
       )
       // Sign legacy
-      .sign(inputN: 0, key: keyVec.privateObj)
-      .sign(
+      .signLegacy(inputN: 0, key: keyVec.privateObj)
+      .signLegacy(
         inputN: 2,
         key: keyVec.privateObj,
         hashType: SigHashType.all(inputs: InputSigHashOption.anyOneCanPay),
       )
-      .sign(
+      .signLegacy(
         inputN: 3,
         key: keyVec.privateObj,
         hashType: SigHashType.single(),
       )
       // Sign witness
-      .sign(inputN: 4, key: keyVec.privateObj, value: value)
-      .sign(
+      .signLegacyWitness(inputN: 4, key: keyVec.privateObj, value: value)
+      .signLegacyWitness(
         inputN: 5,
         key: keyVec.privateObj,
         hashType: SigHashType.all(inputs: InputSigHashOption.anyOneCanPay),
         value: value,
       )
-      .sign(
+      .signLegacyWitness(
         inputN: 6,
         key: keyVec.privateObj,
         hashType: SigHashType.none(),
         value: value,
       )
       // Sign taproot
-      .sign(inputN: 7, key: keyVec.privateObj, prevOuts: taprootPrevOuts)
-      .sign(
+      .signTaproot(inputN: 7, key: keyVec.privateObj, prevOuts: taprootPrevOuts)
+      .signTaproot(
         inputN: 8,
         key: keyVec.privateObj,
         hashType: SigHashType.all(inputs: InputSigHashOption.anyOneCanPay),
-        prevOuts: taprootPrevOuts,
+        prevOuts: [taprootPrevOuts[8]],
       )
-      .sign(
+      .signTaproot(
         inputN: 9,
         key: keyVec.privateObj,
         hashType: SigHashType.none(),
@@ -855,8 +889,7 @@ void main() {
 
       // Sign second input outside tx and check it is OK
       final signedIn = (tx.inputs[1] as P2PKHInput).sign(
-        tx: tx,
-        inputN: 1,
+        details: LegacySignDetails(tx: tx, inputN: 1),
         key: keyVec.privateObj,
       );
       final signedTx = tx.replaceInput(signedIn, 1);
@@ -865,7 +898,7 @@ void main() {
 
       expect(
         signedTx.toHex(),
-        "0300000000010af1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe000000006a473044022079f777b6059975ce333332bb3ecde653be038dcbddefc7920072124b1ffe43fc022030926798d6440ea69aab4e28a3ebf84fa46f3f31ae2c1c38b04c73120abea2cf01210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798fffffffff1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe000000006a47304402201e8ab341d37d9cdd8563d649e710eee973ae601fe61b57da6e1d7ae10ba21a7a022023a9d5b20a43df3c60697c876ba2030d754dda0e07804a699222616ffce3cf3801210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798fffffffff1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe000000006a47304402202c2f712bbef221026214ae9e54e817eb73df6c73aca4d35b5190caf28c454cd102207dc3750935a86b4431e55476a1e049d3d8ee7cf13162f264ce9964afa4b09c7181210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798fffffffff1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe000000006a47304402205a0d9a76a926bce5a74db8fa127d8c8779d868de26c1422f4b8acd3f8735ba580220381287903eeb349023c8d6a0d77ddcdf9fcbc01ce968627183f124ecd5e860c203210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798fffffffff1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe0000000000fffffffff1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe0000000000fffffffff1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe0000000000fffffffff1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe0000000000fffffffff1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe0000000000fffffffff1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe0000000000ffffffff01a0860100000000001976a914c42e7ef92fdb603af844d064faad95db9bcdfd3d88ac00000000024730440220487c6b12556adc75a199a8b390d38b928bd4efbb831f2010250389995fee821302204dfa74a4e7711a8b96249a6ec7836e4cc374d6dbf3864fdd142a25a67663ebfe01210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f817980247304402206e47c35235a3f5dab7420ad3e2ecdc395cb402b9fc29e8ada89ff6e380ac4df3022010812c5beacf5ef47ac380511989d204804b33a664ffe9019ea8be23ccf56f2981210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f817980247304402202b4600fe4e9823210f36074f9e3d1fa442d940e00970b707014630f2a2f695b402203e2468c4c2501959a92fafe6475cff1ba1497b5e50c77701188923399654d1d602210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f8179801416dc042d6c7ada370318f0d33e16421154964ad39c8b7ee275fcaa681a2ebfe48d9b53033672b232821e94aafa0772174d20c99a97e8b44b53937a0cd9caf904d010141af1a113a9cd6f83655cb1444e8f8e3bf07751381a942a3a35b40bac08f61c56a8736a49d8998380305e488e156ecd0516b40474db401ba359ef46cd49d96743d810141f2edfd966b88a16e30c840bf8a93e05bd2bc2bed954a01712bc0ff2fbfcdff654f6262054ba965b09c08e03c8e29c2bd19fd6a2294e5464fa45f58908fab0c8e0200000000",
+        "0300000000010af1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe000000006a473044022079f777b6059975ce333332bb3ecde653be038dcbddefc7920072124b1ffe43fc022030926798d6440ea69aab4e28a3ebf84fa46f3f31ae2c1c38b04c73120abea2cf01210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798fffffffff1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe000000006a47304402201e8ab341d37d9cdd8563d649e710eee973ae601fe61b57da6e1d7ae10ba21a7a022023a9d5b20a43df3c60697c876ba2030d754dda0e07804a699222616ffce3cf3801210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798fffffffff1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe000000006a47304402202c2f712bbef221026214ae9e54e817eb73df6c73aca4d35b5190caf28c454cd102207dc3750935a86b4431e55476a1e049d3d8ee7cf13162f264ce9964afa4b09c7181210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798fffffffff1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe000000006a47304402205a0d9a76a926bce5a74db8fa127d8c8779d868de26c1422f4b8acd3f8735ba580220381287903eeb349023c8d6a0d77ddcdf9fcbc01ce968627183f124ecd5e860c203210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798fffffffff1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe0000000000fffffffff1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe0000000000fffffffff1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe0000000000fffffffff1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe0000000000fffffffff1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe0000000000fffffffff1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe0000000000ffffffff01a0860100000000001976a914c42e7ef92fdb603af844d064faad95db9bcdfd3d88ac00000000024730440220487c6b12556adc75a199a8b390d38b928bd4efbb831f2010250389995fee821302204dfa74a4e7711a8b96249a6ec7836e4cc374d6dbf3864fdd142a25a67663ebfe01210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f817980247304402206e47c35235a3f5dab7420ad3e2ecdc395cb402b9fc29e8ada89ff6e380ac4df3022010812c5beacf5ef47ac380511989d204804b33a664ffe9019ea8be23ccf56f2981210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f817980247304402202b4600fe4e9823210f36074f9e3d1fa442d940e00970b707014630f2a2f695b402203e2468c4c2501959a92fafe6475cff1ba1497b5e50c77701188923399654d1d602210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f817980140622c919fec9e9eeb8e7561bb768c6b7559e9aae170d2269c06f74b57cca6ce447dc9dc3789cd96d304faa7b759a6cfcc9287d965f34a911960c29f0eac9a79ad0141af1a113a9cd6f83655cb1444e8f8e3bf07751381a942a3a35b40bac08f61c56a8736a49d8998380305e488e156ecd0516b40474db401ba359ef46cd49d96743d810141f2edfd966b88a16e30c840bf8a93e05bd2bc2bed954a01712bc0ff2fbfcdff654f6262054ba965b09c08e03c8e29c2bd19fd6a2294e5464fa45f58908fab0c8e0200000000",
       );
 
     });

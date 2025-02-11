@@ -3,8 +3,7 @@ import 'package:coinlib/src/crypto/ec_private_key.dart';
 import 'package:coinlib/src/scripts/programs/p2tr.dart';
 import 'package:coinlib/src/taproot.dart';
 import 'package:coinlib/src/tx/inputs/taproot_input.dart';
-import 'package:coinlib/src/tx/output.dart';
-import 'package:coinlib/src/tx/sighash/sighash_type.dart';
+import 'package:coinlib/src/tx/sign_details.dart';
 import 'package:coinlib/src/tx/transaction.dart';
 import 'input.dart';
 import 'input_signature.dart';
@@ -45,40 +44,26 @@ class TaprootKeyInput extends TaprootInput {
 
   }
 
-  @override
   /// Return a signed Taproot input using tweaked private key for the key-path
   /// spend. The [key] should be tweaked by [Taproot.tweakScalar].
   TaprootKeyInput sign({
-    required Transaction tx,
-    required int inputN,
+    required TaprootKeySignDetails details,
     required ECPrivateKey key,
-    required List<Output> prevOuts,
-    SigHashType hashType = const SigHashType.schnorrDefault(),
   }) {
 
-    if (inputN >= prevOuts.length) {
-      throw CannotSignInput(
-        "Input is out of range of the previous outputs provided",
-      );
+    if (details.hashType.requiresApo) {
+      throw CannotSignInput("A Taproot key-spend doesn't support APO");
     }
 
     // Check key corresponds to matching prevOut
-    final program = prevOuts[inputN].program;
+    final program = details.program;
     if (program is! P2TR || key.pubkey.xonly != program.tweakedKey) {
       throw CannotSignInput(
         "Key cannot sign for Taproot input's tweaked key",
       );
     }
 
-    return addSignature(
-      createInputSignature(
-        tx: tx,
-        inputN: inputN,
-        key: key,
-        prevOuts: prevOuts,
-        hashType: hashType,
-      ),
-    );
+    return addSignature(createInputSignature(key: key, details: details));
 
   }
 

@@ -154,7 +154,7 @@ void main() {
 
           var tx = selection.transaction;
           for (int i = 0; i < vector.inputValues.length; i++) {
-            tx = tx.sign(inputN: i, key: keyPairVectors[0].privateObj);
+            tx = tx.signLegacy(inputN: i, key: keyPairVectors[0].privateObj);
           }
 
           expect(

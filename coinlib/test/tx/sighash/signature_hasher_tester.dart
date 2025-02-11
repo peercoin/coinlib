@@ -49,7 +49,7 @@ void signatureHasherTester(
             witnessHash: "",
           ),
         ),
-        throwsArgumentError,
+        throwsA(isA<CannotSignInput>()),
       );
     }
   });

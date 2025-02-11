@@ -4,41 +4,29 @@ import 'package:coinlib/src/crypto/hash.dart';
 import 'package:coinlib/src/scripts/operations.dart';
 import 'package:coinlib/src/scripts/script.dart';
 import 'package:coinlib/src/tx/inputs/raw_input.dart';
-import 'package:coinlib/src/tx/sighash/sighash_type.dart';
 import 'package:coinlib/src/tx/output.dart';
+import 'package:coinlib/src/tx/sign_details.dart';
 import 'package:coinlib/src/tx/transaction.dart';
 import 'signature_hasher.dart';
 
 /// Produces signature hashes for legacy non-witness inputs.
-final class LegacySignatureHasher implements SignatureHasher {
+final class LegacySignatureHasher extends SignatureHasher {
 
   static final ScriptOp _codeseperator = ScriptOpCode.fromName("CODESEPARATOR");
   static final _hashOne = Uint8List(32)..last = 1;
 
-  final Transaction tx;
-  final int inputN;
-  final Script scriptCode;
-  final SigHashType hashType;
+  @override
+  final LegacySignDetailsWithScript details;
 
-  /// Produces the hash of an input signature for a non-witness input at
-  /// [inputN]. The [scriptCode] of the redeem script is necessary. [hashType]
-  /// controls what data is included in the signature.
-  LegacySignatureHasher({
-    required this.tx,
-    required this.inputN,
-    required this.scriptCode,
-    required this.hashType,
-  }) {
-    SignatureHasher.checkInputN(tx, inputN);
-    SignatureHasher.checkLegacySigHashType(hashType);
-  }
+  /// Produces the hash of an input signature for a non-witness input.
+  LegacySignatureHasher(this.details);
 
   @override
   Uint8List get hash {
 
     // Remove OP_CODESEPERATOR from the script code
     final correctedScriptSig = Script(
-      scriptCode.ops.where((op) => !op.match(_codeseperator)),
+      details.scriptCode.ops.where((op) => !op.match(_codeseperator)),
     ).compiled;
 
     // If there is no matching output for SIGHASH_SINGLE, then return all null
@@ -48,7 +36,7 @@ final class LegacySignatureHasher implements SignatureHasher {
     // Create modified transaction for obtaining a signature hash
 
     final modifiedInputs = (
-      hashType.anyOneCanPay ? [tx.inputs[inputN]] : tx.inputs
+      hashType.anyOneCanPay ? [thisInput] : tx.inputs
     ).asMap().map(
       (index, input) {
         final isThisInput = hashType.anyOneCanPay || index == inputN;

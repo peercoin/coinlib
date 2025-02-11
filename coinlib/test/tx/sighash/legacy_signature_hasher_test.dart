@@ -7,10 +7,12 @@ void main() {
   signatureHasherTester(
     "LegacySignatureHasher",
     (Transaction tx, int inputN, SigHashVector vec) => LegacySignatureHasher(
-      tx: tx,
-      inputN: inputN,
-      scriptCode: Script.fromAsm(vec.scriptCodeAsm),
-      hashType: vec.type,
+      LegacySignDetailsWithScript(
+        tx: tx,
+        inputN: inputN,
+        scriptCode: Script.fromAsm(vec.scriptCodeAsm),
+        hashType: vec.type,
+      ),
     ).hash,
     (SigHashVector vec) => vec.hash,
   );

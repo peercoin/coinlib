@@ -108,18 +108,20 @@ void main() {
     test(".sign() should sign as SIGHASH_DEFAULT by default", () {
       final input = TaprootKeyInput(prevOut: prevOut);
       final signedInput = input.sign(
-        tx: Transaction(
-          inputs: [input],
-          outputs: [exampleOutput],
-        ),
-        inputN: 0,
-        key: keyPairVectors[0].privateObj,
-        prevOuts: [
-          Output.fromProgram(
-            BigInt.from(10000),
-            P2TR.fromTweakedKey(keyPairVectors[0].publicObj),
+        details: TaprootKeySignDetails(
+          tx: Transaction(
+            inputs: [input],
+            outputs: [exampleOutput],
           ),
-        ],
+          inputN: 0,
+          prevOuts: [
+            Output.fromProgram(
+              BigInt.from(10000),
+              P2TR.fromTweakedKey(keyPairVectors[0].publicObj),
+            ),
+          ],
+        ),
+        key: keyPairVectors[0].privateObj,
       );
       expect(signedInput.insig!.hashType.schnorrDefault, true);
     });

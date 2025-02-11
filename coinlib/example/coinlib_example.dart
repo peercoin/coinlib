@@ -76,7 +76,7 @@ void main() async {
 
   // Sign the input with the private key. The signed transaction is returned as
   // a new object as most objects in the library are immutable.
-  final signedTx = tx.sign(inputN: 0, key: key1.privateKey);
+  final signedTx = tx.signLegacy(inputN: 0, key: key1.privateKey);
 
   if (signedTx.complete) {
     print("Signed transaction is complete");
@@ -106,7 +106,7 @@ void main() async {
   final trTx = Transaction(
     inputs: [TaprootKeyInput(prevOut: OutPoint(prevHash, 1))],
     outputs: [trOutput],
-  ).sign(
+  ).signTaproot(
     inputN: 0,
     // Private keys must be tweaked by the Taproot object
     key: taproot.tweakPrivateKey(key1.privateKey),

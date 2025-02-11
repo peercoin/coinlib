@@ -9,13 +9,11 @@ import 'inputs/input.dart';
 import 'inputs/input_signature.dart';
 import 'inputs/legacy_input.dart';
 import 'inputs/legacy_witness_input.dart';
-import 'inputs/p2pkh_input.dart';
-import 'inputs/p2sh_multisig_input.dart';
-import 'inputs/p2wpkh_input.dart';
 import 'inputs/raw_input.dart';
 import 'inputs/witness_input.dart';
 import 'sighash/sighash_type.dart';
 import 'output.dart';
+import 'sign_details.dart';
 
 class TransactionTooLarge implements Exception {}
 class InvalidTransaction implements Exception {}
@@ -186,102 +184,88 @@ class Transaction with Writable {
 
   }
 
-  /// Sign the input at [inputN] with the [key] and [hashType] and return a new
-  /// [Transaction] with the signed input. The input must be a signable
-  /// [P2PKHInput], [P2WPKHInput], [P2SHMultisigInput] or [TaprootKeyInput].
-  /// Otherwise [CannotSignInput] will be thrown. Other inputs may be signed
-  /// seperately and inserted back into the transaction via [replaceInput].
-  /// [value] is only required for P2WPKH.
-  /// [prevOuts] is only required for Taproot inputs.
-  Transaction sign({
+  Transaction _newInputs(List<Input> newInputs) => Transaction(
+    version: version,
+    inputs: newInputs,
+    outputs: outputs,
+    locktime: locktime,
+  );
+
+  T _requireInputOfType<T>(int inputN) {
+    if (inputN < 0 || inputN >= inputs.length) {
+      throw RangeError.range(inputN, 0, inputs.length-1, "inputN");
+    }
+    final input = inputs[inputN];
+    if (input is! T) throw CannotSignInput("Input to sign is not a $T");
+    return input as T;
+  }
+
+  Transaction _replaceNewlySigned(int n, Input input) => _newInputs(
+    [...inputs.take(n), input, ...inputs.skip(n+1)],
+  );
+
+  /// Sign a [LegacyInput] at [inputN] with the [key]. The signature hash is
+  /// SIGHASH_ALL by default but can be changed via [hashType].
+  Transaction signLegacy({
     required int inputN,
     required ECPrivateKey key,
     SigHashType hashType = const SigHashType.all(),
-    BigInt? value,
-    List<Output>? prevOuts,
-  }) {
+  }) => _replaceNewlySigned(
+    inputN,
+    _requireInputOfType<LegacyInput>(inputN).sign(
+      details: LegacySignDetails(tx: this, inputN: inputN, hashType: hashType),
+      key: key,
+    ),
+  );
 
-    if (inputN >= inputs.length) {
-      throw ArgumentError.value(inputN, "inputN", "outside range of inputs");
-    }
-
-    if (!hashType.none && outputs.isEmpty) {
-      throw CannotSignInput("Cannot sign input without any outputs");
-    }
-
-    final input = inputs[inputN];
-
-    // Sign input
-    late Input signedIn;
-
-    if (input is LegacyInput) {
-      signedIn = input.sign(
+  /// Sign a [LegacyWitnessInput] at [inputN] with the [key]. Must contain the
+  /// [value] being spent. The signature hash is SIGHASH_ALL by default but can
+  /// be changed via [hashType].
+  Transaction signLegacyWitness({
+    required int inputN,
+    required ECPrivateKey key,
+    required BigInt value,
+    SigHashType hashType = const SigHashType.all(),
+  }) => _replaceNewlySigned(
+    inputN,
+    _requireInputOfType<LegacyWitnessInput>(inputN).sign(
+      details: LegacyWitnessSignDetails(
         tx: this,
         inputN: inputN,
-        key: key,
-        hashType: hashType,
-      );
-    } else if (input is LegacyWitnessInput) {
-
-      if (value == null) {
-        throw CannotSignInput("Prevout values are required for witness inputs");
-      }
-
-      signedIn = input.sign(
-        tx: this,
-        inputN: inputN,
-        key: key,
         value: value,
         hashType: hashType,
-      );
+      ),
+      key: key,
+    ),
+  );
 
-    } else if (input is TaprootKeyInput) {
-
-      if (prevOuts == null) {
-        throw CannotSignInput(
-          "Previous outputs are required when signing a taproot input",
-        );
-      }
-
-      if (prevOuts.length != inputs.length) {
-        throw CannotSignInput(
-          "The number of previous outputs must match the number of inputs",
-        );
-      }
-
-      signedIn = input.sign(
+  /// Sign a [TaprootKeyInput] at [inputN] with the [key]. If all inputs are
+  /// being signed, all previous outputs must be provided to [prevOuts]. If
+  /// ANYONECANPAY is used, only the output of the input should be included in
+  /// [prevOuts]. The signature hash is SIGHASH_DEFAULT by default but can be
+  /// changed via [hashType].
+  Transaction signTaproot({
+    required int inputN,
+    required ECPrivateKey key,
+    required List<Output> prevOuts,
+    SigHashType hashType = const SigHashType.schnorrDefault(),
+  }) => _replaceNewlySigned(
+    inputN,
+    _requireInputOfType<TaprootKeyInput>(inputN).sign(
+      details: TaprootKeySignDetails(
         tx: this,
         inputN: inputN,
-        key: key,
         prevOuts: prevOuts,
         hashType: hashType,
-      );
-
-    } else {
-      throw CannotSignInput("${input.runtimeType} not a signable input");
-    }
-
-    // Replace input in input list
-    final newInputs = inputs.asMap().map(
-      (index, input) => MapEntry(
-        index, index == inputN ? signedIn : input,
       ),
-    ).values;
-
-    return Transaction(
-      version: version,
-      inputs: newInputs,
-      outputs: outputs,
-      locktime: locktime,
-    );
-
-  }
-
+      key: key,
+    ),
+  );
 
   /// Replaces the input at [n] with the new [input] and invalidates other
   /// input signatures that have standard sighash types accordingly. This is
   /// useful for signing or otherwise updating inputs that cannot be signed with
-  /// the [sign] method.
+  /// the [signLegacy], [signLegacyWitness] or [signTaproot] methods.
   Transaction replaceInput(Input input, int n) {
 
     final oldInput = inputs[n];
@@ -294,8 +278,8 @@ class Transaction with Writable {
     final filtered = inputs.map(
       (input) => input.filterSignatures(
         (insig)
-          // Allow ANYONECANPAY
-          => insig.hashType.anyOneCanPay
+          // Allow ANYONECANPAY, ANYPREVOUT or ANYPREVOUTANYSCRIPT
+          => insig.hashType.inputs != InputSigHashOption.all
           // Allow signature if previous output hasn't changed and the sequence
           // has not changed for taproot inputs or when using SIGHASH_ALL.
           || !(
@@ -307,12 +291,7 @@ class Transaction with Writable {
       ),
     ).toList();
 
-    return Transaction(
-      version: version,
-      inputs: [...filtered.take(n), input, ...filtered.sublist(n+1)],
-      outputs: outputs,
-      locktime: locktime,
-    );
+    return _newInputs([...filtered.take(n), input, ...filtered.skip(n+1)]);
 
   }
 
@@ -321,10 +300,11 @@ class Transaction with Writable {
   Transaction addInput(Input input) => Transaction(
     version: version,
     inputs: [
-      // Only keep ANYONECANPAY signatures when adding a new input
+      // Only keep ANYONECANPAY, ANYPREVOUT and ANYPREVOUTANYSCRIPT signatures
+      // when adding a new input
       ...inputs.map(
         (input) => input.filterSignatures(
-          (insig) => insig.hashType.anyOneCanPay,
+          (insig) => insig.hashType.inputs != InputSigHashOption.all,
         ),
       ),
       input,

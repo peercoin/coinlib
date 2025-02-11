@@ -128,20 +128,6 @@ void main() {
       expectNoMatch("", [hexToBytes("0101"), controlBlock]);
     });
 
-    test("sign() not implemented", () => expect(
-      () => TaprootScriptInput.fromTaprootLeaf(
-        prevOut: prevOut,
-        taproot: taprootVec.object,
-        leaf: taprootVec.object.leaves[0],
-      ).sign(
-        tx: Transaction(inputs: [], outputs: []),
-        inputN: 0,
-        key: ECPrivateKey.generate(),
-        prevOuts: [],
-      ),
-      throwsA(isA<CannotSignInput>()),
-    ),);
-
   });
 
 }

@@ -9,6 +9,7 @@ import 'package:coinlib/src/scripts/programs/p2sh.dart';
 import 'package:coinlib/src/scripts/script.dart';
 import 'package:coinlib/src/tx/sighash/legacy_signature_hasher.dart';
 import 'package:coinlib/src/tx/sighash/sighash_type.dart';
+import 'package:coinlib/src/tx/sign_details.dart';
 import 'package:coinlib/src/tx/transaction.dart';
 import 'input.dart';
 import 'input_signature.dart';
@@ -95,10 +96,8 @@ class P2SHMultisigInput extends LegacyInput {
 
   @override
   LegacyInput sign({
-    required Transaction tx,
-    required int inputN,
+    required LegacySignDetails details,
     required ECPrivateKey key,
-    hashType = const SigHashType.all(),
   }) {
 
     if (!program.pubkeys.contains(key.pubkey)) {
@@ -107,18 +106,17 @@ class P2SHMultisigInput extends LegacyInput {
 
     return insertSignature(
       createInputSignature(
-        tx: tx,
-        inputN: inputN,
         key: key,
-        scriptCode: program.script,
-        hashType: hashType,
+        details: details.addScript(program.script),
       ),
       key.pubkey,
       (hashType) => LegacySignatureHasher(
-        tx: tx,
-        inputN: inputN,
-        scriptCode: program.script,
-        hashType: hashType,
+        LegacySignDetailsWithScript(
+          tx: details.tx,
+          inputN: details.inputN,
+          scriptCode: program.script,
+          hashType: hashType,
+        ),
       ).hash,
     );
 
@@ -128,8 +126,10 @@ class P2SHMultisigInput extends LegacyInput {
   /// The [pubkey] should be the public key for the signature to ensure that it
   /// matches. [getSigHash] obtains the signature hash for a given type so that
   /// existing signatures can be checked.
+  ///
   /// If existing signatures are not in-order then they may not be fully matched
   /// and included in the resulting input.
+  ///
   /// If there are more signatures than the required threshold, the last
   /// signature will be removed.
   P2SHMultisigInput insertSignature(

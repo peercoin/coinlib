@@ -3,8 +3,7 @@ import 'package:coinlib/src/crypto/ec_public_key.dart';
 import 'package:coinlib/src/scripts/operations.dart';
 import 'package:coinlib/src/scripts/programs/p2pkh.dart';
 import 'package:coinlib/src/scripts/script.dart';
-import 'package:coinlib/src/tx/sighash/sighash_type.dart';
-import 'package:coinlib/src/tx/transaction.dart';
+import 'package:coinlib/src/tx/sign_details.dart';
 import 'input.dart';
 import 'input_signature.dart';
 import 'legacy_input.dart';
@@ -64,17 +63,12 @@ class P2PKHInput extends LegacyInput with PKHInput {
 
   @override
   P2PKHInput sign({
-    required Transaction tx,
-    required int inputN,
+    required LegacySignDetails details,
     required ECPrivateKey key,
-    hashType = const SigHashType.all(),
   }) => addSignature(
     createInputSignature(
-      tx: tx,
-      inputN: inputN,
       key: checkKey(key),
-      scriptCode: scriptCode,
-      hashType: hashType,
+      details: details.addScript(scriptCode),
     ),
   );
 

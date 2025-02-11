@@ -173,6 +173,8 @@ class SigHashType {
   /// Only the output with the same index as the input shall be signed
   bool get single => outputs == OutputSigHashOption.single;
 
+  /// All inputs shall be signed
+  bool get allInputs => inputs == InputSigHashOption.all;
   /// Only the input receiving the signature shall be signed
   bool get anyOneCanPay => inputs == InputSigHashOption.anyOneCanPay;
   /// Only the input receiving the signature shall be signed without the output

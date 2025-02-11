@@ -2,8 +2,7 @@ import 'dart:typed_data';
 import 'package:coinlib/src/crypto/ec_private_key.dart';
 import 'package:coinlib/src/crypto/ec_public_key.dart';
 import 'package:coinlib/src/scripts/programs/p2wpkh.dart';
-import 'package:coinlib/src/tx/sighash/sighash_type.dart';
-import 'package:coinlib/src/tx/transaction.dart';
+import 'package:coinlib/src/tx/sign_details.dart';
 import 'input.dart';
 import 'input_signature.dart';
 import 'pkh_input.dart';
@@ -69,19 +68,12 @@ class P2WPKHInput extends LegacyWitnessInput with PKHInput {
 
   @override
   LegacyWitnessInput sign({
-    required Transaction tx,
-    required int inputN,
+    required LegacyWitnessSignDetails details,
     required ECPrivateKey key,
-    required BigInt value,
-    hashType = const SigHashType.all(),
   }) => addSignature(
     createInputSignature(
-      tx: tx,
-      inputN: inputN,
       key: checkKey(key),
-      scriptCode: scriptCode,
-      value: value,
-      hashType: hashType,
+      details: details.addScript(scriptCode),
     ),
   );
 

@@ -7,11 +7,13 @@ void main() {
   signatureHasherTester(
     "WitnessSignatureHasher",
     (Transaction tx, int inputN, SigHashVector vec) => WitnessSignatureHasher(
-      tx: tx,
-      inputN: inputN,
-      scriptCode: Script.fromAsm(vec.scriptCodeAsm),
-      value: witnessValue,
-      hashType: vec.type,
+      LegacyWitnessSignDetailsWithScript(
+        tx: tx,
+        inputN: inputN,
+        scriptCode: Script.fromAsm(vec.scriptCodeAsm),
+        value: witnessValue,
+        hashType: vec.type,
+      ),
     ).hash,
     (SigHashVector vec) => vec.witnessHash,
   );
