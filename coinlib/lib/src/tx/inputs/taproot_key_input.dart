@@ -51,10 +51,6 @@ class TaprootKeyInput extends TaprootInput {
     required ECPrivateKey key,
   }) {
 
-    if (details.hashType.requiresApo) {
-      throw CannotSignInput("A Taproot key-spend doesn't support APO");
-    }
-
     // Check key corresponds to matching prevOut
     final program = details.program;
     if (program is! P2TR || key.pubkey.xonly != program.tweakedKey) {

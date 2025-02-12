@@ -100,25 +100,17 @@ class TaprootScriptInput extends TaprootInput {
     );
 
   /// Creates a [SchnorrInputSignature] to be used for the input's script data.
-  /// Uses the [details] plus an optional [codeSeperatorPos] for the last
-  /// executed position of the script.
+  /// The leaf hash of the [tapscript] is added to the details.
   ///
   /// [InputSigHashOption.anyPrevOut] or
   /// [InputSigHashOption.anyPrevOutAnyScript] can be used, but it must be
   /// assured that the tapscript has a signature operation for a BIP118 APO key
   /// as this is not checked by this method.
   SchnorrInputSignature createScriptSignature({
-    required TaprootKeySignDetails details,
+    required TaprootScriptSignDetails details,
     required ECPrivateKey key,
-    int codeSeperatorPos = 0xFFFFFFFF,
   }) => createInputSignature(
-    details: TaprootScriptSignDetails(
-      tx: details.tx,
-      inputN: details.inputN,
-      prevOuts: details.prevOuts,
-      leafHash: TapLeaf(tapscript).hash,
-      codeSeperatorPos: codeSeperatorPos,
-    ),
+    details: details.addLeafHash(TapLeaf(tapscript).hash),
     key: key,
   );
 

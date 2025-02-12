@@ -149,7 +149,8 @@ base class TaprootSignDetails extends SignDetails {
   /// empty for ANYPREVOUTANYSCRIPT.
   final List<Output> prevOuts;
 
-  /// The leafhash to sign, or null for key-spends
+  /// The leafhash to sign, null for key-spends or empty when using
+  /// ANYPREVOUTANYSCRIPT.
   final Uint8List? leafHash;
   /// The last executed CODESEPARATOR position in the script
   final int codeSeperatorPos;
@@ -202,7 +203,11 @@ final class TaprootKeySignDetails extends TaprootSignDetails {
     required super.inputN,
     required super.prevOuts,
     super.hashType,
-  }) : super();
+  }) : super() {
+    if (hashType.requiresApo) {
+      throw CannotSignInput("Cannot use APO for key-spend");
+    }
+  }
 
   Program? get program => switch (hashType.inputs) {
     InputSigHashOption.all => prevOuts[inputN].program,
@@ -213,14 +218,42 @@ final class TaprootKeySignDetails extends TaprootSignDetails {
 
 }
 
-/// Details for a Taproot script-spend, containing the leaf hash
+/// Details for a Taproot script-spend
 final class TaprootScriptSignDetails extends TaprootSignDetails {
+
+  /// See [TaprootSignDetails()].
+  ///
+  /// [codeSeperatorPos] can be provided with the position of the last executed
+  /// CODESEPARATOR unless none have been executed in the script.
+  TaprootScriptSignDetails({
+    required super.tx,
+    required super.inputN,
+    required super.prevOuts,
+    super.codeSeperatorPos,
+    super.hashType,
+  }) : super();
+
+  TaprootScriptSignDetailsWithLeafHash addLeafHash(Uint8List leafHash)
+    => TaprootScriptSignDetailsWithLeafHash(
+      tx: tx,
+      inputN: inputN,
+      prevOuts:  prevOuts,
+      leafHash: leafHash,
+      codeSeperatorPos: codeSeperatorPos,
+      hashType: hashType,
+    );
+
+}
+
+/// Details for a Taproot script-spend, containing the leaf hash
+final class TaprootScriptSignDetailsWithLeafHash extends TaprootSignDetails {
+
   /// See [TaprootSignDetails()].
   ///
   /// The [leafHash] must be provided. [codeSeperatorPos] can be provided with
   /// the position of the last executed CODESEPARATOR unless none have been
   /// executed in the script.
-  TaprootScriptSignDetails({
+  TaprootScriptSignDetailsWithLeafHash({
     required super.tx,
     required super.inputN,
     required super.prevOuts,
@@ -228,4 +261,5 @@ final class TaprootScriptSignDetails extends TaprootSignDetails {
     super.codeSeperatorPos,
     super.hashType,
   }) : super(leafHash: leafHash);
+
 }

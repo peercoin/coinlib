@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:coinlib/coinlib.dart';
 import 'package:test/test.dart';
 
@@ -44,16 +45,25 @@ final prevOuts = [
 ];
 
 class TaprootSignatureVector {
+
   final int inputN;
   final SigHashType hashType;
-  final String? leafHashHex;
+  final bool useLeafHash;
   final String sigHashHex;
+
   TaprootSignatureVector({
     required this.inputN,
     required this.hashType,
-    this.leafHashHex,
+    this.useLeafHash = false,
     required this.sigHashHex,
   });
+
+  Uint8List? get leafHash => useLeafHash
+    ? hexToBytes(
+        "2bfe58ab6d9fd575bdc3a624e4825dd2b375d64ac033fbc46ea79dbab4f69a3e",
+      )
+    : null;
+
 }
 
 final taprootSigVectors = [
@@ -96,7 +106,19 @@ final taprootSigVectors = [
     inputN: 0,
     hashType: SigHashType.single(),
     sigHashHex: "20834f382e040a8b6d03600667c2c593b4ffa955f15476ba3b70b72c2538320c",
-    leafHashHex: "2bfe58ab6d9fd575bdc3a624e4825dd2b375d64ac033fbc46ea79dbab4f69a3e",
+    useLeafHash: true,
+  ),
+  TaprootSignatureVector(
+    inputN: 0,
+    hashType: SigHashType.all(inputs: InputSigHashOption.anyPrevOut),
+    sigHashHex: "d36ed3bfe384ab0308b3ee90d1f11d1ad9624072f3bfa47580ff2b9a07c25d16",
+    useLeafHash: true,
+  ),
+  TaprootSignatureVector(
+    inputN: 0,
+    hashType: SigHashType.all(inputs: InputSigHashOption.anyPrevOutAnyScript),
+    sigHashHex: "16c8b2007c8c66d708f536a8b676fc7d392de8e0bfb009da9343f9c9e9be3bf9",
+    useLeafHash: true,
   ),
 ];
 
@@ -117,12 +139,10 @@ void main() {
             TaprootSignDetails(
               tx: tx,
               inputN: vec.inputN,
-              prevOuts: vec.hashType.anyOneCanPay
+              prevOuts: (vec.hashType.anyOneCanPay || vec.hashType.anyPrevOut)
                 ? [prevOuts[vec.inputN]]
-                : prevOuts,
-              leafHash: vec.leafHashHex == null
-                ? null
-                : hexToBytes(vec.leafHashHex!),
+                : (vec.hashType.anyPrevOutAnyScript ? [] : prevOuts),
+              leafHash: vec.leafHash,
               hashType: vec.hashType,
             ),
           ).hash,

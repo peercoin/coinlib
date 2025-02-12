@@ -590,7 +590,7 @@ void main() {
 
       final solvedInput = inputToSign.updateStack([
         inputToSign.createScriptSignature(
-          details: TaprootKeySignDetails(
+          details: TaprootScriptSignDetails(
             tx: tx,
             inputN: 0,
             prevOuts: [prevOut],

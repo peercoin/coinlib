@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'package:coinlib/src/common/serial.dart';
 import 'package:coinlib/src/crypto/hash.dart';
 import 'package:coinlib/src/tx/sign_details.dart';
+import 'package:coinlib/src/tx/transaction.dart';
 import 'precomputed_signature_hashes.dart';
 import 'signature_hasher.dart';
 
@@ -20,7 +21,11 @@ final class TaprootSignatureHasher extends SignatureHasher with Writable {
   : txHashes = TransactionSignatureHashes(details.tx),
   prevOutHashes = details.hashType.allInputs
       ? PrevOutSignatureHashes(details.prevOuts)
-      : null;
+      : null {
+    if (details is TaprootScriptSignDetails) {
+      throw CannotSignInput("Missing leaf hash for tapscript sign details");
+    }
+  }
 
   @override
   void write(Writer writer) {
@@ -49,12 +54,23 @@ final class TaprootSignatureHasher extends SignatureHasher with Writable {
     // Data specific to spending input
     writer.writeUInt8(extFlag << 1);
 
-    if (hashType.anyOneCanPay) {
-      thisInput.prevOut.write(writer);
-      details.prevOuts.first.write(writer);
-      writer.writeUInt32(thisInput.sequence);
-    } else {
+    if (hashType.allInputs) {
       writer.writeUInt32(inputN);
+    } else {
+
+      // ANYONECANPAY commits to the prevout point
+      if (hashType.anyOneCanPay) {
+        thisInput.prevOut.write(writer);
+      }
+
+      // Commit to the output value and script unless ANYPREVOUTANYSCRIPT
+      if (!hashType.anyPrevOutAnyScript) {
+        details.prevOuts.first.write(writer);
+      }
+
+      // Always include sequence
+      writer.writeUInt32(thisInput.sequence);
+
     }
 
     // Data specific to matched output
@@ -66,8 +82,11 @@ final class TaprootSignatureHasher extends SignatureHasher with Writable {
 
     // Data specific to the script
     if (leafHash != null) {
-      writer.writeSlice(leafHash);
-      writer.writeUInt8(0); // Key version = 0
+      if (!hashType.anyPrevOutAnyScript) {
+        writer.writeSlice(leafHash);
+      }
+      final keyVersion = hashType.requiresApo ? 1 : 0;
+      writer.writeUInt8(keyVersion);
       writer.writeUInt32(details.codeSeperatorPos);
     }
 
