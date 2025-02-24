@@ -6,9 +6,9 @@ import '../../vectors/taproot.dart';
 
 // Placed in global for lazy initialisation after loadCoinlib
 final taprootVec = taprootVectors[3];
-final controlBlockHex = taprootVec.controlBlocks[0];
-final controlBlock = hexToBytes(controlBlockHex);
-final script = taprootVec.object.leaves[0].script;
+final leaf = taprootVec.object.leaves[0];
+final script = leaf.script;
+final controlBlock = taprootVec.object.controlBlockForLeaf(leaf);
 final witness = [script.compiled, controlBlock];
 final stack = [hexToBytes("0102030405"), hexToBytes("01020304")];
 
@@ -29,7 +29,7 @@ void main() {
         expect(input.script!.length, 0);
 
         expect(input.tapscript.asm, script.asm);
-        expect(bytesToHex(input.controlBlock), controlBlockHex);
+        expect(input.controlBlock, controlBlock);
 
         expect(input.witness, [if (withStack) ...stack, ...witness]);
         expect(input.size, rawWitnessInputBytes.length);
@@ -52,7 +52,7 @@ void main() {
           TaprootScriptInput.fromTaprootLeaf(
             prevOut: prevOut,
             taproot: taprootVec.object,
-            leaf: taprootVec.object.leaves[0],
+            leaf: leaf,
             sequence: sequence,
             stack: withStack ? stack : null,
           ),
@@ -60,7 +60,7 @@ void main() {
         );
         expectTaprootScriptInput(
           Input.match(
-            RawInput.fromReader(BytesReader(rawWitnessInputBytes)),
+            rawWitnessInput,
             [if (withStack) ...stack, ...witness],
           ) as TaprootScriptInput,
           withStack,
@@ -74,7 +74,7 @@ void main() {
         TaprootScriptInput(
           prevOut: prevOut,
           controlBlock: Uint8List.fromList(
-            [...controlBlock.take(33), ...Uint8List(32*128)],
+            [...controlBlock, ...Uint8List(32*128)],
           ),
           tapscript: script,
         ),
@@ -106,7 +106,10 @@ void main() {
       expectNoMatch("", [script.compiled, Uint8List(0)]);
       expectNoMatch(
         "",
-        [script.compiled, controlBlock.sublist(0, controlBlock.length-1)],
+        [
+          script.compiled,
+          controlBlock.sublist(0, controlBlock.length-1),
+        ],
       );
       expectNoMatch(
         "",

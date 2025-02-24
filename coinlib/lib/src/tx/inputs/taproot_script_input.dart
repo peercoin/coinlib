@@ -3,7 +3,7 @@ import 'package:coinlib/src/common/serial.dart';
 import 'package:coinlib/src/crypto/ec_private_key.dart';
 import 'package:coinlib/src/scripts/operations.dart';
 import 'package:coinlib/src/scripts/script.dart';
-import 'package:coinlib/src/taproot.dart';
+import 'package:coinlib/src/taproot/taproot.dart';
 import 'package:coinlib/src/tx/inputs/taproot_input.dart';
 import 'package:coinlib/src/tx/outpoint.dart';
 import 'package:coinlib/src/tx/sighash/sighash_type.dart';

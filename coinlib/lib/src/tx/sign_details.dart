@@ -149,8 +149,9 @@ base class TaprootSignDetails extends SignDetails {
   /// empty for ANYPREVOUTANYSCRIPT.
   final List<Output> prevOuts;
 
-  /// The leafhash to sign, null for key-spends or empty when using
-  /// ANYPREVOUTANYSCRIPT.
+  /// If a tapscript is being signed for instead of a key-path.
+  final bool isScript;
+  /// The leafhash to sign, null for key-spends or ANYPREVOUTANYSCRIPT.
   final Uint8List? leafHash;
   /// The last executed CODESEPARATOR position in the script
   final int codeSeperatorPos;
@@ -169,6 +170,7 @@ base class TaprootSignDetails extends SignDetails {
     required super.tx,
     required super.inputN,
     required this.prevOuts,
+    required this.isScript,
     super.hashType = const SigHashType.schnorrDefault(),
     this.leafHash,
     this.codeSeperatorPos = 0xFFFFFFFF,
@@ -203,7 +205,7 @@ final class TaprootKeySignDetails extends TaprootSignDetails {
     required super.inputN,
     required super.prevOuts,
     super.hashType,
-  }) : super() {
+  }) : super(isScript: false) {
     if (hashType.requiresApo) {
       throw CannotSignInput("Cannot use APO for key-spend");
     }
@@ -211,9 +213,8 @@ final class TaprootKeySignDetails extends TaprootSignDetails {
 
   Program? get program => switch (hashType.inputs) {
     InputSigHashOption.all => prevOuts[inputN].program,
-    InputSigHashOption.anyOneCanPay || InputSigHashOption.anyPrevOut
-      => prevOuts.first.program,
-    InputSigHashOption.anyPrevOutAnyScript => null,
+    InputSigHashOption.anyOneCanPay => prevOuts.first.program,
+    _ => null,
   };
 
 }
@@ -223,6 +224,9 @@ final class TaprootScriptSignDetails extends TaprootSignDetails {
 
   /// See [TaprootSignDetails()].
   ///
+  /// The [leafHash] has to be provided before a hash can be produced unless
+  /// ANYPREVOUTANYSCRIPT is used.
+  ///
   /// [codeSeperatorPos] can be provided with the position of the last executed
   /// CODESEPARATOR unless none have been executed in the script.
   TaprootScriptSignDetails({
@@ -230,11 +234,14 @@ final class TaprootScriptSignDetails extends TaprootSignDetails {
     required super.inputN,
     required super.prevOuts,
     super.codeSeperatorPos,
+    super.leafHash,
     super.hashType,
-  }) : super();
+  }) : super(isScript: true);
 
-  TaprootScriptSignDetailsWithLeafHash addLeafHash(Uint8List leafHash)
-    => TaprootScriptSignDetailsWithLeafHash(
+  /// Add the [leafHash] required before signing can be done unless using
+  /// ANYPREVOUTANYSCRIPT
+  TaprootScriptSignDetails addLeafHash(Uint8List leafHash)
+    => TaprootScriptSignDetails(
       tx: tx,
       inputN: inputN,
       prevOuts:  prevOuts,
@@ -242,24 +249,5 @@ final class TaprootScriptSignDetails extends TaprootSignDetails {
       codeSeperatorPos: codeSeperatorPos,
       hashType: hashType,
     );
-
-}
-
-/// Details for a Taproot script-spend, containing the leaf hash
-final class TaprootScriptSignDetailsWithLeafHash extends TaprootSignDetails {
-
-  /// See [TaprootSignDetails()].
-  ///
-  /// The [leafHash] must be provided. [codeSeperatorPos] can be provided with
-  /// the position of the last executed CODESEPARATOR unless none have been
-  /// executed in the script.
-  TaprootScriptSignDetailsWithLeafHash({
-    required super.tx,
-    required super.inputN,
-    required super.prevOuts,
-    required Uint8List leafHash,
-    super.codeSeperatorPos,
-    super.hashType,
-  }) : super(leafHash: leafHash);
 
 }

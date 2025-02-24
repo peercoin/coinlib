@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 import 'package:coinlib/src/crypto/ec_private_key.dart';
 import 'package:coinlib/src/scripts/programs/p2tr.dart';
-import 'package:coinlib/src/taproot.dart';
+import 'package:coinlib/src/taproot/taproot.dart';
 import 'package:coinlib/src/tx/inputs/taproot_input.dart';
 import 'package:coinlib/src/tx/sign_details.dart';
 import 'package:coinlib/src/tx/transaction.dart';

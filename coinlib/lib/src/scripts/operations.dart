@@ -159,6 +159,10 @@ abstract class ScriptOp {
 /// Represents a [ScriptOp] that is an op code
 class ScriptOpCode implements ScriptOp {
 
+  static final checksig = ScriptOpCode.fromName("CHECKSIG");
+  static final checkmultisig = ScriptOpCode.fromName("CHECKMULTISIG");
+  static final number1 = ScriptOpCode(ScriptOp.op1);
+
   final int code;
   ScriptOpCode(this.code);
 

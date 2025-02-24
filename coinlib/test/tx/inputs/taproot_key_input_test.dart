@@ -10,17 +10,9 @@ void main() {
 
   group("TaprootKeyInput", () {
 
-    late SchnorrInputSignature insig;
+    setUpAll(loadCoinlib);
 
-    setUpAll(() async {
-      await loadCoinlib();
-      insig = SchnorrInputSignature(
-        SchnorrSignature.fromHex(validSchnorrSig),
-        SigHashType.none(),
-      );
-    });
-
-    getWitness(bool hasSig) => [if (hasSig) insig.bytes];
+    getWitness(bool hasSig) => [if (hasSig) schnorrInSig.bytes];
 
     test("valid key-path taproot inputs inc. addSignature", () {
 
@@ -49,12 +41,12 @@ void main() {
       final withSig = TaprootKeyInput(
         prevOut: prevOut,
         sequence: sequence,
-        insig: insig,
+        insig: schnorrInSig,
       );
 
       expectTaprootKeyInput(noSig, false);
       expectTaprootKeyInput(withSig, true);
-      expectTaprootKeyInput(noSig.addSignature(insig), true);
+      expectTaprootKeyInput(noSig.addSignature(schnorrInSig), true);
 
       // Expect match only when there is a Schnorr signature present, as there
       // is no way to distinguish otherwise
@@ -100,9 +92,9 @@ void main() {
     });
 
     test(".filterSignatures()", () {
-      final input = TaprootKeyInput(prevOut: prevOut, insig: insig);
-      expect(input.filterSignatures((insig) => false).insig, isNull);
-      expect(input.filterSignatures((insig) => true).insig, isNotNull);
+      final input = TaprootKeyInput(prevOut: prevOut, insig: schnorrInSig);
+      expect(input.filterSignatures((schnorrInSig) => false).insig, isNull);
+      expect(input.filterSignatures((schnorrInSig) => true).insig, isNotNull);
     });
 
     test(".sign() should sign as SIGHASH_DEFAULT by default", () {

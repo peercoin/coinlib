@@ -5,6 +5,7 @@ import 'package:coinlib/src/common/serial.dart';
 import 'package:coinlib/src/crypto/ec_private_key.dart';
 import 'package:coinlib/src/crypto/hash.dart';
 import 'package:coinlib/src/tx/inputs/taproot_key_input.dart';
+import 'package:coinlib/src/tx/inputs/taproot_single_script_sig_input.dart';
 import 'inputs/input.dart';
 import 'inputs/input_signature.dart';
 import 'inputs/legacy_input.dart';
@@ -239,11 +240,14 @@ class Transaction with Writable {
     ),
   );
 
-  /// Sign a [TaprootKeyInput] at [inputN] with the [key]. If all inputs are
-  /// being signed, all previous outputs must be provided to [prevOuts]. If
-  /// ANYONECANPAY is used, only the output of the input should be included in
-  /// [prevOuts]. The signature hash is SIGHASH_DEFAULT by default but can be
-  /// changed via [hashType].
+  /// Sign a [TaprootKeyInput] at [inputN] with the tweaked [key].
+  ///
+  /// If all inputs are included, all previous outputs must be provided to
+  /// [prevOuts]. If ANYONECANPAY is used, only the output of the input should
+  /// be included in [prevOuts].
+  ///
+  /// The signature hash is SIGHASH_DEFAULT by default but can be changed via
+  /// [hashType].
   Transaction signTaproot({
     required int inputN,
     required ECPrivateKey key,
@@ -253,6 +257,33 @@ class Transaction with Writable {
     inputN,
     _requireInputOfType<TaprootKeyInput>(inputN).sign(
       details: TaprootKeySignDetails(
+        tx: this,
+        inputN: inputN,
+        prevOuts: prevOuts,
+        hashType: hashType,
+      ),
+      key: key,
+    ),
+  );
+
+  /// Sign a [TaprootSingleScriptSigInput] at [inputN] with the [key].
+  ///
+  /// If all inputs are included, all previous outputs must be provided to
+  /// [prevOuts]. If ANYONECANPAY or ANYPREVOUT is used, only the output of the
+  /// input must be included in [prevOuts]. If ANYPREVOUTANYSCRIPT is used,
+  /// [prevOuts] must be empty.
+  ///
+  /// The signature hash is SIGHASH_DEFAULT by default but can be changed via
+  /// [hashType].
+  Transaction signTaprootSingleScriptSig({
+    required int inputN,
+    required ECPrivateKey key,
+    required List<Output> prevOuts,
+    SigHashType hashType = const SigHashType.schnorrDefault(),
+  }) => _replaceNewlySigned(
+    inputN,
+    _requireInputOfType<TaprootSingleScriptSigInput>(inputN).sign(
+      details: TaprootScriptSignDetails(
         tx: this,
         inputN: inputN,
         prevOuts: prevOuts,

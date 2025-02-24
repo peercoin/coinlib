@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:coinlib/coinlib.dart';
 import 'package:test/test.dart';
+import '../vectors/signatures.dart';
 import '../vectors/tx.dart';
 import '../vectors/keys.dart';
 
@@ -278,7 +279,7 @@ void main() {
           inputN: 2,
           key: tweakedKey,
           prevOuts: prevOuts,
-          hashType: SigHashType.all(inputs: InputSigHashOption.anyOneCanPay),
+          hashType: sigHashAOCP,
         ),
       );
 
@@ -304,10 +305,7 @@ void main() {
       );
 
       // Disallow APO
-      for (final apoType in [
-        SigHashType.all(inputs: InputSigHashOption.anyPrevOut),
-        SigHashType.all(inputs: InputSigHashOption.anyPrevOutAnyScript),
-      ]) {
+      for (final apoType in [sigHashAPO, sigHashAPOAS]) {
         expectCannotSign(
           () => tx.signLegacy(inputN: 1, key: privkey, hashType: apoType),
         );
@@ -509,7 +507,7 @@ void main() {
         inputN: 1,
         key: tweakedPriv,
         prevOuts: [prevOuts[1]],
-        hashType: SigHashType.all(inputs: InputSigHashOption.anyOneCanPay),
+        hashType: sigHashAOCP,
       );
 
       expect(signed.complete, true);
@@ -539,10 +537,7 @@ void main() {
       //  63ea0ecff27d9bffd00b09b92b682900e6093a2729f9f0a36746be32dbdeb074
 
       TapLeaf checkSigLeafForVector(KeyTestVector vec) => TapLeaf(
-        Script([
-          ScriptPushData(vec.publicObj.x),
-          ScriptOpCode.fromName("CHECKSIG"),
-        ]),
+        Script([ScriptPushData(vec.publicObj.x), ScriptOpCode.checksig]),
       );
 
       final rTweak = hexToBytes(
@@ -656,7 +651,7 @@ void main() {
       signed = signed.signLegacy(
         inputN: 1,
         key: privkeys[3],
-        hashType: SigHashType.all(inputs: InputSigHashOption.anyOneCanPay),
+        hashType: sigHashAOCP,
       );
       expect(signed.complete, false);
 
@@ -687,11 +682,7 @@ void main() {
       expectInputSignedSize(signed.inputs[1]);
       expect(signed.inputs[1].signedSize, signedSizeFromUnsigned);
       expectMultisigSigs(
-        signed, [
-          SigHashType.single(),
-          SigHashType.none(),
-          SigHashType.all(inputs: InputSigHashOption.anyOneCanPay),
-        ],
+        signed, [SigHashType.single(), SigHashType.none(), sigHashAOCP],
       );
       expect(
         signed.toHex(),
@@ -703,7 +694,7 @@ void main() {
         signed.addInput(
           P2PKHInput(prevOut: examplePrevOut, publicKey: examplePubkey),
         ),
-        [SigHashType.all(inputs: InputSigHashOption.anyOneCanPay)],
+        [sigHashAOCP],
       );
 
       // addOutput only invalidates SIGHASH_ALL
@@ -792,7 +783,7 @@ void main() {
       .signLegacy(
         inputN: 2,
         key: keyVec.privateObj,
-        hashType: SigHashType.all(inputs: InputSigHashOption.anyOneCanPay),
+        hashType: sigHashAOCP,
       )
       .signLegacy(
         inputN: 3,
@@ -804,7 +795,7 @@ void main() {
       .signLegacyWitness(
         inputN: 5,
         key: keyVec.privateObj,
-        hashType: SigHashType.all(inputs: InputSigHashOption.anyOneCanPay),
+        hashType: sigHashAOCP,
         value: value,
       )
       .signLegacyWitness(
@@ -818,7 +809,7 @@ void main() {
       .signTaproot(
         inputN: 8,
         key: keyVec.privateObj,
-        hashType: SigHashType.all(inputs: InputSigHashOption.anyOneCanPay),
+        hashType: sigHashAOCP,
         prevOuts: [taprootPrevOuts[8]],
       )
       .signTaproot(
@@ -899,6 +890,148 @@ void main() {
       expect(
         signedTx.toHex(),
         "0300000000010af1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe000000006a473044022079f777b6059975ce333332bb3ecde653be038dcbddefc7920072124b1ffe43fc022030926798d6440ea69aab4e28a3ebf84fa46f3f31ae2c1c38b04c73120abea2cf01210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798fffffffff1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe000000006a47304402201e8ab341d37d9cdd8563d649e710eee973ae601fe61b57da6e1d7ae10ba21a7a022023a9d5b20a43df3c60697c876ba2030d754dda0e07804a699222616ffce3cf3801210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798fffffffff1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe000000006a47304402202c2f712bbef221026214ae9e54e817eb73df6c73aca4d35b5190caf28c454cd102207dc3750935a86b4431e55476a1e049d3d8ee7cf13162f264ce9964afa4b09c7181210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798fffffffff1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe000000006a47304402205a0d9a76a926bce5a74db8fa127d8c8779d868de26c1422f4b8acd3f8735ba580220381287903eeb349023c8d6a0d77ddcdf9fcbc01ce968627183f124ecd5e860c203210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798fffffffff1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe0000000000fffffffff1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe0000000000fffffffff1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe0000000000fffffffff1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe0000000000fffffffff1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe0000000000fffffffff1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe0000000000ffffffff01a0860100000000001976a914c42e7ef92fdb603af844d064faad95db9bcdfd3d88ac00000000024730440220487c6b12556adc75a199a8b390d38b928bd4efbb831f2010250389995fee821302204dfa74a4e7711a8b96249a6ec7836e4cc374d6dbf3864fdd142a25a67663ebfe01210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f817980247304402206e47c35235a3f5dab7420ad3e2ecdc395cb402b9fc29e8ada89ff6e380ac4df3022010812c5beacf5ef47ac380511989d204804b33a664ffe9019ea8be23ccf56f2981210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f817980247304402202b4600fe4e9823210f36074f9e3d1fa442d940e00970b707014630f2a2f695b402203e2468c4c2501959a92fafe6475cff1ba1497b5e50c77701188923399654d1d602210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f817980140622c919fec9e9eeb8e7561bb768c6b7559e9aae170d2269c06f74b57cca6ce447dc9dc3789cd96d304faa7b759a6cfcc9287d965f34a911960c29f0eac9a79ad0141af1a113a9cd6f83655cb1444e8f8e3bf07751381a942a3a35b40bac08f61c56a8736a49d8998380305e488e156ecd0516b40474db401ba359ef46cd49d96743d810141f2edfd966b88a16e30c840bf8a93e05bd2bc2bed954a01712bc0ff2fbfcdff654f6262054ba965b09c08e03c8e29c2bd19fd6a2294e5464fa45f58908fab0c8e0200000000",
+      );
+
+    });
+
+    test("signTaprootSingleScriptSig()", () {
+      // Broadcast APO example as
+      // 0417f19b2ce523216f9a6e1e1c8ce3a98c7ab609207decfb13e79a7be3b689d9
+
+      final key1 = keyPairVectors.first.privateObj;
+      final key2 = keyPairVectors.last.privateObj;
+      final internalKey = keyPairVectors[2].privateObj;
+
+      final leafRegular = TapLeafChecksig(key1.pubkey);
+      final leafApo = TapLeafChecksig.apo(key2.pubkey);
+
+      final taprootRegular = Taproot(
+        internalKey: internalKey.pubkey,
+        mast: leafRegular,
+      );
+      final taprootApo = Taproot(
+        internalKey: internalKey.pubkey,
+        mast: leafApo,
+      );
+      final taprootApoInternal = Taproot(
+        internalKey: internalKey.pubkey,
+        mast: TapLeafChecksig.apoInternal,
+      );
+
+      final tx = Transaction(
+        inputs: [
+          // Regular SIGHASH_ALL|ANYONECANPAY
+          TaprootSingleScriptSigInput(
+            prevOut: OutPoint.fromHex(
+              "9c45112295bb7619946d75313deb94f4b77be713cdae7f7890cb10b59cd15287",
+              1,
+            ),
+            taproot: taprootRegular,
+            leaf: leafRegular,
+          ),
+          // ANYPREVOUT
+          TaprootSingleScriptSigInput.anyPrevOut(
+            taproot: taprootApo,
+            leaf: leafApo,
+          ),
+          // ANYPREVOUTANYSCRIPT
+          TaprootSingleScriptSigInput.anyPrevOutAnyScript(),
+          // ANYPREVOUT, internal key
+          TaprootSingleScriptSigInput.anyPrevOut(
+            taproot: taprootApoInternal,
+            leaf: TapLeafChecksig.apoInternal,
+          ),
+        ],
+        outputs: [exampleOutput],
+      );
+
+      final coin = CoinUnit.coin.toSats("1");
+
+      // Sign regular
+      final signedTx = tx.signTaprootSingleScriptSig(
+        inputN: 0,
+        key: key1,
+        prevOuts: [Output.fromProgram(coin, P2TR.fromTaproot(taprootRegular))],
+        hashType: sigHashAOCP,
+      // Sign ANYPREVOUT
+      ).signTaprootSingleScriptSig(
+        inputN: 1,
+        key: key2,
+        prevOuts: [Output.fromProgram(coin, P2TR.fromTaproot(taprootApo))],
+        hashType: sigHashAPO,
+      // Sign ANYPREVOUTANYSCRIPT
+      ).signTaprootSingleScriptSig(
+        inputN: 2,
+        key: key2,
+        prevOuts: [],
+        hashType: sigHashAPOAS,
+      // Sign ANYPREVOUT with internal key
+      ).signTaprootSingleScriptSig(
+        inputN: 3,
+        key: taprootApoInternal.tweakPrivateKey(internalKey),
+        prevOuts: [
+          Output.fromProgram(coin, P2TR.fromTaproot(taprootApoInternal)),
+        ],
+        hashType: sigHashAPO,
+      );
+
+      // Update inputs with out points
+      final completeTx = signedTx.replaceInput(
+        (signedTx.inputs[1] as TaprootSingleScriptSigInput).addPrevOut(
+          OutPoint.fromHex(
+            "779abcfad41140c265ec235f0288deacd3a5f75a93f78577a572e28add4ce3cf",
+            1,
+          ),
+        ),
+        1,
+      ).replaceInput(
+        (signedTx.inputs[2] as TaprootSingleScriptSigInput).addTaproot(
+          taproot: taprootApo,
+          leaf: leafApo,
+          prevOut: OutPoint.fromHex(
+            "1bc7c900192ff96e2fbda841f102cf0e924f8614545b16ccf9a89b573d0258f5",
+            1,
+          ),
+        ),
+        2,
+      ).replaceInput(
+        (signedTx.inputs[3] as TaprootSingleScriptSigInput).addPrevOut(
+          OutPoint.fromHex(
+            "f51c753cac9d803e0e9610f94cca59a052e4ad9ac3a0ccc4683295faf9345cca",
+            1,
+          ),
+        ),
+        3,
+      );
+
+      expect(
+        completeTx.inputs.map((i) => i.complete),
+        everyElement(isTrue),
+      );
+      expect(completeTx.complete, true);
+      expect(
+        completeTx.toHex(),
+        "030000000001048752d19cb510cb90787faecd13e77bb7f494eb3d31756d941976bb952211459c0100000000ffffffffcfe34cdd8ae272a57785f7935af7a5d3acde88025f23ec65c24011d4fabc9a770100000000fffffffff558023d579ba8f9cc165b5414864f920ecf02f141a8bd2f6ef92f1900c9c71b0100000000ffffffffca5c34f9fa953268c4cca0c39aade452a059ca4cf910960e3e809dac3c751cf50100000000ffffffff01a0860100000000001976a914c42e7ef92fdb603af844d064faad95db9bcdfd3d88ac034157e44a1281069526bfb54f39eed6e1621392f6b663f049da9d30498ce9209b477f36cc3b4de00e527354bc1d4de251f5f2a0a40d182adbc784da3488bf842a2781222079be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ac21c0b80011a883a0fd621ad46dfc405df1e74bf075cbaf700fd4aebef6e96f8483400341d0c5ce1241d1aecdb957bef965d12a2638aded3181f921daf0623a0c19b17b6ada7dadd03b29d24da910bbe19180f2133087e6d970e315432330c7dc69d6948b4123210179be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ac21c0b80011a883a0fd621ad46dfc405df1e74bf075cbaf700fd4aebef6e96f84834003416e9173f4746edd351c6dd1c8c72fef77e7526174d92987d04ced007afb77a63806cdf129a6aba5c936cbfb207d19569a63a70138e6f22a245a91e20c12e08249c123210179be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ac21c0b80011a883a0fd621ad46dfc405df1e74bf075cbaf700fd4aebef6e96f8483400341130bfe7381a68cbf8346f127c2f6f0bcf537bf8354b8b5baa1cd271a44515ebd89a6d55f631db3edc3d00a492cceeca7a1a19d02a1c39de84bb29de9b6764731410251ac21c1b80011a883a0fd621ad46dfc405df1e74bf075cbaf700fd4aebef6e96f84834000000000",
+      );
+
+      // addInput or replaceInput doesn't invalidate APO
+      final newIn = P2PKHInput(
+        prevOut: examplePrevOut,
+        publicKey: examplePubkey,
+      );
+
+      void expectCompleted(Transaction newTx, List<bool> completed) {
+        expect(newTx.complete, false);
+        expect(newTx.inputs.map((i) => i.complete), completed);
+      }
+
+      expectCompleted(
+        completeTx.addInput(newIn),
+        [true, true, true, true, false],
+      );
+      expectCompleted(
+        completeTx.replaceInput(newIn, 0),
+        [false, true, true, true],
       );
 
     });

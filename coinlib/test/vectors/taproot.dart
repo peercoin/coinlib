@@ -164,3 +164,7 @@ final taprootVectors = [
   ),
 
 ];
+
+final exampleControlBlock = hexToBytes(
+  "c093478e9488f956df2396be2ce6c5cced75f900dfa18e7dabd2428aae78451820",
+);

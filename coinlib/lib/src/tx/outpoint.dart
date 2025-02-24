@@ -8,6 +8,9 @@ import 'output.dart';
 /// Reference to an [Output] by transaction hash and index
 class OutPoint with Writable {
 
+  /// Specify no previous output
+  static final nothing = OutPoint(Uint8List(32), 0);
+
   final Uint8List _hash;
   final int n;
 
@@ -32,6 +35,7 @@ class OutPoint with Writable {
   Uint8List get hash => Uint8List.fromList(_hash);
   /// True if this out point is the type found in a coinbase
   bool get coinbase => _hash.every((e) => e == 0) && n == 0xffffffff;
+  bool get isNothing => _hash.every((e) => e == 0) && n == 0;
 
   @override
   bool operator ==(Object other)

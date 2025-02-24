@@ -1,3 +1,5 @@
+import 'package:coinlib/coinlib.dart';
+
 final validSignatures = [
   "a951b0cf98bd51c614c802a65a418fa42482dc5c45c9394e39c0d98773c51cd530104fdc36d91582b5757e1de73d982e803cc14d75e82c65daf924e38d27d834",
   "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
@@ -91,3 +93,15 @@ final validRecSigSigns = [
   ),
 ];
 
+final sigHashAOCP = SigHashType.all(inputs: InputSigHashOption.anyOneCanPay);
+final sigHashAPO = SigHashType.all(inputs: InputSigHashOption.anyPrevOut);
+final sigHashAPOAS = SigHashType.all(inputs: InputSigHashOption.anyPrevOutAnyScript);
+
+SchnorrInputSignature _sigForType(SigHashType type) => SchnorrInputSignature(
+  SchnorrSignature.fromHex(validSchnorrSig),
+  type,
+);
+
+final schnorrInSig = _sigForType(SigHashType.none());
+final schnorrInSigAPO = _sigForType(sigHashAPO);
+final schnorrInSigAPOAS = _sigForType(sigHashAPOAS);

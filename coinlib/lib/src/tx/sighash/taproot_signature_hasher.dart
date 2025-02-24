@@ -22,7 +22,11 @@ final class TaprootSignatureHasher extends SignatureHasher with Writable {
   prevOutHashes = details.hashType.allInputs
       ? PrevOutSignatureHashes(details.prevOuts)
       : null {
-    if (details is TaprootScriptSignDetails) {
+    if (
+      details.isScript
+      && details.leafHash == null
+      && !hashType.anyPrevOutAnyScript
+    ) {
       throw CannotSignInput("Missing leaf hash for tapscript sign details");
     }
   }
@@ -31,7 +35,7 @@ final class TaprootSignatureHasher extends SignatureHasher with Writable {
   void write(Writer writer) {
 
     final leafHash = details.leafHash;
-    final extFlag = leafHash == null ? 0 : 1;
+    final extFlag = details.isScript ? 1 : 0;
 
     writer.writeUInt8(0); // "Epoch"
     writer.writeUInt8(hashType.value);
@@ -80,10 +84,10 @@ final class TaprootSignatureHasher extends SignatureHasher with Writable {
       );
     }
 
-    // Data specific to the script
-    if (leafHash != null) {
+    // Data specific to the tapscript
+    if (details.isScript) {
       if (!hashType.anyPrevOutAnyScript) {
-        writer.writeSlice(leafHash);
+        writer.writeSlice(leafHash!);
       }
       final keyVersion = hashType.requiresApo ? 1 : 0;
       writer.writeUInt8(keyVersion);

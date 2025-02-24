@@ -13,6 +13,7 @@ final rawWitnessInputBytes = Uint8List.fromList([
   0,
   0xed, 0xfe, 0xef, 0xbe,
 ]);
+final rawWitnessInput = RawInput.fromReader(BytesReader(rawWitnessInputBytes));
 
 void expectInput(Input input) {
   expect(input.prevOut.hash, prevOutHash);

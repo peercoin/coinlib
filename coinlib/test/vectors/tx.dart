@@ -31,6 +31,7 @@ class TxVector {
 final examplePrevOut = OutPoint.fromHex(
   "fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefef1", 0,
 );
+final exampleAltPrevOut = OutPoint(examplePrevOut.hash, 1);
 final examplePubkey = ECPublicKey.fromHex(
   "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
 );

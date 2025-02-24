@@ -14,7 +14,7 @@ import 'package:coinlib/src/scripts/programs/p2witness.dart';
 import 'package:coinlib/src/scripts/programs/p2wpkh.dart';
 import 'package:coinlib/src/scripts/programs/p2wsh.dart';
 import 'package:coinlib/src/scripts/script.dart';
-import 'package:coinlib/src/taproot.dart';
+import 'package:coinlib/src/taproot/taproot.dart';
 
 class InvalidAddress implements Exception {}
 class InvalidAddressNetwork implements Exception {}

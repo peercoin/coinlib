@@ -142,6 +142,7 @@ void main() {
               prevOuts: (vec.hashType.anyOneCanPay || vec.hashType.anyPrevOut)
                 ? [prevOuts[vec.inputN]]
                 : (vec.hashType.anyPrevOutAnyScript ? [] : prevOuts),
+              isScript: vec.leafHash != null,
               leafHash: vec.leafHash,
               hashType: vec.hashType,
             ),
