@@ -1,3 +1,20 @@
+## 3.0.0
+
+This release adds support for ANYPREVOUT and ANYPREVOUTANYSCRIPT. There have
+been numerous breaking changes.
+
+- Refactored `SigHashType` to use `OutputSigHashOption` and
+    `InputSigHashOption`. Adds ANYPREVOUT and ANYPREVOUTANYSCRIPT.
+- Add `TapLeafChecksig` for single signature checksig tapscripts
+- Add `TaprootSingleScriptSigInput` to sign tapscripts using `TapLeafChecksig`.
+    Can sign using ANYPREVOUT and ANYPREVOUTANYSCRIPT.
+- Replaced `sign()` with `signLegacy()`, `signLegacyWitness()`, `signTaproot()`
+    and `signTaprootSingleScriptSig()`.
+- Added `SignDetails` with numerous subclasses for providing signing details for
+    inputs. `SignatureHasher` subclasses and `Input` sign methods refactored
+    accordingly.
+- Taproot signatures are made using SIGHASH_DEFAULT by default.
+
 ## 2.2.0
 
 Add `ECCompressedPublicKey` class that forces compressed public keys.

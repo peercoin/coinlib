@@ -51,7 +51,7 @@ immutable. New modified objects are returned from methods. For example, signing
 a transaction returns a new signed transaction object:
 
 ```dart
-final signedTx = unsignedTx.sign(inputN: 0, key: privateKey);
+final signedTx = unsignedTx.signLegacy(inputN: 0, key: privateKey);
 ```
 
 An example is found in the `example/` directory.
