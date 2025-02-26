@@ -34,14 +34,32 @@ class MyApp extends StatelessWidget {
         "0000000000000000000000000000000000000000000000000000000000000001",
       );
 
+      const msg = "Hello World";
+      final msgSignature = coinlib.MessageSignature.sign(
+        key: privKey,
+        message: msg,
+        prefix: coinlib.Network.mainnet.messagePrefix,
+      );
+
       final schnorrSignature = coinlib.SchnorrSignature.sign(
         privKey, Uint8List(32),
       );
 
-      return Text(
-        "Public key is ${privKey.pubkey.hex} and should equal $expPubkey."
-        " An example Schnorr signature is"
-        " ${coinlib.bytesToHex(schnorrSignature.data)}."
+      return Column(
+        spacing: 10,
+        children: [
+          Text(
+            "Public key is ${privKey.pubkey.hex} and should equal $expPubkey."
+          ),
+          Text(
+            "The message '$msg' signed with the key gives the signature"
+            " $msgSignature."
+          ),
+          Text(
+            "An example Schnorr signature is"
+            " ${coinlib.bytesToHex(schnorrSignature.data)}."
+          ),
+        ],
       );
 
     }
