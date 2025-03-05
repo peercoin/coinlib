@@ -1,3 +1,8 @@
+## 3.0.0
+
+Update to underlying coinlib 3.0.0. Contains breaking changes. Please see the
+CHANGELOG of coinlib.
+
 ## 2.2.0
 
 Update to underlying coinlib 2.2.0 with new `ECCompressedPublicKey` class.
