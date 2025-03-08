@@ -27,9 +27,9 @@ apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
 
 android {
-    if (project.android.hasProperty("namespace")) {
-        namespace = "com.example.coinlib_flutter"
-    }
+
+    namespace = "com.example.coinlib_flutter"
+
     // Bumping the plugin compileSdkVersion requires all clients of this plugin
     // to bump the version in their app.
     compileSdk = 34
