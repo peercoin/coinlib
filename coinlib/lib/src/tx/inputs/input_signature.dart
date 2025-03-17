@@ -62,7 +62,10 @@ class SchnorrInputSignature implements InputSignature {
   @override
   final SigHashType hashType;
 
-  SchnorrInputSignature(this.signature, [this.hashType = const SigHashType.all()]);
+  SchnorrInputSignature(
+    this.signature,
+    [this.hashType = const SigHashType.schnorrDefault(),]
+  );
 
   factory SchnorrInputSignature.fromBytes(Uint8List bytes) {
 

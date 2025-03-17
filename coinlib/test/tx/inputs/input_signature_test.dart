@@ -76,6 +76,14 @@ void main() {
 
     });
 
+    test(
+      "SIGHASH_DEFAULT by default",
+      () => expect(
+        SchnorrInputSignature(SchnorrSignature(sig)).hashType,
+        SigHashType.schnorrDefault(),
+      ),
+    );
+
     test("invalid bytes", () {
       for (final list in <List<int>>[
         [...sig, 0],

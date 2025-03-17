@@ -1,3 +1,7 @@
+## 3.0.1
+
+Fix `SchnorrInputSignature` not using SIGHASH_DEFAULT.
+
 ## 3.0.0
 
 This release adds support for ANYPREVOUT and ANYPREVOUTANYSCRIPT. There have
