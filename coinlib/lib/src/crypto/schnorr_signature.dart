@@ -47,4 +47,10 @@ class SchnorrSignature {
   /// The serialized 32 byte r and s values of a schnorr signature
   Uint8List get data => Uint8List.fromList(_data);
 
+  // Getter for r value (first 32 bytes)
+  Uint8List get r => _data.sublist(0, 32);
+
+  // Getter for s value (last 32 bytes)
+  Uint8List get s => _data.sublist(32, 64);
+  
 }
