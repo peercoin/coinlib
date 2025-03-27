@@ -22,6 +22,10 @@ class SchnorrSignature {
   /// Takes a HEX encoded 64-byte schnorr signature.
   SchnorrSignature.fromHex(String hex) : this(hexToBytes(hex));
 
+  /// Construct a signature from an R point and s scalar.
+  SchnorrSignature.fromRS(ECPublicKey r, ECPrivateKey s)
+    : this(Uint8List.fromList(r.x + s.data));
+
   /// Creates a signature using a private key ([privkey]) for a given 32-byte
   /// [hash]. The signature will be generated deterministically and shall be the
   /// same for a given hash and key.
@@ -47,10 +51,11 @@ class SchnorrSignature {
   /// The serialized 32 byte r and s values of a schnorr signature
   Uint8List get data => Uint8List.fromList(_data);
 
-  // Getter for r value (first 32 bytes)
-  Uint8List get r => _data.sublist(0, 32);
+  /// The R point of the Schnorr signature, given by the x coordinate.
+  /// The x-coordinate can be obtained by [ECPublicKey.x()].
+  ECPublicKey get r => ECPublicKey.fromXOnly(_data.sublist(0, 32));
 
-  // Getter for s value (last 32 bytes)
-  Uint8List get s => _data.sublist(32, 64);
-  
+  /// The s scalar of the Schnorr signature
+  ECPrivateKey get s => ECPrivateKey(_data.sublist(32, 64));
+
 }

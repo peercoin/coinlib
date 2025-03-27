@@ -9,11 +9,11 @@ void main() {
 
     setUpAll(loadCoinlib);
 
-    final validSig = validSignatures[0];
+    final validHex = validSignatures[0];
 
     test("requires 64-bytes", () {
 
-      for (final failing in [validSig.substring(2), "${validSig}00"]) {
+      for (final failing in [validHex.substring(2), "${validHex}00"]) {
         expect(
           () => SchnorrSignature.fromHex(failing),
           throwsArgumentError,
@@ -23,13 +23,20 @@ void main() {
     });
 
     test(".data is copied cannot be mutated", () {
-      final data = hexToBytes(validSignatures[0]);
+      final data = hexToBytes(validHex);
       final sig = SchnorrSignature(data);
       sig.data[0] = 0xff;
       data[1] = 0xff;
       expect(bytesToHex(sig.data), validSignatures[0]);
     });
 
+    test(".r and .s give point and scalar", () {
+      final data = hexToBytes(validHex);
+      final sig = SchnorrSignature(data);
+      final r = sig.r;
+      final s = sig.s;
+      expect(SchnorrSignature.fromRS(r, s).data, sig.data);
+    });
 
     test(".sign()", () {
 
