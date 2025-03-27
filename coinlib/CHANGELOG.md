@@ -1,3 +1,10 @@
+## 3.1.0
+
+- Add `.r` and `.s` getters to `SchnorrSignature` with a new `.fromRS`
+constructor. The underlying bytes for a BIP340 signature can be obtained via
+`.r.x` and `.s.data`.
+- Add `.xhex` convenience getter for `ECPublicKey`.
+
 ## 3.0.1
 
 Fix `SchnorrInputSignature` not using SIGHASH_DEFAULT.
