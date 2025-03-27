@@ -67,11 +67,12 @@ void main() {
         );
       }
 
-  });
+    });
 
-  test(".hex", () {
+    test(".hex and .xhex", () {
       for (final vector in keyPairVectors) {
         expect(vector.publicObj.hex, vector.public);
+        expect(vector.publicObj.xhex, vector.public.substring(2, 66));
       }
     });
 

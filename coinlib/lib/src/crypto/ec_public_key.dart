@@ -52,6 +52,9 @@ class ECPublicKey {
   /// any existing keys to work.
   Uint8List get x => _data.sublist(1, 33);
 
+  /// A hex string of the x-coordinate
+  String get xhex => bytesToHex(x);
+
   /// Obtains a new key that uses the same X coordinate but uses an even Y
   /// coordinate.
   ECPublicKey get xonly => ECPublicKey.fromXOnly(x);
