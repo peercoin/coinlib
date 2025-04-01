@@ -12,13 +12,15 @@ Future<bool> cmdAvailable(String cmd) async {
 }
 
 Future<int> execWithStdio(
-  String executable, List<String> arguments, {
-    String? workingDir, String? stdin,
-  }
-) async {
-
+  String executable,
+  List<String> arguments, {
+  String? workingDir,
+  String? stdin,
+}) async {
   final process = await Process.start(
-    executable, arguments, workingDirectory: workingDir,
+    executable,
+    arguments,
+    workingDirectory: workingDir,
   );
 
   if (stdin != null) {
@@ -29,7 +31,21 @@ Future<int> execWithStdio(
   await process.stdout.transform(utf8.decoder).forEach(stdout.write);
 
   return await process.exitCode;
+}
 
+Future<int> execWithStdioWin(String command, List<String> arguments) async {
+  final process = await Process.start(command, arguments);
+
+  process.stdout.transform(SystemEncoding().decoder).listen((data) {
+    print('[stdout]: $data');
+  });
+
+  process.stderr.transform(SystemEncoding().decoder).listen((data) {
+    print('[stderr]: $data');
+  });
+
+  // Wait for the process to complete
+  return await process.exitCode;
 }
 
 void exitOnCode(int exitCode, String exitMsg) {
@@ -39,6 +55,5 @@ void exitOnCode(int exitCode, String exitMsg) {
   }
 }
 
-String createTmpDir()
-  => Directory.systemTemp.createTempSync("coinlibBuild").path;
-
+String createTmpDir() =>
+    Directory.systemTemp.createTempSync("coinlibBuild").path;
