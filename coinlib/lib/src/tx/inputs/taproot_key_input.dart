@@ -22,7 +22,7 @@ class TaprootKeyInput extends TaprootInput {
     required super.prevOut,
     this.insig,
     super.sequence = Input.sequenceFinal,
-  }) : super(witness: [if (insig != null) insig.bytes]);
+  }) : super(witness: [insig != null ? insig.bytes : Uint8List(0)]);
 
   /// Checks if the [raw] input and [witness] data match the expected format for
   /// a [TaprootKeyInput], with a signature. If it does it returns a
@@ -33,9 +33,10 @@ class TaprootKeyInput extends TaprootInput {
     if (witness.length != 1) return null;
 
     try {
+      final sig = witness.first;
       return TaprootKeyInput(
         prevOut: raw.prevOut,
-        insig: SchnorrInputSignature.fromBytes(witness[0]),
+        insig: sig.isEmpty ? null : SchnorrInputSignature.fromBytes(witness[0]),
         sequence: raw.sequence,
       );
     } on InvalidInputSignature {

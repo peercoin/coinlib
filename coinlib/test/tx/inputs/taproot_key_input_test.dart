@@ -12,7 +12,7 @@ void main() {
 
     setUpAll(loadCoinlib);
 
-    getWitness(bool hasSig) => [if (hasSig) schnorrInSig.bytes];
+    getWitness(bool hasSig) => [hasSig ? schnorrInSig.bytes : Uint8List(0)];
 
     test("valid key-path taproot inputs inc. addSignature", () {
 
@@ -48,14 +48,15 @@ void main() {
       expectTaprootKeyInput(withSig, true);
       expectTaprootKeyInput(noSig.addSignature(schnorrInSig), true);
 
-      // Expect match only when there is a Schnorr signature present, as there
-      // is no way to distinguish otherwise
-      final matched = Input.match(
-        RawInput.fromReader(BytesReader(rawWitnessInputBytes)),
-        getWitness(true),
-      );
-      expect(matched, isA<TaprootKeyInput>());
-      expectTaprootKeyInput(matched as TaprootKeyInput, true);
+      // Matches when signature is present or not
+      for (final hasSig in [false, true]) {
+        final matched = Input.match(
+          RawInput.fromReader(BytesReader(rawWitnessInputBytes)),
+          getWitness(hasSig),
+        );
+        expect(matched, isA<TaprootKeyInput>());
+        expectTaprootKeyInput(matched as TaprootKeyInput, hasSig);
+      }
 
     });
 
@@ -74,8 +75,6 @@ void main() {
       );
 
       expectNoMatch("0", getWitness(true));
-      // Doesn't match without signature
-      expectNoMatch("", getWitness(false));
       expectNoMatch("", [...getWitness(true), ...getWitness(true)]);
       // Not allowing annex
       expectNoMatch("", [...getWitness(true), hexToBytes("5001020304")]);
@@ -101,10 +100,7 @@ void main() {
       final input = TaprootKeyInput(prevOut: prevOut);
       final signedInput = input.sign(
         details: TaprootKeySignDetails(
-          tx: Transaction(
-            inputs: [input],
-            outputs: [exampleOutput],
-          ),
+          tx: Transaction(inputs: [input], outputs: [exampleOutput]),
           inputN: 0,
           prevOuts: [
             Output.fromProgram(

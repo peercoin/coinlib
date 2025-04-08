@@ -493,11 +493,10 @@ final ambiguousWitness = TxVector(
   obj: Transaction(
     version: 3,
     inputs: [
-      WitnessInput(
+      TaprootKeyInput(
         prevOut: OutPoint.fromHex(
           "0000000000000000000000000000000000000000000000002d00000000000000", 0,
         ),
-        witness: [Uint8List(0)],
         sequence: 189878609,
       ),
     ],
@@ -513,9 +512,9 @@ final ambiguousWitness = TxVector(
   isWitness: true,
   isCoinBase: false,
   isCoinStake: false,
-  complete: true,
+  complete: false,
   size: 64,
-  inputTypes: [WitnessInput],
+  inputTypes: [TaprootKeyInput],
   hex: ambiguousHex,
 );
 
