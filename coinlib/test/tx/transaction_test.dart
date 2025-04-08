@@ -918,6 +918,11 @@ void main() {
         mast: TapLeafChecksig.apoInternal,
       );
 
+      final apoInput = TaprootSingleScriptSigInput.anyPrevOut(
+        taproot: taprootApo,
+        leaf: leafApo,
+      );
+
       final tx = Transaction(
         inputs: [
           // Regular SIGHASH_ALL|ANYONECANPAY
@@ -930,12 +935,9 @@ void main() {
             leaf: leafRegular,
           ),
           // ANYPREVOUT
-          TaprootSingleScriptSigInput.anyPrevOut(
-            taproot: taprootApo,
-            leaf: leafApo,
-          ),
+          apoInput,
           // ANYPREVOUTANYSCRIPT
-          TaprootSingleScriptSigInput.anyPrevOutAnyScript(),
+          apoInput,
           // ANYPREVOUT, internal key
           TaprootSingleScriptSigInput.anyPrevOut(
             taproot: taprootApoInternal,
@@ -985,10 +987,8 @@ void main() {
         ),
         1,
       ).replaceInput(
-        (signedTx.inputs[2] as TaprootSingleScriptSigInput).addTaproot(
-          taproot: taprootApo,
-          leaf: leafApo,
-          prevOut: OutPoint.fromHex(
+        (signedTx.inputs[2] as TaprootSingleScriptSigInput).addPrevOut(
+          OutPoint.fromHex(
             "1bc7c900192ff96e2fbda841f102cf0e924f8614545b16ccf9a89b573d0258f5",
             1,
           ),

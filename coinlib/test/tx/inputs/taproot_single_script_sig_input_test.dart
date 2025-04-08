@@ -14,6 +14,10 @@ final apoTR = Taproot(
   internalKey: privkey.pubkey,
   mast: TapLeafChecksig.apoInternal,
 );
+final apoInput = TaprootSingleScriptSigInput.anyPrevOut(
+  taproot: apoTR,
+  leaf: TapLeafChecksig.apoInternal,
+);
 final unsignedTx = Transaction(
   inputs: [
     TaprootSingleScriptSigInput(
@@ -22,12 +26,8 @@ final unsignedTx = Transaction(
       leaf:regularLeaf,
       sequence: sequence,
     ),
-    TaprootSingleScriptSigInput.anyPrevOut(
-      taproot: apoTR,
-      leaf: TapLeafChecksig.apoInternal,
-      sequence: sequence,
-    ),
-    TaprootSingleScriptSigInput.anyPrevOutAnyScript(),
+    apoInput,
+    apoInput,
   ],
   outputs: [exampleOutput],
 );
@@ -44,7 +44,6 @@ void main() {
         int i, SigHashType hashType, {
           bool addPrevOutBeforeSign = false,
           bool addPrevOut = false,
-          bool addTaproot = false,
         }
       ) {
 
@@ -69,14 +68,6 @@ void main() {
         if (!addPrevOut) return;
 
         input = input.addPrevOut(examplePrevOut);
-        expect(input.complete, !addTaproot);
-
-        if (!addTaproot) return;
-
-        input = input.addTaproot(
-          taproot: apoTR,
-          leaf: TapLeafChecksig.apoInternal,
-        );
         expect(input.complete, true);
 
       }
@@ -91,89 +82,43 @@ void main() {
       expectSign(1, sigHashAOCP, addPrevOutBeforeSign: true);
 
       // APOAS
-      expectSign(2, sigHashAPOAS, addPrevOut: true, addTaproot: true);
+      expectSign(2, sigHashAPOAS, addPrevOut: true);
 
     });
 
-    test("signatures invalidate on new prevout or tapscript", () {
+    test("signatures invalidate on new prevout", () {
 
-      final altLeaf = TapLeafChecksig.apo(privkey.pubkey);
-
-      void expectComplete(
-        TaprootSingleScriptSigInput input,
-        bool onPrevOut,
-        bool onTaproot,
-      ) {
+      void expectComplete(SchnorrInputSignature inputSig, bool onPrevOut) {
+        final input = TaprootSingleScriptSigInput(
+          prevOut: examplePrevOut,
+          taproot: regularTR,
+          leaf: regularLeaf,
+          insig: inputSig,
+        );
         expect(input.complete, true);
         expect(input.addPrevOut(exampleAltPrevOut).complete, onPrevOut);
-        expect(
-          input.addTaproot(
-            taproot: Taproot(internalKey: privkey.pubkey, mast: altLeaf),
-            leaf: altLeaf,
-          ).complete,
-          onTaproot,
-        );
       }
 
-      expectComplete(
-        TaprootSingleScriptSigInput(
-          prevOut: examplePrevOut,
-          taproot: regularTR,
-          leaf: regularLeaf,
-          insig: schnorrInSig,
-        ),
-        false,
-        false,
-      );
-
-      expectComplete(
-        TaprootSingleScriptSigInput(
-          prevOut: examplePrevOut,
-          taproot: regularTR,
-          leaf: regularLeaf,
-          insig: schnorrInSigAPO,
-        ),
-        true,
-        false,
-      );
-
-      expectComplete(
-        TaprootSingleScriptSigInput(
-          prevOut: examplePrevOut,
-          taproot: regularTR,
-          leaf: regularLeaf,
-          insig: schnorrInSigAPOAS,
-        ),
-        true,
-        true,
-      );
+      expectComplete(schnorrInSig, false);
+      expectComplete(schnorrInSigAPO, true);
+      expectComplete(schnorrInSigAPOAS, true);
 
     });
 
-    test(".sign() fail", () {
-
-      void expectFail(int i, SigHashType hashType) {
-        final input = unsignedTx.inputs[i] as TaprootSingleScriptSigInput;
-        expect(
-          () => input.sign(
-            details: TaprootScriptSignDetails(
-              tx: unsignedTx,
-              inputN: i,
-              prevOuts: [if (!hashType.anyPrevOutAnyScript) exampleOutput],
-              hashType: hashType,
-            ),
-            key: privkey,
+    test(".sign() cannot sign APO for non-APO key", () {
+      final input = unsignedTx.inputs.first as TaprootSingleScriptSigInput;
+      expect(
+        () => input.sign(
+          details: TaprootScriptSignDetails(
+            tx: unsignedTx,
+            inputN: 0,
+            prevOuts: [exampleOutput],
+            hashType: sigHashAPO,
           ),
-          throwsA(isA<CannotSignInput>()),
-        );
-      }
-
-      // Signing APO for non-APO key
-      expectFail(0, sigHashAPO);
-
-      // Missing leaf for non-APOAS
-      expectFail(2, sigHashAPO);
-
+          key: privkey,
+        ),
+        throwsA(isA<CannotSignInput>()),
+      );
     });
 
     test(".match() success", () {

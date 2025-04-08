@@ -14,21 +14,21 @@ import 'taproot_script_input.dart';
 /// An input that provides a single signature to satisfy a tapscript [leaf].
 class TaprootSingleScriptSigInput extends TaprootInput {
 
-  final TapLeafChecksig? leaf;
+  final TapLeafChecksig leaf;
   final SchnorrInputSignature? insig;
 
   TaprootSingleScriptSigInput._({
-    OutPoint? prevOut,
-    this.leaf,
-    Uint8List? controlBlock,
-    this.insig,
+    required this.leaf,
+    required Uint8List controlBlock,
     required super.sequence,
+    OutPoint? prevOut,
+    this.insig,
   }) : super(
     prevOut: prevOut ?? OutPoint.nothing,
     witness: [
       if (insig != null) insig.bytes,
-      if (leaf != null) leaf.script.compiled,
-      if (controlBlock != null) controlBlock,
+      leaf.script.compiled,
+      controlBlock,
     ],
   );
 
@@ -47,13 +47,6 @@ class TaprootSingleScriptSigInput extends TaprootInput {
     insig: insig,
     sequence: sequence,
   );
-
-  /// Create an APO input with no information that can only be signed with
-  /// ANYPREVOUTANYSCRIPT.
-  TaprootSingleScriptSigInput.anyPrevOutAnyScript({
-    SchnorrInputSignature? insig,
-    int sequence = Input.sequenceFinal,
-  }) : this._(insig: insig, sequence: sequence);
 
   /// Create an APO input specifying a [Taproot] and [TapLeaf] that can be
   /// signed using ANYPREVOUT or ANYPREVOUTANYSCRIPT. ANYPREVOUTANYSCRIPT may
@@ -103,23 +96,6 @@ class TaprootSingleScriptSigInput extends TaprootInput {
 
   }
 
-  /// Add the [Taproot] and [TapLeaf] required to complete the input for
-  /// ANYPREVOUTANYSCRIPT. The [prevOut] may optionally be added.
-  ///
-  /// The signature is not invalidated for ANYPREVOUTANYSCRIPT.
-  TaprootSingleScriptSigInput addTaproot({
-    required Taproot taproot,
-    required TapLeafChecksig leaf,
-    OutPoint? prevOut,
-  }) => TaprootSingleScriptSigInput._(
-    prevOut: prevOut ?? this.prevOut,
-    leaf: leaf,
-    controlBlock: taproot.controlBlockForLeaf(leaf),
-    insig: (insig != null && insig!.hashType.anyPrevOutAnyScript)
-      ? insig : null,
-    sequence: sequence,
-  );
-
   /// Complete the input by adding (or replacing) the [OutPoint].
   ///
   /// A signature is not invalidated if ANYPREVOUT or ANYPREVOUTANYSCRIPT is
@@ -129,7 +105,7 @@ class TaprootSingleScriptSigInput extends TaprootInput {
   ) => TaprootSingleScriptSigInput._(
     prevOut: prevOut,
     leaf: leaf,
-    controlBlock: leaf == null ? null : witness.last,
+    controlBlock: witness.last,
     insig: (insig != null && insig!.hashType.requiresApo) ? insig : null,
     sequence: sequence,
   );
@@ -140,7 +116,7 @@ class TaprootSingleScriptSigInput extends TaprootInput {
   ) => TaprootSingleScriptSigInput._(
     prevOut: prevOut,
     leaf: leaf,
-    controlBlock: leaf == null ? null : witness.last,
+    controlBlock: witness.last,
     insig: insig,
     sequence: sequence,
   );
@@ -151,17 +127,14 @@ class TaprootSingleScriptSigInput extends TaprootInput {
     required ECPrivateKey key,
   }) {
 
-    if (leaf != null && !leaf!.isApo && details.hashType.requiresApo) {
+    if (!leaf.isApo && details.hashType.requiresApo) {
       throw CannotSignInput(
         "Cannot sign with ${details.hashType} for non-APO key",
       );
     }
 
     return addSignature(
-      createInputSignature(
-        key: key,
-        details: leaf == null ? details : details.addLeafHash(leaf!.hash),
-      ),
+      createInputSignature(key: key, details: details.addLeafHash(leaf.hash)),
     );
 
   }
