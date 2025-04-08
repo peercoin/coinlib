@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'util.dart';
 
 /// Follows bitcoin-core/secp256k1's "Building on Windows" instructions.
@@ -7,6 +6,7 @@ import 'util.dart';
 /// Runnable in "Developer Command Prompt for VS 2022".
 
 void main() async {
+
   // Make temporary directory.
   final workDir = Directory.current.path;
   final tmpDir = createTmpDir();
@@ -60,7 +60,7 @@ void main() async {
     "${Platform.pathSeparator}libsecp256k1-2.dll",
   );
 
-  print("FIle exists: ${dll.existsSync()}");
+  print("File exists: ${dll.existsSync()}");
 
   dll.copySync(
     "$workDir"
@@ -69,4 +69,5 @@ void main() async {
   );
 
   print("Output libsecp256k1.dll successfully");
+
 }

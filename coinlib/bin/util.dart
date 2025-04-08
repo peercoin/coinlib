@@ -14,9 +14,10 @@ Future<bool> cmdAvailable(String cmd) async {
 Future<int> execWithStdio(
   String executable,
   List<String> arguments, {
-  String? workingDir,
-  String? stdin,
-}) async {
+    String? workingDir,
+    String? stdin,
+  }
+) async {
   final process = await Process.start(
     executable,
     arguments,
@@ -44,7 +45,6 @@ Future<int> execWithStdioWin(String command, List<String> arguments) async {
     print('[stderr]: $data');
   });
 
-  // Wait for the process to complete
   return await process.exitCode;
 }
 
