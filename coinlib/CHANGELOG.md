@@ -1,3 +1,13 @@
+## 4.0.0
+
+- The `TaprootKeyInput` will now write an empty witness stack element to
+  represent a missing signature. These inputs without a signature will be
+  recognised when matching an input or reading a transaction.
+- `TaprootSingleScriptSigInput.anyPrevOutAnyScript()` has been removed. All
+    `TaprootSingleScriptSigInput` inputs now require the `Taproot` and
+    `TapLeafChecksig`.
+- Fixes Windows build sometimes hanging
+
 ## 3.1.0
 
 - Add `.r` and `.s` getters to `SchnorrSignature` with a new `.fromRS`

@@ -1,3 +1,7 @@
+## 4.0.0
+
+Update to underlying coinlib 4.0.0. Please see the CHANGELOG of coinlib.
+
 ## 3.0.0
 
 Update to underlying coinlib 3.0.0. Contains breaking changes. Please see the
