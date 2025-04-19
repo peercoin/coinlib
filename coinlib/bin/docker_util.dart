@@ -25,7 +25,7 @@ Future<bool> dockerRun(
   // Build
   print("Building $tag");
   var exitCode = await execWithStdio(
-    dockerCmd, ["build", "-f", "-", "-t", tag],
+    dockerCmd, ["build", "-t", tag, "-"],
     stdin: dockerScript,
   );
 
