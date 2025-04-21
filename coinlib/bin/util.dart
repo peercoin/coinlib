@@ -29,10 +29,10 @@ Future<int> execWithStdio(
     await process.stdin.close();
   }
 
-  // Pipe stdout to terminal and discard stderr
+  // Pipe stdout and stderr to terminal
   await Future.wait([
-    process.stdout.transform(utf8.decoder).forEach(stdout.write),
-    process.stderr.drain<String?>(),
+    for (final stream in [process.stdout, process.stderr])
+      stream.transform(utf8.decoder).forEach(stdout.write),
   ]);
 
   return await process.exitCode;
