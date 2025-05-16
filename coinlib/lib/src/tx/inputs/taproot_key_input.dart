@@ -15,8 +15,15 @@ class TaprootKeyInput extends TaprootInput {
   final SchnorrInputSignature? insig;
 
   @override
-  // 64-bit sig plus varint with default sighash type
-  final int? signedSize = 41 + 65;
+  // 41 bytes for legacy input data
+  // 64 witness signature bytes
+  // 1 potential sighash byte
+  // 2 bytes for witness varints
+  final int signedSize = 41 + 64 + 1 + 2;
+
+  @override
+  // Minus the sighash byte
+  int get defaultSignedSize => signedSize - 1;
 
   TaprootKeyInput({
     required super.prevOut,

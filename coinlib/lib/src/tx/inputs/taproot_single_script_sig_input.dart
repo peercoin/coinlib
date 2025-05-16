@@ -17,6 +17,20 @@ class TaprootSingleScriptSigInput extends TaprootInput {
   final TapLeafChecksig leaf;
   final SchnorrInputSignature? insig;
 
+  @override
+  // 41 bytes for legacy input data
+  // 64 witness signature bytes
+  // 1 potential sighash byte
+  // 4 bytes for witness varints
+  int get signedSize => 41 + 64 + 1 + 4
+    + leaf.script.compiled.length
+    // Control block
+    + witness.last.length;
+
+  @override
+  // Minus the sighash byte
+  int get defaultSignedSize => signedSize - 1;
+
   TaprootSingleScriptSigInput._({
     required this.leaf,
     required Uint8List controlBlock,
@@ -49,8 +63,7 @@ class TaprootSingleScriptSigInput extends TaprootInput {
   );
 
   /// Create an APO input specifying a [Taproot] and [TapLeaf] that can be
-  /// signed using ANYPREVOUT or ANYPREVOUTANYSCRIPT. ANYPREVOUTANYSCRIPT may
-  /// also ommit the taproot information using [anyPrevOutAnyScript()].
+  /// signed using ANYPREVOUT or ANYPREVOUTANYSCRIPT.
   TaprootSingleScriptSigInput.anyPrevOut({
     required Taproot taproot,
     required TapLeafChecksig leaf,

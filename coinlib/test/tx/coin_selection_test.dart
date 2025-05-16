@@ -105,6 +105,9 @@ final vectors = [
   ),
 ];
 
+final privKey = keyPairVectors.first.privateObj;
+final pubKey = keyPairVectors.first.publicObj;
+
 void main() {
 
   group("CoinSelection()", () {
@@ -113,10 +116,7 @@ void main() {
     late P2PKH changeProgram;
     setUpAll(() async {
       await loadCoinlib();
-      input = P2PKHInput(
-        prevOut: examplePrevOut,
-        publicKey: keyPairVectors[0].publicObj,
-      );
+      input = P2PKHInput(prevOut: examplePrevOut, publicKey: pubKey);
       changeProgram = P2PKH.fromPublicKey(examplePubkey);
     });
 
@@ -154,7 +154,7 @@ void main() {
 
           var tx = selection.transaction;
           for (int i = 0; i < vector.inputValues.length; i++) {
-            tx = tx.signLegacy(inputN: i, key: keyPairVectors[0].privateObj);
+            tx = tx.signLegacy(inputN: i, key: privKey);
           }
 
           expect(
@@ -405,6 +405,82 @@ void main() {
           isNonZero,
         );
       }
+
+    });
+
+    test("works for taproot inputs", () {
+
+      // Input 1 = Script with known default sighash type
+      // Input 2 = Script with unknown default sighash type
+      // Input 3 = Script with none sighash type
+      // Input 4 = Key with known default sighash type
+      // Input 5 = Key with unknown default sighash type
+      // Input 6 = Key with none sighash type
+
+      final tapleaf = TapLeafChecksig(pubKey);
+      final taproot = Taproot(internalKey: pubKey, mast: tapleaf);
+      final program = P2TR.fromTaproot(taproot);
+      final inAmt = CoinUnit.coin.toSats("1");
+
+      final selection = CoinSelection(
+        selected: List.generate(
+          6,
+          // First three are script-path
+          (i) => InputCandidate(
+            input:
+              i < 3
+              ? TaprootSingleScriptSigInput(
+                prevOut:  examplePrevOut,
+                taproot: taproot,
+                leaf: tapleaf,
+              )
+              : TaprootKeyInput(prevOut: examplePrevOut),
+            value: inAmt,
+            // First and 4th known as a default sig hash
+            defaultSigHash: i % 3 == 0,
+          ),
+        ),
+        recipients: [outputForValue(5000000)],
+        changeProgram: program,
+        feePerKb: feePerKb, minFee: minFee, minChange: minChange,
+      );
+
+      final prevOuts = List.generate(
+        6,
+        (_) => Output.fromProgram(inAmt, program),
+      );
+      final tweaked = taproot.tweakPrivateKey(privKey);
+
+      // First two in each 3-set default
+      SigHashType iToHashType(int i) => i % 3 != 2
+        ? SigHashType.schnorrDefault()
+        : SigHashType.none();
+
+      var tx = selection.transaction;
+
+      for (int i = 0; i < 3; i++) {
+        tx = tx.signTaprootSingleScriptSig(
+          inputN: i,
+          key: tweaked,
+          prevOuts: prevOuts,
+          hashType: iToHashType(i),
+        );
+      }
+
+      for (int i = 3; i < 6; i++) {
+        tx = tx.signTaproot(
+          inputN: i,
+          key: tweaked,
+          prevOuts: prevOuts,
+          hashType: iToHashType(i),
+        );
+      }
+
+      // Expected signed size is two bytes higher due to 2nd and 5th inputs not
+      // having defaultSigHash set to true
+      expect(selection.signedSize, 942);
+      expect(tx.size, 940);
+      expect(selection.fee, BigInt.from(9420));
 
     });
 

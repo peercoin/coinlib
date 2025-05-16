@@ -25,4 +25,7 @@ abstract class TaprootInput extends WitnessInput {
     details.hashType,
   );
 
+  /// The signed size when SIGHASH_DEFAULT is used for all signatures
+  int? get defaultSignedSize => signedSize;
+
 }

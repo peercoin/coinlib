@@ -1,8 +1,10 @@
 import 'package:coinlib/src/common/serial.dart';
 import 'package:coinlib/src/crypto/random.dart';
 import 'package:coinlib/src/scripts/program.dart';
+import 'package:coinlib/src/tx/inputs/witness_input.dart';
 import 'package:collection/collection.dart';
 import 'inputs/input.dart';
+import 'inputs/taproot_input.dart';
 import 'output.dart';
 import 'transaction.dart';
 
@@ -10,11 +12,27 @@ class InsufficientFunds implements Exception {}
 
 /// A candidate input to spend a UTXO with the UTXO value
 class InputCandidate {
+
   /// Input that can spend the UTXO
   final Input input;
   /// Value of UTXO to be spent
   final BigInt value;
-  InputCandidate({ required this.input, required this.value });
+  /// True if it is known that the default sighash type is being used which
+  /// allows one less byte to be used for Taproot signatures.
+  final bool defaultSigHash;
+
+  /// Provides an [input] alongside the [value] being spent that may be
+  /// selected.
+  ///
+  /// [defaultSigHash] can be set to true if it is known that a Taproot input
+  /// will definitely be signed with SIGHASH_DEFAULT. The fee calculation will
+  /// be incorrect if this is set for a non-default sighash type.
+  InputCandidate({
+    required this.input,
+    required this.value,
+    this.defaultSigHash = false,
+  });
+
 }
 
 /// Represents a selection of inputs to fund a transaction. If the inputs
@@ -83,13 +101,28 @@ class CoinSelection {
     recipientValue = recipients
       .fold(BigInt.zero, (acc, output) => acc + output.value);
 
+    final isWitness = selected.any(
+      (candidate) => candidate.input is WitnessInput,
+    );
+
     // Get unchanging size
     final int fixedSize
       // Version and locktime
       = 8
+      // Add witness marker and flag
+      + (isWitness ? 2 : 0)
       // Fully signed inputs
       + MeasureWriter.varIntSizeOfInt(selected.length)
-      + selected.fold(0, (acc, candidate) => acc + candidate.input.signedSize!);
+      + selected.fold(
+        0,
+        (acc, candidate) {
+          final input = candidate.input;
+          final inputSize = input is TaprootInput && candidate.defaultSigHash
+            ? input.defaultSignedSize
+            : input.signedSize;
+          return acc + inputSize!;
+        }
+      );
 
     // Determine size and fee with change
     final sizeWithChange = _sizeGivenChange(fixedSize, true);
