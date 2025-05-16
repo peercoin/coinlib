@@ -1,3 +1,11 @@
+## 4.1.0
+
+`CoinSelection` now works for `TaprootKeyInput` and
+`TaprootSingleScriptSigInput`.
+
+`defaultSigHash` may be used with `InputCandidate` to give an optimal fee for
+Taproot inputs signed with the default sighash.
+
 ## 4.0.0
 
 - The `TaprootKeyInput` will now write an empty witness stack element to
