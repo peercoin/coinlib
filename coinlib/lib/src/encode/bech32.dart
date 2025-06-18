@@ -99,6 +99,7 @@ class Bech32 {
     required String hrp,
     required List<int> words,
     required this.type,
+    bool ignoreMaxLengthCheckForMweb = false,
   })  : hrp = hrp.toLowerCase(),
         words = List.unmodifiable(words) {
     if (hrp.isEmpty) throw InvalidBech32("Missing HRP");
@@ -108,7 +109,8 @@ class Bech32 {
       throw InvalidBech32("Words outside of 5-bit range");
     }
 
-    if (hrp.length + 1 + words.length + checksumLength > maxLength) {
+    if (!ignoreMaxLengthCheckForMweb &&
+        hrp.length + 1 + words.length + checksumLength > maxLength) {
       throw InvalidBech32("Bech32 too long");
     }
   }
@@ -116,8 +118,11 @@ class Bech32 {
   /// Decodes a bech32 string into the hrp, 5-bit words and type. May throw an
   /// [InvalidBech32]. It will throw [InvalidBech32Checksum] if the bech32 is
   /// valid but doesn't have a valid checksum for either bech32 or bech32m.
-  factory Bech32.decode(String encoded) {
-    if (encoded.length > maxLength) {
+  factory Bech32.decode(
+    String encoded, {
+    bool ignoreMaxLengthCheckForMweb = false,
+  }) {
+    if (!ignoreMaxLengthCheckForMweb && encoded.length > maxLength) {
       throw InvalidBech32("Bech32 too long");
     }
 
