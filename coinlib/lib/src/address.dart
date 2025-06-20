@@ -130,6 +130,8 @@ class P2SHAddress extends Base58Address {
 /// [P2WSHAddress]. Unknown witness programs are encoded via
 /// [UnknownWitnessAddress].
 abstract class Bech32Address implements Address {
+  static const nonMwebMaxWitnessProgramLength = 40;
+
   /// The human readable part of the address used to specify the network
   final String hrp;
 
@@ -146,6 +148,14 @@ abstract class Bech32Address implements Address {
   }) {
     if (version < 0 || version > 16) {
       throw ArgumentError("bech32 version must be 0-16", "this.version");
+    }
+
+    if (!ignoreMaxLengthCheckForMweb &&
+        (_data.length < 2 || _data.length > nonMwebMaxWitnessProgramLength)) {
+      throw ArgumentError(
+        "witness programs must be 2-$nonMwebMaxWitnessProgramLength in length",
+        "this.program",
+      );
     }
 
     if (!hrpValid(hrp)) {
@@ -172,11 +182,14 @@ abstract class Bech32Address implements Address {
   factory Bech32Address.fromString(String encoded, Network network) {
     final bech32 = Bech32.decode(
       encoded,
-      ignoreMaxLengthCheckForMweb: network.bech32Hrp == "ltcmweb",
+      ignoreMaxLengthCheckForMweb: network.mwebBech32Hrp.isNotEmpty,
     );
 
     if (bech32.words.isEmpty) throw InvalidAddress();
-    if (bech32.hrp != network.bech32Hrp) throw InvalidAddressNetwork();
+    if (bech32.hrp != network.bech32Hrp &&
+        bech32.hrp != network.mwebBech32Hrp) {
+      throw InvalidAddressNetwork();
+    }
 
     final version = bech32.words[0];
 
@@ -193,13 +206,9 @@ abstract class Bech32Address implements Address {
 
     late Bech32Address addr;
 
-    // TODO account for testnet (don't hardcode this)
-    if (network.bech32Hrp == "ltcmweb" && version == 0) {
-      if (bytes.length != MwebAddress._expectedProgramLength) {
-        throw Exception(
-          "Invalid MWEB witness program length: ${bytes.length}, expected ${MwebAddress._expectedProgramLength}",
-        );
-      }
+    if (network.mwebBech32Hrp.isNotEmpty &&
+        version == 0 &&
+        bytes.length == MwebAddress._expectedProgramLength) {
       addr = MwebAddress.fromHash(hash: bytes, hrp: bech32.hrp);
     } else if (version == 0) {
       // Version 0 signals P2WPKH or P2WSH
@@ -219,7 +228,7 @@ abstract class Bech32Address implements Address {
       }
     } else if (version <= 16) {
       // Treat other versions as unknown, but still require valid length range (e.g., 2-40)
-      if (bytes.length < 2 || bytes.length > 40) {
+      if (bytes.length < 2 || bytes.length > nonMwebMaxWitnessProgramLength) {
         // Using 40 as a general max for unknown
         throw InvalidAddress();
       }
@@ -295,14 +304,11 @@ class P2TRAddress extends Bech32Address {
 class MwebAddress extends Bech32Address {
   static const int _expectedProgramLength = 66;
 
-  factory MwebAddress.fromAddress(String encoded, {required Network network}) {
-    // TODO this should probably be handled differently as well
-    final mwebNetwork = network.copyWith(bech32Hrp: "ltcmweb");
-
+  factory MwebAddress.fromString(String encoded, {required Network network}) {
     // Delegate to the base Bech32Address.fromString, passing the customized network.
     final Bech32Address decodedAddr = Bech32Address.fromString(
       encoded,
-      mwebNetwork,
+      network,
     );
 
     if (decodedAddr is! MwebAddress) {

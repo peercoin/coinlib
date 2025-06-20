@@ -1,6 +1,6 @@
 class Network {
   final int wifPrefix, p2pkhPrefix, p2shPrefix, privHDPrefix, pubHDPrefix;
-  final String bech32Hrp, messagePrefix;
+  final String bech32Hrp, messagePrefix, mwebBech32Hrp;
   final BigInt minFee, minOutput, feePerKb;
 
   Network({
@@ -10,6 +10,7 @@ class Network {
     required this.privHDPrefix,
     required this.pubHDPrefix,
     required this.bech32Hrp,
+    this.mwebBech32Hrp = "",
     required this.messagePrefix,
     required this.minFee,
     required this.minOutput,
@@ -24,6 +25,7 @@ class Network {
     int? privHDPrefix,
     int? pubHDPrefix,
     String? bech32Hrp,
+    String? mwebBech32Hrp,
     String? messagePrefix,
     BigInt? minFee,
     BigInt? minOutput,
@@ -36,6 +38,7 @@ class Network {
       privHDPrefix: privHDPrefix ?? this.privHDPrefix,
       pubHDPrefix: pubHDPrefix ?? this.pubHDPrefix,
       bech32Hrp: bech32Hrp ?? this.bech32Hrp,
+      mwebBech32Hrp: mwebBech32Hrp ?? this.mwebBech32Hrp,
       messagePrefix: messagePrefix ?? this.messagePrefix,
       minFee: minFee ?? this.minFee,
       minOutput: minOutput ?? this.minOutput,
@@ -52,6 +55,7 @@ class Network {
         '  privHDPrefix: 0x${privHDPrefix.toRadixString(16)},\n'
         '  pubHDPrefix: 0x${pubHDPrefix.toRadixString(16)},\n'
         '  bech32Hrp: "$bech32Hrp",\n'
+        '  mwebBech32Hrp: "$mwebBech32Hrp",\n'
         '  messagePrefix: "$messagePrefix",\n'
         '  minFee: $minFee,\n'
         '  minOutput: $minOutput,\n'
@@ -66,6 +70,7 @@ class Network {
     privHDPrefix: 0x0488ade4,
     pubHDPrefix: 0x0488b21e,
     bech32Hrp: "pc",
+    mwebBech32Hrp: "",
     messagePrefix: "Peercoin Signed Message:\n",
     minFee: BigInt.from(1000),
     minOutput: BigInt.from(10000),
@@ -79,6 +84,7 @@ class Network {
     privHDPrefix: 0x043587CF,
     pubHDPrefix: 0x04358394,
     bech32Hrp: "tpc",
+    mwebBech32Hrp: "",
     messagePrefix: "Peercoin Signed Message:\n",
     minFee: BigInt.from(1000),
     minOutput: BigInt.from(10000),
