@@ -335,6 +335,17 @@ class MwebAddress extends Bech32Address {
 
   @override
   Program get program => RawProgram(Script([MwebScriptOp(data)]));
+
+  @override
+  toString() => _encodedCache ??= Bech32(
+        hrp: hrp,
+        words: List<int>.from([
+          version,
+          ...convertBits(_data, 8, 5, true)!,
+        ]),
+        type: version == 0 ? Bech32Type.bech32 : Bech32Type.bech32m,
+        ignoreMaxLengthCheckForMweb: true,
+      ).encode();
 }
 
 /// This address type is for all bech32 addresses that do not match known
