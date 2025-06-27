@@ -1,48 +1,53 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/src/common/bytes.dart';
 import 'package:coinlib/src/common/hex.dart';
 import 'package:coinlib/src/common/serial.dart';
 import 'package:coinlib/src/crypto/ec_public_key.dart';
 import 'package:coinlib/src/tx/inputs/input_signature.dart';
+
 import 'codes.dart';
 
 class InvalidScriptAsm implements Exception {}
+
 class PushDataNotMinimal implements Exception {}
 
 /// Represents a single operation or script pushdata
 abstract class ScriptOp {
-
   static final op1Negate = scriptOpNameToCode["1NEGATE"]!;
   static final op1 = scriptOpNameToCode["1"]!;
   static final op16 = scriptOpNameToCode["16"]!;
   static final pushData1 = scriptOpNameToCode["PUSHDATA1"]!;
-  static final pushData2 = pushData1+1;
-  static final pushData4 = pushData2+1;
+  static final pushData2 = pushData1 + 1;
+  static final pushData4 = pushData2 + 1;
   static final pushdataMatcherRegExp = RegExp(r"^<(\d+)-bytes>$");
 
   /// The compiled bytes for this operation
   Uint8List get compiled;
+
   /// The ASM string representation of this operation
   String get asm;
+
   /// Returns an integer if the operation pushes a number, or null
   int? get number;
+
   /// If this is a pushdata of an ECDSA input signature then it shall be
   /// returned, or null
   ECDSAInputSignature? get ecdsaSig;
+
   /// If this is a pushdata of a Schnorr input signature then it shall be
   /// returned, or null
   SchnorrInputSignature? get schnorrSig;
+
   /// If this is a pushdata of a public key then it shall be returned, or null
   ECPublicKey? get publicKey;
 
   /// Interpret a single script ASM string into a [ScriptOp].
   factory ScriptOp.fromAsm(String asm) {
-
     if (asm.isEmpty) throw InvalidScriptAsm();
 
     // If it starts with OP_, then it is an opcode
     if (asm.startsWith("OP_")) {
-
       final code = scriptOpNameToCode[asm.substring(3)];
       if (code == null) throw InvalidScriptAsm();
 
@@ -50,7 +55,6 @@ abstract class ScriptOp {
       if (code >= pushData1 && code <= pushData4) throw InvalidScriptAsm();
 
       return ScriptOpCode(code);
-
     }
 
     // If "-1" or "81", then it is a 1NEGATE op code
@@ -77,8 +81,9 @@ abstract class ScriptOp {
       throw InvalidScriptAsm();
     }
 
-    return bytes.length == 1 ? ScriptOp.fromNumber(bytes[0]) : ScriptPushData(bytes);
-
+    return bytes.length == 1
+        ? ScriptOp.fromNumber(bytes[0])
+        : ScriptPushData(bytes);
   }
 
   /// Reads a single operation from a [BytesReader]. [OutOfData] will be thrown
@@ -86,9 +91,9 @@ abstract class ScriptOp {
   /// If [requireMinimal] is true, a pushdata operation must be encoded
   /// minimally or else [PushDataNotMinimal] will be thrown.
   factory ScriptOp.fromReader(
-    BytesReader reader, { bool requireMinimal = false, }
-  ) {
-
+    BytesReader reader, {
+    bool requireMinimal = false,
+  }) {
     final code = reader.readUInt8();
 
     int readN = -1;
@@ -127,13 +132,11 @@ abstract class ScriptOp {
     }
 
     return ScriptPushData(bytes);
-
   }
 
   /// Constructs an [ScriptOp] from a number, returning the smallest
   /// representation
   factory ScriptOp.fromNumber(int n) {
-
     if (n < -1 || n > 0xffffffff) {
       throw ArgumentError.value(n, "n", "out of range");
     }
@@ -147,18 +150,25 @@ abstract class ScriptOp {
     if (n > 0xffff) bytes.add(n >> 16);
     if (n > 0xffffff) bytes.add(n >> 24);
     return ScriptPushData(Uint8List.fromList(bytes));
-
   }
 
   /// Returns true when the other [ScriptOp] matches this one.
   /// [ScriptPushDataMatcher] will match with a push data of a particular size.
   bool match(ScriptOp other);
 
+  @override
+  String toString() => "$runtimeType("
+      "compiled: $compiled, "
+      "asm: $asm, "
+      "number: $number, "
+      "ecdsaSig: $ecdsaSig, "
+      "schnorrSig: $schnorrSig, "
+      "publicKey: $publicKey"
+      ")";
 }
 
 /// Represents a [ScriptOp] that is an op code
 class ScriptOpCode implements ScriptOp {
-
   static final checksig = ScriptOpCode.fromName("CHECKSIG");
   static final checkmultisig = ScriptOpCode.fromName("CHECKMULTISIG");
   static final number1 = ScriptOpCode(ScriptOp.op1);
@@ -205,18 +215,15 @@ class ScriptOpCode implements ScriptOp {
 
   @override
   ECPublicKey? get publicKey => null;
-
 }
 
 /// Represents a [ScriptOp] that is a pushdata
 class ScriptPushData implements ScriptOp {
-
   final Uint8List _data;
 
   ScriptPushData(Uint8List data) : _data = Uint8List.fromList(data);
 
   List<int> _compiledList() {
-
     // Compress down to numerical opcode
     if (_data.length == 1) {
       final val = _data[0];
@@ -244,7 +251,6 @@ class ScriptPushData implements ScriptOp {
       _data.length >> 24,
       ..._data,
     ];
-
   }
 
   @override
@@ -262,7 +268,6 @@ class ScriptPushData implements ScriptOp {
 
   @override
   int? get number {
-
     // Only number if no more than 4 bytes
     if (_data.length > 4) return null;
 
@@ -272,16 +277,15 @@ class ScriptPushData implements ScriptOp {
     final isNeg = (_data.last & 0x80) == 0x80;
 
     // Absolute number with sign bit removed
-    final abs = (
-      _data[0]
-      | (_data.length > 1 ? _data[1] << 8 : 0)
-      | (_data.length > 2 ? _data[2] << 16 : 0)
-      | (_data.length > 3 ? _data[3] << 24 : 0)
-    // Remove sign bit
-    ) & 0x7fffffff >> (8*(4-_data.length));
+    final abs = (_data[0] |
+            (_data.length > 1 ? _data[1] << 8 : 0) |
+            (_data.length > 2 ? _data[2] << 16 : 0) |
+            (_data.length > 3 ? _data[3] << 24 : 0)
+        // Remove sign bit
+        ) &
+        0x7fffffff >> (8 * (4 - _data.length));
 
     return isNeg ? -abs : abs;
-
   }
 
   @override
@@ -315,15 +319,13 @@ class ScriptPushData implements ScriptOp {
   Uint8List get data => Uint8List.fromList(_data);
 
   @override
-  bool match(ScriptOp other)
-    => (other is ScriptPushData && bytesEqual(_data, other._data))
-    || (other is ScriptPushDataMatcher && _data.length == other.size);
-
+  bool match(ScriptOp other) =>
+      (other is ScriptPushData && bytesEqual(_data, other._data)) ||
+      (other is ScriptPushDataMatcher && _data.length == other.size);
 }
 
 /// Provides comparison with [ScriptPushData] of a particular size.
 class ScriptPushDataMatcher implements ScriptOp {
-
   final int size;
 
   ScriptPushDataMatcher(this.size) {
@@ -333,9 +335,9 @@ class ScriptPushDataMatcher implements ScriptOp {
   }
 
   @override
-  bool match(ScriptOp other)
-    => (other is ScriptPushDataMatcher && other.size == size)
-    || (other is ScriptPushData && other._data.length == size);
+  bool match(ScriptOp other) =>
+      (other is ScriptPushDataMatcher && other.size == size) ||
+      (other is ScriptPushData && other._data.length == size);
 
   @override
   String get asm => "<$size-bytes>";
@@ -354,5 +356,32 @@ class ScriptPushDataMatcher implements ScriptOp {
 
   @override
   ECPublicKey? get publicKey => null;
+}
 
+class MwebScriptOp implements ScriptOp {
+  final Uint8List data;
+
+  MwebScriptOp(this.data);
+
+  @override
+  String get asm => throw UnimplementedError();
+
+  @override
+  Uint8List get compiled => data;
+
+  @override
+  ECDSAInputSignature? get ecdsaSig => null;
+
+  @override
+  bool match(ScriptOp other) =>
+      other is MwebScriptOp && data.toString() == other.data.toString();
+
+  @override
+  int? get number => null;
+
+  @override
+  ECPublicKey? get publicKey => null;
+
+  @override
+  SchnorrInputSignature? get schnorrSig => null;
 }

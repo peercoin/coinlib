@@ -439,4 +439,19 @@ class Transaction with Writable {
       inputs.isNotEmpty &&
       outputs.isNotEmpty &&
       inputs.every((input) => input.complete);
+
+  @override
+  String toString() => "Transaction("
+      "version: $version, "
+      "locktime: $locktime, "
+      "isWitness: $isWitness, "
+      "isCoinBase: $isCoinBase, "
+      "isCoinStake: $isCoinStake, "
+      "complete: $complete, "
+      "hashHex: $hashHex, "
+      "txid: $txid, "
+      "inputs: $inputs, "
+      "outputs: $outputs, "
+      "mwebBytes: $mwebBytes"
+      ")";
 }
