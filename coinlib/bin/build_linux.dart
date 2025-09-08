@@ -7,34 +7,32 @@ String dockerfile = r"""
 FROM debian:bookworm
 
 # Install dependenices
-RUN apt-get update -y \
-  && apt-get install -y autoconf libtool build-essential git
+RUN apt-get update -y && apt-get install -y cmake git
 
-# Clone libsecp256k1.
-# Could use secp256k1 already in code-base but this makes the dockerfile more
-# independent and avoids complexity of copying everything into the correct
-# context. It's not a large library to download.
-# Use 0.5.0 release
-RUN git clone https://github.com/bitcoin-core/secp256k1 \
-  && cd secp256k1 \
-  && git checkout e3a885d42a7800c1ccebad94ad1e2b82c4df5c65
+# Clone libsecp256k1-coinlib v0.7.0
+RUN git clone https://github.com/peercoin/secp256k1-coinlib \
+  && cd secp256k1-coinlib \
+  && git checkout 69018e5b939d8d540ca6b237945100f4ecb5681e
 
-WORKDIR /secp256k1
+WORKDIR /secp256k1-coinlib
 
 # Build shared library for linux
-RUN ./autogen.sh
-RUN ./configure \
-  --enable-module-recovery --disable-tests \
-  --disable-exhaustive-tests --disable-benchmark \
-  CFLAGS="-O2"
-RUN make
+RUN cmake -B build \
+      -DSECP256K1_ENABLE_MODULE_RECOVERY=ON \
+      -DSECP256K1_BUILD_TESTS=OFF \
+      -DSECP256K1_BUILD_EXHAUSTIVE_TESTS=OFF \
+      -DSECP256K1_BUILD_BENCHMARK=OFF \
+      -DSECP256K1_BUILD_EXAMPLES=OFF \
+      -DSECP256K1_BUILD_CTIME_TESTS=OFF \
+      -DCMAKE_BUILD_TYPE=Release
+RUN cmake --build build
 
 # Build shared library into /usr/local/lib as usual and then copy into output
 # Unused symbols could be stripped. But for future ease, all symbols are
 # maintained.
-RUN make install
+RUN cmake --install build
 RUN mkdir output
-RUN cp /usr/local/lib/libsecp256k1.so.2.2.0 output/libsecp256k1.so
+RUN cp /usr/local/lib/libsecp256k1.so.6.0.0 output/libsecp256k1.so
 """;
 
 void main() async {

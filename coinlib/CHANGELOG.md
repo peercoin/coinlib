@@ -1,3 +1,8 @@
+## 5.0.0 WIP
+
+Requires a rebuild of the secp256k1 library as it has moved to the
+secp256k1-coinlib fork.
+
 ## 4.1.0
 
 `CoinSelection` now works for `TaprootKeyInput` and

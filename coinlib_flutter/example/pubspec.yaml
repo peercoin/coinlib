@@ -10,7 +10,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  coinlib_flutter: ^4.0.0
+  coinlib_flutter:
+    path: ../
   cupertino_icons: ^1.0.2
 
 dev_dependencies:
