@@ -1,18 +1,18 @@
-# Clone secp256k1 0.5.0 code into ./build/secp256k1
+# Clone secp256k1-coinlib 0.7.0 code into ./build/secp256k1-coinlib
 `
 mkdir build
-git clone https://github.com/bitcoin-core/secp256k1 build/secp256k1
-cd build/secp256k1
-git checkout e3a885d42a7800c1ccebad94ad1e2b82c4df5c65
+git clone https://github.com/peercoin/secp256k1-coinlib build/secp256k1-coinlib
+cd build/secp256k1-coinlib
+git checkout 69018e5b939d8d540ca6b237945100f4ecb5681e
 `
 
 Pod::Spec.new do |s|
   s.name             = 'coinlib_flutter'
   s.module_name      = 'secp256k1'
-  s.version          = '0.5.0'
+  s.version          = '0.7.0'
   s.summary          = 'Cryptographic primitives from the secp256k1 library'
   s.description      = <<-DESC
-The secp256k1 library bundled into the flutter plugin via cocoapods.
+The secp256k1-coinlib library bundled into the flutter plugin via cocoapods.
                        DESC
   s.homepage         = 'http://peercoin.net'
   s.license          = { :file => '../LICENSE' }
