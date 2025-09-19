@@ -74,9 +74,12 @@ RUN ${WASI_SDK_PATH}/bin/wasm-ld \
   --export secp256k1_ec_seckey_negate \
   --export secp256k1_keypair_create \
   --export secp256k1_xonly_pubkey_parse \
+  --export secp256k1_xonly_pubkey_serialize \
   --export secp256k1_schnorrsig_sign32 \
   --export secp256k1_schnorrsig_verify \
   --export secp256k1_ecdh \
+  --export secp256k1_ec_pubkey_sort \
+  --export secp256k1_musig_pubkey_agg \
   # The secp256k1 library file
   build/lib/libsecp256k1.a \
   # Need to include libc for wasi here as it isn't done for us

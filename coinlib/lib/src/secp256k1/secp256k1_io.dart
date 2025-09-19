@@ -1,8 +1,9 @@
 import "dart:ffi";
 import "dart:io";
 import "package:coinlib/src/crypto/random.dart";
+import "package:coinlib/src/secp256k1/heap.dart";
 import 'package:ffi/ffi.dart';
-import "heap_array_ffi.dart";
+import "heap_ffi.dart";
 import "secp256k1.ffi.g.dart";
 import "package:path/path.dart";
 import "secp256k1_base.dart";
@@ -37,17 +38,23 @@ String _libraryPath() {
 
 DynamicLibrary _openLibrary() => DynamicLibrary.open(_libraryPath());
 
+typedef MuSigCache = MuSigCacheGeneric<Pointer<secp256k1_musig_keyagg_cache>>;
+
+typedef PubKeyPtr = Pointer<secp256k1_pubkey>;
+
 /// Specialises Secp256k1Base to use the FFI
 class Secp256k1 extends Secp256k1Base<
   Pointer<secp256k1_context>,
-  UCharPointer,
-  Pointer<secp256k1_pubkey>,
+  Pointer<UnsignedChar>,
+  PubKeyPtr,
   Pointer<Size>,
   Pointer<secp256k1_ecdsa_signature>,
   Pointer<secp256k1_ecdsa_recoverable_signature>,
   Pointer<secp256k1_keypair>,
   Pointer<secp256k1_xonly_pubkey>,
   Pointer<Int>,
+  Pointer<secp256k1_musig_keyagg_cache>,
+  Pointer<PubKeyPtr>,
   Pointer<Never>
 > {
 
@@ -81,30 +88,31 @@ class Secp256k1 extends Secp256k1Base<
     extEcSeckeyNegate = _lib.secp256k1_ec_seckey_negate;
     extKeypairCreate = _lib.secp256k1_keypair_create;
     extXOnlyPubkeyParse = _lib.secp256k1_xonly_pubkey_parse;
+    extXOnlyPubkeySerialize = _lib.secp256k1_xonly_pubkey_serialize;
     extSchnorrSign32 = _lib.secp256k1_schnorrsig_sign32;
     extSchnorrVerify = _lib.secp256k1_schnorrsig_verify;
     extEcdh = _lib.secp256k1_ecdh;
+    extEcPubkeySort = _lib.secp256k1_ec_pubkey_sort;
+    extMuSigPubkeyAgg = _lib.secp256k1_musig_pubkey_agg;
 
     // Set heap arrays
-    key32Array = HeapArrayFfi(Secp256k1Base.privkeySize);
-    scalarArray = HeapArrayFfi(Secp256k1Base.privkeySize);
-    serializedPubKeyArray = HeapArrayFfi(Secp256k1Base.uncompressedPubkeySize);
-    hashArray = HeapArrayFfi(Secp256k1Base.hashSize);
-    entropyArray = HeapArrayFfi(Secp256k1Base.entropySize);
-    serializedSigArray = HeapArrayFfi(Secp256k1Base.sigSize);
-    derSigArray = HeapArrayFfi(Secp256k1Base.derSigSize);
+    key32Array = HeapBytesFfi(Secp256k1Base.privkeySize);
+    scalarArray = HeapBytesFfi(Secp256k1Base.privkeySize);
+    serializedPubKeyArray = HeapBytesFfi(Secp256k1Base.uncompressedPubkeySize);
+    hashArray = HeapBytesFfi(Secp256k1Base.hashSize);
+    entropyArray = HeapBytesFfi(Secp256k1Base.entropySize);
+    serializedSigArray = HeapBytesFfi(Secp256k1Base.sigSize);
+    derSigArray = HeapBytesFfi(Secp256k1Base.derSigSize);
 
-    // Set other pointers
-    // A finalizer could be added to free allocated memory but as this class will
-    // used for a singleton object throughout the entire lifetime of the program,
-    // it doesn't matter
-    sizeTPtr = malloc();
-    pubKeyPtr = malloc();
-    sigPtr = malloc();
-    recSigPtr = malloc();
-    keyPairPtr = malloc();
-    xPubKeyPtr = malloc();
-    recIdPtr = malloc();
+    // Set other heap data
+    sizeT = HeapSizeFfi();
+    pubKey = HeapFfi(malloc());
+    sig = HeapFfi(malloc());
+    recSig = HeapFfi(malloc());
+    keyPair = HeapFfi(malloc());
+    xPubKey = HeapFfi(malloc());
+    recId = HeapIntFfi();
+
     nullPtr = nullptr;
 
     // Create context
@@ -113,7 +121,7 @@ class Secp256k1 extends Secp256k1Base<
     // Randomise context with 32 bytes
 
     final randBytes = generateRandomBytes(32);
-    final randArray = HeapArrayFfi(32);
+    final randArray = HeapBytesFfi(32);
     randArray.load(randBytes);
 
     if (_lib.secp256k1_context_randomize(ctxPtr, randArray.ptr) != 1) {
@@ -123,12 +131,11 @@ class Secp256k1 extends Secp256k1Base<
   }
 
   @override
-  set sizeT(int size) => sizeTPtr.value = size;
+  HeapPointerArray<Pointer<PubKeyPtr>, PubKeyPtr> allocPubKeyArray(int size)
+    => HeapPointerArrayFfi(malloc(size), size, () => malloc());
 
   @override
-  int get sizeT => sizeTPtr.value;
-
-  @override
-  int get internalRecId => recIdPtr.value;
+  Heap<Pointer<secp256k1_musig_keyagg_cache>> allocMuSigCache()
+    => HeapFfi(malloc());
 
 }

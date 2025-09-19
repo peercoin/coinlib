@@ -64,6 +64,7 @@ export 'package:coinlib/src/tx/sighash/witness_signature_hasher.dart';
 
 export 'package:coinlib/src/address.dart';
 export 'package:coinlib/src/coin_unit.dart';
+export 'package:coinlib/src/musig.dart';
 export 'package:coinlib/src/network.dart';
 
 Future<void> loadCoinlib() => secp256k1.load();
