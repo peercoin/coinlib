@@ -58,6 +58,8 @@ class Secp256k1 extends Secp256k1Base<
     extEcdh = wasm.field("secp256k1_ecdh");
     extEcPubkeySort = wasm.field("secp256k1_ec_pubkey_sort");
     extMuSigPubkeyAgg = wasm.field("secp256k1_musig_pubkey_agg");
+    extMuSigPubkeyXOnlyTweakAdd
+      = wasm.field("secp256k1_musig_pubkey_xonly_tweak_add");
 
     // Local functions for loading purposes
     final int Function(int) contextCreate
@@ -110,5 +112,10 @@ class Secp256k1 extends Secp256k1Base<
 
   @override
   Heap<int> allocMuSigCache() => _heapFactory.alloc(_muSigCacheSize);
+
+  @override
+  Heap<int> copyMuSigCache(int copyFrom) => _heapFactory.alloc(
+    _muSigCacheSize, copyFrom: copyFrom,
+  );
 
 }

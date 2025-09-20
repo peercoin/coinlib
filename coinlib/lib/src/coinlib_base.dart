@@ -20,6 +20,8 @@ export 'package:coinlib/src/encode/base58.dart';
 export 'package:coinlib/src/encode/bech32.dart';
 export 'package:coinlib/src/encode/wif.dart';
 
+export 'package:coinlib/src/musig/keys.dart';
+
 export 'package:coinlib/src/scripts/codes.dart';
 export 'package:coinlib/src/scripts/operations.dart';
 export 'package:coinlib/src/scripts/program.dart';
@@ -64,7 +66,6 @@ export 'package:coinlib/src/tx/sighash/witness_signature_hasher.dart';
 
 export 'package:coinlib/src/address.dart';
 export 'package:coinlib/src/coin_unit.dart';
-export 'package:coinlib/src/musig.dart';
 export 'package:coinlib/src/network.dart';
 
 Future<void> loadCoinlib() => secp256k1.load();

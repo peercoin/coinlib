@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+import 'package:coinlib/src/common/bytes.dart';
 import 'package:coinlib/src/crypto/ec_private_key.dart';
 import 'package:coinlib/src/crypto/ec_public_key.dart';
 import 'package:coinlib/src/secp256k1/secp256k1.dart';
@@ -12,7 +14,9 @@ class MuSigPublicKeys {
 
   late final MuSigCache _aggCache;
 
-  MuSigPublicKeys(this.pubKeys) {
+  MuSigPublicKeys._(this.pubKeys, this.aggregate, this._aggCache);
+
+  factory MuSigPublicKeys(Set<ECPublicKey> pubKeys) {
 
     if (pubKeys.isEmpty) {
       throw ArgumentError.value(pubKeys, "pubKeys", "should not be empty");
@@ -21,9 +25,18 @@ class MuSigPublicKeys {
     final (bytes, cache) = secp256k1.muSigAgggregate(
       pubKeys.map((pk) => pk.data).toList(),
     );
-    aggregate = ECPublicKey.fromXOnly(bytes);
-    _aggCache = cache;
 
+    return MuSigPublicKeys._(pubKeys, ECPublicKey.fromXOnly(bytes), cache);
+
+  }
+
+  /// Tweaks as an x-only aggregate public key
+  MuSigPublicKeys tweak(Uint8List scalar) {
+    checkScalar(scalar);
+    final (keyBytes, cache) = secp256k1.muSigTweakXOnly(
+      _aggCache, scalar,
+    );
+    return MuSigPublicKeys._(pubKeys, ECPublicKey(keyBytes).xonly, cache);
   }
 
 }
@@ -34,7 +47,13 @@ class MuSigPrivate {
   final ECPrivateKey privateKey;
   final MuSigPublicKeys public;
 
+  MuSigPrivate._(this.privateKey, this.public);
+
   MuSigPrivate(this.privateKey, Set<ECPublicKey> otherKeys)
     : public = MuSigPublicKeys({ privateKey.pubkey, ...otherKeys });
+
+  MuSigPrivate tweak(Uint8List scalar) => MuSigPrivate._(
+    privateKey, public.tweak(scalar),
+  );
 
 }

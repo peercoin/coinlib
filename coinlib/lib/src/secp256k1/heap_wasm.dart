@@ -97,7 +97,14 @@ class HeapFactory {
   }
 
   /// Allocate data for a miscellaneous object with [size] bytes.
-  HeapWasm alloc(int size) => HeapWasm._(_malloc(size), _free);
+  /// If [copyFrom] is specified, data shall be copied from this pointer.
+  HeapWasm alloc(int size, { int? copyFrom }) {
+    final heap = HeapWasm._(_malloc(size), _free);
+    if (copyFrom != null) {
+      _memory.setRange(heap.ptr, heap.ptr + size, _memory, copyFrom);
+    }
+    return heap;
+  }
 
   /// Allocates an integer on the heap.
   HeapIntWasm integer() => HeapIntWasm._withMemory(

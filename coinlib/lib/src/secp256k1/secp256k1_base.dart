@@ -104,6 +104,9 @@ abstract class Secp256k1Base<
   late int Function(
     CtxPtr, XPubKeyPtr, MuSigAggCachePtr, PubKeyPtrPtr, int,
   ) extMuSigPubkeyAgg;
+  late int Function(
+    CtxPtr, PubKeyPtr, MuSigAggCachePtr, UCharPtr,
+  ) extMuSigPubkeyXOnlyTweakAdd;
 
   // Heap arrays
 
@@ -557,6 +560,32 @@ abstract class Secp256k1Base<
 
   }
 
+  /// Tweaks the aggregate MuSig key returning the new aggregate key and cache.
+  /// The new cache is a new object. The previous cache is not valid for the
+  /// tweaked key
+  (Uint8List, MuSigCacheGeneric<MuSigAggCachePtr>) muSigTweakXOnly(
+    MuSigCacheGeneric<MuSigAggCachePtr> cache,
+    Uint8List scalar,
+  ) {
+    _requireLoad();
+
+    scalarArray.load(scalar);
+
+    // Copy cache to avoid side-effects
+    final newCache = copyMuSigCache(cache._cache.ptr);
+
+    if (
+      extMuSigPubkeyXOnlyTweakAdd(
+        ctxPtr, pubKey.ptr, newCache.ptr, scalarArray.ptr,
+      ) != 1
+    ) {
+      throw Secp256k1Exception("Couldn't apply tweak to MuSig key");
+    }
+
+    return (_serializePubKeyFromPtr(true), MuSigCacheGeneric(newCache));
+
+  }
+
   /// Specialised sub-classes should override to allocate a [size] number of
   /// secp256k1_pubkey and then alloate and set an array of pointers on the heap
   /// to them.
@@ -565,5 +594,10 @@ abstract class Secp256k1Base<
   /// Specialised sub-classes should override to allocate an
   /// secp256k1_musig_keyagg_cache on the heap.
   Heap<MuSigAggCachePtr> allocMuSigCache();
+
+  /// Specialised sub-classes should override to allocate an
+  /// secp256k1_musig_keyagg_cache on the heap and then copy the [copyFrom]
+  /// struct into it.
+  Heap<MuSigAggCachePtr> copyMuSigCache(MuSigAggCachePtr copyFrom);
 
 }

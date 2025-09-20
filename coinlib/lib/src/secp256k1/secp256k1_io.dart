@@ -38,9 +38,10 @@ String _libraryPath() {
 
 DynamicLibrary _openLibrary() => DynamicLibrary.open(_libraryPath());
 
-typedef MuSigCache = MuSigCacheGeneric<Pointer<secp256k1_musig_keyagg_cache>>;
-
 typedef PubKeyPtr = Pointer<secp256k1_pubkey>;
+typedef MuSigAggCachePtr = Pointer<secp256k1_musig_keyagg_cache>;
+
+typedef MuSigCache = MuSigCacheGeneric<MuSigAggCachePtr>;
 
 /// Specialises Secp256k1Base to use the FFI
 class Secp256k1 extends Secp256k1Base<
@@ -53,7 +54,7 @@ class Secp256k1 extends Secp256k1Base<
   Pointer<secp256k1_keypair>,
   Pointer<secp256k1_xonly_pubkey>,
   Pointer<Int>,
-  Pointer<secp256k1_musig_keyagg_cache>,
+  MuSigAggCachePtr,
   Pointer<PubKeyPtr>,
   Pointer<Never>
 > {
@@ -94,6 +95,7 @@ class Secp256k1 extends Secp256k1Base<
     extEcdh = _lib.secp256k1_ecdh;
     extEcPubkeySort = _lib.secp256k1_ec_pubkey_sort;
     extMuSigPubkeyAgg = _lib.secp256k1_musig_pubkey_agg;
+    extMuSigPubkeyXOnlyTweakAdd = _lib.secp256k1_musig_pubkey_xonly_tweak_add;
 
     // Set heap arrays
     key32Array = HeapBytesFfi(Secp256k1Base.privkeySize);
@@ -135,7 +137,13 @@ class Secp256k1 extends Secp256k1Base<
     => HeapPointerArrayFfi(malloc(size), size, () => malloc());
 
   @override
-  Heap<Pointer<secp256k1_musig_keyagg_cache>> allocMuSigCache()
-    => HeapFfi(malloc());
+  Heap<MuSigAggCachePtr> allocMuSigCache() => HeapFfi(malloc());
+
+  @override
+  Heap<MuSigAggCachePtr> copyMuSigCache(MuSigAggCachePtr copyFrom) {
+    final newCache = HeapFfi<secp256k1_musig_keyagg_cache>(malloc());
+    newCache.ptr.ref = copyFrom.ref;
+    return newCache;
+  }
 
 }

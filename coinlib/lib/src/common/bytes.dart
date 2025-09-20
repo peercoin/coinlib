@@ -10,6 +10,9 @@ Uint8List checkBytes(Uint8List bytes, int length, { String name = "Bytes" }) {
   return bytes;
 }
 
+Uint8List checkScalar(Uint8List scalar)
+  => checkBytes(scalar, 32, name: "Scalar");
+
 /// Throws an [ArgumentError] if the [bytes] are not of the required [length]
 /// and returns a copy of the [bytes].
 Uint8List copyCheckBytes(
