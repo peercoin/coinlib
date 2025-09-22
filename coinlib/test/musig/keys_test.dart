@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:coinlib/coinlib.dart';
 import 'package:test/test.dart';
+import '../vectors/keys.dart';
 
 void main() {
 
@@ -13,18 +14,10 @@ void main() {
       () => expect(() => MuSigPublicKeys({}), throwsArgumentError),
     );
 
-    Set<ECPublicKey> getKeys(bool compressed) => Iterable.generate(
-      3,
-      (i) => ECPrivateKey(
-        Uint8List(32)..last = i+1,
-        compressed: compressed,
-      ).pubkey,
-    ).toSet();
-
     test("aggregation works regardless of format", () {
 
-      final compressed = MuSigPublicKeys(getKeys(true)).aggregate;
-      final uncompressed = MuSigPublicKeys(getKeys(false)).aggregate;
+      final compressed = getMuSigKeys(true).aggregate;
+      final uncompressed = getMuSigKeys(false).aggregate;
 
       expect(compressed, uncompressed);
       expect(
@@ -36,7 +29,7 @@ void main() {
 
     test(".tweak", () {
 
-      final musig = MuSigPublicKeys(getKeys(true));
+      final musig = getMuSigKeys(true);
       final scalar = Uint8List(32)..last = 1;
 
       // Do twice to ensure cache doesn't mutate
@@ -58,4 +51,3 @@ void main() {
   });
 
 }
-

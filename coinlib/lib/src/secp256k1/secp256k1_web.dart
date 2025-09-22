@@ -5,14 +5,17 @@ import 'heap_wasm.dart';
 import "secp256k1_base.dart";
 import 'secp256k1.wasm.g.dart';
 
-typedef MuSigCache = MuSigCacheGeneric<int>;
+typedef MuSigCache = OpaqueGeneric<int>;
+typedef MuSigSecretNonce = OpaqueGeneric<int>;
 
 /// Loads and wraps WASM code to be run via the browser JS APIs
 class Secp256k1 extends Secp256k1Base<
-  int, int, int, int, int, int, int, int, int, int, int, int
+  int, int, int, int, int, int, int, int, int, int, int, int, int, int
 > {
 
   static const _muSigCacheSize = 197;
+  static const _muSigSecNonceSize = 132;
+  static const _muSigPubNonceSize = 132;
 
   late final HeapFactory _heapFactory;
 
@@ -60,6 +63,9 @@ class Secp256k1 extends Secp256k1Base<
     extMuSigPubkeyAgg = wasm.field("secp256k1_musig_pubkey_agg");
     extMuSigPubkeyXOnlyTweakAdd
       = wasm.field("secp256k1_musig_pubkey_xonly_tweak_add");
+    extMuSigNonceGen = wasm.field("secp256k1_musig_nonce_gen");
+    extMuSigPubNonceSerialize
+      = wasm.field("secp256k1_musig_pubnonce_serialize");
 
     // Local functions for loading purposes
     final int Function(int) contextCreate
@@ -81,6 +87,7 @@ class Secp256k1 extends Secp256k1Base<
     );
     serializedSigArray = _heapFactory.bytes(Secp256k1Base.sigSize);
     derSigArray = _heapFactory.bytes(Secp256k1Base.derSigSize);
+    muSigPubNonceArray = _heapFactory.bytes(Secp256k1Base.muSigPubNonceSize);
 
     // Heap objects
     pubKey = _heapFactory.alloc(Secp256k1Base.pubkeySize);
@@ -90,6 +97,7 @@ class Secp256k1 extends Secp256k1Base<
     keyPair = _heapFactory.alloc(Secp256k1Base.keyPairSize);
     xPubKey = _heapFactory.alloc(Secp256k1Base.xonlySize);
     recId = _heapFactory.integer();
+    muSigPubNonce = _heapFactory.alloc(_muSigPubNonceSize);
 
     nullPtr = 0;
 
@@ -117,5 +125,8 @@ class Secp256k1 extends Secp256k1Base<
   Heap<int> copyMuSigCache(int copyFrom) => _heapFactory.alloc(
     _muSigCacheSize, copyFrom: copyFrom,
   );
+
+  @override
+  Heap<int> allocMuSigSecNonce() => _heapFactory.alloc(_muSigSecNonceSize);
 
 }
