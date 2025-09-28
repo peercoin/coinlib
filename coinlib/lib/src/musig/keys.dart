@@ -1,8 +1,4 @@
-import 'dart:typed_data';
-import 'package:coinlib/src/common/bytes.dart';
-import 'package:coinlib/src/crypto/ec_private_key.dart';
-import 'package:coinlib/src/crypto/ec_public_key.dart';
-import 'package:coinlib/src/secp256k1/secp256k1.dart';
+part of "library.dart";
 
 /// Takes the public keys ([pubKeys]) for MuSig2 and provides the [aggregate]
 /// public key. This will automatically order the keys and provide a consistent
@@ -12,7 +8,7 @@ class MuSigPublicKeys {
   final Set<ECPublicKey> pubKeys;
   late final ECPublicKey aggregate;
 
-  late final MuSigCache _aggCache;
+  late final OpaqueMuSigCache _aggCache;
 
   MuSigPublicKeys._(this.pubKeys, this.aggregate, this._aggCache);
 

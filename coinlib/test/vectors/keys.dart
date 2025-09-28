@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-
 import 'package:coinlib/coinlib.dart';
 
 class KeyTestVector {
@@ -132,11 +131,14 @@ final invalidTweaks = [
   "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141",
 ];
 
+ECPrivateKey getPrivKey(int i, [bool compressed = true]) => ECPrivateKey(
+  Uint8List(32)..last = i+1,
+  compressed: compressed,
+);
+
+ECPublicKey getPubKey(int i, [bool compressed = true])
+  => getPrivKey(i, compressed).pubkey;
+
 MuSigPublicKeys getMuSigKeys([bool compressed = true]) => MuSigPublicKeys(
-  {
-    for (int i = 0; i < 3; i++) ECPrivateKey(
-      Uint8List(32)..last = i+1,
-      compressed: compressed,
-    ).pubkey,
-  }
+  Iterable.generate(3, (i) => getPubKey(i, compressed)).toSet(),
 );

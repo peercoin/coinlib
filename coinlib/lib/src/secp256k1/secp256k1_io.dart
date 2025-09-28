@@ -41,9 +41,13 @@ DynamicLibrary _openLibrary() => DynamicLibrary.open(_libraryPath());
 typedef PubKeyPtr = Pointer<secp256k1_pubkey>;
 typedef MuSigAggCachePtr = Pointer<secp256k1_musig_keyagg_cache>;
 typedef MuSigSecNoncePtr = Pointer<secp256k1_musig_secnonce>;
+typedef MuSigPublicNoncePtr = Pointer<secp256k1_musig_pubnonce>;
+typedef MuSigSessionPtr = Pointer<secp256k1_musig_session>;
 
-typedef MuSigCache = OpaqueGeneric<MuSigAggCachePtr>;
-typedef MuSigSecretNonce = OpaqueGeneric<MuSigSecNoncePtr>;
+typedef OpaqueMuSigCache = OpaqueGeneric<MuSigAggCachePtr>;
+typedef OpaqueMuSigSecretNonce = OpaqueGeneric<MuSigSecNoncePtr>;
+typedef OpaqueMuSigPublicNonce = OpaqueGeneric<MuSigPublicNoncePtr>;
+typedef OpaqueMuSigSession = OpaqueGeneric<MuSigSessionPtr>;
 
 /// Specialises Secp256k1Base to use the FFI
 class Secp256k1 extends Secp256k1Base<
@@ -59,7 +63,10 @@ class Secp256k1 extends Secp256k1Base<
   MuSigAggCachePtr,
   Pointer<PubKeyPtr>,
   MuSigSecNoncePtr,
-  Pointer<secp256k1_musig_pubnonce>,
+  MuSigPublicNoncePtr,
+  Pointer<secp256k1_musig_aggnonce>,
+  Pointer<MuSigPublicNoncePtr>,
+  MuSigSessionPtr,
   Pointer<Never>
 > {
 
@@ -101,7 +108,10 @@ class Secp256k1 extends Secp256k1Base<
     extMuSigPubkeyAgg = _lib.secp256k1_musig_pubkey_agg;
     extMuSigPubkeyXOnlyTweakAdd = _lib.secp256k1_musig_pubkey_xonly_tweak_add;
     extMuSigNonceGen = _lib.secp256k1_musig_nonce_gen;
+    extMuSigPubNonceParse = _lib.secp256k1_musig_pubnonce_parse;
     extMuSigPubNonceSerialize = _lib.secp256k1_musig_pubnonce_serialize;
+    extMuSigNonceAgg = _lib.secp256k1_musig_nonce_agg;
+    extMuSigNonceProcess = _lib.secp256k1_musig_nonce_process;
 
     // Set heap arrays
     key32Array = HeapBytesFfi(Secp256k1Base.privkeySize);
@@ -120,8 +130,8 @@ class Secp256k1 extends Secp256k1Base<
     recSig = HeapFfi(malloc());
     keyPair = HeapFfi(malloc());
     xPubKey = HeapFfi(malloc());
+    muSigAggNonce = HeapFfi(malloc());
     recId = HeapIntFfi();
-    muSigPubNonce = HeapFfi(malloc());
 
     nullPtr = nullptr;
 
@@ -142,7 +152,13 @@ class Secp256k1 extends Secp256k1Base<
 
   @override
   HeapPointerArray<Pointer<PubKeyPtr>, PubKeyPtr> allocPubKeyArray(int size)
-    => HeapPointerArrayFfi(malloc(size), size, () => malloc());
+    => HeapPointerArrayFfi.alloc(malloc(size), size, () => malloc());
+
+  @override
+  HeapPointerArray<
+    Pointer<MuSigPublicNoncePtr>, MuSigPublicNoncePtr
+  > setMuSigPubNonceArray(Iterable<Heap<MuSigPublicNoncePtr>> objs)
+    => HeapPointerArrayFfi.assign(malloc(objs.length), objs.cast());
 
   @override
   Heap<MuSigAggCachePtr> allocMuSigCache() => HeapFfi(malloc());
@@ -156,5 +172,11 @@ class Secp256k1 extends Secp256k1Base<
 
   @override
   Heap<MuSigSecNoncePtr> allocMuSigSecNonce() => HeapFfi(malloc());
+
+  @override
+  Heap<MuSigPublicNoncePtr> allocMuSigPubNonce() => HeapFfi(malloc());
+
+  @override
+  Heap<MuSigSessionPtr> allocMuSigSession() => HeapFfi(malloc());
 
 }

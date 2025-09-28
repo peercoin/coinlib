@@ -9,7 +9,11 @@ abstract interface class Heap<Ptr> {
 /// Represents a unsigned char array and can read/write a Uint8List
 /// [Ptr] is the type that represents an `unsigned char *`.
 abstract interface class HeapBytes<Ptr> extends Heap<Ptr> {
-  Uint8List get list;
+  /// Obtain a copy of the bytes that is safe to store even if the underlying
+  /// list changes
+  Uint8List get copy;
+  /// Obtain a copy of the first [n] bytes.
+  Uint8List copyNBytes(int n);
   void load(Uint8List data);
 }
 

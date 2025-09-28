@@ -5,17 +5,20 @@ import 'heap_wasm.dart';
 import "secp256k1_base.dart";
 import 'secp256k1.wasm.g.dart';
 
-typedef MuSigCache = OpaqueGeneric<int>;
-typedef MuSigSecretNonce = OpaqueGeneric<int>;
+typedef OpaqueMuSigCache = OpaqueGeneric<int>;
+typedef OpaqueMuSigSecretNonce = OpaqueGeneric<int>;
+typedef OpaqueMuSigPublicNonce = OpaqueGeneric<int>;
+typedef OpaqueMuSigSession = OpaqueGeneric<int>;
 
 /// Loads and wraps WASM code to be run via the browser JS APIs
 class Secp256k1 extends Secp256k1Base<
-  int, int, int, int, int, int, int, int, int, int, int, int, int, int
+  int, int, int, int, int, int, int, int, int, int, int, int, int, int, int,
+  int, int
 > {
 
   static const _muSigCacheSize = 197;
-  static const _muSigSecNonceSize = 132;
-  static const _muSigPubNonceSize = 132;
+  static const _muSigNonceSize = 132;
+  static const _muSigSessionSize = 133;
 
   late final HeapFactory _heapFactory;
 
@@ -64,8 +67,11 @@ class Secp256k1 extends Secp256k1Base<
     extMuSigPubkeyXOnlyTweakAdd
       = wasm.field("secp256k1_musig_pubkey_xonly_tweak_add");
     extMuSigNonceGen = wasm.field("secp256k1_musig_nonce_gen");
+    extMuSigPubNonceParse = wasm.field("secp256k1_musig_pubnonce_parse");
     extMuSigPubNonceSerialize
       = wasm.field("secp256k1_musig_pubnonce_serialize");
+    extMuSigNonceAgg = wasm.field("secp256k1_musig_nonce_agg");
+    extMuSigNonceProcess = wasm.field("secp256k1_musig_nonce_process");
 
     // Local functions for loading purposes
     final int Function(int) contextCreate
@@ -96,8 +102,8 @@ class Secp256k1 extends Secp256k1Base<
     recSig = _heapFactory.alloc(Secp256k1Base.recSigSize);
     keyPair = _heapFactory.alloc(Secp256k1Base.keyPairSize);
     xPubKey = _heapFactory.alloc(Secp256k1Base.xonlySize);
+    muSigAggNonce = _heapFactory.alloc(_muSigNonceSize);
     recId = _heapFactory.integer();
-    muSigPubNonce = _heapFactory.alloc(_muSigPubNonceSize);
 
     nullPtr = 0;
 
@@ -116,7 +122,12 @@ class Secp256k1 extends Secp256k1Base<
 
   @override
   HeapPointerArray<int, int> allocPubKeyArray(int size)
-    => _heapFactory.pointerArray(size, Secp256k1Base.pubkeySize);
+    => _heapFactory.allocPointerArray(size, Secp256k1Base.pubkeySize);
+
+  @override
+  HeapPointerArray<int, int> setMuSigPubNonceArray(
+    Iterable<Heap<int>> objs,
+  ) => _heapFactory.assignPointerArray(objs.toList().cast());
 
   @override
   Heap<int> allocMuSigCache() => _heapFactory.alloc(_muSigCacheSize);
@@ -127,6 +138,12 @@ class Secp256k1 extends Secp256k1Base<
   );
 
   @override
-  Heap<int> allocMuSigSecNonce() => _heapFactory.alloc(_muSigSecNonceSize);
+  Heap<int> allocMuSigSecNonce() => _heapFactory.alloc(_muSigNonceSize);
+
+  @override
+  Heap<int> allocMuSigPubNonce() => _heapFactory.alloc(_muSigNonceSize);
+
+  @override
+  Heap<int> allocMuSigSession() => _heapFactory.alloc(_muSigSessionSize);
 
 }

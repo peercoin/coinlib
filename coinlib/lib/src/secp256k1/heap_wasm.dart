@@ -28,13 +28,18 @@ class HeapWasm implements Heap<int> {
 class HeapBytesWasm extends HeapWasm implements HeapBytes<int> {
 
   final int size;
-  @override
-  final Uint8List list;
+  final Uint8List _view;
 
-  HeapBytesWasm._(this.size, super.ptr, this.list, super.free) : super._();
+  HeapBytesWasm._(this.size, super.ptr, this._view, super.free) : super._();
 
   @override
-  load(Uint8List data) => list.setAll(0, data);
+  Uint8List get copy => _view.sublist(0);
+
+  @override
+  Uint8List copyNBytes(int n) => _view.sublist(0, n);
+
+  @override
+  load(Uint8List data) => _view.setAll(0, data);
 
 }
 
@@ -111,13 +116,19 @@ class HeapFactory {
     _memory, _malloc(_intBytes), _free,
   );
 
-  /// Creates an array with [length] of pointers of objects allocated with
-  /// [objSize].
-  HeapPointerArrayWasm pointerArray(int length, int objSize)
+  /// Creates an array of pointers to the [objs].
+  HeapPointerArrayWasm assignPointerArray(List<HeapWasm> objs)
     => HeapPointerArrayWasm._(
       _memory,
-      _malloc(length*_intBytes),
+      _malloc(objs.length*_intBytes),
       _free,
+      objs,
+    );
+
+  /// Creates an array with [length] of pointers to objects allocated with
+  /// [objSize].
+  HeapPointerArrayWasm allocPointerArray(int length, int objSize)
+    => assignPointerArray(
       List.generate(length, (_) => HeapWasm._(_malloc(objSize), _free)),
     );
 

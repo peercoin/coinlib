@@ -20,7 +20,7 @@ export 'package:coinlib/src/encode/base58.dart';
 export 'package:coinlib/src/encode/bech32.dart';
 export 'package:coinlib/src/encode/wif.dart';
 
-export 'package:coinlib/src/musig/keys.dart';
+export 'package:coinlib/src/musig/library.dart';
 
 export 'package:coinlib/src/scripts/codes.dart';
 export 'package:coinlib/src/scripts/operations.dart';

@@ -26,10 +26,16 @@ implements HeapBytes<Pointer<UnsignedChar>> {
 
   HeapBytesFfi(this.size) : super(malloc.allocate(size));
 
+  Uint8List get _view => ptr.cast<Uint8>().asTypedList(size);
+
   @override
-  Uint8List get list => ptr.cast<Uint8>().asTypedList(size);
+  Uint8List get copy => _view.sublist(0);
+
   @override
-  load(Uint8List data) => list.setAll(0, data);
+  Uint8List copyNBytes(int n) => _view.sublist(0, n);
+
+  @override
+  load(Uint8List data) => _view.setAll(0, data);
 
 }
 
@@ -69,15 +75,23 @@ implements HeapPointerArray<Pointer<Pointer<T>>, Pointer<T>> {
   // object is alive.
   final List<HeapFfi<T>> _objs;
 
-  HeapPointerArrayFfi(
+  HeapPointerArrayFfi.assign(
     super.ptr,
-    int length,
-    Pointer<T> Function() alloc,
-  ): _objs = List.generate(length, (_) => HeapFfi(alloc())) {
-    for (int i = 0; i < length; i++) {
+    Iterable<HeapFfi<T>> objs,
+  ) : _objs = objs.toList() {
+    for (int i = 0; i < objs.length; i++) {
       ptr[i] = _objs[i].ptr;
     }
   }
+
+  HeapPointerArrayFfi.alloc(
+    Pointer<Pointer<T>> ptr,
+    int length,
+    Pointer<T> Function() alloc,
+  ) : this.assign(
+    ptr,
+    List.generate(length, (_) => HeapFfi(alloc())),
+  );
 
   @override
   List<Pointer<T>> get list => List.generate(_objs.length, (i) => ptr[i]);
