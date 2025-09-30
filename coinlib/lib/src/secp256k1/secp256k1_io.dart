@@ -43,11 +43,13 @@ typedef MuSigAggCachePtr = Pointer<secp256k1_musig_keyagg_cache>;
 typedef MuSigSecNoncePtr = Pointer<secp256k1_musig_secnonce>;
 typedef MuSigPublicNoncePtr = Pointer<secp256k1_musig_pubnonce>;
 typedef MuSigSessionPtr = Pointer<secp256k1_musig_session>;
+typedef MuSigPartialSigPtr = Pointer<secp256k1_musig_partial_sig>;
 
 typedef OpaqueMuSigCache = OpaqueGeneric<MuSigAggCachePtr>;
 typedef OpaqueMuSigSecretNonce = OpaqueGeneric<MuSigSecNoncePtr>;
 typedef OpaqueMuSigPublicNonce = OpaqueGeneric<MuSigPublicNoncePtr>;
 typedef OpaqueMuSigSession = OpaqueGeneric<MuSigSessionPtr>;
+typedef OpaqueMuSigPartialSig = OpaqueGeneric<MuSigPartialSigPtr>;
 
 /// Specialises Secp256k1Base to use the FFI
 class Secp256k1 extends Secp256k1Base<
@@ -67,6 +69,7 @@ class Secp256k1 extends Secp256k1Base<
   Pointer<secp256k1_musig_aggnonce>,
   Pointer<MuSigPublicNoncePtr>,
   MuSigSessionPtr,
+  MuSigPartialSigPtr,
   Pointer<Never>
 > {
 
@@ -112,6 +115,9 @@ class Secp256k1 extends Secp256k1Base<
     extMuSigPubNonceSerialize = _lib.secp256k1_musig_pubnonce_serialize;
     extMuSigNonceAgg = _lib.secp256k1_musig_nonce_agg;
     extMuSigNonceProcess = _lib.secp256k1_musig_nonce_process;
+    extMuSigPartialSign = _lib.secp256k1_musig_partial_sign;
+    extMuSigPartialSigParse = _lib.secp256k1_musig_partial_sig_parse;
+    extMuSigPartialSigSerialize = _lib.secp256k1_musig_partial_sig_serialize;
 
     // Set heap arrays
     key32Array = HeapBytesFfi(Secp256k1Base.privkeySize);
@@ -178,5 +184,8 @@ class Secp256k1 extends Secp256k1Base<
 
   @override
   Heap<MuSigSessionPtr> allocMuSigSession() => HeapFfi(malloc());
+
+  @override
+  Heap<MuSigPartialSigPtr> allocMuSigPartialSig() => HeapFfi(malloc());
 
 }

@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:coinlib/coinlib.dart';
 import 'package:coinlib/src/crypto/random.dart';
 import 'heap.dart';
 
@@ -24,7 +25,7 @@ abstract class Secp256k1Base<
   CtxPtr, UCharPtr, PubKeyPtr, SizeTPtr, SignaturePtr,
   RecoverableSignaturePtr, KeyPairPtr, XPubKeyPtr, IntPtr, MuSigAggCachePtr,
   PubKeyPtrPtr, MuSigSecNoncePtr, MuSigPubNoncePtr, MuSigAggNoncePtr,
-  MuSigPubNoncePtrPtr, MuSigSessionPtr, NullPtr
+  MuSigPubNoncePtrPtr, MuSigSessionPtr, MuSigPartialSigPtr, NullPtr
 > {
 
   static const contextNone = 1;
@@ -39,6 +40,7 @@ abstract class Secp256k1Base<
   static const sigSize = 64;
   static const derSigSize = 72;
   static const muSigPubNonceSize = 66;
+  static const muSigPartialSigSize = 32;
   static const recSigSize = 65;
   static const keyPairSize = 96;
   static const xonlySize = 32;
@@ -125,6 +127,16 @@ abstract class Secp256k1Base<
     CtxPtr, MuSigSessionPtr, MuSigAggNoncePtr, UCharPtr, MuSigAggCachePtr,
     NullPtr,
   ) extMuSigNonceProcess;
+  late int Function(
+    CtxPtr, MuSigPartialSigPtr, MuSigSecNoncePtr, KeyPairPtr, MuSigAggCachePtr,
+    MuSigSessionPtr,
+  ) extMuSigPartialSign;
+  late int Function(
+    CtxPtr, MuSigPartialSigPtr, UCharPtr,
+  ) extMuSigPartialSigParse;
+  late int Function(
+    CtxPtr, UCharPtr, MuSigPartialSigPtr,
+  ) extMuSigPartialSigSerialize;
 
   // Heap arrays
 
@@ -640,8 +652,8 @@ abstract class Secp256k1Base<
 
   }
 
-  /// Returns an opaque allocated public MuSig2 nonce from the 66-byte [bytes].
-  /// If the nonce is invalid, [Secp256k1Exception] may be thrown.
+  /// Returns an opaque public MuSig2 nonce from the 66-byte [bytes]. If the
+  /// nonce is invalid, [Secp256k1Exception] may be thrown.
   OpaqueGeneric<MuSigPubNoncePtr> muSigParsePublicNonce(Uint8List bytes) {
     _requireLoad();
 
@@ -660,6 +672,7 @@ abstract class Secp256k1Base<
 
   }
 
+  /// Obtains the 66 byte serialised public MuSig nonce
   Uint8List muSigSerialisePublicNonce(OpaqueGeneric<MuSigPubNoncePtr> nonce) {
     _requireLoad();
     extMuSigPubNonceSerialize(ctxPtr, muSigPubNonceArray.ptr, nonce._heap.ptr);
@@ -712,6 +725,65 @@ abstract class Secp256k1Base<
 
   }
 
+  /// Produces a partial signature for the MuSig signing [session] using the
+  /// [secNonce], key [cache] and [privKeyBytes].
+  ///
+  /// The caller must ensure that the private key scalar is 32-bytes.
+  OpaqueGeneric<MuSigPartialSigPtr> muSigPartialSign(
+    OpaqueGeneric<MuSigSecNoncePtr> secNonce,
+    Uint8List privKeyBytes,
+    OpaqueGeneric<MuSigAggCachePtr> cache,
+    OpaqueGeneric<MuSigSessionPtr> session,
+  ) {
+    _requireLoad();
+
+    _parsePrivKeyIntoKeyPairPtr(privKeyBytes);
+
+    final partialSig = allocMuSigPartialSig();
+
+    if (
+      extMuSigPartialSign(
+        ctxPtr, partialSig.ptr, secNonce._heap.ptr, keyPair.ptr,
+        cache._heap.ptr, session._heap.ptr,
+      ) != 1
+    ) {
+      throw Secp256k1Exception("Could not create partial MuSig signature");
+    }
+
+    return OpaqueGeneric(partialSig);
+
+  }
+
+  /// Returns an opaque MuSig2 partial signature from the 32-byte [bytes].
+  /// If the partial signature is invalid, [Secp256k1Exception] may be thrown.
+  OpaqueGeneric<MuSigPartialSigPtr> muSigParsePartialSig(Uint8List bytes) {
+    _requireLoad();
+
+    if (bytes.length != muSigPartialSigSize) {
+      throw Secp256k1Exception("MuSig partial signature size must be 32");
+    }
+
+    // Reuse scalarArray as it is 32 bytes
+    scalarArray.load(bytes);
+    final partialSig = allocMuSigPartialSig();
+
+    if (extMuSigPartialSigParse(ctxPtr, partialSig.ptr, scalarArray.ptr) != 1) {
+      throw Secp256k1Exception("Invalid MuSig partial signature");
+    }
+
+    return OpaqueGeneric(partialSig);
+
+  }
+
+  /// Obtains the serialised 32 bytes of a MuSig partial signature
+  Uint8List muSigSerialisePartialSig(
+    OpaqueGeneric<MuSigPartialSigPtr> partialSig,
+  ) {
+    _requireLoad();
+    extMuSigPartialSigSerialize(ctxPtr, scalarArray.ptr, partialSig._heap.ptr);
+    return scalarArray.copy;
+  }
+
   /// Specialised sub-classes should override to allocate a [size] number of
   /// secp256k1_pubkey and then alloate and set an array of pointers on the heap
   /// to them.
@@ -744,5 +816,9 @@ abstract class Secp256k1Base<
   /// Specialised sub-classes should override to allocate an
   /// secp256k1_musig_session on the heap.
   Heap<MuSigSessionPtr> allocMuSigSession();
+
+  /// Specialised sub-classes should override to allocate an
+  /// secp256k1_musig_partial_sig on the heap.
+  Heap<MuSigPartialSigPtr> allocMuSigPartialSig();
 
 }

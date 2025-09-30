@@ -9,16 +9,18 @@ typedef OpaqueMuSigCache = OpaqueGeneric<int>;
 typedef OpaqueMuSigSecretNonce = OpaqueGeneric<int>;
 typedef OpaqueMuSigPublicNonce = OpaqueGeneric<int>;
 typedef OpaqueMuSigSession = OpaqueGeneric<int>;
+typedef OpaqueMuSigPartialSig = OpaqueGeneric<int>;
 
 /// Loads and wraps WASM code to be run via the browser JS APIs
 class Secp256k1 extends Secp256k1Base<
   int, int, int, int, int, int, int, int, int, int, int, int, int, int, int,
-  int, int
+  int, int, int
 > {
 
   static const _muSigCacheSize = 197;
   static const _muSigNonceSize = 132;
   static const _muSigSessionSize = 133;
+  static const _muSigPartialSigSize = 36;
 
   late final HeapFactory _heapFactory;
 
@@ -72,6 +74,10 @@ class Secp256k1 extends Secp256k1Base<
       = wasm.field("secp256k1_musig_pubnonce_serialize");
     extMuSigNonceAgg = wasm.field("secp256k1_musig_nonce_agg");
     extMuSigNonceProcess = wasm.field("secp256k1_musig_nonce_process");
+    extMuSigPartialSign = wasm.field("secp256k1_musig_partial_sign");
+    extMuSigPartialSigParse = wasm.field("secp256k1_musig_partial_sig_parse");
+    extMuSigPartialSigSerialize
+      = wasm.field("secp256k1_musig_partial_sig_serialize");
 
     // Local functions for loading purposes
     final int Function(int) contextCreate
@@ -145,5 +151,8 @@ class Secp256k1 extends Secp256k1Base<
 
   @override
   Heap<int> allocMuSigSession() => _heapFactory.alloc(_muSigSessionSize);
+
+  @override
+  Heap<int> allocMuSigPartialSig() => _heapFactory.alloc(_muSigPartialSigSize);
 
 }

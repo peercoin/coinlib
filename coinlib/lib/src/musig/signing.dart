@@ -28,6 +28,30 @@ class MuSigPublicNonce {
 
 }
 
+class InvalidMuSigPartialSig implements Exception {}
+
+/// The partial signature from a participant that needs to be shared.
+class MuSigPartialSig {
+
+  final OpaqueMuSigPartialSig _underlying;
+  final Uint8List bytes;
+
+  MuSigPartialSig._(this._underlying, this.bytes);
+  MuSigPartialSig._fromUnderlying(this._underlying)
+    : bytes = secp256k1.muSigSerialisePartialSig(_underlying);
+
+  /// Creates the partial signature from the [bytes]. If the [bytes] are
+  /// invalid, [InvalidMuSigPartialSig] will be thrown.
+  factory MuSigPartialSig.fromBytes(Uint8List bytes) {
+    try {
+      return MuSigPartialSig._(secp256k1.muSigParsePartialSig(bytes), bytes);
+    } on Secp256k1Exception {
+      throw InvalidMuSigPartialSig();
+    }
+  }
+
+}
+
 /// A MuSig signing session state to be used for one signing session only.
 ///
 /// This class is stateful unlike most of the classes in the library. This is to
@@ -51,8 +75,8 @@ class MuSigStatefulSigningSession {
   /// key for the signer with [ourPublicKey].
   ///
   /// [ourPublicNonce] needs to be shared with other signers. Once all details
-  /// and public nonces have been obtained, the signing session can be prepared
-  /// with [prepare].
+  /// and public nonces have been obtained, [sign] can be called to create a
+  /// partial signature.
   MuSigStatefulSigningSession({
     required this.keys,
     required this.ourPublicKey,
@@ -72,25 +96,37 @@ class MuSigStatefulSigningSession {
 
   }
 
-  /// Prepares the MuSig signing session with details required to produce
-  /// partial signatures. This can only be done once.
+  /// Produces a partial signature with the required details. This can only be
+  /// done once or a [StateError] will be thrown.
   ///
   /// [otherNonces] must map the public key of all other participants with their
   /// shared public nonces.
   ///
   /// [hash] must be the 32-byte hash to be signed.
   ///
+  /// The [privKey] must be paired with [ourPublicKey].
+  ///
   /// An optional [adaptor] point can be provided to produce an adaptor
   /// signature.
-  void prepare({
+  MuSigPartialSig sign({
     required KeyToNonceMap otherNonces,
     required Uint8List hash,
+    required ECPrivateKey privKey,
     ECPublicKey? adaptor,
   }) {
 
     checkBytes(hash, 32);
 
-    // Ensure we haven't already aggregated the nonces
+    // Check private key matches the participant's public key
+    if (privKey.pubkey != ourPublicKey) {
+      throw ArgumentError.value(
+        privKey,
+        "privKey",
+        "doesn't match outPublicKey",
+      );
+    }
+
+    // Ensure we haven't already produced a partial signature
     if (_underlyingSession != null) {
       throw StateError("Already prepared signing session");
     }
@@ -119,6 +155,13 @@ class MuSigStatefulSigningSession {
       adaptor?.data,
     );
     _otherNonces = otherNonces;
+
+    // Produce partial signature
+    return MuSigPartialSig._fromUnderlying(
+      secp256k1.muSigPartialSign(
+        _ourSecretNonce, privKey.data, keys._aggCache, _underlyingSession!,
+      ),
+    );
 
   }
 

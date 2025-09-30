@@ -36,7 +36,23 @@ void main() {
 
     test("can read/write public nonces", () {
       final bytes = getNonceBytes();
-      final bytes2 = MuSigPublicNonce.fromBytes(bytes).bytes;
+      expect(bytes, MuSigPublicNonce.fromBytes(bytes).bytes);
+    });
+
+  });
+
+  group("MuSigPartialSig", () {
+
+    test("invalid public signature", () => expect(
+      () => MuSigPartialSig.fromBytes(
+        Uint8List.fromList(List.filled(32, 0xff)),
+      ),
+      throwsA(isA<InvalidMuSigPartialSig>()),
+    ),);
+
+    test("can read/write partial signatures", () {
+      final bytes = Uint8List(32)..last = 1;
+      final bytes2 = MuSigPartialSig.fromBytes(bytes).bytes;
       expect(bytes, bytes2);
     });
 
@@ -72,18 +88,25 @@ void main() {
         );
       });
 
-      test("prepare failure", () {
+      test("sign failure", () {
 
         void expectInvalid(
           KeyToNonceMap otherNonces,
-          int hashLen,
+          [
+            int hashLen = 32,
+            int key = 0,
+          ]
         ) => expect(
-          () => sessions.first.prepare(
+          () => sessions.first.sign(
             otherNonces: otherNonces,
             hash: Uint8List(hashLen),
+            privKey: getPrivKey(key),
           ),
           throwsArgumentError,
         );
+
+        // Wrong key
+        expectInvalid(otherNoncesMaps.first, 32, 1);
 
         // Bad hash size
         for (final i in [31, 33]) {
@@ -91,30 +114,34 @@ void main() {
         }
 
         // Too few nonces
-        expectInvalid(
-          { getPubKey(1): sessions[1].ourPublicNonce },
-          32,
-        );
+        expectInvalid({ getPubKey(1): sessions[1].ourPublicNonce });
 
-        // Wrong public key
-        expectInvalid(otherNoncesMaps.last, 32);
+        // Wrong nonces
+        expectInvalid(otherNoncesMaps.last);
 
       });
 
-      group("given prepared", () {
+      group("given partial signatures", () {
 
         final hash = Uint8List(32);
+        late final List<MuSigPartialSig> partialSigs;
 
         setUp(() {
-          for (int i = 0; i < 3; i++) {
-            sessions[i].prepare(otherNonces: otherNoncesMaps[i], hash: hash);
-          }
+          partialSigs = List.generate(
+            3,
+            (i) => sessions[i].sign(
+              otherNonces: otherNoncesMaps[i],
+              hash: hash,
+              privKey: getPrivKey(i),
+            ),
+          );
         });
 
-        test("cannot prepare twice", () => expect(
-          () => sessions.first.prepare(
+        test("cannot sign twice", () => expect(
+          () => sessions.first.sign(
             otherNonces: otherNoncesMaps.first,
             hash: hash,
+            privKey: getPrivKey(0),
           ),
           throwsStateError,
         ),);
