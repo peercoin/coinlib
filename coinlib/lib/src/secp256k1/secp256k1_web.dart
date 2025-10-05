@@ -78,6 +78,7 @@ class Secp256k1 extends Secp256k1Base<
     extMuSigPartialSigParse = wasm.field("secp256k1_musig_partial_sig_parse");
     extMuSigPartialSigSerialize
       = wasm.field("secp256k1_musig_partial_sig_serialize");
+    extMuSigPartialSigVerify = wasm.field("secp256k1_musig_partial_sig_verify");
 
     // Local functions for loading purposes
     final int Function(int) contextCreate

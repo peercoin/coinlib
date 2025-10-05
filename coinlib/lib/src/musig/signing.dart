@@ -70,6 +70,7 @@ class MuSigStatefulSigningSession {
 
   OpaqueMuSigSession? _underlyingSession;
   KeyToNonceMap? _otherNonces;
+  Map<ECPublicKey, MuSigPartialSig> _partialSigs = {};
 
   /// Starts a signing session with the MuSig [keys] and specifying the public
   /// key for the signer with [ourPublicKey].
@@ -164,5 +165,60 @@ class MuSigStatefulSigningSession {
     );
 
   }
+
+  /// Adds the partial signature ([partialSig]) of a participant with the
+  /// [participantKey] if it is valid.
+  ///
+  /// Will return true if the partial signature is valid or false if it isn't.
+  ///
+  /// This must be called after [sign] or else [StateError] will be thrown.
+  ///
+  /// A valid [partialSig] cannot be sent for a [participantKey] more than once
+  /// or [StateError] will be thrown.
+  bool addPartialSignature({
+    required MuSigPartialSig partialSig,
+    required ECPublicKey participantKey,
+  }) {
+
+    if (_underlyingSession == null) {
+      throw StateError("Need to call sign first");
+    }
+
+    if (havePartialSignature(participantKey)) {
+      throw StateError(
+        "Already contains a valid partial signature from $participantKey",
+      );
+    }
+
+    final pubNonce = _otherNonces![participantKey];
+
+    if (pubNonce == null) {
+      throw ArgumentError.value(
+        participantKey,
+        "participantKey",
+        "is not a public key of a participant",
+      );
+    }
+
+    final valid = secp256k1.muSigPartialSignatureVerify(
+      partialSig._underlying,
+      pubNonce._underlying,
+      participantKey.data,
+      keys._aggCache,
+      _underlyingSession!,
+    );
+
+    if (valid) {
+      _partialSigs[participantKey] = partialSig;
+    }
+
+    return valid;
+
+  }
+
+  /// Returns true if a valid partial signature was processed with
+  /// [addPartialSignature] for the [participantKey].
+  bool havePartialSignature(ECPublicKey participantKey) =>
+    _partialSigs.containsKey(participantKey);
 
 }

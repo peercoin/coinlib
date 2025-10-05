@@ -89,6 +89,7 @@ RUN ${WASI_SDK_PATH}/bin/wasm-ld \
   --export secp256k1_musig_partial_sign \
   --export secp256k1_musig_partial_sig_parse \
   --export secp256k1_musig_partial_sig_serialize \
+  --export secp256k1_musig_partial_sig_verify \
   # The secp256k1 library file
   build/lib/libsecp256k1.a \
   # Need to include libc for wasi here as it isn't done for us

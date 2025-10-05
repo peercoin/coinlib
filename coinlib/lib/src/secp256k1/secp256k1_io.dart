@@ -118,6 +118,7 @@ class Secp256k1 extends Secp256k1Base<
     extMuSigPartialSign = _lib.secp256k1_musig_partial_sign;
     extMuSigPartialSigParse = _lib.secp256k1_musig_partial_sig_parse;
     extMuSigPartialSigSerialize = _lib.secp256k1_musig_partial_sig_serialize;
+    extMuSigPartialSigVerify = _lib.secp256k1_musig_partial_sig_verify;
 
     // Set heap arrays
     key32Array = HeapBytesFfi(Secp256k1Base.privkeySize);

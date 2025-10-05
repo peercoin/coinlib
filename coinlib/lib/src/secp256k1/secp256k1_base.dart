@@ -137,6 +137,10 @@ abstract class Secp256k1Base<
   late int Function(
     CtxPtr, UCharPtr, MuSigPartialSigPtr,
   ) extMuSigPartialSigSerialize;
+  late int Function(
+    CtxPtr, MuSigPartialSigPtr, MuSigPubNoncePtr, PubKeyPtr, MuSigAggCachePtr,
+    MuSigSessionPtr,
+  ) extMuSigPartialSigVerify;
 
   // Heap arrays
 
@@ -782,6 +786,24 @@ abstract class Secp256k1Base<
     _requireLoad();
     extMuSigPartialSigSerialize(ctxPtr, scalarArray.ptr, partialSig._heap.ptr);
     return scalarArray.copy;
+  }
+
+  bool muSigPartialSignatureVerify(
+    OpaqueGeneric<MuSigPartialSigPtr> partialSig,
+    OpaqueGeneric<MuSigPubNoncePtr> pubNonce,
+    Uint8List pubKeyBytes,
+    OpaqueGeneric<MuSigAggCachePtr> cache,
+    OpaqueGeneric<MuSigSessionPtr> session,
+  ) {
+    _requireLoad();
+
+    _parsePubkeyIntoPtr(pubKeyBytes);
+
+    return extMuSigPartialSigVerify(
+      ctxPtr, partialSig._heap.ptr, pubNonce._heap.ptr, pubKey.ptr,
+      cache._heap.ptr, session._heap.ptr,
+    ) == 1;
+
   }
 
   /// Specialised sub-classes should override to allocate a [size] number of

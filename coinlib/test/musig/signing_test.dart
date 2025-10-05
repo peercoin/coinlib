@@ -121,10 +121,18 @@ void main() {
 
       });
 
+      test("cannot add partial sig before sign", () => expect(
+        () => sessions.first.addPartialSignature(
+          partialSig: MuSigPartialSig.fromBytes(Uint8List(32)..last = 1),
+          participantKey: getPubKey(1),
+        ),
+        throwsStateError,
+      ),);
+
       group("given partial signatures", () {
 
         final hash = Uint8List(32);
-        late final List<MuSigPartialSig> partialSigs;
+        late List<MuSigPartialSig> partialSigs;
 
         setUp(() {
           partialSigs = List.generate(
@@ -145,6 +153,54 @@ void main() {
           ),
           throwsStateError,
         ),);
+
+        bool addPartialSig(int who, int from, [ int? keyI ])
+          => sessions[who].addPartialSignature(
+            partialSig: partialSigs[from],
+            participantKey: getPubKey(keyI ?? from),
+          );
+
+        test("cannot be self", () => expect(
+          () => addPartialSig(0, 0),
+          throwsArgumentError,
+        ),);
+
+        test("invalid partial sig", () => expect(
+          addPartialSig(0, 0, 1),
+          false,
+        ),);
+
+        test("can add partial sigs", () {
+
+          void expectHave(int i, bool have)
+            => expect(sessions.first.havePartialSignature(getPubKey(i)), have);
+
+          for (int i = 1; i < 3; i++) {
+            expectHave(i, false);
+            expect(addPartialSig(0, i), true);
+            expectHave(i, true);
+          }
+
+        });
+
+        group("given added all partial sigs", () {
+
+          setUp(() {
+            for (int who = 0; who < 3; who++) {
+              for (int from = 0; from < 3; from++) {
+                if (who != from) {
+                  addPartialSig(who, from);
+                }
+              }
+            }
+          });
+
+          test("cannot add partial sig more than once", () => expect(
+            () => addPartialSig(0, 1),
+            throwsStateError,
+          ),);
+
+        });
 
       });
 
