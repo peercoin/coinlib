@@ -3,55 +3,6 @@ part of "library.dart";
 /// Maps the public key of a participant to their public nonce
 typedef KeyToNonceMap = Map<ECPublicKey, MuSigPublicNonce>;
 
-class InvalidMuSigPublicNonce implements Exception {}
-
-/// The public nonce of a participant for a single signing session only.
-class MuSigPublicNonce {
-
-  final OpaqueMuSigPublicNonce _underlying;
-  /// The serialised bytes that can be shared with other signers
-  final Uint8List bytes;
-
-  MuSigPublicNonce._(this._underlying, this.bytes);
-  MuSigPublicNonce._fromUnderlying(this._underlying)
-    : bytes = secp256k1.muSigSerialisePublicNonce(_underlying);
-
-  /// Creates the public nonce from the [bytes]. If the [bytes] are invalid,
-  /// [InvalidMuSigPublicNonce] will be thrown.
-  factory MuSigPublicNonce.fromBytes(Uint8List bytes) {
-    try {
-      return MuSigPublicNonce._(secp256k1.muSigParsePublicNonce(bytes), bytes);
-    } on Secp256k1Exception {
-      throw InvalidMuSigPublicNonce();
-    }
-  }
-
-}
-
-class InvalidMuSigPartialSig implements Exception {}
-
-/// The partial signature from a participant that needs to be shared.
-class MuSigPartialSig {
-
-  final OpaqueMuSigPartialSig _underlying;
-  final Uint8List bytes;
-
-  MuSigPartialSig._(this._underlying, this.bytes);
-  MuSigPartialSig._fromUnderlying(this._underlying)
-    : bytes = secp256k1.muSigSerialisePartialSig(_underlying);
-
-  /// Creates the partial signature from the [bytes]. If the [bytes] are
-  /// invalid, [InvalidMuSigPartialSig] will be thrown.
-  factory MuSigPartialSig.fromBytes(Uint8List bytes) {
-    try {
-      return MuSigPartialSig._(secp256k1.muSigParsePartialSig(bytes), bytes);
-    } on Secp256k1Exception {
-      throw InvalidMuSigPartialSig();
-    }
-  }
-
-}
-
 /// A MuSig signing session state to be used for one signing session only.
 ///
 /// This class is stateful unlike most of the classes in the library. This is to
@@ -69,8 +20,10 @@ class MuSigStatefulSigningSession {
   late final OpaqueMuSigSecretNonce _ourSecretNonce;
 
   OpaqueMuSigSession? _underlyingSession;
+  bool _isAdaptor = false;
   KeyToNonceMap? _otherNonces;
-  Map<ECPublicKey, MuSigPartialSig> _partialSigs = {};
+  OpaqueMuSigPartialSig? _ourPartialSig;
+  final Map<ECPublicKey, OpaqueMuSigPartialSig> _partialSigs = {};
 
   /// Starts a signing session with the MuSig [keys] and specifying the public
   /// key for the signer with [ourPublicKey].
@@ -156,13 +109,13 @@ class MuSigStatefulSigningSession {
       adaptor?.data,
     );
     _otherNonces = otherNonces;
+    _isAdaptor = adaptor != null;
 
     // Produce partial signature
-    return MuSigPartialSig._fromUnderlying(
-      secp256k1.muSigPartialSign(
-        _ourSecretNonce, privKey.data, keys._aggCache, _underlyingSession!,
-      ),
+    _ourPartialSig = secp256k1.muSigPartialSign(
+      _ourSecretNonce, privKey.data, keys._aggCache, _underlyingSession!,
     );
+    return MuSigPartialSig._fromUnderlying(_ourPartialSig!);
 
   }
 
@@ -209,7 +162,7 @@ class MuSigStatefulSigningSession {
     );
 
     if (valid) {
-      _partialSigs[participantKey] = partialSig;
+      _partialSigs[participantKey] = partialSig._underlying;
     }
 
     return valid;
@@ -220,5 +173,37 @@ class MuSigStatefulSigningSession {
   /// [addPartialSignature] for the [participantKey].
   bool havePartialSignature(ECPublicKey participantKey) =>
     _partialSigs.containsKey(participantKey);
+
+  MuSigResult finish() {
+
+    if (_underlyingSession == null) {
+      throw StateError("Need to call sign before finishing");
+    }
+
+    final actualSigs = _partialSigs.length;
+    final reqSigs = keys.pubKeys.length - 1;
+    if (actualSigs != reqSigs) {
+      throw StateError(
+        "Need $reqSigs partial signatures. Only have $actualSigs",
+      );
+    }
+
+    final sig = SchnorrSignature(
+      secp256k1.muSigSignatureAggregate(
+        { _ourPartialSig!, ..._partialSigs.values },
+        _underlyingSession!,
+      ),
+    );
+
+    return _isAdaptor
+      ? MuSigResultAdaptor._(
+        SchnorrAdaptorSignature(
+          sig,
+          secp256k1.muSigNonceParity(_underlyingSession!),
+        ),
+      )
+      : MuSigResultComplete._(sig);
+
+  }
 
 }

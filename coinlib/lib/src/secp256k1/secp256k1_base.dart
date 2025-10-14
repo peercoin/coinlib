@@ -25,7 +25,8 @@ abstract class Secp256k1Base<
   CtxPtr, UCharPtr, PubKeyPtr, SizeTPtr, SignaturePtr,
   RecoverableSignaturePtr, KeyPairPtr, XPubKeyPtr, IntPtr, MuSigAggCachePtr,
   PubKeyPtrPtr, MuSigSecNoncePtr, MuSigPubNoncePtr, MuSigAggNoncePtr,
-  MuSigPubNoncePtrPtr, MuSigSessionPtr, MuSigPartialSigPtr, NullPtr
+  MuSigPubNoncePtrPtr, MuSigSessionPtr, MuSigPartialSigPtr,
+  MuSigPartialSigPtrPtr, NullPtr
 > {
 
   static const contextNone = 1;
@@ -141,6 +142,14 @@ abstract class Secp256k1Base<
     CtxPtr, MuSigPartialSigPtr, MuSigPubNoncePtr, PubKeyPtr, MuSigAggCachePtr,
     MuSigSessionPtr,
   ) extMuSigPartialSigVerify;
+  late int Function(
+    CtxPtr, UCharPtr, MuSigSessionPtr, MuSigPartialSigPtrPtr, int,
+  ) extMuSigPartialSigAgg;
+  late int Function(CtxPtr, IntPtr, MuSigSessionPtr) extMuSigNonceParity;
+  late int Function(CtxPtr, UCharPtr, UCharPtr, UCharPtr, int) extMuSigAdapt;
+  late int Function(
+    CtxPtr, UCharPtr, UCharPtr, UCharPtr, int,
+  ) extMuSigExtractAdaptor;
 
   // Heap arrays
 
@@ -152,12 +161,14 @@ abstract class Secp256k1Base<
   late HeapBytes<UCharPtr> hashArray;
   late HeapBytes<UCharPtr> entropyArray;
   late HeapBytes<UCharPtr> serializedSigArray;
+  late HeapBytes<UCharPtr> preSigArray;
   late HeapBytes<UCharPtr> derSigArray;
   late HeapBytes<UCharPtr> muSigPubNonceArray;
 
   // Other pre-allocated heap objects
   late Heap<PubKeyPtr> pubKey;
   late HeapInt<SizeTPtr> sizeT;
+  late HeapInt<IntPtr> integer;
   late Heap<SignaturePtr> sig;
   late Heap<RecoverableSignaturePtr> recSig;
   late Heap<KeyPairPtr> keyPair;
@@ -806,6 +817,96 @@ abstract class Secp256k1Base<
 
   }
 
+  /// Takes a set of [partialSigs] for a given MuSig [session] and then returns
+  /// the aggregated 64-bit Schnorr signature.
+  Uint8List muSigSignatureAggregate(
+    Set<OpaqueGeneric<MuSigPartialSigPtr>> partialSigs,
+    OpaqueGeneric<MuSigSessionPtr> session,
+  ) {
+    _requireLoad();
+
+    final partialSigArray = setMuSigPartialSigArray(
+      partialSigs.map((partial) => partial._heap),
+    );
+
+    if (
+      extMuSigPartialSigAgg(
+        ctxPtr, serializedSigArray.ptr, session._heap.ptr, partialSigArray.ptr,
+        partialSigs.length,
+      ) != 1
+    ) {
+      throw Secp256k1Exception("Could not aggregate partial signatures");
+    }
+
+    return serializedSigArray.copy;
+
+  }
+
+  /// Gets the nonce parity (true if odd) from the MuSig [session].
+  bool muSigNonceParity(OpaqueGeneric<MuSigSessionPtr> session) {
+    _requireLoad();
+
+    if (extMuSigNonceParity(ctxPtr, integer.ptr, session._heap.ptr) != 1) {
+      throw Secp256k1Exception(
+        "Could not obtain nonce parity from MuSig session",
+      );
+    }
+
+    return integer.value == 1;
+
+  }
+
+  /// Takes a 64-byte adaptor pre-signature ([preSig]) and a 32-byte scalar
+  /// ([adaptor]) and adapts the signature using the scalar.
+  ///
+  /// The caller must ensure that the sizes of the arguments are correct.
+  /// Overflowing data in the [preSig] or [adaptor] will result in a
+  /// [Secp256k1Exception].
+  Uint8List adaptSchnorr(Uint8List preSig, Uint8List adaptor, bool parity) {
+    _requireLoad();
+
+    serializedSigArray.load(preSig);
+    scalarArray.load(adaptor);
+
+    if (
+      extMuSigAdapt(
+        ctxPtr, serializedSigArray.ptr, serializedSigArray.ptr, scalarArray.ptr,
+        parity ? 1 : 0,
+      ) != 1
+    ) {
+      throw Secp256k1Exception("Could not adapt Schnorr signature");
+    }
+
+    return serializedSigArray.copy;
+
+  }
+
+  /// Given an adaptor pre-signature, a completed signature and the nonce
+  /// parity, extracts the adaptor used.
+  ///
+  /// The caller must ensure each signature is 64 bytes. Overflowing data in the
+  /// [preSig] or [completeSig] will result in a [Secp256k1Exception].
+  Uint8List extractSchnorrAdaptor(
+    Uint8List preSig, Uint8List completeSig, bool parity,
+  ) {
+    _requireLoad();
+
+    preSigArray.load(preSig);
+    serializedSigArray.load(completeSig);
+
+    if (
+      extMuSigExtractAdaptor(
+        ctxPtr, scalarArray.ptr, serializedSigArray.ptr, preSigArray.ptr,
+        parity ? 1 : 0,
+      ) != 1
+    ) {
+      throw Secp256k1Exception("Cannot extract Schnorr signature adaptor");
+    }
+
+    return scalarArray.copy;
+
+  }
+
   /// Specialised sub-classes should override to allocate a [size] number of
   /// secp256k1_pubkey and then alloate and set an array of pointers on the heap
   /// to them.
@@ -817,6 +918,13 @@ abstract class Secp256k1Base<
   HeapPointerArray<
     MuSigPubNoncePtrPtr, MuSigPubNoncePtr
   > setMuSigPubNonceArray(Iterable<Heap<MuSigPubNoncePtr>> objs);
+
+  /// Specialised sub-classes should override to allocate an array to
+  /// secp256k1_musig_partial_sig pointers and then set the heap objects in
+  /// [objs] as pointers in this array.
+  HeapPointerArray<
+    MuSigPartialSigPtrPtr, MuSigPartialSigPtr
+  > setMuSigPartialSigArray(Iterable<Heap<MuSigPartialSigPtr>> objs);
 
   /// Specialised sub-classes should override to allocate an
   /// secp256k1_musig_keyagg_cache on the heap.

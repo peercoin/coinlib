@@ -70,6 +70,7 @@ class Secp256k1 extends Secp256k1Base<
   Pointer<MuSigPublicNoncePtr>,
   MuSigSessionPtr,
   MuSigPartialSigPtr,
+  Pointer<MuSigPartialSigPtr>,
   Pointer<Never>
 > {
 
@@ -119,6 +120,10 @@ class Secp256k1 extends Secp256k1Base<
     extMuSigPartialSigParse = _lib.secp256k1_musig_partial_sig_parse;
     extMuSigPartialSigSerialize = _lib.secp256k1_musig_partial_sig_serialize;
     extMuSigPartialSigVerify = _lib.secp256k1_musig_partial_sig_verify;
+    extMuSigPartialSigAgg = _lib.secp256k1_musig_partial_sig_agg;
+    extMuSigNonceParity = _lib.secp256k1_musig_nonce_parity;
+    extMuSigAdapt = _lib.secp256k1_musig_adapt;
+    extMuSigExtractAdaptor = _lib.secp256k1_musig_extract_adaptor;
 
     // Set heap arrays
     key32Array = HeapBytesFfi(Secp256k1Base.privkeySize);
@@ -126,12 +131,14 @@ class Secp256k1 extends Secp256k1Base<
     serializedPubKeyArray = HeapBytesFfi(Secp256k1Base.uncompressedPubkeySize);
     hashArray = HeapBytesFfi(Secp256k1Base.hashSize);
     entropyArray = HeapBytesFfi(Secp256k1Base.entropySize);
+    preSigArray = HeapBytesFfi(Secp256k1Base.sigSize);
     serializedSigArray = HeapBytesFfi(Secp256k1Base.sigSize);
     derSigArray = HeapBytesFfi(Secp256k1Base.derSigSize);
     muSigPubNonceArray = HeapBytesFfi(Secp256k1Base.muSigPubNonceSize);
 
     // Set other heap data
     sizeT = HeapSizeFfi();
+    integer = HeapIntFfi();
     pubKey = HeapFfi(malloc());
     sig = HeapFfi(malloc());
     recSig = HeapFfi(malloc());
@@ -165,6 +172,12 @@ class Secp256k1 extends Secp256k1Base<
   HeapPointerArray<
     Pointer<MuSigPublicNoncePtr>, MuSigPublicNoncePtr
   > setMuSigPubNonceArray(Iterable<Heap<MuSigPublicNoncePtr>> objs)
+    => HeapPointerArrayFfi.assign(malloc(objs.length), objs.cast());
+
+  @override
+  HeapPointerArray<
+    Pointer<MuSigPartialSigPtr>, MuSigPartialSigPtr
+  > setMuSigPartialSigArray(Iterable<Heap<MuSigPartialSigPtr>> objs)
     => HeapPointerArrayFfi.assign(malloc(objs.length), objs.cast());
 
   @override

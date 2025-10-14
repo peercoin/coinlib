@@ -3,6 +3,8 @@ import 'package:coinlib/coinlib.dart';
 import 'package:test/test.dart';
 import '../vectors/keys.dart';
 
+final hash = Uint8List(32);
+
 void main() {
 
   late final MuSigPublicKeys keys;
@@ -88,6 +90,35 @@ void main() {
         );
       });
 
+      late List<MuSigPartialSig> partialSigs;
+
+      bool addPartialSig(int who, int from, [ int? keyI ])
+        => sessions[who].addPartialSignature(
+          partialSig: partialSigs[from],
+          participantKey: getPubKey(keyI ?? from),
+        );
+
+      void addAllPartialSigs() {
+        for (int who = 0; who < 3; who++) {
+          for (int from = 0; from < 3; from++) {
+            if (who != from) {
+              addPartialSig(who, from);
+            }
+          }
+        }
+      }
+
+      void expectIdenticalValidSigs(Iterable<SchnorrSignature> sigs) {
+        expect(
+          sigs.map((sig) => sig.verify(keys.aggregate, hash)),
+          everyElement(true),
+        );
+        expect(
+          sigs.map((sig) => bytesToHex(sig.data)).toSet(),
+          hasLength(1),
+        );
+      }
+
       test("sign failure", () {
 
         void expectInvalid(
@@ -129,10 +160,14 @@ void main() {
         throwsStateError,
       ),);
 
-      group("given partial signatures", () {
+      void expectCannotFinish() => expect(
+        () => sessions.first.finish(),
+        throwsStateError,
+      );
 
-        final hash = Uint8List(32);
-        late List<MuSigPartialSig> partialSigs;
+      test("cannot finish before sign", expectCannotFinish);
+
+      group("given partial signatures", () {
 
         setUp(() {
           partialSigs = List.generate(
@@ -154,13 +189,7 @@ void main() {
           throwsStateError,
         ),);
 
-        bool addPartialSig(int who, int from, [ int? keyI ])
-          => sessions[who].addPartialSignature(
-            partialSig: partialSigs[from],
-            participantKey: getPubKey(keyI ?? from),
-          );
-
-        test("cannot be self", () => expect(
+        test("cannot add own partial sig", () => expect(
           () => addPartialSig(0, 0),
           throwsArgumentError,
         ),);
@@ -183,29 +212,69 @@ void main() {
 
         });
 
+        test("cannot finish before all partial sigs", () {
+          expectCannotFinish();
+          addPartialSig(0, 1);
+          expectCannotFinish();
+        });
+
         group("given added all partial sigs", () {
 
-          setUp(() {
-            for (int who = 0; who < 3; who++) {
-              for (int from = 0; from < 3; from++) {
-                if (who != from) {
-                  addPartialSig(who, from);
-                }
-              }
-            }
-          });
+          setUp(() => addAllPartialSigs());
 
           test("cannot add partial sig more than once", () => expect(
             () => addPartialSig(0, 1),
             throwsStateError,
           ),);
 
+          test("finish gives identical and valid signatures", () {
+
+            final sigs = sessions.map(
+              (session) => (session.finish() as MuSigResultComplete).signature,
+            ).toList();
+
+            expectIdenticalValidSigs(sigs);
+
+          });
+
         });
 
       });
 
       test("can sign with adaptor", () {
-        // TODO
+
+        final adaptorScalar = getPrivKey(0);
+        partialSigs = List.generate(
+          3,
+          (i) => sessions[i].sign(
+            otherNonces: otherNoncesMaps[i],
+            hash: hash,
+            privKey: getPrivKey(i),
+            adaptor: adaptorScalar.pubkey,
+          ),
+        );
+        addAllPartialSigs();
+
+        final adaptorSigs = sessions.map(
+          (session) => (
+            session.finish() as MuSigResultAdaptor
+          ).adaptorSignature,
+        ).toList();
+
+        expect(
+          adaptorSigs.map((sig) => sig.preSig.verify(keys.aggregate, hash)),
+          everyElement(false),
+        );
+
+        final completeSigs = adaptorSigs.map((sig) => sig.adapt(adaptorScalar));
+
+        expectIdenticalValidSigs(completeSigs);
+
+        expect(
+          adaptorSigs.map((sig) => sig.extract(completeSigs.first).pubkey),
+          everyElement(adaptorScalar.pubkey),
+        );
+
       });
 
     });

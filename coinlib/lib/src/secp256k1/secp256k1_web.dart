@@ -14,7 +14,7 @@ typedef OpaqueMuSigPartialSig = OpaqueGeneric<int>;
 /// Loads and wraps WASM code to be run via the browser JS APIs
 class Secp256k1 extends Secp256k1Base<
   int, int, int, int, int, int, int, int, int, int, int, int, int, int, int,
-  int, int, int
+  int, int, int, int
 > {
 
   static const _muSigCacheSize = 197;
@@ -79,6 +79,10 @@ class Secp256k1 extends Secp256k1Base<
     extMuSigPartialSigSerialize
       = wasm.field("secp256k1_musig_partial_sig_serialize");
     extMuSigPartialSigVerify = wasm.field("secp256k1_musig_partial_sig_verify");
+    extMuSigPartialSigAgg = wasm.field("secp256k1_musig_partial_sig_agg");
+    extMuSigNonceParity = wasm.field("secp256k1_musig_nonce_parity");
+    extMuSigAdapt = wasm.field("secp256k1_musig_adapt");
+    extMuSigExtractAdaptor = wasm.field("secp256k1_musig_extract_adaptor");
 
     // Local functions for loading purposes
     final int Function(int) contextCreate
@@ -98,6 +102,7 @@ class Secp256k1 extends Secp256k1Base<
     serializedPubKeyArray = _heapFactory.bytes(
       Secp256k1Base.uncompressedPubkeySize,
     );
+    preSigArray = _heapFactory.bytes(Secp256k1Base.sigSize);
     serializedSigArray = _heapFactory.bytes(Secp256k1Base.sigSize);
     derSigArray = _heapFactory.bytes(Secp256k1Base.derSigSize);
     muSigPubNonceArray = _heapFactory.bytes(Secp256k1Base.muSigPubNonceSize);
@@ -105,6 +110,7 @@ class Secp256k1 extends Secp256k1Base<
     // Heap objects
     pubKey = _heapFactory.alloc(Secp256k1Base.pubkeySize);
     sizeT = _heapFactory.integer();
+    integer = _heapFactory.integer();
     sig = _heapFactory.alloc(Secp256k1Base.sigSize);
     recSig = _heapFactory.alloc(Secp256k1Base.recSigSize);
     keyPair = _heapFactory.alloc(Secp256k1Base.keyPairSize);
@@ -135,6 +141,12 @@ class Secp256k1 extends Secp256k1Base<
   HeapPointerArray<int, int> setMuSigPubNonceArray(
     Iterable<Heap<int>> objs,
   ) => _heapFactory.assignPointerArray(objs.toList().cast());
+
+  @override
+  // Identical in implementation to setMuSigPubNonceArray
+  HeapPointerArray<int, int> setMuSigPartialSigArray(
+    Iterable<Heap<int>> objs,
+  ) => setMuSigPubNonceArray(objs);
 
   @override
   Heap<int> allocMuSigCache() => _heapFactory.alloc(_muSigCacheSize);

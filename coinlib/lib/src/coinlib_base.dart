@@ -14,6 +14,7 @@ export 'package:coinlib/src/crypto/hd_key.dart';
 export 'package:coinlib/src/crypto/message_signature.dart';
 export 'package:coinlib/src/crypto/nums_public_key.dart';
 export 'package:coinlib/src/crypto/random.dart';
+export 'package:coinlib/src/crypto/schnorr_adaptor_signature.dart';
 export 'package:coinlib/src/crypto/schnorr_signature.dart';
 
 export 'package:coinlib/src/encode/base58.dart';
