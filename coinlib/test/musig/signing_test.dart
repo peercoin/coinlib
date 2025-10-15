@@ -7,16 +7,18 @@ final hash = Uint8List(32);
 
 void main() {
 
-  late final MuSigPublicKeys keys;
+  late final List<MuSigPrivate> privs;
+  late final ECPublicKey aggregate;
 
   setUpAll(() async {
     await loadCoinlib();
-    keys = getMuSigKeys();
+    privs = List.generate(3, (i) => getMuSigPrivate(i));
+    aggregate = privs.first.public.aggregate;
   });
 
   MuSigStatefulSigningSession getSession(int i) => MuSigStatefulSigningSession(
-    keys: keys,
-    ourPublicKey: getPubKey(i),
+    keys: privs[i].public,
+    ourPublicKey: privs[i].privateKey.pubkey,
   );
 
   Uint8List getNonceBytes() => getSession(0).ourPublicNonce.bytes;
@@ -69,7 +71,7 @@ void main() {
 
     test("ourPublicKey must be in keys", () => expect(
       () => MuSigStatefulSigningSession(
-        keys: keys,
+        keys: privs.first.public,
         ourPublicKey: getPubKey(3),
       ),
       throwsArgumentError,
@@ -110,7 +112,7 @@ void main() {
 
       void expectIdenticalValidSigs(Iterable<SchnorrSignature> sigs) {
         expect(
-          sigs.map((sig) => sig.verify(keys.aggregate, hash)),
+          sigs.map((sig) => sig.verify(aggregate, hash)),
           everyElement(true),
         );
         expect(
@@ -131,7 +133,7 @@ void main() {
           () => sessions.first.sign(
             otherNonces: otherNonces,
             hash: Uint8List(hashLen),
-            privKey: getPrivKey(key),
+            privKey: privs[key].privateKey,
           ),
           throwsArgumentError,
         );
@@ -175,7 +177,7 @@ void main() {
             (i) => sessions[i].sign(
               otherNonces: otherNoncesMaps[i],
               hash: hash,
-              privKey: getPrivKey(i),
+              privKey: privs[i].privateKey,
             ),
           );
         });
@@ -184,7 +186,7 @@ void main() {
           () => sessions.first.sign(
             otherNonces: otherNoncesMaps.first,
             hash: hash,
-            privKey: getPrivKey(0),
+            privKey: privs.first.privateKey,
           ),
           throwsStateError,
         ),);
@@ -249,7 +251,7 @@ void main() {
           (i) => sessions[i].sign(
             otherNonces: otherNoncesMaps[i],
             hash: hash,
-            privKey: getPrivKey(i),
+            privKey: privs[i].privateKey,
             adaptor: adaptorScalar.pubkey,
           ),
         );
@@ -262,7 +264,7 @@ void main() {
         ).toList();
 
         expect(
-          adaptorSigs.map((sig) => sig.preSig.verify(keys.aggregate, hash)),
+          adaptorSigs.map((sig) => sig.preSig.verify(aggregate, hash)),
           everyElement(false),
         );
 

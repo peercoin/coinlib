@@ -139,6 +139,10 @@ ECPrivateKey getPrivKey(int i, [bool compressed = true]) => ECPrivateKey(
 ECPublicKey getPubKey(int i, [bool compressed = true])
   => getPrivKey(i, compressed).pubkey;
 
-MuSigPublicKeys getMuSigKeys([bool compressed = true]) => MuSigPublicKeys(
-  Iterable.generate(3, (i) => getPubKey(i, compressed)).toSet(),
+MuSigPrivate getMuSigPrivate(int i, [bool compressed = true]) => MuSigPrivate(
+  getPrivKey(i, compressed),
+  { for (int j = 0; j < 3; j++) if (j != i) getPubKey(j, compressed), },
 );
+
+MuSigPublicKeys getMuSigKeys([bool compressed = true])
+  => getMuSigPrivate(0, compressed).public;
