@@ -3,6 +3,13 @@
 Requires a rebuild of the secp256k1 library as it has moved to the
 secp256k1-coinlib fork.
 
+- Adds MuSig2 support with `MuSigPublicKeys` and `MuSigStatefulSigningSession`.
+- Includes adaptor signature support when using MuSig2 with
+- `SchnorrAdaptorSignature`.
+- Moves to underlying secp256k1-coinlib.
+- Removed dependency to wasm_interop that had a broken js dependency.
+- Fixes `extraEntropy` being ignored for `Secp256k1Base.schnorrSign`.
+
 ## 4.1.0
 
 `CoinSelection` now works for `TaprootKeyInput` and
