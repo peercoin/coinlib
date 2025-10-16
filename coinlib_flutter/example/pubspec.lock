@@ -36,18 +36,17 @@ packages:
   coinlib:
     dependency: transitive
     description:
-      name: coinlib
-      sha256: cf8bf904f49339fd5ccd8c51dbdb099c5a616072507076bab724239d2e34b97e
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.0.0"
+      path: "../../coinlib"
+      relative: true
+    source: path
+    version: "4.1.0"
   coinlib_flutter:
     dependency: "direct main"
     description:
       path: ".."
       relative: true
     source: path
-    version: "4.0.0"
+    version: "5.0.0"
   collection:
     dependency: transitive
     description:
@@ -295,14 +294,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "14.3.1"
-  wasm_interop:
-    dependency: transitive
-    description:
-      name: wasm_interop
-      sha256: b1b378f07a4cf0103c25faf34d9a64d2c3312135b9efb47e0ec116ec3b14e48f
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.1"
 sdks:
   dart: ">=3.8.0-0 <4.0.0"
   flutter: ">=3.18.0-18.0.pre.54"
