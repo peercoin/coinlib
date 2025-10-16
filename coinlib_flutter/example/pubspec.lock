@@ -39,7 +39,7 @@ packages:
       path: "../../coinlib"
       relative: true
     source: path
-    version: "4.1.0"
+    version: "5.0.0"
   coinlib_flutter:
     dependency: "direct main"
     description:
