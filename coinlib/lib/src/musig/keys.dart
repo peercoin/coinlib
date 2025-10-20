@@ -10,7 +10,8 @@ class MuSigPublicKeys {
 
   late final OpaqueMuSigCache _aggCache;
 
-  MuSigPublicKeys._(this.pubKeys, this.aggregate, this._aggCache);
+  MuSigPublicKeys._(Set<ECPublicKey> pubKeys, this.aggregate, this._aggCache)
+    : pubKeys = Set.unmodifiable(pubKeys);
 
   factory MuSigPublicKeys(Set<ECPublicKey> pubKeys) {
 

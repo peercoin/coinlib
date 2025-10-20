@@ -21,6 +21,11 @@ void main() {
       () => expect(() => MuSigPublicKeys({}), throwsArgumentError),
     );
 
+    test("pubKeys is immutable", () {
+      final keySet = getMuSigKeys().pubKeys;
+      expect(() => keySet.remove(keySet.first), throwsA(anything));
+    });
+
     test("aggregation works regardless of format", () {
 
       final compressed = getMuSigKeys(true).aggregate;
