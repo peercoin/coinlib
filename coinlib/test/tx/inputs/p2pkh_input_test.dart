@@ -27,68 +27,61 @@ void main() {
       final noSigScript = Script.fromAsm(pubkeyVec).compiled;
       final sigScript = Script.fromAsm("${der}03 $pubkeyVec").compiled;
 
-      final noSigBytes = Uint8List.fromList([
-        ...prevOutHash,
-        0xef, 0xbe, 0xed, 0xfe,
-        noSigScript.length, ...noSigScript,
-        0xed, 0xfe, 0xef, 0xbe,
-      ]);
+      void expectP2PKHInput(P2PKHInput input, bool hasSig, bool finalSeq) {
 
-      final sigBytes = Uint8List.fromList([
-        ...prevOutHash,
-        0xef, 0xbe, 0xed, 0xfe,
-        sigScript.length, ...sigScript,
-        0xed, 0xfe, 0xef, 0xbe,
-      ]);
+        final script = hasSig ? sigScript : noSigScript;
+        final bytes = Uint8List.fromList([
+          ...prevOutHash,
+          0xef, 0xbe, 0xed, 0xfe,
+          script.length, ...script,
+          finalSeq ? 0xff : 0xfe, 0xff, 0xff, 0xff,
+        ]);
 
-      expectP2PKHInput(P2PKHInput input, bool hasSig) {
+        for (final input in [
+          input, Input.match(RawInput.fromReader(BytesReader(bytes))),
+        ]) {
 
-        expectInput(input);
+          input as P2PKHInput;
 
-        expect(input.publicKey.hex, pubkeyVec);
-        expect(input.complete, hasSig);
-        expect(input.insig, hasSig ? isNotNull : null);
+          expectInput(
+            input,
+            finalSeq
+            ? InputSequence.finalWithoutLocktime
+            : InputSequence.enforceLocktime,
+          );
 
-        final scriptSig = hasSig ? sigScript : noSigScript;
-        expect(input.scriptSig, scriptSig);
-        expect(input.script.match(Script.decompile(scriptSig)), true);
+          expect(input.publicKey.hex, pubkeyVec);
+          expect(input.complete, hasSig);
+          expect(input.insig, hasSig ? isNotNull : null);
 
-        if (hasSig) {
-          expect(bytesToHex(input.insig!.signature.der), validDerSigs[0]);
-          expect(input.insig!.hashType.single, true);
+          expect(input.scriptSig, script);
+          expect(input.script.match(Script.decompile(script)), true);
+
+          if (hasSig) {
+            expect(bytesToHex(input.insig!.signature.der), validDerSigs[0]);
+            expect(input.insig!.hashType.single, true);
+          }
+
+          expect(input.size, bytes.length);
+          expect(input.toBytes(), bytes);
+
         }
 
-        final bytes = hasSig ? sigBytes : noSigBytes;
-        expect(input.size, bytes.length);
-        expect(input.toBytes(), bytes);
-
       }
 
-      final noSig = P2PKHInput(
+      final noSig = P2PKHInput(prevOut: prevOut, publicKey: pk);
+      final withSig = P2PKHInput(prevOut: prevOut, publicKey: pk, insig: insig);
+      final withFinal = P2PKHInput(
         prevOut: prevOut,
-        sequence: sequence,
         publicKey: pk,
+        sequence: InputSequence.finalWithoutLocktime,
       );
 
-      final withSig = P2PKHInput(
-        prevOut: prevOut,
-        sequence: sequence,
-        publicKey: pk,
-        insig: insig,
-      );
-
-      expectP2PKHInput(noSig, false);
-      expectP2PKHInput(withSig, true);
-      expectP2PKHInput(noSig.addSignature(insig), true);
-
-      expectMatched(Uint8List bytes, bool hasSig) {
-        final matched = Input.match(RawInput.fromReader(BytesReader(bytes)));
-        expect(matched, isA<P2PKHInput>());
-        expectP2PKHInput(matched as P2PKHInput, hasSig);
-      }
-
-      expectMatched(noSigBytes, false);
-      expectMatched(sigBytes, true);
+      expectP2PKHInput(noSig, false, false);
+      expectP2PKHInput(withSig, true, false);
+      expectP2PKHInput(noSig.addSignature(insig), true, false);
+      expectP2PKHInput(withFinal, false, true);
+      expectP2PKHInput(withFinal.addSignature(insig), true, true);
 
     });
 
@@ -108,7 +101,6 @@ void main() {
             RawInput(
               prevOut: prevOut,
               scriptSig: Script.fromAsm(asm).compiled,
-              sequence: 0,
             ),
           ),
           null,

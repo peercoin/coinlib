@@ -6,19 +6,23 @@ import 'input_signature.dart';
 import 'p2pkh_input.dart';
 import 'p2sh_multisig_input.dart';
 import 'raw_input.dart';
+import 'sequence.dart';
 import 'witness_input.dart';
 
 /// The base class for all inputs, providing the [Input.match] factory
 /// constructor to determine the appropriate subclass from a [RawInput]
 abstract class Input with Writable {
 
-  static const sequenceFinal = 0xffffffff;
-
   OutPoint get prevOut;
   Uint8List get scriptSig;
-  int get sequence;
+  InputSequence get sequence;
 
-  /// True when the input is fully signed and ready for broadcast
+  /// True when the input is fully signed where it is possible to determine so.
+  ///
+  /// This doesn't mean the input is valid.
+  ///
+  /// [RawInput]s will set this to true as it is not known if they are
+  /// completed.
   bool get complete;
 
   /// The maximum total size when fully signed via the default hash type

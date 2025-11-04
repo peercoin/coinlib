@@ -42,7 +42,7 @@ final class WitnessSignatureHasher extends SignatureHasher with Writable {
     thisInput.prevOut.write(writer);
     writer.writeVarSlice(details.scriptCode.compiled);
     writer.writeUInt64(details.value);
-    writer.writeUInt32(thisInput.sequence);
+    writer.writeUInt32(thisInput.sequence.value);
     writer.writeSlice(hashOutputs);
     writer.writeUInt32(tx.locktime);
     writer.writeUInt32(hashType.value);

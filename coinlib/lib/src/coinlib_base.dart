@@ -54,6 +54,7 @@ export 'package:coinlib/src/tx/inputs/p2sh_multisig_input.dart';
 export 'package:coinlib/src/tx/inputs/p2wpkh_input.dart';
 export 'package:coinlib/src/tx/inputs/pkh_input.dart';
 export 'package:coinlib/src/tx/inputs/raw_input.dart';
+export 'package:coinlib/src/tx/inputs/sequence.dart';
 export 'package:coinlib/src/tx/inputs/taproot_input.dart';
 export 'package:coinlib/src/tx/inputs/taproot_key_input.dart';
 export 'package:coinlib/src/tx/inputs/taproot_script_input.dart';

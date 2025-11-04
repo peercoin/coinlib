@@ -3,8 +3,8 @@ import 'package:coinlib/src/crypto/ecdsa_signature.dart';
 import 'package:coinlib/src/tx/sighash/witness_signature_hasher.dart';
 import 'package:coinlib/src/tx/sign_details.dart';
 import 'package:coinlib/src/tx/transaction.dart';
-import 'input.dart';
 import 'input_signature.dart';
+import 'sequence.dart';
 import 'witness_input.dart';
 
 /// Represents v0 witness program inputs
@@ -13,7 +13,7 @@ abstract class LegacyWitnessInput extends WitnessInput {
   LegacyWitnessInput({
     required super.prevOut,
     required super.witness,
-    super.sequence = Input.sequenceFinal,
+    super.sequence = InputSequence.enforceLocktime,
   });
 
   /// Signs the input given the [details] and [key]. Should throw

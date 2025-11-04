@@ -8,9 +8,9 @@ import 'package:coinlib/src/tx/inputs/taproot_input.dart';
 import 'package:coinlib/src/tx/outpoint.dart';
 import 'package:coinlib/src/tx/sighash/sighash_type.dart';
 import 'package:coinlib/src/tx/sign_details.dart';
-import 'input.dart';
 import 'input_signature.dart';
 import 'raw_input.dart';
+import 'sequence.dart';
 
 /// A [TaprootInput] which spends using the script-path for 0xc0 version
 /// Tapscripts. There is no signing logic and sign() is not implemented.
@@ -29,7 +29,7 @@ class TaprootScriptInput extends TaprootInput {
     required Uint8List controlBlock,
     required this.tapscript,
     List<Uint8List>? stack,
-    super.sequence = Input.sequenceFinal,
+    super.sequence = InputSequence.enforceLocktime,
   }) : super(
     witness: [if (stack != null) ...stack, tapscript.compiled, controlBlock],
   );
@@ -39,7 +39,7 @@ class TaprootScriptInput extends TaprootInput {
     required Taproot taproot,
     required TapLeaf leaf,
     List<Uint8List>? stack,
-    int sequence = Input.sequenceFinal,
+    InputSequence sequence = InputSequence.enforceLocktime,
   }) : this(
     prevOut: prevOut,
     controlBlock: taproot.controlBlockForLeaf(leaf),

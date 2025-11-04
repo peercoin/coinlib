@@ -4,6 +4,7 @@ import 'package:coinlib/src/common/hex.dart';
 import 'package:coinlib/src/common/serial.dart';
 import 'package:coinlib/src/crypto/ec_private_key.dart';
 import 'package:coinlib/src/crypto/hash.dart';
+import 'package:coinlib/src/tx/inputs/sequence.dart';
 import 'package:coinlib/src/tx/inputs/taproot_key_input.dart';
 import 'package:coinlib/src/tx/inputs/taproot_single_script_sig_input.dart';
 import 'inputs/input.dart';
@@ -431,5 +432,16 @@ class Transaction with Writable {
   bool get complete
     => inputs.isNotEmpty && outputs.isNotEmpty
     && inputs.every((input) => input.complete);
+
+  /// True if the locktime of this transaction is enforced.
+  ///
+  /// The locktime is enforced if any input doesn't have
+  /// [InputSequence.finalWithoutLocktime] as the sequence. All inputs must be
+  /// final to disable the locktime.
+  ///
+  /// If there are no inputs, then this is false.
+  bool get locktimeIsEnforced => inputs.any(
+    (input) => input.sequence.locktimeIsEnforced,
+  );
 
 }

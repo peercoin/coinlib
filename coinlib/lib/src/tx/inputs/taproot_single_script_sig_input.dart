@@ -5,9 +5,9 @@ import 'package:coinlib/src/taproot/taproot.dart';
 import 'package:coinlib/src/tx/outpoint.dart';
 import 'package:coinlib/src/tx/sign_details.dart';
 import 'package:coinlib/src/tx/transaction.dart';
-import 'input.dart';
 import 'input_signature.dart';
 import 'raw_input.dart';
+import 'sequence.dart';
 import 'taproot_input.dart';
 import 'taproot_script_input.dart';
 
@@ -53,7 +53,7 @@ class TaprootSingleScriptSigInput extends TaprootInput {
     required Taproot taproot,
     required TapLeafChecksig leaf,
     SchnorrInputSignature? insig,
-    int sequence = Input.sequenceFinal,
+    InputSequence sequence = InputSequence.enforceLocktime,
   }) : this._(
     prevOut: prevOut,
     controlBlock: taproot.controlBlockForLeaf(leaf),
@@ -68,7 +68,7 @@ class TaprootSingleScriptSigInput extends TaprootInput {
     required Taproot taproot,
     required TapLeafChecksig leaf,
     SchnorrInputSignature? insig,
-    int sequence = Input.sequenceFinal,
+    InputSequence sequence = InputSequence.enforceLocktime,
   }) : this._(
     leaf: leaf,
     controlBlock: taproot.controlBlockForLeaf(leaf),

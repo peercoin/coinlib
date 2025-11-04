@@ -73,7 +73,7 @@ final class TaprootSignatureHasher extends SignatureHasher with Writable {
       }
 
       // Always include sequence
-      writer.writeUInt32(thisInput.sequence);
+      writer.writeUInt32(thisInput.sequence.value);
 
     }
 

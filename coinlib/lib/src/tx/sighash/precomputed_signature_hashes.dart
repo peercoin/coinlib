@@ -47,7 +47,7 @@ class PrecomputeHasher<T extends Object> with Writable {
 
   static void _writeSequences(Writer writer, Transaction tx) {
     for (final input in tx.inputs) {
-      writer.writeUInt32(input.sequence);
+      writer.writeUInt32(input.sequence.value);
     }
   }
 

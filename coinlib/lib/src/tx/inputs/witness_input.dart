@@ -1,7 +1,7 @@
 import 'dart:typed_data';
-import 'input.dart';
 import 'raw_input.dart';
 import 'p2wpkh_input.dart';
+import 'sequence.dart';
 import 'taproot_key_input.dart';
 import 'taproot_script_input.dart';
 
@@ -13,7 +13,7 @@ class WitnessInput extends RawInput {
   WitnessInput({
     required super.prevOut,
     required List<Uint8List> witness,
-    super.sequence = Input.sequenceFinal,
+    super.sequence = InputSequence.enforceLocktime,
   }) : witness = List.unmodifiable(witness), super(scriptSig: Uint8List(0));
 
   /// Matches a [raw] input with witness data to a corresponding [WitnessInput]

@@ -4,6 +4,7 @@ import 'package:coinlib/src/crypto/hash.dart';
 import 'package:coinlib/src/scripts/operations.dart';
 import 'package:coinlib/src/scripts/script.dart';
 import 'package:coinlib/src/tx/inputs/raw_input.dart';
+import 'package:coinlib/src/tx/inputs/sequence.dart';
 import 'package:coinlib/src/tx/output.dart';
 import 'package:coinlib/src/tx/sign_details.dart';
 import 'package:coinlib/src/tx/transaction.dart';
@@ -48,7 +49,9 @@ final class LegacySignatureHasher extends SignatureHasher {
             // and blank scripts for all the others
             scriptSig: isThisInput ? correctedScriptSig : Uint8List(0),
             // Make sequence 0 for other inputs unless using SIGHASH_ALL
-            sequence: isThisInput || hashType.all ? input.sequence : 0,
+            sequence: isThisInput || hashType.all
+              ? input.sequence
+              : InputSequence.fromValue(0),
           ),
         );
       }

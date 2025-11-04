@@ -348,7 +348,9 @@ void main() {
 
         final tx = Transaction(
           inputs: prevTxIds.map((txid) => P2PKHInput(
-              prevOut: OutPoint.fromHex(txid, 1), publicKey: keyVec.publicObj,
+              prevOut: OutPoint.fromHex(txid, 1),
+              publicKey: keyVec.publicObj,
+              sequence: InputSequence.finalWithoutLocktime,
             ),
           ),
           outputs: [exampleOutput],
@@ -440,10 +442,12 @@ void main() {
           P2PKHInput(
             prevOut: OutPoint.fromHex(prevHashHex, 1),
             publicKey: keyVec.publicObj,
+            sequence: InputSequence.finalWithoutLocktime,
           ),
           P2WPKHInput(
             prevOut: OutPoint.fromHex(prevHashHex, 2),
             publicKey: keyVec.publicObj,
+            sequence: InputSequence.finalWithoutLocktime,
           ),
         ],
         outputs: [exampleOutput],
@@ -482,12 +486,14 @@ void main() {
               "ec68cf7fa9599c96b87c176c9d2fa0ee2fcc8a0f3469b7da5b637963e67470c1",
               1,
             ),
+            sequence: InputSequence.finalWithoutLocktime,
           ),
           TaprootKeyInput(
             prevOut: OutPoint.fromHex(
               "cada1d0756465151d8fe7195f5702d48ff5e8f56b5d19ecd7815c8e82687211e",
               1,
             ),
+            sequence: InputSequence.finalWithoutLocktime,
           ),
         ],
         outputs: [exampleOutput],
@@ -566,6 +572,7 @@ void main() {
             ),
             taproot: taproot,
             leaf: secondLeaf,
+            sequence: InputSequence.finalWithoutLocktime,
           ),
         ],
         outputs: [exampleOutput],
@@ -632,10 +639,12 @@ void main() {
           P2PKHInput(
             prevOut: OutPoint.fromHex(prevHashHex, 1),
             publicKey: pubkeys[0],
+            sequence: InputSequence.finalWithoutLocktime,
           ),
           P2SHMultisigInput(
             prevOut: OutPoint.fromHex(prevHashHex, 2),
             program: multisig,
+            sequence: InputSequence.finalWithoutLocktime,
           ),
         ],
         outputs: [exampleOutput, exampleOutput],
@@ -763,17 +772,28 @@ void main() {
           // Legacy inputs
           ...List.generate(
             4,
-            (i) => P2PKHInput(prevOut: examplePrevOut, publicKey: keyVec.publicObj),
+            (i) => P2PKHInput(
+              prevOut: examplePrevOut,
+              publicKey: keyVec.publicObj,
+              sequence: InputSequence.finalWithoutLocktime,
+            ),
           ),
           // Witness inputs
           ...List.generate(
             3,
-            (i) => P2WPKHInput(prevOut: examplePrevOut, publicKey: keyVec.publicObj),
+            (i) => P2WPKHInput(
+              prevOut: examplePrevOut,
+              publicKey: keyVec.publicObj,
+              sequence: InputSequence.finalWithoutLocktime,
+            ),
           ),
           // Taproot inputs
           ...List.generate(
             3,
-            (i) => TaprootKeyInput(prevOut: examplePrevOut),
+            (i) => TaprootKeyInput(
+              prevOut: examplePrevOut,
+              sequence: InputSequence.finalWithoutLocktime,
+            ),
           ),
         ],
         outputs: [exampleOutput],
@@ -831,6 +851,7 @@ void main() {
           RawInput(
             prevOut: examplePrevOut,
             scriptSig: hexToBytes("00"),
+            sequence: InputSequence.finalWithoutLocktime,
           ),
           1,
         ),
@@ -841,11 +862,7 @@ void main() {
       // sequence changes
       expectComplete(
         tx.replaceInput(
-          RawInput(
-            prevOut: examplePrevOut,
-            scriptSig: hexToBytes("00"),
-            sequence: 0,
-          ),
+          RawInput(prevOut: examplePrevOut, scriptSig: hexToBytes("00")),
           1,
         ),
         [
@@ -921,6 +938,7 @@ void main() {
       final apoInput = TaprootSingleScriptSigInput.anyPrevOut(
         taproot: taprootApo,
         leaf: leafApo,
+        sequence: InputSequence.finalWithoutLocktime,
       );
 
       final tx = Transaction(
@@ -933,6 +951,7 @@ void main() {
             ),
             taproot: taprootRegular,
             leaf: leafRegular,
+            sequence: InputSequence.finalWithoutLocktime,
           ),
           // ANYPREVOUT
           apoInput,
@@ -942,6 +961,7 @@ void main() {
           TaprootSingleScriptSigInput.anyPrevOut(
             taproot: taprootApoInternal,
             leaf: TapLeafChecksig.apoInternal,
+            sequence: InputSequence.finalWithoutLocktime,
           ),
         ],
         outputs: [exampleOutput],
