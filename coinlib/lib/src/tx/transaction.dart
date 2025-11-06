@@ -7,6 +7,7 @@ import 'package:coinlib/src/crypto/hash.dart';
 import 'package:coinlib/src/tx/inputs/sequence.dart';
 import 'package:coinlib/src/tx/inputs/taproot_key_input.dart';
 import 'package:coinlib/src/tx/inputs/taproot_single_script_sig_input.dart';
+import 'package:coinlib/src/tx/locktime.dart';
 import 'inputs/input.dart';
 import 'inputs/input_signature.dart';
 import 'inputs/legacy_input.dart';
@@ -45,22 +46,24 @@ class Transaction with Writable {
   final int version;
   final List<Input> inputs;
   final List<Output> outputs;
-  final int locktime;
+  final Locktime locktime;
 
   /// Constructs a transaction with the given [inputs] and [outputs].
   /// [TransactionTooLarge] will be thrown if the resulting transction exceeds
   /// [maxSize] (1MB).
+  ///
+  /// To follow the behaviour of the reference Peercoin client, the [locktime]
+  /// can be set to the current tip block height via [BlockHeightLocktime].
   Transaction({
     this.version = currentVersion,
     required Iterable<Input> inputs,
     required Iterable<Output> outputs,
-    this.locktime = 0,
+    this.locktime = Locktime.zero,
   })
   : inputs = List.unmodifiable(inputs),
   outputs = List.unmodifiable(outputs)
   {
     checkInt32(version);
-    checkUint32(locktime);
     if (size > maxSize) throw TransactionTooLarge();
   }
 
@@ -103,7 +106,7 @@ class Transaction with Writable {
       version: version,
       inputs: inputs,
       outputs: outputs,
-      locktime: locktime,
+      locktime: Locktime(locktime),
     );
 
   }
@@ -182,7 +185,7 @@ class Transaction with Writable {
       }
     }
 
-    writer.writeUInt32(locktime);
+    writer.writeUInt32(locktime.value);
 
   }
 
@@ -443,5 +446,16 @@ class Transaction with Writable {
   bool get locktimeIsEnforced => inputs.any(
     (input) => input.sequence.locktimeIsEnforced,
   );
+
+  /// Given the [medianTime] of the previous 11 blocks and the current
+  /// [blockHeight], returns true if the transaction is unlocked and available
+  /// for inclusion into a block.
+  ///
+  /// This returns true if [locktimeIsEnforced] is false and otherwise checks
+  /// the locktime.
+  bool isUnlocked({
+    required DateTime medianTime,
+    required int blockHeight,
+  }) => !locktimeIsEnforced || locktime.isUnlocked(medianTime, blockHeight);
 
 }

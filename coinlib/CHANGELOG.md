@@ -10,6 +10,9 @@ secp256k1-coinlib fork.
     `0xfffffffe` by default and enforce locktimes.
 - Adds `locktimeIsEnforced` to `Transaction` to determine if the locktime is in
     effect.
+- Adds `Locktime` abstractions for transactions. Transactions have
+    `.isUnlocked` to determine if the transaction is available for block
+    inclusion.
 - Moves to underlying secp256k1-coinlib.
 - Removed dependency to wasm_interop that had a broken js dependency.
 - Fixes `extraEntropy` being ignored for `Secp256k1Base.schnorrSign`.

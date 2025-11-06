@@ -312,7 +312,7 @@ final validTxVecs = [
       version: 3,
       inputs: [],
       outputs: [exampleOutput],
-      locktime: 0x01020304,
+      locktime: Locktime(0x01020304),
     ),
     hashHex: "586cf7ffc988e620d69c4164f0eeff7a9ff89a04f6a13a7b9297d1819f4d1730",
     isWitness: false,

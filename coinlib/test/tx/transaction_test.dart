@@ -35,7 +35,7 @@ void main() {
     expectFullVector(Transaction tx, TxVector vec) {
       expectVectorWithoutObj(tx, vec);
       expect(tx.version, vec.obj.version);
-      expect(tx.locktime, vec.obj.locktime);
+      expect(tx.locktime.value, vec.obj.locktime.value);
       // Simplify input and output checking by converting both to hex
       expect(mapToHex(tx.inputs), mapToHex(vec.obj.inputs));
       expect(mapToHex(tx.outputs), mapToHex(vec.obj.outputs));
@@ -1053,6 +1053,38 @@ void main() {
         completeTx.replaceInput(newIn, 0),
         [false, true, true, true],
       );
+
+    });
+
+    test(".isUnlocked", () {
+
+      final now = DateTime.now();
+      final past = now.subtract(Duration(seconds: 1));
+
+      void expectIsUnlocked(bool enforced, DateTime time, bool unlocked) {
+
+        final tx = Transaction(
+          inputs: [
+            P2PKHInput(
+              prevOut: examplePrevOut,
+              publicKey: examplePubkey,
+              sequence: enforced
+              ? InputSequence.enforceLocktime
+              : InputSequence.finalWithoutLocktime,
+            ),
+          ],
+          outputs: [exampleOutput],
+          locktime: MedianTimeLocktime(now),
+        );
+
+        expect(tx.isUnlocked(medianTime: time, blockHeight: 0), unlocked);
+
+      }
+
+      expectIsUnlocked(true, now, true);
+      expectIsUnlocked(true, past, false);
+      expectIsUnlocked(false, now, true);
+      expectIsUnlocked(false, past, true);
 
     });
 

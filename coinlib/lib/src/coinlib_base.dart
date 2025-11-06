@@ -42,6 +42,7 @@ export 'package:coinlib/src/taproot/taproot.dart';
 export 'package:coinlib/src/tx/coin_selection.dart';
 export 'package:coinlib/src/tx/transaction.dart';
 export 'package:coinlib/src/tx/sign_details.dart';
+export 'package:coinlib/src/tx/locktime.dart';
 export 'package:coinlib/src/tx/outpoint.dart';
 export 'package:coinlib/src/tx/output.dart';
 
