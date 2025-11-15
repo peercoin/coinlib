@@ -1,5 +1,8 @@
 import 'dart:typed_data';
 import 'package:coinlib/src/common/hex.dart';
+import 'package:coinlib/src/crypto/ec_compressed_public_key.dart';
+import 'package:coinlib/src/crypto/ec_public_key.dart';
+import 'package:coinlib/src/tx/locktime.dart';
 
 import 'checks.dart';
 
@@ -91,6 +94,27 @@ class BytesReader extends _ReadWriteBase {
   List<Uint8List> readVector()
     => List<Uint8List>.generate(readVarInt().toInt(), (i) => readVarSlice());
 
+  List<T> readListWithFunc<T>(T Function() read)
+    => List<T>.generate(readVarInt().toInt(), (_) => read());
+
+  /// Reads a list of public keys that are in compressed format.
+  List<ECPublicKey> readPubKeyVector() => readListWithFunc(
+    () => ECPublicKey(readSlice(33)),
+  );
+
+  Map<K, V> readMap<K, V>(K Function() readKey, V Function() readValue)
+    => Map.fromEntries(
+      Iterable.generate(
+        readVarInt().toInt(),
+        (_) => MapEntry(readKey(), readValue()),
+      ),
+    );
+
+  Map<ECPublicKey, V> readPubKeyMap<V>(V Function() readValue)
+    => readMap(() => ECPublicKey(readSlice(33)), readValue);
+
+  Locktime readLocktime() => Locktime(readUInt32());
+
 }
 
 /// Methods to handle the writing of data
@@ -119,6 +143,56 @@ mixin Writer {
       writeVarSlice(bytes);
     }
   }
+
+  /// Writes elements from the [list] using the [write] function on each
+  /// element.
+  void writeListWithFunc<T>(List<T> list, void Function(T) write) {
+    writeVarInt(BigInt.from(list.length));
+    for (final el in list) {
+      write(el);
+    }
+  }
+
+  /// Writes a list of public keys. They will be converted to compressed format
+  /// if necessary.
+  void writePubKeyVector(List<ECPublicKey> keys) => writeListWithFunc(
+    keys, (key) => writeSlice(ECCompressedPublicKey.fromPubkey(key).data),
+  );
+
+  /// Writes a map serialising the keys and values using [writeKey] and
+  /// [writeValue].
+  void writeMap<K, V>(
+    Map<K, V> map,
+    void Function(K) writeKey,
+    void Function(V) writeValue,
+  ) {
+    writeVarInt(BigInt.from(map.length));
+    for (final entry in map.entries) {
+      writeKey(entry.key);
+      writeValue(entry.value);
+    }
+  }
+
+  /// Writes a map using public keys as map keys which will be converted into
+  /// compressed format if necessary.
+  void writePubKeyMap<V>(
+    Map<ECPublicKey, V> map,
+    void Function(V) writeValue,
+  ) => writeMap(
+    map,
+    (key) => writeSlice(ECCompressedPublicKey.fromPubkey(key).data),
+    writeValue,
+  );
+
+  /// Writes a vector of all the writable elements
+  void writeWritableVector(List<Writable> list) {
+    writeVarInt(BigInt.from(list.length));
+    for (final el in list) {
+      el.write(this);
+    }
+  }
+
+  void writeLocktime(Locktime locktime) => writeUInt32(locktime.value);
 
 }
 

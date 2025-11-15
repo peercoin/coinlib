@@ -169,15 +169,8 @@ class Transaction with Writable {
       writer.writeUInt8(1); // Flag
     }
 
-    writer.writeVarInt(BigInt.from(inputs.length));
-    for (final input in inputs) {
-      input.write(writer);
-    }
-
-    writer.writeVarInt(BigInt.from(outputs.length));
-    for (final output in outputs) {
-      output.write(writer);
-    }
+    writer.writeWritableVector(inputs);
+    writer.writeWritableVector(outputs);
 
     if (isWitness) {
       for (final input in inputs) {
@@ -185,7 +178,7 @@ class Transaction with Writable {
       }
     }
 
-    writer.writeUInt32(locktime.value);
+    writer.writeLocktime(locktime);
 
   }
 

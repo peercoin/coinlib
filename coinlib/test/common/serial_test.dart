@@ -60,7 +60,6 @@ class WritableTestTx with Writable {
 
 void main() {
 
-
   group("BytesReader", () {
 
     test("can read tx", () {
