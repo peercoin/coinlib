@@ -278,6 +278,8 @@ void main() {
       // Should work OK twice
       final obj = WritableTestTx();
       for (int i = 0; i < 2; i++) {
+        // Should copy bytes with no mutation to underlying
+        obj.toBytes()[0] = 0xff;
         expect(obj.toBytes(), expData);
         expect(obj.toHex(), bytesToHex(expData));
         expect(obj.size, expSize);

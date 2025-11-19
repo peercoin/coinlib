@@ -1,11 +1,15 @@
 import 'dart:typed_data';
+import 'package:coinlib/src/common/bytes.dart';
 import 'package:coinlib/src/common/hex.dart';
 import 'package:coinlib/src/common/serial.dart';
 import 'package:coinlib/src/crypto/ec_public_key.dart';
+import 'package:coinlib/src/crypto/hash.dart';
+import 'package:coinlib/src/musig/library.dart';
 import 'package:coinlib/src/network.dart';
 import 'package:coinlib/src/tx/locktime.dart';
 import 'package:coinlib/src/tx/output.dart';
 import 'package:coinlib/src/tx/transaction.dart';
+import 'package:collection/collection.dart';
 
 class InvalidDLCTerms implements Exception {
 
@@ -21,12 +25,49 @@ class InvalidDLCTerms implements Exception {
     : this("Contains output value less than min of $min");
   InvalidDLCTerms.smallFunding(BigInt min)
     : this("Contains funding value less than min of $min");
+  InvalidDLCTerms.notOrdered()
+    : this("The input bytes contain out-of-order keys");
 
 }
 
-BigInt addBigInts(Iterable<BigInt> ints) => ints.fold(
+BigInt _addBigInts(Iterable<BigInt> ints) => ints.fold(
   BigInt.zero, (a, b) => a+b,
 );
+
+Map<ECPublicKey, T> _xOnlyUnmodifiableMap<T>(Map<ECPublicKey, T> map)
+  => Map.unmodifiable(map.map((key, v) => MapEntry(key.xonly, v)));
+
+Map<ECPublicKey, T> _readPubKeyMap<T>(
+  BytesReader reader,
+  T Function() readValue,
+) => Map.fromEntries(
+  Iterable.generate(
+    reader.readVarInt().toInt(),
+    (_) => MapEntry(
+      ECPublicKey.fromXOnly(reader.readSlice(32)),
+      readValue(),
+    ),
+  ),
+);
+
+void _writeOrderedPubkeyMap<T>(
+  Writer writer,
+  Map<ECPublicKey, T> map,
+  void Function(T) writeValue,
+) {
+
+  writer.writeVarInt(BigInt.from(map.length));
+
+  final orderedEntries = map.entries
+    .map((entry) => MapEntry(entry.key.x, entry.value))
+    .sortedByCompare((entry) => entry.key, compareBytes);
+
+  for (final entry in orderedEntries) {
+    writer.writeSlice(entry.key);
+    writeValue(entry.value);
+  }
+
+}
 
 /// A CET will pay to the [outputs] with the value of each output evenly reduced
 /// to cover the transaction fee.
@@ -53,7 +94,7 @@ class CETOutputs {
     }
   }
 
-  BigInt get totalValue => addBigInts(outputs.map((out) => out.value));
+  BigInt get totalValue => _addBigInts(outputs.map((out) => out.value));
 
 }
 
@@ -72,8 +113,8 @@ class DLCTerms with Writable {
   /// The version of the protocol is currently 1
   static final int version = 1;
 
-  /// A list of participants that must sign all CETs and RTs for the DLCs.
-  final List<ECPublicKey> participants;
+  /// A set of participants that must sign all CETs and RTs for the DLCs.
+  final Set<ECPublicKey> participants;
 
   /// How much each participant is expected to fund the DLC. A public key may
   /// refer to a funder outside of [participants] if they are not expected to
@@ -105,17 +146,18 @@ class DLCTerms with Writable {
   /// broadcast of a CET, but this is not checked.
   final Locktime refundLocktime;
 
-  /// May throw [InvalidDLCTerms].
+  /// All [ECPublicKey]s will be coerced into x-only public keys. May throw
+  /// [InvalidDLCTerms].
   DLCTerms({
-    required List<ECPublicKey> participants,
+    required Set<ECPublicKey> participants,
     required Map<ECPublicKey, BigInt> fundAmounts,
     required Map<ECPublicKey, CETOutputs> outcomes,
     required this.refundLocktime,
     required Network network,
   }) :
-    participants = List.unmodifiable(participants),
-    fundAmounts = Map.unmodifiable(fundAmounts),
-    outcomes = Map.unmodifiable(outcomes) {
+    participants = Set.unmodifiable(participants.map((key) => key.xonly)),
+    fundAmounts = _xOnlyUnmodifiableMap(fundAmounts),
+    outcomes = _xOnlyUnmodifiableMap(outcomes) {
 
     // There should not be any funding amount for a participant which is under
     // the minimum output
@@ -124,7 +166,7 @@ class DLCTerms with Writable {
     }
 
     // The outcome output amounts must add up to the total funded amount
-    final totalToFund = addBigInts(fundAmounts.values);
+    final totalToFund = _addBigInts(fundAmounts.values);
     if (
       outcomes.values.any(
         (outcome) => outcome.totalValue.compareTo(totalToFund) != 0,
@@ -146,10 +188,14 @@ class DLCTerms with Writable {
       throw InvalidDLCTerms.badVersion(version);
     }
 
-    return DLCTerms(
-      participants: reader.readPubKeyVector(),
-      fundAmounts: reader.readPubKeyMap(() => reader.readVarInt()),
-      outcomes: reader.readPubKeyMap(
+    final terms = DLCTerms(
+      participants: Iterable.generate(
+        reader.readVarInt().toInt(),
+        (_) => ECPublicKey.fromXOnly(reader.readSlice(32)),
+      ).toSet(),
+      fundAmounts: _readPubKeyMap(reader, () => reader.readVarInt()),
+      outcomes: _readPubKeyMap(
+        reader,
         () => CETOutputs(
           reader.readListWithFunc(() => Output.fromReader(reader)),
           network,
@@ -158,6 +204,15 @@ class DLCTerms with Writable {
       refundLocktime: reader.readLocktime(),
       network: network,
     );
+
+    // Check public keys were ordered correctly
+    // This is not the optimal way to do this but is simple
+    final inBytes = reader.bytes.buffer.asUint8List();
+    if (compareBytes(inBytes, terms.toBytes()) != 0) {
+      throw InvalidDLCTerms.notOrdered();
+    }
+
+    return terms;
 
   }
 
@@ -168,19 +223,43 @@ class DLCTerms with Writable {
     => DLCTerms.fromBytes(hexToBytes(hex), network);
 
   @override
-  /// The public keys will be written as compressed public keys
   void write(Writer writer) {
+
     writer.writeUInt16(version);
-    writer.writePubKeyVector(participants);
-    writer.writePubKeyMap(
+
+    // Sort the public keys ensuring the written set is always the same
+    writer.writeVarInt(BigInt.from(participants.length));
+    for (final key in participants.map((key) => key.x).sorted(compareBytes)) {
+      writer.writeSlice(key);
+    }
+
+    _writeOrderedPubkeyMap(
+      writer,
       fundAmounts,
-      (amount) => writer.writeVarInt(amount),
+      (amt) => writer.writeVarInt(amt),
     );
-    writer.writePubKeyMap(
+
+    _writeOrderedPubkeyMap(
+      writer,
       outcomes,
       (outputs) => writer.writeWritableVector(outputs.outputs),
     );
+
     writer.writeLocktime(refundLocktime);
+
   }
+
+  // Use a tagged hasher to avoid potential conflicts that could lead to key
+  // reuse
+  static final _dlcKeyTweakHash = getTaggedHasher("CoinlibDLCKeyTweak");
+  Uint8List? _tweakHashCache;
+
+  /// Obtains the tweaked MuSig2 aggregate key for this DLC. The key is
+  /// aggregated from the [participants] and then tweaked from the [DLCTerms]
+  /// data to prevent key-reuse across multiple DLCs in the event that
+  /// participants re-use their individual keys.
+  MuSigPublicKeys get musig => MuSigPublicKeys(participants).tweak(
+    _tweakHashCache ??= _dlcKeyTweakHash(toBytes()),
+  );
 
 }

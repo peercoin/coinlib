@@ -1,9 +1,6 @@
 import 'dart:typed_data';
 import 'package:coinlib/src/common/hex.dart';
-import 'package:coinlib/src/crypto/ec_compressed_public_key.dart';
-import 'package:coinlib/src/crypto/ec_public_key.dart';
 import 'package:coinlib/src/tx/locktime.dart';
-
 import 'checks.dart';
 
 /// Thrown when attempting to read or write beyond the boundary of data
@@ -97,22 +94,6 @@ class BytesReader extends _ReadWriteBase {
   List<T> readListWithFunc<T>(T Function() read)
     => List<T>.generate(readVarInt().toInt(), (_) => read());
 
-  /// Reads a list of public keys that are in compressed format.
-  List<ECPublicKey> readPubKeyVector() => readListWithFunc(
-    () => ECPublicKey(readSlice(33)),
-  );
-
-  Map<K, V> readMap<K, V>(K Function() readKey, V Function() readValue)
-    => Map.fromEntries(
-      Iterable.generate(
-        readVarInt().toInt(),
-        (_) => MapEntry(readKey(), readValue()),
-      ),
-    );
-
-  Map<ECPublicKey, V> readPubKeyMap<V>(V Function() readValue)
-    => readMap(() => ECPublicKey(readSlice(33)), readValue);
-
   Locktime readLocktime() => Locktime(readUInt32());
 
 }
@@ -152,37 +133,6 @@ mixin Writer {
       write(el);
     }
   }
-
-  /// Writes a list of public keys. They will be converted to compressed format
-  /// if necessary.
-  void writePubKeyVector(List<ECPublicKey> keys) => writeListWithFunc(
-    keys, (key) => writeSlice(ECCompressedPublicKey.fromPubkey(key).data),
-  );
-
-  /// Writes a map serialising the keys and values using [writeKey] and
-  /// [writeValue].
-  void writeMap<K, V>(
-    Map<K, V> map,
-    void Function(K) writeKey,
-    void Function(V) writeValue,
-  ) {
-    writeVarInt(BigInt.from(map.length));
-    for (final entry in map.entries) {
-      writeKey(entry.key);
-      writeValue(entry.value);
-    }
-  }
-
-  /// Writes a map using public keys as map keys which will be converted into
-  /// compressed format if necessary.
-  void writePubKeyMap<V>(
-    Map<ECPublicKey, V> map,
-    void Function(V) writeValue,
-  ) => writeMap(
-    map,
-    (key) => writeSlice(ECCompressedPublicKey.fromPubkey(key).data),
-    writeValue,
-  );
 
   /// Writes a vector of all the writable elements
   void writeWritableVector(List<Writable> list) {
@@ -316,14 +266,19 @@ mixin Writable {
   /// Override to write data into [writer]
   void write(Writer writer);
 
-  /// Obtains a cached [Uint8List] with data serialized for this object
+  /// Obtains a copy of a [Uint8List] with data serialized for this
+  /// object. The serialisation is cached allowing this to be called multiple
+  /// times without writing from the object each time.
   Uint8List toBytes() {
-    if (_cache != null) return _cache!;
-    final bytes = Uint8List(size);
-    final writer = BytesWriter(bytes);
-    write(writer);
-    _sizeCache = bytes.length;
-    return _cache = bytes;
+
+    if (_cache == null) {
+      _cache = Uint8List(size);
+      write(BytesWriter(_cache!));
+      _sizeCache = _cache!.length;
+    }
+
+    return Uint8List.fromList(_cache!);
+
   }
 
   String toHex() => bytesToHex(toBytes());

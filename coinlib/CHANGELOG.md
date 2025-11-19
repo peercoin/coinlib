@@ -15,6 +15,7 @@ secp256k1-coinlib fork.
     inclusion.
 - Moves to underlying secp256k1-coinlib.
 - Removed dependency to wasm_interop that had a broken js dependency.
+- `Writable.toBytes()` returns a copy of the cached bytes to avoid mutation.
 - Fixes `extraEntropy` being ignored for `Secp256k1Base.schnorrSign`.
 
 ## 4.1.0

@@ -5,7 +5,6 @@ import 'package:coinlib/src/crypto/ec_private_key.dart';
 import 'package:coinlib/src/crypto/ec_public_key.dart';
 import 'package:coinlib/src/crypto/hash.dart';
 import 'package:coinlib/src/scripts/script.dart';
-import 'package:collection/collection.dart';
 
 /// This class encapsulates the construction of Taproot tweaked keys given an
 /// internal key and MAST consisting of Tapscript leaves constructed with
@@ -135,16 +134,7 @@ class TapBranch implements TapNode {
 
   // Used to determine which hash should be encoded first. The smallest hash
   // should be first.
-  bool _leftFirst() {
-
-    for (final pair in IterableZip([l.hash, r.hash])) {
-      if (pair[0] < pair[1]) return true;
-      if (pair[0] > pair[1]) return false;
-    }
-
-    return true;
-
-  }
+  bool _leftFirst() => compareBytes(l.hash, r.hash) <= 0;
 
   Uint8List? _hashCache;
   @override
