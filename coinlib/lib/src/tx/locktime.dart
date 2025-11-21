@@ -40,6 +40,11 @@ sealed class Locktime {
     ? value <= blockHeight
     : (this as MedianTimeLocktime).time.compareTo(medianTime) <= 0;
 
+  /// True if this [Locktime] is the same type as the [other] locktime and comes
+  /// before it.
+  bool isDefinitelyBefore(Locktime other)
+    => value < other.value && runtimeType == other.runtimeType;
+
 }
 
 class BlockHeightLocktime extends Locktime {

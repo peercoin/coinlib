@@ -76,4 +76,25 @@ void main() {
 
   });
 
+  test(".isDefinitelyBefore", () {
+
+    final lowTime = MedianTimeLocktime(earliest);
+    final highTime = MedianTimeLocktime(earliest.add(second));
+    final lowBlock = BlockHeightLocktime(1);
+    final highBlock = BlockHeightLocktime(2);
+
+    void expectBefores(Locktime locktime, bool time, bool block) {
+      expect(locktime.isDefinitelyBefore(lowTime), false);
+      expect(locktime.isDefinitelyBefore(highTime), time);
+      expect(locktime.isDefinitelyBefore(lowBlock), false);
+      expect(locktime.isDefinitelyBefore(highBlock), block);
+    }
+
+    expectBefores(lowTime, true, false);
+    expectBefores(highTime, false, false);
+    expectBefores(lowBlock, false, true);
+    expectBefores(highBlock, false, false);
+
+  });
+
 }

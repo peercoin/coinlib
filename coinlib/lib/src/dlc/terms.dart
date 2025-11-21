@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:coinlib/src/common/bigints.dart';
 import 'package:coinlib/src/common/bytes.dart';
 import 'package:coinlib/src/common/hex.dart';
 import 'package:coinlib/src/common/serial.dart';
@@ -6,33 +7,13 @@ import 'package:coinlib/src/crypto/ec_public_key.dart';
 import 'package:coinlib/src/crypto/hash.dart';
 import 'package:coinlib/src/musig/library.dart';
 import 'package:coinlib/src/network.dart';
+import 'package:coinlib/src/taproot/leaves.dart';
+import 'package:coinlib/src/taproot/taproot.dart';
 import 'package:coinlib/src/tx/locktime.dart';
-import 'package:coinlib/src/tx/output.dart';
 import 'package:coinlib/src/tx/transaction.dart';
 import 'package:collection/collection.dart';
-
-class InvalidDLCTerms implements Exception {
-
-  final String message;
-
-  InvalidDLCTerms(this.message);
-  InvalidDLCTerms.badOutcomeMatch()
-    : this("Contains outcome output amounts not matching the funded amount");
-  InvalidDLCTerms.badVersion(int v)
-    : this("Version $v isn't allowed. Only v1 is supported.");
-  InvalidDLCTerms.noOutputs() : this("CETOutputs have no outputs");
-  InvalidDLCTerms.smallOutput(BigInt min)
-    : this("Contains output value less than min of $min");
-  InvalidDLCTerms.smallFunding(BigInt min)
-    : this("Contains funding value less than min of $min");
-  InvalidDLCTerms.notOrdered()
-    : this("The input bytes contain out-of-order keys");
-
-}
-
-BigInt _addBigInts(Iterable<BigInt> ints) => ints.fold(
-  BigInt.zero, (a, b) => a+b,
-);
+import 'outcome.dart';
+import 'errors.dart';
 
 Map<ECPublicKey, T> _xOnlyUnmodifiableMap<T>(Map<ECPublicKey, T> map)
   => Map.unmodifiable(map.map((key, v) => MapEntry(key.xonly, v)));
@@ -69,35 +50,6 @@ void _writeOrderedPubkeyMap<T>(
 
 }
 
-/// A CET will pay to the [outputs] with the value of each output evenly reduced
-/// to cover the transaction fee.
-class CETOutputs {
-
-  /// The outputs to be included in the CET of this outcome. The values must
-  /// add up to the amounts being funded by the participants in
-  /// [DLCTerms.fundAmounts].
-  ///
-  /// The [Output.value] for each output will have an equal share of the
-  /// transaction fee removed when the transaction is constructed. When doing
-  /// this, if any of the outputs fall below the dust amount, they will be
-  /// removed first.
-  final List<Output> outputs;
-
-  /// Requires that the output values are at least [Network.minOutput] or
-  /// [InvalidDLCTerms] may be thrown.
-  CETOutputs(this.outputs, Network network) {
-    if (outputs.isEmpty) {
-      throw InvalidDLCTerms.noOutputs();
-    }
-    if (outputs.any((out) => out.value.compareTo(network.minOutput) < 0)) {
-      throw InvalidDLCTerms.smallOutput(network.minOutput);
-    }
-  }
-
-  BigInt get totalValue => _addBigInts(outputs.map((out) => out.value));
-
-}
-
 /// Specifies the terms of a DLC contract to be agreed upon by all
 /// [participants].
 ///
@@ -124,7 +76,7 @@ class DLCTerms with Writable {
   /// contribution to the Funding Transaction fee in excess of these amounts.
   final Map<ECPublicKey, BigInt> fundAmounts;
 
-  /// Maps oracle adaptor points to [CETOutputs] that contain the output
+  /// Maps oracle adaptor points to [CETOutcome] that contain the output
   /// information to include in Contract Execution Transactions.
   ///
   /// The points can be arbitrarily announced by the oracle in association with
@@ -137,7 +89,7 @@ class DLCTerms with Writable {
   /// computation of multiple adaptor points for multiple outcome messages given
   /// the R and P points. coinlib doesn't provide an abstraction for
   /// constructing adaptor points via signatures this way.
-  final Map<ECPublicKey, CETOutputs> outcomes;
+  final Map<ECPublicKey, CETOutcome> outcomes;
 
   /// The [Transaction.locktime] to be used in the Refund Transaction where
   /// participants may regain access to funds.
@@ -151,7 +103,7 @@ class DLCTerms with Writable {
   DLCTerms({
     required Set<ECPublicKey> participants,
     required Map<ECPublicKey, BigInt> fundAmounts,
-    required Map<ECPublicKey, CETOutputs> outcomes,
+    required Map<ECPublicKey, CETOutcome> outcomes,
     required this.refundLocktime,
     required Network network,
   }) :
@@ -166,13 +118,21 @@ class DLCTerms with Writable {
     }
 
     // The outcome output amounts must add up to the total funded amount
-    final totalToFund = _addBigInts(fundAmounts.values);
+    final totalToFund = addBigInts(fundAmounts.values);
     if (
       outcomes.values.any(
         (outcome) => outcome.totalValue.compareTo(totalToFund) != 0,
       )
     ) {
       throw InvalidDLCTerms.badOutcomeMatch();
+    }
+
+    if (
+      outcomes.values.any(
+        (outcome) => !outcome.locktime.isDefinitelyBefore(refundLocktime),
+      )
+    ) {
+      throw InvalidDLCTerms.cetLocktimeAfterRf();
     }
 
   }
@@ -196,10 +156,7 @@ class DLCTerms with Writable {
       fundAmounts: _readPubKeyMap(reader, () => reader.readVarInt()),
       outcomes: _readPubKeyMap(
         reader,
-        () => CETOutputs(
-          reader.readListWithFunc(() => Output.fromReader(reader)),
-          network,
-        ),
+        () => CETOutcome.fromReader(reader, network),
       ),
       refundLocktime: reader.readLocktime(),
       network: network,
@@ -242,7 +199,7 @@ class DLCTerms with Writable {
     _writeOrderedPubkeyMap(
       writer,
       outcomes,
-      (outputs) => writer.writeWritableVector(outputs.outputs),
+      (outcome) => outcome.write(writer),
     );
 
     writer.writeLocktime(refundLocktime);
@@ -252,14 +209,23 @@ class DLCTerms with Writable {
   // Use a tagged hasher to avoid potential conflicts that could lead to key
   // reuse
   static final _dlcKeyTweakHash = getTaggedHasher("CoinlibDLCKeyTweak");
-  Uint8List? _tweakHashCache;
+
+  MuSigPublicKeys? _muSigCache;
 
   /// Obtains the tweaked MuSig2 aggregate key for this DLC. The key is
   /// aggregated from the [participants] and then tweaked from the [DLCTerms]
   /// data to prevent key-reuse across multiple DLCs in the event that
   /// participants re-use their individual keys.
-  MuSigPublicKeys get musig => MuSigPublicKeys(participants).tweak(
-    _tweakHashCache ??= _dlcKeyTweakHash(toBytes()),
+  MuSigPublicKeys get musig
+    => _muSigCache ??= MuSigPublicKeys(participants).tweak(
+      _dlcKeyTweakHash(toBytes()),
+    );
+
+  /// Obtains [Taproot] allowing key-path spend using the [musig] key or an APO
+  /// CHECKSIG script-path using the same key used by the CETs and RF.
+  Taproot get taproot => Taproot(
+    internalKey: musig.aggregate,
+    mast: TapLeafChecksig.apoInternal,
   );
 
 }

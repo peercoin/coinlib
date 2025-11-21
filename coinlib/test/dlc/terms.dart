@@ -2,18 +2,7 @@ import 'package:coinlib/coinlib.dart';
 import 'package:test/test.dart';
 import '../vectors/keys.dart';
 import '../vectors/tx.dart';
-
-CETOutputs getOuts(List<String> coins) => CETOutputs(
-  [
-    for (final coinAmt in coins) Output.fromScriptBytes(
-      CoinUnit.coin.toSats(coinAmt),
-      exampleOutput.scriptPubKey,
-    ),
-  ],
-  Network.mainnet,
-);
-
-final exampleLocktime = MedianTimeLocktime(DateTime(2026));
+import 'helpers.dart';
 
 final exampleTerms = DLCTerms(
   participants: {
@@ -26,8 +15,8 @@ final exampleTerms = DLCTerms(
     getPubKey(2, false): CoinUnit.coin.toSats("4"),
   },
   outcomes: {
-    getPubKey(3): getOuts(["1", "5"]),
-    getPubKey(4, false): getOuts(["6"]),
+    getPubKey(3): getOutcome(["1", "5"]),
+    getPubKey(4, false): getOutcome(["6"]),
   },
   refundLocktime: exampleLocktime,
   network: Network.mainnet,
@@ -36,7 +25,7 @@ final exampleTerms = DLCTerms(
 DLCTerms getTerms({
   Set<ECPublicKey>? participants,
   Map<ECPublicKey, BigInt>? fundAmounts,
-  Map<ECPublicKey, CETOutputs>? outcomes,
+  Map<ECPublicKey, CETOutcome>? outcomes,
   Locktime? locktime,
 }) => DLCTerms(
   participants: participants ?? exampleTerms.participants,
@@ -54,25 +43,6 @@ void main() {
 
   setUpAll(loadCoinlib);
 
-  group("CETOutputs", () {
-
-    test(
-      "gives totalValue",
-      () => expect(getOuts(["1", "5"]).totalValue, CoinUnit.coin.toSats("6")),
-    );
-
-    test(
-      "outputs cannot be empty",
-      () => expectInvalid(() => getOuts([])),
-    );
-
-    test(
-      "outputs must reach minOutput",
-      () => expectInvalid(() => getOuts(["0.009999"])),
-    );
-
-  });
-
   group("DLCTerms", () {
 
     test("immutable fields", () {
@@ -85,7 +55,7 @@ void main() {
         throwsA(anything),
       );
       expect(
-        () => exampleTerms.outcomes[examplePubkey] = getOuts(["5"]),
+        () => exampleTerms.outcomes[examplePubkey] = getOutcome(["5"]),
         throwsA(anything),
       );
     });
@@ -104,6 +74,17 @@ void main() {
         },
       ),
     ),);
+
+    test(
+      "outcome locktime must be before the refund locktime",
+      () => expectInvalidTerms(
+        () => getTerms(
+          outcomes: {
+            getPubKey(0): getOutcome(["6"], exampleLocktime),
+          },
+        ),
+      ),
+    );
 
     test("can read and write", () {
 
@@ -138,6 +119,7 @@ void main() {
         final outs = readTerms.outcomes[getPubKey(i)]!;
         expect(outs.totalValue.toInt(), 6000000);
         expect(outs.outputs.map((out) => out.value.toInt() / 1000000), coins);
+        expect(outs.locktime.value, exampleOutcomeLocktime.value);
       }
       expectOuts(3, [1, 5]);
       expectOuts(4, [6]);
@@ -164,7 +146,7 @@ void main() {
       final terms = getTerms(
         participants: { odd },
         fundAmounts: { odd: CoinUnit.coin.toSats("1") },
-        outcomes: { odd: getOuts(["1"]) },
+        outcomes: { odd: getOutcome(["1"]) },
       );
 
       expect(terms.participants.first.yIsEven, true);
