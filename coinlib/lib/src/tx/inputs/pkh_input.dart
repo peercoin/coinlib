@@ -9,6 +9,16 @@ import 'input_signature.dart';
 /// [ECDSAInputSignature] required in these inputs.
 abstract mixin class PKHInput {
 
+  /// Gives the signed size of a P2PKH or P2WPKH input.
+  static int signedSizeCalc(ECPublicKey publicKey, ECDSAInputSignature? insig)
+    =>
+    // 41 basic size
+    // 2 for pushdata/varint of signature and key
+    41 + 2
+    + publicKey.data.length
+    // Assume signature is 71 with low-R by default
+    + (insig?.bytes.length ?? 71);
+
   ECPublicKey get publicKey;
   ECDSAInputSignature? get insig;
   PKHInput addSignature(ECDSAInputSignature insig);

@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-
 import 'package:coinlib/coinlib.dart';
 import 'package:test/test.dart';
 import '../vectors/keys.dart';
@@ -36,7 +35,7 @@ final vectors = [
     inputValues: [],
     outputValues: [coin],
     expFee: minFee.toInt(),
-    expSignedSize: 78,
+    expSignedSize: 44,
     expEnoughFunds: false,
     expChangeless: false,
   ),
@@ -44,8 +43,8 @@ final vectors = [
   CoinSelectionVector(
     inputValues: [coin],
     outputValues: [coin],
-    expFee: 2250,
-    expSignedSize: 225,
+    expFee: 1910,
+    expSignedSize: 191,
     expEnoughFunds: false,
     expChangeless: false,
   ),
@@ -62,8 +61,8 @@ final vectors = [
   CoinSelectionVector(
     inputValues: [coin+1910-1],
     outputValues: [coin],
-    expFee: 2250,
-    expSignedSize: 225,
+    expFee: 1910,
+    expSignedSize: 191,
     expEnoughFunds: false,
     expChangeless: false,
   ),
@@ -78,9 +77,9 @@ final vectors = [
   ),
   // Just under minimum change
   CoinSelectionVector(
-    inputValues: [coin+2250+minChange.toInt()-1],
+    inputValues: [coin+1910+minChange.toInt()-1],
     outputValues: [coin],
-    expFee: 2250+minChange.toInt()-1,
+    expFee: 1910+minChange.toInt()-1,
     expSignedSize: 191,
     expEnoughFunds: true,
     expChangeless: true,
@@ -299,7 +298,9 @@ void main() {
 
       // Single input required
       expectInOrder(candidates.sublist(0, 1), coin*3);
-      // Covers with first three, even if only two needed
+      // Covers with two
+      expectInOrder(candidates.sublist(0, 2), coin*4);
+      // Covers with first three
       expectInOrder(candidates.sublist(0, 3), coin*5);
       // Need all
       expectInOrder(candidates, coin*10);
@@ -433,11 +434,13 @@ void main() {
                 prevOut:  examplePrevOut,
                 taproot: taproot,
                 leaf: tapleaf,
+                defaultSigHash: i == 0,
               )
-              : TaprootKeyInput(prevOut: examplePrevOut),
+              : TaprootKeyInput(
+                prevOut: examplePrevOut,
+                defaultSigHash: i == 3,
+              ),
             value: inAmt,
-            // First and 4th known as a default sig hash
-            defaultSigHash: i % 3 == 0,
           ),
         ),
         recipients: [outputForValue(5000000)],

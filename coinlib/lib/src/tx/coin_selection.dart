@@ -1,10 +1,8 @@
-import 'package:coinlib/src/common/serial.dart';
+import 'package:coinlib/src/common/bigints.dart';
 import 'package:coinlib/src/crypto/random.dart';
 import 'package:coinlib/src/scripts/program.dart';
-import 'package:coinlib/src/tx/inputs/witness_input.dart';
 import 'package:collection/collection.dart';
 import 'inputs/input.dart';
-import 'inputs/taproot_input.dart';
 import 'locktime.dart';
 import 'output.dart';
 import 'transaction.dart';
@@ -18,20 +16,12 @@ class InputCandidate {
   final Input input;
   /// Value of UTXO to be spent
   final BigInt value;
-  /// True if it is known that the default sighash type is being used which
-  /// allows one less byte to be used for Taproot signatures.
-  final bool defaultSigHash;
 
   /// Provides an [input] alongside the [value] being spent that may be
   /// selected.
-  ///
-  /// [defaultSigHash] can be set to true if it is known that a Taproot input
-  /// will definitely be signed with SIGHASH_DEFAULT. The fee calculation will
-  /// be incorrect if this is set for a non-default sighash type.
   InputCandidate({
     required this.input,
     required this.value,
-    this.defaultSigHash = false,
   });
 
 }
@@ -55,31 +45,19 @@ class CoinSelection {
   late final BigInt inputValue;
   /// The total value of all recipient outputs
   late final BigInt recipientValue;
-  /// The fee to be paid by the transaction
-  late final BigInt fee;
   /// The value of the change output. This is 0 for a changeless transaction or
   /// negative if there aren't enough funds.
   late final BigInt changeValue;
   /// The maximum size of the transaction after being fully signed
-  late final int signedSize;
-
-  int _sizeGivenChange(int fixedSize, bool includeChange)
-    => fixedSize
-    + recipients.fold(0, (acc, output) => acc + output.size)
-    + (includeChange ? Output.fromProgram(BigInt.zero, changeProgram).size : 0)
-    + MeasureWriter.varIntSizeOfInt(
-      recipients.length + (includeChange ? 1 : 0),
-    ) as int;
-
-  BigInt _feeForSize(int size) {
-    final feeForSize = feePerKb * BigInt.from(size) ~/ BigInt.from(1000);
-    return feeForSize.compareTo(minFee) > 0 ? feeForSize : minFee;
-  }
+  late int signedSize;
 
   /// Selects all the inputs from [selected] to send to the [recipients] outputs
   /// and provide change to the [changeProgram]. The [feePerKb] specifies the
   /// required fee in sats per KB with a minimum fee specified with
   /// [minFee]. The [minChange] is the minimum allowed change.
+  ///
+  /// Will throw [ArgumentError] if a [selected] input does not have a
+  /// calculable size.
   CoinSelection({
     this.version = Transaction.currentVersion,
     required Iterable<InputCandidate> selected,
@@ -97,63 +75,42 @@ class CoinSelection {
     }
 
     // Get input and recipient values
-    inputValue = selected
-      .fold(BigInt.zero, (acc, candidate) => acc + candidate.value);
-    recipientValue = recipients
-      .fold(BigInt.zero, (acc, output) => acc + output.value);
+    inputValue = addBigInts(selected.map((candidate) => candidate.value));
+    recipientValue = addBigInts(recipients.map((output) => output.value));
+    final inputExcess = inputValue - recipientValue;
 
-    final isWitness = selected.any(
-      (candidate) => candidate.input is WitnessInput,
-    );
+    final inputs = selected.map((candidate) => candidate.input).toList();
+    final isWitness = Transaction.inputsHaveWitness(inputs);
+    final outputProgram = Output.fromProgram(BigInt.zero, changeProgram);
 
-    // Get unchanging size
-    final int fixedSize
-      // Version and locktime
-      = 8
-      // Add witness marker and flag
-      + (isWitness ? 2 : 0)
-      // Fully signed inputs
-      + MeasureWriter.varIntSizeOfInt(selected.length)
-      + selected.fold(
-        0,
-        (acc, candidate) {
-          final input = candidate.input;
-          final inputSize = input is TaprootInput && candidate.defaultSigHash
-            ? input.defaultSignedSize
-            : input.signedSize;
-          return acc + inputSize!;
-        }
-      );
+    int getSize(bool withChange) => Transaction.calculateSignedSize(
+      inputs: inputs,
+      outputs: [...recipients, if (withChange) outputProgram ],
+      isWitness: isWitness,
+    )!; // Assert null as all inputs will have signedSize as tested above
 
-    // Determine size and fee with change
-    final sizeWithChange = _sizeGivenChange(fixedSize, true);
-    final feeWithChange = _feeForSize(sizeWithChange);
-    final includedChangeValue = inputValue - recipientValue - feeWithChange;
+    BigInt getFeeExcess(int size)
+      => inputExcess - Transaction.calculateFee(size, feePerKb, minFee);
 
-    // If change is under the required minimum, remove the change output
-    if (includedChangeValue.compareTo(minChange) < 0) {
+    // Try to create change tranasction first
+    final sizeWithChange = getSize(true);
+    final change = getFeeExcess(sizeWithChange);
 
-      final changelessSize = _sizeGivenChange(fixedSize, false);
-      final feeForSize = _feeForSize(changelessSize);
-      final excess = inputValue - recipientValue - feeForSize;
-
-      if (!excess.isNegative) {
-        // Exceeded without change. Fee is the input value minus the recipient
-        // value
-        signedSize = changelessSize;
-        fee = inputValue - recipientValue;
-        changeValue = BigInt.zero;
-        return;
-      }
-      // Else haven't met requirement
-
+    // Transaction with change is successful if the change is above the minimum
+    if (change.compareTo(minChange) >= 0) {
+      signedSize = sizeWithChange;
+      changeValue = change;
+      return;
     }
 
-    // Either haven't met requirement, or have met requirement with change so
-    // provide details of change-containing transaction
-    signedSize = sizeWithChange;
-    fee = feeWithChange;
-    changeValue = includedChangeValue;
+    // Else target the transaction without the change output
+    signedSize = getSize(false);
+    final feeExcess = getFeeExcess(signedSize);
+
+    // Clamp the change value to no more than 0 as it is a changeless
+    // transaction.
+    // If the excess is negative, it is a shortfall.
+    changeValue = feeExcess.isNegative ? feeExcess : BigInt.zero;
 
   }
 
@@ -203,9 +160,11 @@ class CoinSelection {
   /// in the order that they are given until the required amount has been
   /// reached. If there are not enough coins, all shall be selected and
   /// [enoughFunds] shall be false.
+  ///
   /// If [randomise] is set to true, the order of inputs shall be randomised
   /// after being selected. This is useful for candidates that are not already
   /// randomised as it may avoid giving clues to the algorithm being used.
+  ///
   /// The algorithm will only take upto 6800 candidates by default to avoid
   /// taking too long and due to size limitations. This can be changed with
   /// [maxCandidates].
@@ -234,14 +193,28 @@ class CoinSelection {
         locktime: locktime,
       );
 
+    if (candidates.isEmpty) return trySelection([]);
+
     // Restrict number of candidates due to size limitation and for efficiency
     final list = candidates.take(maxCandidates).toList();
 
-    CoinSelection selection = trySelection([]);
-    for (int i = 0; i < list.length; i++) {
-      selection = trySelection(list.take(i+1));
-      if (selection.enoughFunds) break;
+    // Use binary search to find the required amount
+    CoinSelection search(int left, int right, CoinSelection? cacheRight) {
+
+      if (left == right) {
+        return cacheRight ?? trySelection(list.take(left));
+      }
+
+      final middle = (left + right) ~/ 2;
+      final middleSelection = trySelection(list.take(middle));
+
+      return middleSelection.enoughFunds
+        ? search(left, middle, middleSelection)
+        : search(middle+1, right, cacheRight);
+
     }
+
+    final selection = search(1, list.length, null);
 
     return randomise
       ? trySelection(selection.selected.toList()..shuffle())
@@ -303,17 +276,23 @@ class CoinSelection {
   /// value and fee, or [TransactionTooLarge] if the resulting signed
   /// transaction would be too large.
   Transaction get transaction {
+
     if (!enoughFunds) throw InsufficientFunds();
     if (tooLarge) throw TransactionTooLarge();
+
     return Transaction(
       version: version,
       inputs: selected.map((candidate) => candidate.input),
-      outputs: changeless ? recipients : insertRandom(
-        recipients,
-        Output.fromProgram(changeValue, changeProgram),
-      ),
+      outputs: changeless
+        ? recipients
+        : insertRandom(
+          recipients,
+          Output.fromProgram(changeValue, changeProgram),
+        ),
       locktime: locktime,
+      skipSizeCheck: true,
     );
+
   }
 
   /// True when the input value covers the outputs and fee
@@ -324,5 +303,7 @@ class CoinSelection {
   bool get tooLarge => signedSize > Transaction.maxSize;
   /// True if a signable solution has been found
   bool get ready => enoughFunds && !tooLarge;
+  /// The fee to be paid by the transaction
+  BigInt get fee => inputValue - recipientValue - changeValue;
 
 }

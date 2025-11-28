@@ -55,6 +55,17 @@ void main() {
 
     });
 
+    test(".signedSize", () {
+      expect(
+        TaprootKeyInput(prevOut: prevOut, defaultSigHash: false).signedSize,
+        107,
+      );
+      expect(
+        TaprootKeyInput(prevOut: prevOut, defaultSigHash: true).signedSize,
+        106,
+      );
+    });
+
     test("doesn't match non key-spend inputs", () {
 
       expectNoMatch(String asm, List<Uint8List> witness) => expect(

@@ -7,27 +7,27 @@ import '../../vectors/signatures.dart';
 import '../../vectors/tx.dart';
 import '../../vectors/taproot.dart';
 
-final privkey = keyPairVectors.first.privateObj;
+final privkey = getPrivKey(0);
 final regularLeaf = TapLeafChecksig(privkey.pubkey);
-final regularTR = Taproot(internalKey: privkey.pubkey, mast: regularLeaf);
+final regularTR = Taproot(
+  internalKey: privkey.pubkey,
+  mast: TapBranch(regularLeaf, TapLeafChecksig(getPubKey(1))),
+);
 final apoTR = Taproot(
   internalKey: privkey.pubkey,
   mast: TapLeafChecksig.apoInternal,
+);
+final regularInput = TaprootSingleScriptSigInput(
+  prevOut: prevOut,
+  taproot: regularTR,
+  leaf: regularLeaf,
 );
 final apoInput = TaprootSingleScriptSigInput.anyPrevOut(
   taproot: apoTR,
   leaf: TapLeafChecksig.apoInternal,
 );
 final unsignedTx = Transaction(
-  inputs: [
-    TaprootSingleScriptSigInput(
-      prevOut: prevOut,
-      taproot: regularTR,
-      leaf:regularLeaf,
-    ),
-    apoInput,
-    apoInput,
-  ],
+  inputs: [regularInput, apoInput, apoInput],
   outputs: [exampleOutput],
 );
 
@@ -36,6 +36,13 @@ void main() {
   group("TaprootSingleScriptSigInput", () {
 
     setUpAll(loadCoinlib);
+
+    test(".signedSize", () {
+      // 109 base input size, 33 control block, 2 compiled leaf script
+      expect(apoInput.signedSize, 109+33+2);
+      // 109 base input size, 65 control block, 34 compiled leaf script
+      expect(regularInput.signedSize, 109+65+34);
+    });
 
     test(".sign() success", () {
 

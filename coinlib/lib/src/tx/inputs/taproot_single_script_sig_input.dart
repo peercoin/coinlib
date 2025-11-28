@@ -18,40 +18,46 @@ class TaprootSingleScriptSigInput extends TaprootInput {
   final SchnorrInputSignature? insig;
 
   @override
-  // 41 bytes for legacy input data
-  // 64 witness signature bytes
-  // 1 potential sighash byte
-  // 4 bytes for witness varints
-  int get signedSize => 41 + 64 + 1 + 4
-    + leaf.script.compiled.length
-    // Control block
-    + witness.last.length;
-
-  @override
-  // Minus the sighash byte
-  int get defaultSignedSize => signedSize - 1;
+  final int signedSize;
 
   TaprootSingleScriptSigInput._({
     required this.leaf,
     required Uint8List controlBlock,
     required super.sequence,
     OutPoint? prevOut,
+    bool defaultSigHash = false,
     this.insig,
-  }) : super(
-    prevOut: prevOut ?? OutPoint.nothing,
-    witness: [
-      if (insig != null) insig.bytes,
-      leaf.script.compiled,
-      controlBlock,
-    ],
-  );
+  }) :
+    // 41 bytes for legacy input data plus 3 bytes for witness varints
+    // 64 to 65 witness signature bytes
+    signedSize = 44
+      + (
+        insig == null
+        ? (defaultSigHash ? 64 : 65)
+        : insig.bytes.length
+      )
+      + leaf.script.compiled.length
+      + controlBlock.length,
+    super(
+      prevOut: prevOut ?? OutPoint.nothing,
+      witness: [
+        if (insig != null) insig.bytes,
+        leaf.script.compiled,
+        controlBlock,
+      ],
+    );
 
   /// Constructs an input with all the information for signing with any sighash
   /// type.
+  ///
+  /// Set [defaultSigHash] to true if it is known that the default sighash type
+  /// is being used which allows one less byte to be used for Taproot
+  /// signatures and for the [signedSize] to be set correctly.
   TaprootSingleScriptSigInput({
     required OutPoint prevOut,
     required Taproot taproot,
     required TapLeafChecksig leaf,
+    bool defaultSigHash = false,
     SchnorrInputSignature? insig,
     InputSequence sequence = InputSequence.enforceLocktime,
   }) : this._(
@@ -59,6 +65,7 @@ class TaprootSingleScriptSigInput extends TaprootInput {
     controlBlock: taproot.controlBlockForLeaf(leaf),
     leaf: leaf,
     insig: insig,
+    defaultSigHash: defaultSigHash,
     sequence: sequence,
   );
 
@@ -73,6 +80,7 @@ class TaprootSingleScriptSigInput extends TaprootInput {
     leaf: leaf,
     controlBlock: taproot.controlBlockForLeaf(leaf),
     insig: insig,
+    defaultSigHash: false,
     sequence: sequence,
   );
 

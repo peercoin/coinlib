@@ -200,12 +200,16 @@ class P2SHMultisigInput extends LegacyInput {
 
   int get _signedScriptSize
     => 1 // Extra 0
-    + program.threshold*73 // Add 73 bytes per signature
+    + sigs.fold(0, (acc, sig) => acc + sig.bytes.length + 1)
+    // For unadded signatures assume 71 bytes plus push data
+    + (program.threshold-sigs.length)*72
     // Determine the length of the program pushdata by actually compiling it.
     // Not the most efficient but the simplest solution.
-    + ScriptPushData(program.script.compiled).compiled.length;
+    + ScriptPushData(program.script.compiled).compiled.length
+    as int;
 
   @override
+  /// Assumes low-R 71-byte signatures by default
   int? get signedSize
     => 40 // Outpoint plus sequence
     + _signedScriptSize

@@ -13,8 +13,16 @@ secp256k1-coinlib fork.
 - Adds `Locktime` abstractions for transactions. Transactions have
     `.isUnlocked` to determine if the transaction is available for block
     inclusion.
+- `InputCandidate.defaultSigHash` is moved to `TaprootKeyInput` and
+    `TaprootSingleScriptSigInput` and `defaultSignedSize` is removed from
+    Taproot inputs.
+- The `signedSize` of inputs is made more accurate.
+- Moves fee calculation logic to `Transaction` with `calculateSignedSize`,
+`calculateFee`, `signedSize` and `fee`.
+- Adds `skipSizeCheck` to `Transaction` constructor.
 - Moves to underlying secp256k1-coinlib.
 - Removed dependency to wasm_interop that had a broken js dependency.
+- The efficiency of `CoinSelection` is greatly improved.
 - `Writable.toBytes()` returns a copy of the cached bytes to avoid mutation.
 - Fixes `extraEntropy` being ignored for `Secp256k1Base.schnorrSign`.
 

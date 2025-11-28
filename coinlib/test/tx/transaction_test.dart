@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:coinlib/coinlib.dart';
 import 'package:test/test.dart';
+import '../vectors/inputs.dart';
 import '../vectors/signatures.dart';
 import '../vectors/tx.dart';
 import '../vectors/keys.dart';
@@ -13,7 +14,7 @@ void main() {
 
     final keyVec = keyPairVectors[0];
 
-    expectVectorWithoutObj(Transaction tx, TxVector vec) {
+    void expectVectorWithoutObj(Transaction tx, TxVector vec) {
       expect(tx.toHex(), vec.hex);
 
       expect(tx.hashHex, vec.hashHex);
@@ -27,12 +28,13 @@ void main() {
       expect(tx.isCoinStake, vec.isCoinStake);
       expect(tx.complete, vec.complete);
       expect(tx.size, vec.size);
+      expect(tx.signedSize, vec.signedSize);
       expect(tx.inputs.map((input) => input.runtimeType), vec.inputTypes);
     }
 
     mapToHex(List<Writable> list) => list.map((e) => e.toHex());
 
-    expectFullVector(Transaction tx, TxVector vec) {
+    void expectFullVector(Transaction tx, TxVector vec) {
       expectVectorWithoutObj(tx, vec);
       expect(tx.version, vec.obj.version);
       expect(tx.locktime.value, vec.obj.locktime.value);
@@ -41,9 +43,12 @@ void main() {
       expect(mapToHex(tx.outputs), mapToHex(vec.obj.outputs));
     }
 
-    expectInputSignedSize(Input input) => expect(
-      input.size, lessThanOrEqualTo(input.signedSize!),
-    );
+    void expectSignedSize(Transaction unsigned, Transaction signed) {
+      // After obtaining the actual signature, the true signedSize is known
+      expect(signed.signedSize, signed.size);
+      // The actual size may be smaller depending on the signature size
+      expect(unsigned.signedSize, greaterThanOrEqualTo(signed.size));
+    }
 
     test("valid txs", () {
       for (final vec in validTxVecs) {
@@ -363,11 +368,11 @@ void main() {
             key: keyVec.privateObj,
             hashType: hashType,
           );
-          expectInputSignedSize(signed.inputs[i]);
         }
 
         expect(tx.complete, false);
         expect(signed.complete, true);
+        expectSignedSize(tx, signed);
         expect(signed.toHex(), hex);
 
       }
@@ -461,7 +466,7 @@ void main() {
         inputN: 1, key: keyVec.privateObj, value: BigInt.from(3000000),
       );
       expect(signed.complete, true);
-      expectInputSignedSize(signed.inputs[1]);
+      expectSignedSize(tx, signed);
 
       expect(
         signed.toHex(),
@@ -487,6 +492,7 @@ void main() {
               1,
             ),
             sequence: InputSequence.finalWithoutLocktime,
+            defaultSigHash: true,
           ),
           TaprootKeyInput(
             prevOut: OutPoint.fromHex(
@@ -517,9 +523,7 @@ void main() {
       );
 
       expect(signed.complete, true);
-      for (final input in signed.inputs) {
-        expectInputSignedSize(input);
-      }
+      expectSignedSize(tx, signed);
 
       expect(
         signed.toHex(),
@@ -581,6 +585,7 @@ void main() {
       // Doesn't know when arbitrary taproot script input is complete so assume
       // it is even when it isn't.
       expect(tx.complete, true);
+      expect(tx.signedSize, null);
 
       // Manual signing of input as Transaction.sign doesn't know how to handle
       // these arbitrary inputs.
@@ -688,7 +693,7 @@ void main() {
 
       // Check final tx
       expect(signed.complete, true);
-      expectInputSignedSize(signed.inputs[1]);
+      expectSignedSize(tx, signed);
       expect(signed.inputs[1].signedSize, signedSizeFromUnsigned);
       expectMultisigSigs(
         signed, [SigHashType.single(), SigHashType.none(), sigHashAOCP],
@@ -1029,6 +1034,7 @@ void main() {
         everyElement(isTrue),
       );
       expect(completeTx.complete, true);
+      expectSignedSize(tx, completeTx);
       expect(
         completeTx.toHex(),
         "030000000001048752d19cb510cb90787faecd13e77bb7f494eb3d31756d941976bb952211459c0100000000ffffffffcfe34cdd8ae272a57785f7935af7a5d3acde88025f23ec65c24011d4fabc9a770100000000fffffffff558023d579ba8f9cc165b5414864f920ecf02f141a8bd2f6ef92f1900c9c71b0100000000ffffffffca5c34f9fa953268c4cca0c39aade452a059ca4cf910960e3e809dac3c751cf50100000000ffffffff01a0860100000000001976a914c42e7ef92fdb603af844d064faad95db9bcdfd3d88ac034157e44a1281069526bfb54f39eed6e1621392f6b663f049da9d30498ce9209b477f36cc3b4de00e527354bc1d4de251f5f2a0a40d182adbc784da3488bf842a2781222079be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ac21c0b80011a883a0fd621ad46dfc405df1e74bf075cbaf700fd4aebef6e96f8483400341d0c5ce1241d1aecdb957bef965d12a2638aded3181f921daf0623a0c19b17b6ada7dadd03b29d24da910bbe19180f2133087e6d970e315432330c7dc69d6948b4123210179be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ac21c0b80011a883a0fd621ad46dfc405df1e74bf075cbaf700fd4aebef6e96f84834003416e9173f4746edd351c6dd1c8c72fef77e7526174d92987d04ced007afb77a63806cdf129a6aba5c936cbfb207d19569a63a70138e6f22a245a91e20c12e08249c123210179be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ac21c0b80011a883a0fd621ad46dfc405df1e74bf075cbaf700fd4aebef6e96f8483400341130bfe7381a68cbf8346f127c2f6f0bcf537bf8354b8b5baa1cd271a44515ebd89a6d55f631db3edc3d00a492cceeca7a1a19d02a1c39de84bb29de9b6764731410251ac21c1b80011a883a0fd621ad46dfc405df1e74bf075cbaf700fd4aebef6e96f84834000000000",
@@ -1085,6 +1091,31 @@ void main() {
       expectIsUnlocked(true, past, false);
       expectIsUnlocked(false, now, true);
       expectIsUnlocked(false, past, true);
+
+    });
+
+    test(".calculateFee", () {
+
+      final tx = ambiguousWitness.obj;
+      expect(tx.signedSize, 129);
+
+      void expectFee(Transaction tx, int minFee, int? expected) => expect(
+        tx.fee(BigInt.from(1000), BigInt.from(minFee))?.toInt(),
+        expected,
+      );
+
+      // Calcatutes according to feePerKb
+      expectFee(tx, 100, 129);
+
+      // Gives min fee if higher
+      expectFee(tx, 130, 130);
+
+      // Gives null when signedSize is null
+      expectFee(
+        Transaction(inputs: [rawWitnessInput], outputs: [exampleOutput]),
+        100,
+        null,
+      );
 
     });
 

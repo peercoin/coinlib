@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'package:coinlib/coinlib.dart';
 
 class TxVector {
+
   Transaction obj;
   String hashHex;
   String txidHex;
@@ -11,9 +12,11 @@ class TxVector {
   bool complete;
   bool locktimeIsEnforced;
   int size;
+  int? signedSize;
   List<Type> inputTypes;
   String hex;
   String? legacyHex;
+
   TxVector({
     required this.obj,
     required this.hashHex,
@@ -23,11 +26,13 @@ class TxVector {
     required this.isCoinStake,
     required this.complete,
     required this.size,
+    required this.signedSize,
     required this.inputTypes,
     required this.hex,
     required this.locktimeIsEnforced,
     this.legacyHex,
   }): txidHex = txidHex ?? hashHex;
+
 }
 
 final examplePrevOut = OutPoint.fromHex(
@@ -90,6 +95,7 @@ final validTxVecs = [
     complete: true,
     locktimeIsEnforced: false,
     size: 192,
+    signedSize: 192,
     inputTypes: [P2PKHInput],
     hex: "0300000001f1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe000000006b4830450221008732a460737d956fd94d49a31890b2908f7ed7025a9c1d0f25e43290f1841716022004fa7d608a291d44ebbbebbadaac18f943031e7de39ef3bf9920998c43e60c0401210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ffffffff01a0860100000000001976a914c42e7ef92fdb603af844d064faad95db9bcdfd3d88ac00000000",
   ),
@@ -120,6 +126,7 @@ final validTxVecs = [
     complete: true,
     locktimeIsEnforced: true,
     size: 340,
+    signedSize: 340,
     inputTypes: [P2PKHInput, P2PKHInput],
     hex: "0300000002f1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe000000006b4830450221008732a460737d956fd94d49a31890b2908f7ed7025a9c1d0f25e43290f1841716022004fa7d608a291d44ebbbebbadaac18f943031e7de39ef3bf9920998c43e60c0401210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798fffffffff1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe000000006b4830450221008732a460737d956fd94d49a31890b2908f7ed7025a9c1d0f25e43290f1841716022004fa7d608a291d44ebbbebbadaac18f943031e7de39ef3bf9920998c43e60c0401210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798feffffff01a0860100000000001976a914c42e7ef92fdb603af844d064faad95db9bcdfd3d88ac00000000",
   ),
@@ -184,6 +191,7 @@ final validTxVecs = [
     complete: true,
     locktimeIsEnforced: false,
     size: 439,
+    signedSize: 439,
     inputTypes: [P2PKHInput, P2PKHInput],
     hex: "0300000002e7b73e229790c1e79a02f0c871813b3cf26a4156c5b8d942e88b38fe8d3f43a0000000008c493046022100fd3d8fef44fb0962ba3f07bee1d4cafb84e60e38e6c7d9274504b3638a8d2f520221009fce009044e615b6883d4bf62e04c48f9fe236e19d644b082b2f0ae5c98e045c014104aa592c859fd00ed2a02609aad3a1bf72e0b42de67713e632c70a33cc488c15598a0fb419370a54d1c275b44380e8777fc01b6dc3cd43a416c6bab0e30dc1e19fffffffff7bfc005f3880a606027c7cd7dd02a0f6a6572eeb84a91aa158311be13695a7ea010000008b483045022100e2e61c40f26e2510b76dc72ea2f568ec514fce185c719e18bca9caaef2b20e9e02207f1100fc79eb0584e970c7f18fb226f178951d481767b4092d50d13c50ccba8b014104aa592c859fd00ed2a02609aad3a1bf72e0b42de67713e632c70a33cc488c15598a0fb419370a54d1c275b44380e8777fc01b6dc3cd43a416c6bab0e30dc1e19fffffffff0240d52303000000001976a914167c3e1f10cc3b691c73afbdb211e156e3e3f25c88ac15462e00000000001976a914290f7d617b75993e770e5606335fa0999a28d71388ac00000000",
   ),
@@ -208,6 +216,7 @@ final validTxVecs = [
     complete: false,
     locktimeIsEnforced: false,
     size: 119,
+    signedSize: 191,
     inputTypes: [P2PKHInput],
     hex: "0300000001f1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe0000000022210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ffffffff01a0860100000000001976a914c42e7ef92fdb603af844d064faad95db9bcdfd3d88ac00000000",
   ),
@@ -233,6 +242,7 @@ final validTxVecs = [
     complete: false,
     locktimeIsEnforced: false,
     size: 158,
+    signedSize: 158,
     inputTypes: [P2PKHInput],
     hex:
     "0300000001f1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe000000006b4830450221008732a460737d956fd94d49a31890b2908f7ed7025a9c1d0f25e43290f1841716022004fa7d608a291d44ebbbebbadaac18f943031e7de39ef3bf9920998c43e60c0401210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ffffffff0000000000",
@@ -270,6 +280,7 @@ final validTxVecs = [
     complete: true,
     locktimeIsEnforced: false,
     size: 337,
+    signedSize: 337,
     inputTypes: [P2SHMultisigInput],
     hex: "0300000001f1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe00000000fc0047304402200773352a6c70b5ddfe8f6af883d9ea7b9abf7a96fdabe4d3b4a7a590f142c84402206fbf9b634221f206b7c99b3d9bc9dbdc5fec16536d7fd1eac352bbb4feff2a6f0147304402207567ea17703e2df7993ce70ead3f9f051e3bf7b8dfcdc6e9edc7547c0c0c4ef302204332066de953f267db9c31ca934052f1cfabd4281fd2649f928a66b1deb604e7014c69522103df7940ee7cddd2f97763f67e1fb13488da3fbdd7f9c68ec5ef0864074745a2892103e05ce435e462ec503143305feb6c00e06a3ad52fbf939e85c65f3a765bb7baac2103aea0dfd576151cb399347aa6732f8fdf027b9ea3ea2e65fb754803f776e0a50953aeffffffff01a0860100000000001976a914c42e7ef92fdb603af844d064faad95db9bcdfd3d88ac00000000",
   ),
@@ -301,6 +312,7 @@ final validTxVecs = [
     complete: false,
     locktimeIsEnforced: false,
     size: 265,
+    signedSize: 337,
     inputTypes: [P2SHMultisigInput],
     hex: "0300000001f1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe00000000b40047304402207567ea17703e2df7993ce70ead3f9f051e3bf7b8dfcdc6e9edc7547c0c0c4ef302204332066de953f267db9c31ca934052f1cfabd4281fd2649f928a66b1deb604e7014c69522103df7940ee7cddd2f97763f67e1fb13488da3fbdd7f9c68ec5ef0864074745a2892103e05ce435e462ec503143305feb6c00e06a3ad52fbf939e85c65f3a765bb7baac2103aea0dfd576151cb399347aa6732f8fdf027b9ea3ea2e65fb754803f776e0a50953aeffffffff01a0860100000000001976a914c42e7ef92fdb603af844d064faad95db9bcdfd3d88ac00000000",
   ),
@@ -321,6 +333,7 @@ final validTxVecs = [
     complete: false,
     locktimeIsEnforced: false,
     size: 44,
+    signedSize: 44,
     inputTypes: [],
     hex:
     "030000000001a0860100000000001976a914c42e7ef92fdb603af844d064faad95db9bcdfd3d88ac04030201",
@@ -340,6 +353,7 @@ final validTxVecs = [
     complete: false,
     locktimeIsEnforced: false,
     size: 10,
+    signedSize: 10,
     inputTypes: [],
     hex:
     "03000000000000000000",
@@ -384,6 +398,7 @@ final validTxVecs = [
     complete: true,
     locktimeIsEnforced: false,
     size: 249,
+    signedSize: 249,
     inputTypes: [P2PKHInput],
     hex: "03000000019ac03d5ae6a875d970128ef9086cef276a1919684a6988023cc7254691d97e6d010000006b4830450221009d41dc793ba24e65f571473d40b299b6459087cea1509f0d381740b1ac863cb6022039c425906fcaf51b2b84d8092569fb3213de43abaff2180e2a799d4fcb4dd0aa012102d5ede09a8ae667d0f855ef90325e27f6ce35bbe60a1e6e87af7f5b3c652140fdffffffff080100000000000000010101000000000000000202010100000000000000014c0100000000000000034c02010100000000000000014d0100000000000000044dffff010100000000000000014e0100000000000000064effffffff0100000000",
   ),
@@ -418,6 +433,7 @@ final validTxVecs = [
     complete: true,
     locktimeIsEnforced: false,
     size: 126,
+    signedSize: null,
     inputTypes: [RawInput],
     hex: "03000000010000000000000000000000000000000000000000000000000000000000000000ffffffff29032832051c4d696e656420627920416e74506f6f6c20626a343a45ef0454c5de8d5e5300004e2c0000ffffffff01414f1995000000001976a914b05793fe86a9f51a5f5ae3a6f07fd31932128a3f88ac00000000",
   ),
@@ -446,6 +462,7 @@ final validTxVecs = [
     complete: true,
     locktimeIsEnforced: false,
     size: 201,
+    signedSize: 201,
     inputTypes: [P2PKHInput],
     hex: "0300000001f1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe000000006b4830450221008732a460737d956fd94d49a31890b2908f7ed7025a9c1d0f25e43290f1841716022004fa7d608a291d44ebbbebbadaac18f943031e7de39ef3bf9920998c43e60c0401210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ffffffff02000000000000000000a0860100000000001976a914c42e7ef92fdb603af844d064faad95db9bcdfd3d88ac00000000",
   ),
@@ -471,6 +488,7 @@ final validTxVecs = [
     complete: false,
     locktimeIsEnforced: false,
     size: 122,
+    signedSize: 194,
     inputTypes: [P2WPKHInput],
     hex: "03000000000101f1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe0000000000ffffffff01a0860100000000001976a914c42e7ef92fdb603af844d064faad95db9bcdfd3d88ac01210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f8179800000000",
     legacyHex: "0300000001f1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe0000000000ffffffff01a0860100000000001976a914c42e7ef92fdb603af844d064faad95db9bcdfd3d88ac00000000",
@@ -498,6 +516,7 @@ final validTxVecs = [
     complete: true,
     locktimeIsEnforced: true,
     size: 195,
+    signedSize: 195,
     inputTypes: [P2WPKHInput],
     hex: "03000000000101f1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe00000000000403020101a0860100000000001976a914c42e7ef92fdb603af844d064faad95db9bcdfd3d88ac024830450221008732a460737d956fd94d49a31890b2908f7ed7025a9c1d0f25e43290f1841716022004fa7d608a291d44ebbbebbadaac18f943031e7de39ef3bf9920998c43e60c0401210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f8179800000000",
     legacyHex: "0300000001f1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe00000000000403020101a0860100000000001976a914c42e7ef92fdb603af844d064faad95db9bcdfd3d88ac00000000",
@@ -524,6 +543,7 @@ final validTxVecs = [
     complete: true,
     locktimeIsEnforced: false,
     size: 94,
+    signedSize: null,
     inputTypes: [WitnessInput],
     hex: "03000000000101f1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe0000000000ffffffff01a0860100000000001976a914c42e7ef92fdb603af844d064faad95db9bcdfd3d88ac020004ff01020300000000",
     legacyHex: "0300000001f1fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe0000000000ffffffff01a0860100000000001976a914c42e7ef92fdb603af844d064faad95db9bcdfd3d88ac00000000",
@@ -554,6 +574,7 @@ final ambiguousLegacy = TxVector(
   complete: false,
   locktimeIsEnforced: false,
   size: 64,
+  signedSize: 64,
   inputTypes: [],
   hex: ambiguousHex,
 );
@@ -567,6 +588,7 @@ final ambiguousWitness = TxVector(
           "0000000000000000000000000000000000000000000000002d00000000000000", 0,
         ),
         sequence: InputSequence.fromValue(189878609),
+        defaultSigHash: false,
       ),
     ],
     outputs: [
@@ -584,6 +606,7 @@ final ambiguousWitness = TxVector(
   complete: false,
   locktimeIsEnforced: true,
   size: 64,
+  signedSize: 129,
   inputTypes: [TaprootKeyInput],
   hex: ambiguousHex,
 );

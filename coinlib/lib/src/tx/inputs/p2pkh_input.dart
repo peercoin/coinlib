@@ -21,20 +21,25 @@ class P2PKHInput extends LegacyInput with PKHInput {
   final ECPublicKey publicKey;
   @override
   final ECDSAInputSignature? insig;
+
   @override
-  final int? signedSize = 147;
+  /// For an input without a signature, it is assumed the signature will be a
+  /// low-R signature with a size of 71 bytes.
+  final int signedSize;
 
   P2PKHInput({
     required super.prevOut,
     required this.publicKey,
     this.insig,
     super.sequence = InputSequence.enforceLocktime,
-  }) : super(
-    scriptSig: Script([
-      if (insig != null) ScriptPushData(insig.bytes),
-      ScriptPushData(publicKey.data),
-    ]).compiled,
-  );
+  }) :
+    signedSize = PKHInput.signedSizeCalc(publicKey, insig),
+    super(
+      scriptSig: Script([
+        if (insig != null) ScriptPushData(insig.bytes),
+        ScriptPushData(publicKey.data),
+      ]).compiled,
+    );
 
   /// Checks if the [RawInput] matches the expected format for a [P2PKHInput],
   /// with or without a signature. If it does it returns a [P2PKHInput] for the

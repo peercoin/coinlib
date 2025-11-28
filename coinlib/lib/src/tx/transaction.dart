@@ -43,14 +43,53 @@ class Transaction with Writable {
   static const maxOutputs
     = (maxSize - minOtherSize - minInputSize) ~/ minOutputSize;
 
+  /// True if any of the inputs are witness inputs
+  static bool inputsHaveWitness(Iterable<Input> inputs)
+    => inputs.any((input) => input is WitnessInput);
+
+  /// Calculates the maximum size of a signed [Transaction] containing the
+  /// [inputs] and [outputs].
+  static int? calculateSignedSize({
+    required Iterable<Input> inputs,
+    required Iterable<Output> outputs,
+    required bool isWitness,
+  }) => inputs.any((input) => input.signedSize == null)
+    ? null
+    : (
+      // Version and locktime
+      8
+      // Add witness marker and flag
+      // Also add a single varint byte for each input. Input types shouldn't
+      // have witness vectors large enough to require more than a byte
+      + (isWitness ? 2 + inputs.length : 0)
+      // Fully signed inputs
+      + MeasureWriter.varIntSizeOfInt(inputs.length)
+      + inputs.fold(0, (acc, input) => acc + input.signedSize!)
+      // Outputs
+      + (outputs.fold(0, (acc, output) => acc + output.size))
+      + MeasureWriter.varIntSizeOfInt(outputs.length)
+      // Not sure why cast is required but it is
+      as int
+    );
+
+  /// Calculates the fee for a transction of a given [size].
+  static BigInt calculateFee(int size, BigInt feePerKb, BigInt minFee) {
+    final feeForSize = feePerKb * BigInt.from(size) ~/ BigInt.from(1000);
+    return feeForSize.compareTo(minFee) > 0 ? feeForSize : minFee;
+  }
+
   final int version;
   final List<Input> inputs;
   final List<Output> outputs;
   final Locktime locktime;
 
+  /// If the transaction has any witness inputs.
+  final bool isWitness;
+
   /// Constructs a transaction with the given [inputs] and [outputs].
+  ///
   /// [TransactionTooLarge] will be thrown if the resulting transction exceeds
-  /// [maxSize] (1MB).
+  /// [maxSize] (1MB), though this check can be skipped with [skipSizeCheck].
   ///
   /// To follow the behaviour of the reference Peercoin client, the [locktime]
   /// can be set to the current tip block height via [BlockHeightLocktime].
@@ -59,12 +98,14 @@ class Transaction with Writable {
     required Iterable<Input> inputs,
     required Iterable<Output> outputs,
     this.locktime = Locktime.zero,
+    bool skipSizeCheck = false,
   })
   : inputs = List.unmodifiable(inputs),
-  outputs = List.unmodifiable(outputs)
+  outputs = List.unmodifiable(outputs),
+  isWitness = inputs.any((input) => input is WitnessInput)
   {
     checkInt32(version);
-    if (size > maxSize) throw TransactionTooLarge();
+    if (!skipSizeCheck && size > maxSize) throw TransactionTooLarge();
   }
 
   static int _readAndCheckVarInt(BytesReader reader, int max) {
@@ -407,9 +448,6 @@ class Transaction with Writable {
   String get txid
     => bytesToHex(Uint8List.fromList(legacyHash.reversed.toList()));
 
-  /// If the transaction has any witness inputs.
-  bool get isWitness => inputs.any((input) => input is WitnessInput);
-
   bool get isCoinBase
     => inputs.length == 1
     && inputs.first.prevOut.coinbase
@@ -428,6 +466,22 @@ class Transaction with Writable {
   bool get complete
     => inputs.isNotEmpty && outputs.isNotEmpty
     && inputs.every((input) => input.complete);
+
+  /// The size of the transaction if it is fully signed. Returns null if this
+  /// cannot be determined due to an input returning null for
+  /// [Input.signedSize].
+  int? get signedSize => calculateSignedSize(
+    inputs: inputs,
+    outputs: outputs,
+    isWitness: isWitness,
+  );
+
+  /// Returns the fee of the fully signed transaction or null if any input
+  /// returns null from [Input.signedSize].
+  BigInt? fee(BigInt feePerKb, BigInt minFee) {
+    final size = signedSize;
+    return size == null ? null : calculateFee(size, feePerKb, minFee);
+  }
 
   /// True if the locktime of this transaction is enforced.
   ///

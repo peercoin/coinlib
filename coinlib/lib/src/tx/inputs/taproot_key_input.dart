@@ -15,21 +15,26 @@ class TaprootKeyInput extends TaprootInput {
   final SchnorrInputSignature? insig;
 
   @override
-  // 41 bytes for legacy input data
-  // 64 witness signature bytes
-  // 1 potential sighash byte
-  // 2 bytes for witness varints
-  final int signedSize = 41 + 64 + 1 + 2;
+  final int signedSize;
 
-  @override
-  // Minus the sighash byte
-  int get defaultSignedSize => signedSize - 1;
-
+  /// Set [defaultSigHash] to true if it is known that the default sighash type
+  /// is being used which allows one less byte to be used for Taproot
+  /// signatures and for the [signedSize] to be set correctly.
   TaprootKeyInput({
     required super.prevOut,
     this.insig,
+    bool defaultSigHash = false,
     super.sequence = InputSequence.enforceLocktime,
-  }) : super(witness: [insig != null ? insig.bytes : Uint8List(0)]);
+  }) :
+    // 41 bytes for legacy input data plus 1 byte for witness varint
+    // 64 witness signature bytes plus potential 1 sighash byte
+    signedSize = 42
+      + (
+        insig == null
+        ? (defaultSigHash ? 64 : 65)
+        : insig.bytes.length
+      ),
+    super(witness: [insig != null ? insig.bytes : Uint8List(0)]);
 
   /// Checks if the [raw] input and [witness] data match the expected format for
   /// a [TaprootKeyInput], with a signature. If it does it returns a

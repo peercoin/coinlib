@@ -21,20 +21,23 @@ class P2WPKHInput extends LegacyWitnessInput with PKHInput {
   final ECPublicKey publicKey;
   @override
   final ECDSAInputSignature? insig;
+
   @override
-  final int? signedSize = 147;
+  final int signedSize;
 
   P2WPKHInput({
     required super.prevOut,
     required this.publicKey,
     this.insig,
     super.sequence = InputSequence.enforceLocktime,
-  }) : super(
-    witness: [
-      if (insig != null) insig.bytes,
-      publicKey.data,
-    ],
-  );
+  }) :
+    signedSize = PKHInput.signedSizeCalc(publicKey, insig),
+    super(
+      witness: [
+        if (insig != null) insig.bytes,
+        publicKey.data,
+      ],
+    );
 
   /// Checks if the [raw] input and [witness] data match the expected format for
   /// a P2WPKHInput, with or without a signature. If it does it returns a
