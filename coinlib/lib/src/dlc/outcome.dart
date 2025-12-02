@@ -1,6 +1,5 @@
 import 'package:coinlib/src/common/bigints.dart';
 import 'package:coinlib/src/common/serial.dart';
-import 'package:coinlib/src/network.dart';
 import 'package:coinlib/src/tx/locktime.dart';
 import 'package:coinlib/src/tx/output.dart';
 import 'terms.dart';
@@ -30,25 +29,19 @@ class CETOutcome with Writable {
   /// becomes available.
   final Locktime locktime;
 
-  /// Requires that the output values are at least [Network.minOutput] or
-  /// [InvalidDLCTerms] may be thrown.
+  /// There must be a minimum of one output or [InvalidDLCTerms] may be thrown.
   CETOutcome({
     required this.outputs,
     required this.locktime,
-    required Network network,
   }) {
     if (outputs.isEmpty) {
       throw InvalidDLCTerms.noOutputs();
     }
-    if (outputs.any((out) => out.value.compareTo(network.minOutput) < 0)) {
-      throw InvalidDLCTerms.smallOutput(network.minOutput);
-    }
   }
 
-  CETOutcome.fromReader(BytesReader reader, Network network) : this(
+  CETOutcome.fromReader(BytesReader reader) : this(
     outputs: reader.readListWithFunc(() => Output.fromReader(reader)),
     locktime: reader.readLocktime(),
-    network: network,
   );
 
   BigInt get totalValue => addBigInts(outputs.map((out) => out.value));

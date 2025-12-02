@@ -4,6 +4,11 @@ import '../vectors/keys.dart';
 import '../vectors/tx.dart';
 import 'helpers.dart';
 
+Output getFundOutput(int pk, String coin) => Output.fromProgram(
+  CoinUnit.coin.toSats(coin),
+  P2TR.fromTweakedKey(getPubKey(pk)),
+);
+
 final exampleTerms = DLCTerms(
   participants: {
     getPubKey(0),
@@ -11,8 +16,8 @@ final exampleTerms = DLCTerms(
   },
   fundAmounts: {
     // Can be different from participants
-    getPubKey(0): CoinUnit.coin.toSats("2"),
-    getPubKey(2, false): CoinUnit.coin.toSats("4"),
+    getPubKey(0): getFundOutput(0, "2"),
+    getPubKey(2, false): getFundOutput(2, "4"),
   },
   outcomes: {
     getPubKey(3): getOutcome(["1", "5"]),
@@ -24,7 +29,7 @@ final exampleTerms = DLCTerms(
 
 DLCTerms getTerms({
   Set<ECPublicKey>? participants,
-  Map<ECPublicKey, BigInt>? fundAmounts,
+  Map<ECPublicKey, Output>? fundAmounts,
   Map<ECPublicKey, CETOutcome>? outcomes,
   Locktime? locktime,
 }) => DLCTerms(
@@ -51,7 +56,7 @@ void main() {
         throwsA(anything),
       );
       expect(
-        () => exampleTerms.fundAmounts[examplePubkey] = BigInt.zero,
+        () => exampleTerms.fundAmounts[examplePubkey] = getFundOutput(0, "3"),
         throwsA(anything),
       );
       expect(
@@ -62,15 +67,23 @@ void main() {
 
     test("outcomes and funded amounts must match", () => expectInvalid(
       () => getTerms(
-        fundAmounts: { getPubKey(0): CoinUnit.coin.toSats("1") },
+        fundAmounts: { getPubKey(0): getFundOutput(0, "1") },
       ),
     ),);
 
     test("funded amounts must be at least minOutput", () => expectInvalid(
       () => getTerms(
         fundAmounts: {
-          getPubKey(0): CoinUnit.coin.toSats("5.990001"),
-          getPubKey(1): CoinUnit.coin.toSats("0.009999"),
+          getPubKey(0): getFundOutput(0, "5.990001"),
+          getPubKey(1): getFundOutput(1, "0.009999"),
+        },
+      ),
+    ),);
+
+    test("outcome amounts must be at least minOutput", () => expectInvalid(
+      () => getTerms(
+        outcomes: {
+          getPubKey(3): getOutcome(["5.990001", "0.009999"]),
         },
       ),
     ),);
@@ -108,7 +121,7 @@ void main() {
 
       expectTwoKeys(readTerms.fundAmounts.keys, 0, 2);
       expectContainsTwo(
-        readTerms.fundAmounts.values.map((bi) => bi.toInt()),
+        readTerms.fundAmounts.values.map((out) => out.value.toInt()),
         2000000,
         4000000,
       );
@@ -145,7 +158,7 @@ void main() {
 
       final terms = getTerms(
         participants: { odd },
-        fundAmounts: { odd: CoinUnit.coin.toSats("1") },
+        fundAmounts: { odd: getFundOutput(0, "1") },
         outcomes: { odd: getOutcome(["1"]) },
       );
 

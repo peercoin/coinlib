@@ -13,7 +13,6 @@ CETOutcome getOutcome(List<String> coins, [ Locktime? locktime ]) => CETOutcome(
     ),
   ],
   locktime: locktime ?? exampleOutcomeLocktime,
-  network: Network.mainnet,
 );
 
 void expectInvalidTerms(void Function() f) => expect(

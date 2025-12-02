@@ -18,11 +18,6 @@ void main() {
       () => expectInvalidTerms(() => getOutcome([])),
     );
 
-    test(
-      "outputs must reach minOutput",
-      () => expectInvalidTerms(() => getOutcome(["0.009999"])),
-    );
-
   });
 
 }

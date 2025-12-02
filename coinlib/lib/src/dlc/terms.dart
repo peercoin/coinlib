@@ -10,6 +10,7 @@ import 'package:coinlib/src/network.dart';
 import 'package:coinlib/src/taproot/leaves.dart';
 import 'package:coinlib/src/taproot/taproot.dart';
 import 'package:coinlib/src/tx/locktime.dart';
+import 'package:coinlib/src/tx/output.dart';
 import 'package:coinlib/src/tx/transaction.dart';
 import 'package:collection/collection.dart';
 import 'outcome.dart';
@@ -68,13 +69,17 @@ class DLCTerms with Writable {
   /// A set of participants that must sign all CETs and RTs for the DLCs.
   final Set<ECPublicKey> participants;
 
-  /// How much each participant is expected to fund the DLC. A public key may
-  /// refer to a funder outside of [participants] if they are not expected to
-  /// sign.
+  /// How much each participant is expected to fund the DLC and what [Output]
+  /// should be used to refund the participant. A public key may refer to a
+  /// funder outside of [participants] in the unsual circumstance that they are
+  /// not expected to sign.
+  ///
+  /// The amounts are encapsulated within [Output]s which double as the outputs
+  /// to be used when refunding the amounts.
   ///
   /// Note that these participants will also be expected to pay an equal
   /// contribution to the Funding Transaction fee in excess of these amounts.
-  final Map<ECPublicKey, BigInt> fundAmounts;
+  final Map<ECPublicKey, Output> fundAmounts;
 
   /// Maps oracle adaptor points to [CETOutcome] that contain the output
   /// information to include in Contract Execution Transactions.
@@ -98,14 +103,17 @@ class DLCTerms with Writable {
   /// broadcast of a CET, but this is not checked.
   final Locktime refundLocktime;
 
+  /// The [Network] that this DLC is to be used on.
+  final Network network;
+
   /// All [ECPublicKey]s will be coerced into x-only public keys. May throw
   /// [InvalidDLCTerms].
   DLCTerms({
     required Set<ECPublicKey> participants,
-    required Map<ECPublicKey, BigInt> fundAmounts,
+    required Map<ECPublicKey, Output> fundAmounts,
     required Map<ECPublicKey, CETOutcome> outcomes,
     required this.refundLocktime,
-    required Network network,
+    required this.network,
   }) :
     participants = Set.unmodifiable(participants.map((key) => key.xonly)),
     fundAmounts = _xOnlyUnmodifiableMap(fundAmounts),
@@ -113,12 +121,29 @@ class DLCTerms with Writable {
 
     // There should not be any funding amount for a participant which is under
     // the minimum output
-    if (fundAmounts.values.any((val) => val.compareTo(network.minOutput) < 0)) {
+    if (
+      fundAmounts.values.any(
+        (output) => output.value.compareTo(network.minOutput) < 0,
+      )
+    ) {
       throw InvalidDLCTerms.smallFunding(network.minOutput);
     }
 
+    // The CET outputs must also be no less than the minimum
+    if (
+      outcomes.values.any(
+        (outcome) => outcome.outputs.any(
+          (out) => out.value.compareTo(network.minOutput) < 0,
+        ),
+      )
+    ) {
+      throw InvalidDLCTerms.smallOutput(network.minOutput);
+    }
+
     // The outcome output amounts must add up to the total funded amount
-    final totalToFund = addBigInts(fundAmounts.values);
+    final totalToFund = addBigInts(
+      fundAmounts.values.map((output) => output.value),
+    );
     if (
       outcomes.values.any(
         (outcome) => outcome.totalValue.compareTo(totalToFund) != 0,
@@ -153,10 +178,10 @@ class DLCTerms with Writable {
         reader.readVarInt().toInt(),
         (_) => ECPublicKey.fromXOnly(reader.readSlice(32)),
       ).toSet(),
-      fundAmounts: _readPubKeyMap(reader, () => reader.readVarInt()),
+      fundAmounts: _readPubKeyMap(reader, () => Output.fromReader(reader)),
       outcomes: _readPubKeyMap(
         reader,
-        () => CETOutcome.fromReader(reader, network),
+        () => CETOutcome.fromReader(reader),
       ),
       refundLocktime: reader.readLocktime(),
       network: network,
@@ -193,7 +218,7 @@ class DLCTerms with Writable {
     _writeOrderedPubkeyMap(
       writer,
       fundAmounts,
-      (amt) => writer.writeVarInt(amt),
+      (output) => output.write(writer),
     );
 
     _writeOrderedPubkeyMap(
@@ -222,7 +247,7 @@ class DLCTerms with Writable {
     );
 
   /// Obtains [Taproot] allowing key-path spend using the [musig] key or an APO
-  /// CHECKSIG script-path using the same key used by the CETs and RF.
+  /// CHECKSIG script-path using the same key used by the CETs and RT.
   Taproot get taproot => Taproot(
     internalKey: musig.aggregate,
     mast: TapLeafChecksig.apoInternal,
