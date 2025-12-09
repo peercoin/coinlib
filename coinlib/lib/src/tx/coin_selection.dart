@@ -115,6 +115,7 @@ class CoinSelection {
   }
 
   /// A useful default coin selection algorithm.
+  ///
   /// Currently this will first select candidates at random until the required
   /// input amount is reached. If the resulting transaction is too large or not
   /// enough funds have been reached it will fall back to adding the largest

@@ -76,7 +76,7 @@ class MuSigStatefulSigningSession {
       throw ArgumentError.value(
         privKey,
         "privKey",
-        "doesn't match outPublicKey",
+        "doesn't match ourPublicKey",
       );
     }
 
@@ -119,7 +119,7 @@ class MuSigStatefulSigningSession {
 
   }
 
-  /// Adds the partial signature ([partialSig]) of a participant with the
+  /// Adds the partial signature ([partialSig]) of another participant with the
   /// [participantKey] if it is valid.
   ///
   /// Will return true if the partial signature is valid or false if it isn't.
@@ -128,6 +128,10 @@ class MuSigStatefulSigningSession {
   ///
   /// A valid [partialSig] cannot be sent for a [participantKey] more than once
   /// or [StateError] will be thrown.
+  ///
+  /// The participant's own partial signature is not required and
+  /// [ArgumentError] will be thrown if the [participantKey] doesn't belong to
+  /// another participant.
   bool addPartialSignature({
     required MuSigPartialSig partialSig,
     required ECPublicKey participantKey,

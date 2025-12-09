@@ -1,6 +1,9 @@
 import 'dart:typed_data';
+import 'package:coinlib/src/common/bytes.dart';
 import 'package:coinlib/src/common/hex.dart';
+import 'package:coinlib/src/crypto/ec_public_key.dart';
 import 'package:coinlib/src/tx/locktime.dart';
+import 'package:collection/collection.dart';
 import 'checks.dart';
 
 /// Thrown when attempting to read or write beyond the boundary of data
@@ -96,6 +99,17 @@ class BytesReader extends _ReadWriteBase {
 
   Locktime readLocktime() => Locktime(readUInt32());
 
+  Map<ECPublicKey, T> readXPubKeyMap<T>(T Function() readValue)
+    => Map.fromEntries(
+      Iterable.generate(
+        readVarInt().toInt(),
+        (_) => MapEntry(
+          ECPublicKey.fromXOnly(readSlice(32)),
+          readValue(),
+        ),
+      ),
+    );
+
 }
 
 /// Methods to handle the writing of data
@@ -143,6 +157,24 @@ mixin Writer {
   }
 
   void writeLocktime(Locktime locktime) => writeUInt32(locktime.value);
+
+  void writeOrderedXPubkeyMap<T>(
+    Map<ECPublicKey, T> map,
+    void Function(T) writeValue,
+  ) {
+
+    writeVarInt(BigInt.from(map.length));
+
+    final orderedEntries = map.entries
+      .map((entry) => MapEntry(entry.key.x, entry.value))
+      .sortedByCompare((entry) => entry.key, compareBytes);
+
+    for (final entry in orderedEntries) {
+      writeSlice(entry.key);
+      writeValue(entry.value);
+    }
+
+  }
 
 }
 

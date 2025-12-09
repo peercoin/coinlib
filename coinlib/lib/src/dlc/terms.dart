@@ -13,43 +13,12 @@ import 'package:coinlib/src/tx/locktime.dart';
 import 'package:coinlib/src/tx/output.dart';
 import 'package:coinlib/src/tx/transaction.dart';
 import 'package:collection/collection.dart';
+import '../scripts/programs/p2tr.dart';
 import 'outcome.dart';
 import 'errors.dart';
 
 Map<ECPublicKey, T> _xOnlyUnmodifiableMap<T>(Map<ECPublicKey, T> map)
   => Map.unmodifiable(map.map((key, v) => MapEntry(key.xonly, v)));
-
-Map<ECPublicKey, T> _readPubKeyMap<T>(
-  BytesReader reader,
-  T Function() readValue,
-) => Map.fromEntries(
-  Iterable.generate(
-    reader.readVarInt().toInt(),
-    (_) => MapEntry(
-      ECPublicKey.fromXOnly(reader.readSlice(32)),
-      readValue(),
-    ),
-  ),
-);
-
-void _writeOrderedPubkeyMap<T>(
-  Writer writer,
-  Map<ECPublicKey, T> map,
-  void Function(T) writeValue,
-) {
-
-  writer.writeVarInt(BigInt.from(map.length));
-
-  final orderedEntries = map.entries
-    .map((entry) => MapEntry(entry.key.x, entry.value))
-    .sortedByCompare((entry) => entry.key, compareBytes);
-
-  for (final entry in orderedEntries) {
-    writer.writeSlice(entry.key);
-    writeValue(entry.value);
-  }
-
-}
 
 /// Specifies the terms of a DLC contract to be agreed upon by all
 /// [participants].
@@ -80,6 +49,9 @@ class DLCTerms with Writable {
   /// Note that these participants will also be expected to pay an equal
   /// contribution to the Funding Transaction fee in excess of these amounts.
   final Map<ECPublicKey, Output> fundAmounts;
+
+  /// The total funded amount
+  final BigInt fundedAmount;
 
   /// Maps oracle adaptor points to [CETOutcome] that contain the output
   /// information to include in Contract Execution Transactions.
@@ -117,6 +89,9 @@ class DLCTerms with Writable {
   }) :
     participants = Set.unmodifiable(participants.map((key) => key.xonly)),
     fundAmounts = _xOnlyUnmodifiableMap(fundAmounts),
+    fundedAmount = addBigInts(
+      fundAmounts.values.map((output) => output.value),
+    ),
     outcomes = _xOnlyUnmodifiableMap(outcomes) {
 
     // There should not be any funding amount for a participant which is under
@@ -141,12 +116,9 @@ class DLCTerms with Writable {
     }
 
     // The outcome output amounts must add up to the total funded amount
-    final totalToFund = addBigInts(
-      fundAmounts.values.map((output) => output.value),
-    );
     if (
       outcomes.values.any(
-        (outcome) => outcome.totalValue.compareTo(totalToFund) != 0,
+        (outcome) => outcome.totalValue.compareTo(fundedAmount) != 0,
       )
     ) {
       throw InvalidDLCTerms.badOutcomeMatch();
@@ -178,11 +150,8 @@ class DLCTerms with Writable {
         reader.readVarInt().toInt(),
         (_) => ECPublicKey.fromXOnly(reader.readSlice(32)),
       ).toSet(),
-      fundAmounts: _readPubKeyMap(reader, () => Output.fromReader(reader)),
-      outcomes: _readPubKeyMap(
-        reader,
-        () => CETOutcome.fromReader(reader),
-      ),
+      fundAmounts: reader.readXPubKeyMap(() => Output.fromReader(reader)),
+      outcomes: reader.readXPubKeyMap(() => CETOutcome.fromReader(reader)),
       refundLocktime: reader.readLocktime(),
       network: network,
     );
@@ -215,17 +184,12 @@ class DLCTerms with Writable {
       writer.writeSlice(key);
     }
 
-    _writeOrderedPubkeyMap(
-      writer,
+    writer.writeOrderedXPubkeyMap(
       fundAmounts,
       (output) => output.write(writer),
     );
 
-    _writeOrderedPubkeyMap(
-      writer,
-      outcomes,
-      (outcome) => outcome.write(writer),
-    );
+    writer.writeOrderedXPubkeyMap(outcomes, (outcome) => outcome.write(writer));
 
     writer.writeLocktime(refundLocktime);
 
@@ -251,6 +215,11 @@ class DLCTerms with Writable {
   Taproot get taproot => Taproot(
     internalKey: musig.aggregate,
     mast: TapLeafChecksig.apoInternal,
+  );
+
+  Output get fundingOutput => Output.fromProgram(
+    fundedAmount,
+    P2TR.fromTaproot(taproot),
   );
 
 }
