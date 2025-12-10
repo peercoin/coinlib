@@ -37,7 +37,7 @@ class ECPublicKey {
   /// the instance a new key cannot be created (practically impossible for
   /// random 32-bit scalars), then null will be returned.
   ECPublicKey? tweak(Uint8List scalar) {
-    checkBytes(scalar, 32, name: "Scalar");
+    checkScalar(scalar);
     final newKey = secp256k1.pubKeyTweak(_data, scalar, compressed);
     return newKey == null ? null : ECPublicKey(newKey);
   }

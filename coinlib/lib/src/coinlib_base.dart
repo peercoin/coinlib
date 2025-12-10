@@ -14,11 +14,14 @@ export 'package:coinlib/src/crypto/hd_key.dart';
 export 'package:coinlib/src/crypto/message_signature.dart';
 export 'package:coinlib/src/crypto/nums_public_key.dart';
 export 'package:coinlib/src/crypto/random.dart';
+export 'package:coinlib/src/crypto/schnorr_adaptor_signature.dart';
 export 'package:coinlib/src/crypto/schnorr_signature.dart';
 
 export 'package:coinlib/src/encode/base58.dart';
 export 'package:coinlib/src/encode/bech32.dart';
 export 'package:coinlib/src/encode/wif.dart';
+
+export 'package:coinlib/src/musig/library.dart';
 
 export 'package:coinlib/src/scripts/codes.dart';
 export 'package:coinlib/src/scripts/operations.dart';
@@ -39,6 +42,7 @@ export 'package:coinlib/src/taproot/taproot.dart';
 export 'package:coinlib/src/tx/coin_selection.dart';
 export 'package:coinlib/src/tx/transaction.dart';
 export 'package:coinlib/src/tx/sign_details.dart';
+export 'package:coinlib/src/tx/locktime.dart';
 export 'package:coinlib/src/tx/outpoint.dart';
 export 'package:coinlib/src/tx/output.dart';
 
@@ -51,6 +55,7 @@ export 'package:coinlib/src/tx/inputs/p2sh_multisig_input.dart';
 export 'package:coinlib/src/tx/inputs/p2wpkh_input.dart';
 export 'package:coinlib/src/tx/inputs/pkh_input.dart';
 export 'package:coinlib/src/tx/inputs/raw_input.dart';
+export 'package:coinlib/src/tx/inputs/sequence.dart';
 export 'package:coinlib/src/tx/inputs/taproot_input.dart';
 export 'package:coinlib/src/tx/inputs/taproot_key_input.dart';
 export 'package:coinlib/src/tx/inputs/taproot_script_input.dart';

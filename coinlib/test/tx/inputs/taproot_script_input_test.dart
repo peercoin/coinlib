@@ -43,7 +43,6 @@ void main() {
             prevOut: prevOut,
             controlBlock: controlBlock,
             tapscript: script,
-            sequence: sequence,
             stack: withStack ? stack : null,
           ),
           withStack,
@@ -53,7 +52,6 @@ void main() {
             prevOut: prevOut,
             taproot: taprootVec.object,
             leaf: leaf,
-            sequence: sequence,
             stack: withStack ? stack : null,
           ),
           withStack,
@@ -86,11 +84,7 @@ void main() {
 
       expectNoMatch(String asm, List<Uint8List> witness) => expect(
         TaprootScriptInput.match(
-          RawInput(
-            prevOut: prevOut,
-            scriptSig: Script.fromAsm(asm).compiled,
-            sequence: 0,
-          ),
+          RawInput(prevOut: prevOut, scriptSig: Script.fromAsm(asm).compiled),
           witness,
         ),
         null,

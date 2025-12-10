@@ -1,31 +1,15 @@
 import 'dart:io';
 import 'util.dart';
 
-/// Follows bitcoin-core/secp256k1's "Building on Windows" instructions.
+/// Follows peercoin/secp256k1-coinlib's "Building on Windows" instructions.
 ///
 /// Runnable in "Developer Command Prompt for VS 2022".
-
 void main() async {
 
-  // Make temporary directory.
   final workDir = Directory.current.path;
-  final tmpDir = createTmpDir();
 
-  // Clone bitcoin-core/secp256k1.
-  await execWithStdioWin("git", [
-    "clone",
-    "https://github.com/bitcoin-core/secp256k1",
-    "$tmpDir/secp256k1",
-  ]);
-  Directory.current = Directory("$tmpDir/secp256k1");
-  await execWithStdioWin(
-    "git",
-    // Use version 0.5.0
-    ["checkout", "e3a885d42a7800c1ccebad94ad1e2b82c4df5c65"],
-  );
-
-  // Build in tmpDir/secp256k1/build.
-  Directory("build").createSync();
+  // Clone into tmp directory
+  final tmpDir = await cloneForWindowsInTmpDir();
 
   // Configure cmake.
   await execWithStdioWin("cmake", [
@@ -38,6 +22,13 @@ void main() async {
     "-B",
     "build",
     "--debug-output",
+    "-DSECP256K1_ENABLE_MODULE_RECOVERY=ON",
+    "-DSECP256K1_BUILD_TESTS=OFF",
+    "-DSECP256K1_BUILD_EXHAUSTIVE_TESTS=OFF",
+    "-DSECP256K1_BUILD_BENCHMARK=OFF",
+    "-DSECP256K1_BUILD_EXAMPLES=OFF",
+    "-DSECP256K1_BUILD_CTIME_TESTS=OFF",
+    "-DCMAKE_BUILD_TYPE=Release",
   ]);
 
   // Build.
@@ -53,11 +44,11 @@ void main() async {
   Directory("$workDir${Platform.pathSeparator}build").createSync();
   final dll = File(
     "$tmpDir"
-    "${Platform.pathSeparator}secp256k1"
+    "${Platform.pathSeparator}secp256k1-coinlib"
     "${Platform.pathSeparator}build"
     "${Platform.pathSeparator}src"
     "${Platform.pathSeparator}RelWithDebInfo"
-    "${Platform.pathSeparator}libsecp256k1-2.dll",
+    "${Platform.pathSeparator}libsecp256k1-6.dll",
   );
 
   print("File exists: ${dll.existsSync()}");

@@ -24,7 +24,6 @@ final unsignedTx = Transaction(
       prevOut: prevOut,
       taproot: regularTR,
       leaf:regularLeaf,
-      sequence: sequence,
     ),
     apoInput,
     apoInput,

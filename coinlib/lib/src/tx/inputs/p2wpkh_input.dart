@@ -3,11 +3,11 @@ import 'package:coinlib/src/crypto/ec_private_key.dart';
 import 'package:coinlib/src/crypto/ec_public_key.dart';
 import 'package:coinlib/src/scripts/programs/p2wpkh.dart';
 import 'package:coinlib/src/tx/sign_details.dart';
-import 'input.dart';
 import 'input_signature.dart';
 import 'pkh_input.dart';
 import 'raw_input.dart';
 import 'legacy_witness_input.dart';
+import 'sequence.dart';
 
 /// An input for a Pay-to-Witness-Public-Key-Hash output ([P2WPKH]). This
 /// contains the public key that should match the hash in the associated output.
@@ -28,7 +28,7 @@ class P2WPKHInput extends LegacyWitnessInput with PKHInput {
     required super.prevOut,
     required this.publicKey,
     this.insig,
-    super.sequence = Input.sequenceFinal,
+    super.sequence = InputSequence.enforceLocktime,
   }) : super(
     witness: [
       if (insig != null) insig.bytes,

@@ -41,9 +41,49 @@ class MyApp extends StatelessWidget {
         prefix: coinlib.Network.mainnet.messagePrefix,
       );
 
-      final schnorrSignature = coinlib.SchnorrSignature.sign(
-        privKey, Uint8List(32),
+      // MuSig with adaptor signature example
+
+      int otherI(int i) => i == 0 ? 1 : 0;
+
+      final muSigPrivKeys = List.generate(
+        2,
+        (i) => coinlib.ECPrivateKey(Uint8List(32)..last = i+1),
       );
+      final muSigPrivs = List.generate(
+        2,
+        (i) => coinlib.MuSigPrivate(
+          muSigPrivKeys[i],
+          { muSigPrivKeys[otherI(i)].pubkey },
+        ),
+      );
+      final muSigSessions = List.generate(
+        2,
+        (i) => coinlib.MuSigStatefulSigningSession(
+          keys: muSigPrivs[i].public,
+          ourPublicKey: muSigPrivKeys[i].pubkey,
+        ),
+      );
+      final partialSigs = List.generate(
+        2,
+        (i) => muSigSessions[i].sign(
+          otherNonces: {
+            muSigPrivKeys[otherI(i)].pubkey:
+              muSigSessions[otherI(i)].ourPublicNonce,
+          },
+          hash: Uint8List(32),
+          privKey: muSigPrivKeys[i],
+          adaptor: privKey.pubkey,
+        ),
+      );
+
+      muSigSessions.first.addPartialSignature(
+        partialSig: partialSigs.last,
+        participantKey: muSigPrivKeys.last.pubkey,
+      );
+      final adaptorSig = (
+       muSigSessions.first.finish() as coinlib.MuSigResultAdaptor
+      ).adaptorSignature;
+      final finalSig = adaptorSig.adapt(privKey);
 
       return Column(
         spacing: 10,
@@ -56,8 +96,8 @@ class MyApp extends StatelessWidget {
             " $msgSignature."
           ),
           Text(
-            "An example Schnorr signature is"
-            " ${coinlib.bytesToHex(schnorrSignature.data)}."
+            "An example MuSig2 Schnorr signature is"
+            " ${coinlib.bytesToHex(finalSig.data)}."
           ),
         ],
       );

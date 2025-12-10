@@ -1,141 +1,130 @@
-import "dart:typed_data";
-import 'package:wasm_interop/wasm_interop.dart';
+import 'package:coinlib/src/secp256k1/heap.dart';
 import 'package:coinlib/src/crypto/random.dart';
-import 'heap_array_wasm.dart';
+import 'package:coinlib/src/secp256k1/wasm.dart';
+import 'heap_wasm.dart';
 import "secp256k1_base.dart";
 import 'secp256k1.wasm.g.dart';
 
-typedef IntFunc1 = int Function(int);
-typedef IntFunc2 = int Function(int, int);
-typedef IntFunc3 = int Function(int, int, int);
-typedef IntFunc4 = int Function(int, int, int, int);
-typedef IntFunc5 = int Function(int, int, int, int, int);
-typedef IntFunc6 = int Function(int, int, int, int, int, int);
+typedef OpaqueMuSigCache = OpaqueGeneric<int>;
+typedef OpaqueMuSigSecretNonce = OpaqueGeneric<int>;
+typedef OpaqueMuSigPublicNonce = OpaqueGeneric<int>;
+typedef OpaqueMuSigSession = OpaqueGeneric<int>;
+typedef OpaqueMuSigPartialSig = OpaqueGeneric<int>;
 
 /// Loads and wraps WASM code to be run via the browser JS APIs
 class Secp256k1 extends Secp256k1Base<
-  int, int, int, int, int, int, int, int, int, int
+  int, int, int, int, int, int, int, int, int, int, int, int, int, int, int,
+  int, int, int, int
 > {
 
-  static final int _ptrBytes = 4; // 32-bit architecture
-  static final int _intBytes = 8; // Allocate 8 bytes to be on the safe side
-  late Uint8List _memory;
+  static const _muSigCacheSize = 197;
+  static const _muSigNonceSize = 132;
+  static const _muSigSessionSize = 133;
+  static const _muSigPartialSigSize = 36;
+
+  late final HeapFactory _heapFactory;
 
   @override
   Future<void> internalLoad() async {
 
     // Load Instance
 
-    final inst = await Instance.fromBytesAsync(
-      secp256k1WasmData,
-      // Dummy WASI imports. No file descriptor support provided.
-      importMap: {
-        "wasi_snapshot_preview1" : {
-          "fd_close": () => Object(),
-          "fd_seek": () => Object(),
-          "fd_write": () => Object(),
-        },
-      },
-    );
-    _memory = inst.memories["memory"]!.buffer.asUint8List();
+    final wasm = await Wasm.loadWasi(secp256k1WasmData);
 
     // Set functions
-    extEcSeckeyVerify = inst.functions["secp256k1_ec_seckey_verify"]
-      as IntFunc2;
-    extEcSeckeyVerify = inst.functions["secp256k1_ec_seckey_verify"]
-      as IntFunc2;
-    extEcPubkeyCreate = inst.functions["secp256k1_ec_pubkey_create"]
-      as IntFunc3;
-    extEcPubkeySerialize = inst.functions["secp256k1_ec_pubkey_serialize"]
-      as IntFunc5;
-    extEcPubkeyParse = inst.functions["secp256k1_ec_pubkey_parse"]
-      as IntFunc4;
-    extEcdsaSign = inst.functions["secp256k1_ecdsa_sign"]
-      as IntFunc6;
+    extEcSeckeyVerify = wasm.field("secp256k1_ec_seckey_verify");
+    extEcSeckeyVerify = wasm.field("secp256k1_ec_seckey_verify");
+    extEcPubkeyCreate = wasm.field("secp256k1_ec_pubkey_create");
+    extEcPubkeySerialize = wasm.field("secp256k1_ec_pubkey_serialize");
+    extEcPubkeyParse = wasm.field("secp256k1_ec_pubkey_parse");
+    extEcdsaSign = wasm.field("secp256k1_ecdsa_sign");
     extEcdsaSignatureSerializeCompact
-      = inst.functions["secp256k1_ecdsa_signature_serialize_compact"]
-      as IntFunc3;
+      = wasm.field("secp256k1_ecdsa_signature_serialize_compact");
     extEcdsaSignatureParseCompact
-      = inst.functions["secp256k1_ecdsa_signature_parse_compact"]
-      as IntFunc3;
+      = wasm.field("secp256k1_ecdsa_signature_parse_compact");
     extEcdsaSignatureNormalize
-      = inst.functions["secp256k1_ecdsa_signature_normalize"]
-      as IntFunc3;
+      = wasm.field("secp256k1_ecdsa_signature_normalize");
     extEcdsaSignatureSerializeDer
-      = inst.functions["secp256k1_ecdsa_signature_serialize_der"]
-      as IntFunc4;
+      = wasm.field("secp256k1_ecdsa_signature_serialize_der");
     extEcdsaSignatureParseDer
-      = inst.functions["secp256k1_ecdsa_signature_parse_der"]
-      as IntFunc4;
-    extEcdsaVerify = inst.functions["secp256k1_ecdsa_verify"]
-      as IntFunc4;
+      = wasm.field("secp256k1_ecdsa_signature_parse_der");
+    extEcdsaVerify = wasm.field("secp256k1_ecdsa_verify");
     extEcdsaRecoverableSignatureSerializeCompact
-      = inst.functions["secp256k1_ecdsa_recoverable_signature_serialize_compact"]
-      as IntFunc4;
+      = wasm.field("secp256k1_ecdsa_recoverable_signature_serialize_compact");
     extEcdsaRecoverableSignatureParseCompact
-      = inst.functions["secp256k1_ecdsa_recoverable_signature_parse_compact"]
-      as IntFunc4;
-    extEcdsaSignRecoverable
-      = inst.functions["secp256k1_ecdsa_sign_recoverable"]
-      as IntFunc6;
-    extEcdsaRecover = inst.functions["secp256k1_ecdsa_recover"] as IntFunc4;
-    extEcSeckeyTweakAdd
-      = inst.functions["secp256k1_ec_seckey_tweak_add"]
-      as IntFunc3;
-    extEcPubkeyTweakAdd
-      = inst.functions["secp256k1_ec_pubkey_tweak_add"]
-      as IntFunc3;
-    extEcSeckeyNegate
-      = inst.functions["secp256k1_ec_seckey_negate"]
-      as IntFunc2;
-    extKeypairCreate = inst.functions["secp256k1_keypair_create"] as IntFunc3;
-    extXOnlyPubkeyParse
-      = inst.functions["secp256k1_xonly_pubkey_parse"]
-      as IntFunc3;
-    extSchnorrSign32
-      = inst.functions["secp256k1_schnorrsig_sign32"]
-      as IntFunc5;
-    extSchnorrVerify
-      = inst.functions["secp256k1_schnorrsig_verify"]
-      as IntFunc5;
-    extEcdh = inst.functions["secp256k1_ecdh"] as IntFunc6;
+      = wasm.field("secp256k1_ecdsa_recoverable_signature_parse_compact");
+    extEcdsaSignRecoverable = wasm.field("secp256k1_ecdsa_sign_recoverable");
+    extEcdsaRecover = wasm.field("secp256k1_ecdsa_recover");
+    extEcSeckeyTweakAdd = wasm.field("secp256k1_ec_seckey_tweak_add");
+    extEcPubkeyTweakAdd = wasm.field("secp256k1_ec_pubkey_tweak_add");
+    extEcSeckeyNegate = wasm.field("secp256k1_ec_seckey_negate");
+    extKeypairCreate = wasm.field("secp256k1_keypair_create");
+    extXOnlyPubkeyParse = wasm.field("secp256k1_xonly_pubkey_parse");
+    extXOnlyPubkeySerialize = wasm.field("secp256k1_xonly_pubkey_serialize");
+    extSchnorrSign32 = wasm.field("secp256k1_schnorrsig_sign32");
+    extSchnorrVerify = wasm.field("secp256k1_schnorrsig_verify");
+    extEcdh = wasm.field("secp256k1_ecdh");
+    extEcPubkeySort = wasm.field("secp256k1_ec_pubkey_sort");
+    extMuSigPubkeyAgg = wasm.field("secp256k1_musig_pubkey_agg");
+    extMuSigPubkeyXOnlyTweakAdd
+      = wasm.field("secp256k1_musig_pubkey_xonly_tweak_add");
+    extMuSigNonceGen = wasm.field("secp256k1_musig_nonce_gen");
+    extMuSigPubNonceParse = wasm.field("secp256k1_musig_pubnonce_parse");
+    extMuSigPubNonceSerialize
+      = wasm.field("secp256k1_musig_pubnonce_serialize");
+    extMuSigNonceAgg = wasm.field("secp256k1_musig_nonce_agg");
+    extMuSigNonceProcess = wasm.field("secp256k1_musig_nonce_process");
+    extMuSigPartialSign = wasm.field("secp256k1_musig_partial_sign");
+    extMuSigPartialSigParse = wasm.field("secp256k1_musig_partial_sig_parse");
+    extMuSigPartialSigSerialize
+      = wasm.field("secp256k1_musig_partial_sig_serialize");
+    extMuSigPartialSigVerify = wasm.field("secp256k1_musig_partial_sig_verify");
+    extMuSigPartialSigAgg = wasm.field("secp256k1_musig_partial_sig_agg");
+    extMuSigNonceParity = wasm.field("secp256k1_musig_nonce_parity");
+    extMuSigAdapt = wasm.field("secp256k1_musig_adapt");
+    extMuSigExtractAdaptor = wasm.field("secp256k1_musig_extract_adaptor");
 
     // Local functions for loading purposes
-    final contextCreate = inst.functions["secp256k1_context_create"]
-      as IntFunc1;
-    final contextRandomize = inst.functions["secp256k1_context_randomize"]
-      as IntFunc2;
+    final int Function(int) contextCreate
+      = wasm.field("secp256k1_context_create");
+    final int Function(int, int) contextRandomize
+      = wasm.field("secp256k1_context_randomize");
 
-    final malloc = inst.functions["malloc"]! as MallocFunction;
-    final free = inst.functions["free"]! as FreeFunction;
+    final MallocFunction malloc = wasm.field("malloc");
+    final FreeFunction free = wasm.field("free");
+    _heapFactory = HeapFactory(wasm.memory, malloc, free);
 
     // Heap arrays
-    final arrayFactory = HeapArrayWasmFactory(_memory, malloc, free);
-    key32Array = arrayFactory.create(Secp256k1Base.privkeySize);
-    scalarArray = arrayFactory.create(Secp256k1Base.privkeySize);
-    hashArray = arrayFactory.create(Secp256k1Base.hashSize);
-    entropyArray = arrayFactory.create(Secp256k1Base.entropySize);
-    serializedPubKeyArray = arrayFactory.create(
+    key32Array = _heapFactory.bytes(Secp256k1Base.privkeySize);
+    scalarArray = _heapFactory.bytes(Secp256k1Base.privkeySize);
+    hashArray = _heapFactory.bytes(Secp256k1Base.hashSize);
+    entropyArray = _heapFactory.bytes(Secp256k1Base.entropySize);
+    serializedPubKeyArray = _heapFactory.bytes(
       Secp256k1Base.uncompressedPubkeySize,
     );
-    serializedSigArray = arrayFactory.create(Secp256k1Base.sigSize);
-    derSigArray = arrayFactory.create(Secp256k1Base.derSigSize);
+    preSigArray = _heapFactory.bytes(Secp256k1Base.sigSize);
+    serializedSigArray = _heapFactory.bytes(Secp256k1Base.sigSize);
+    derSigArray = _heapFactory.bytes(Secp256k1Base.derSigSize);
+    muSigPubNonceArray = _heapFactory.bytes(Secp256k1Base.muSigPubNonceSize);
 
-    // Other pointers
-    pubKeyPtr = malloc(Secp256k1Base.pubkeySize);
-    sizeTPtr = malloc(_ptrBytes);
-    sigPtr = malloc(Secp256k1Base.sigSize);
-    recSigPtr = malloc(Secp256k1Base.recSigSize);
-    keyPairPtr = malloc(Secp256k1Base.keyPairSize);
-    xPubKeyPtr = malloc(Secp256k1Base.xonlySize);
-    recIdPtr = malloc(_intBytes);
+    // Heap objects
+    pubKey = _heapFactory.alloc(Secp256k1Base.pubkeySize);
+    sizeT = _heapFactory.integer();
+    integer = _heapFactory.integer();
+    sig = _heapFactory.alloc(Secp256k1Base.sigSize);
+    recSig = _heapFactory.alloc(Secp256k1Base.recSigSize);
+    keyPair = _heapFactory.alloc(Secp256k1Base.keyPairSize);
+    xPubKey = _heapFactory.alloc(Secp256k1Base.xonlySize);
+    muSigAggNonce = _heapFactory.alloc(_muSigNonceSize);
+    recId = _heapFactory.integer();
+
     nullPtr = 0;
 
     // Create and randomise context with 32 bytes
     ctxPtr = contextCreate(Secp256k1Base.contextNone);
 
     final randomBytes = generateRandomBytes(32);
-    final randArray = arrayFactory.create(32);
+    final randArray = _heapFactory.bytes(32);
     randArray.load(randomBytes);
 
     if (contextRandomize(ctxPtr, randArray.ptr) != 1) {
@@ -145,16 +134,38 @@ class Secp256k1 extends Secp256k1Base<
   }
 
   @override
-  set sizeT(int size)
-    => ByteData.view(_memory.buffer).setUint32(sizeTPtr, size, Endian.little);
+  HeapPointerArray<int, int> allocPubKeyArray(int size)
+    => _heapFactory.allocPointerArray(size, Secp256k1Base.pubkeySize);
 
   @override
-  int get sizeT
-    => ByteData.view(_memory.buffer).getUint32(sizeTPtr, Endian.little);
+  HeapPointerArray<int, int> setMuSigPubNonceArray(
+    Iterable<Heap<int>> objs,
+  ) => _heapFactory.assignPointerArray(objs.toList().cast());
 
   @override
-  // Given the little-endian architecture, it is safe to take the first byte as
-  // the desired recid.
-  int get internalRecId => _memory.buffer.asUint8List()[recIdPtr];
+  // Identical in implementation to setMuSigPubNonceArray
+  HeapPointerArray<int, int> setMuSigPartialSigArray(
+    Iterable<Heap<int>> objs,
+  ) => setMuSigPubNonceArray(objs);
+
+  @override
+  Heap<int> allocMuSigCache() => _heapFactory.alloc(_muSigCacheSize);
+
+  @override
+  Heap<int> copyMuSigCache(int copyFrom) => _heapFactory.alloc(
+    _muSigCacheSize, copyFrom: copyFrom,
+  );
+
+  @override
+  Heap<int> allocMuSigSecNonce() => _heapFactory.alloc(_muSigNonceSize);
+
+  @override
+  Heap<int> allocMuSigPubNonce() => _heapFactory.alloc(_muSigNonceSize);
+
+  @override
+  Heap<int> allocMuSigSession() => _heapFactory.alloc(_muSigSessionSize);
+
+  @override
+  Heap<int> allocMuSigPartialSig() => _heapFactory.alloc(_muSigPartialSigSize);
 
 }

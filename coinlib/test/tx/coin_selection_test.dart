@@ -171,7 +171,7 @@ void main() {
             vector.outputValue + vector.expChangeValue,
           );
           expect(tx.version, Transaction.currentVersion);
-          expect(tx.locktime, 0);
+          expect(tx.locktime.value, 0);
 
         } else {
           expect(
@@ -188,7 +188,7 @@ void main() {
 
       final selection = CoinSelection(
         version: 1234,
-        locktime: 54,
+        locktime: Locktime(54),
         selected: [candidateForValue(coin)],
         recipients: [outputForValue(10000)],
         changeProgram: changeProgram,
@@ -199,7 +199,7 @@ void main() {
 
       final tx = selection.transaction;
       expect(tx.version, 1234);
-      expect(tx.locktime, 54);
+      expect(tx.locktime.value, 54);
 
     });
 
@@ -278,7 +278,7 @@ void main() {
         unorderedEquals(values),
       );
       expect(selection.version, 1234);
-      expect(selection.locktime, 0xabcd1234);
+      expect(selection.locktime.value, 0xabcd1234);
     }
 
     final candidates = [coin*4, coin, coin*3, coin, coin*2];
@@ -292,7 +292,7 @@ void main() {
           recipients: [outputForValue(outValue)],
           changeProgram: changeProgram,
           feePerKb: feePerKb, minFee: minFee, minChange: minChange,
-          locktime: 0xabcd1234,
+          locktime: Locktime(0xabcd1234),
         );
         expectSelectedValues(selection, selected);
       }
@@ -316,7 +316,7 @@ void main() {
         recipients: [outputForValue(outValue)],
         changeProgram: changeProgram,
         feePerKb: feePerKb, minFee: minFee, minChange: minChange,
-        locktime: 0xabcd1234,
+        locktime: Locktime(0xabcd1234),
       );
 
       // Only need one
@@ -347,7 +347,7 @@ void main() {
           recipients: [outputForValue(outValue)],
           changeProgram: changeProgram,
           feePerKb: feePerKb, minFee: minFee, minChange: minChange,
-          locktime: 0xabcd1234,
+          locktime: Locktime(0xabcd1234),
         );
         expectSelectedValues(selection, selected);
       }
@@ -372,7 +372,7 @@ void main() {
           recipients: [outputForValue(outValue)],
           changeProgram: changeProgram,
           feePerKb: feePerKb, minFee: minFee, minChange: minChange,
-          locktime: 0xabcd1234,
+          locktime: Locktime(0xabcd1234),
         );
 
       // Defaults to random where possible
@@ -397,7 +397,7 @@ void main() {
         expect(selection.tooLarge, false);
         expect(selection.enoughFunds, true);
         expect(selection.version, 1234);
-        expect(selection.locktime, 0xabcd1234);
+        expect(selection.locktime.value, 0xabcd1234);
         expect(
           selection.selected.where(
             (candidate) => candidate.value.toInt() == coin*100,

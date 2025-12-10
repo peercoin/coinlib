@@ -49,7 +49,7 @@ void main() {
         ...prevOutHash,
         0xef, 0xbe, 0xed, 0xfe,
         ...withVarInt,
-        0xed, 0xfe, 0xef, 0xbe,
+        0xfe, 0xff, 0xff, 0xff,
       ]);
 
     }
@@ -84,7 +84,6 @@ void main() {
         expectP2SHMultisigInput(
           P2SHMultisigInput(
             prevOut: prevOut,
-            sequence: sequence,
             program: multisig,
             sigs: insigs.sublist(0, i),
           ),
@@ -108,7 +107,6 @@ void main() {
       expect(
         () => P2SHMultisigInput(
           prevOut: prevOut,
-          sequence: sequence,
           program: multisig,
           sigs: insigs.sublist(0, 4),
         ),
@@ -120,7 +118,6 @@ void main() {
 
       final input = P2SHMultisigInput(
         prevOut: prevOut,
-        sequence: sequence,
         program: multisig,
         sigs: insigs.sublist(0, 1),
       );
@@ -150,11 +147,7 @@ void main() {
       ]) {
         expect(
           P2SHMultisigInput.match(
-            RawInput(
-              prevOut: prevOut,
-              scriptSig: Script.fromAsm(asm).compiled,
-              sequence: 0,
-            ),
+            RawInput(prevOut: prevOut, scriptSig: Script.fromAsm(asm).compiled),
           ),
           null,
         );

@@ -2,15 +2,15 @@ name: coinlib
 description:
   A straight-forward, modular library for Peercoin and other Satoshi-based UTXO
   blockchains
-version: 4.1.0
+version: 5.0.0
 repository: https://github.com/peercoin/coinlib
 
 environment:
-  sdk: '>=3.2.0 <4.0.0'
+  sdk: '>=3.4.0 <4.0.0'
 
 dev_dependencies:
-  ffigen: ^12.0.0
-  lints: ^4.0.0
+  ffigen: ^19.1.0
+  lints: ^6.0.0
   test: ^1.21.0
 
 dependencies:
@@ -21,7 +21,6 @@ dependencies:
   hex: ^0.2.0
   path: ^1.8.0
   pointycastle: ^3.7.3
-  wasm_interop: ^2.0.1
 
 ffigen:
   name: NativeSecp256k1
@@ -32,3 +31,13 @@ ffigen:
       - 'include/secp256k1_recovery.h'
       - 'include/secp256k1_schnorrsig.h'
       - 'include/secp256k1_ecdh.h'
+      - 'include/secp256k1_musig.h'
+  typedefs:
+    exclude:
+      - _.*
+  structs:
+    exclude:
+      - _.*
+  macros:
+    exclude:
+      - _.*

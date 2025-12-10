@@ -5,9 +5,9 @@ import 'package:coinlib/src/taproot/taproot.dart';
 import 'package:coinlib/src/tx/inputs/taproot_input.dart';
 import 'package:coinlib/src/tx/sign_details.dart';
 import 'package:coinlib/src/tx/transaction.dart';
-import 'input.dart';
 import 'input_signature.dart';
 import 'raw_input.dart';
+import 'sequence.dart';
 
 /// A [TaprootInput] which spends using the key-path
 class TaprootKeyInput extends TaprootInput {
@@ -28,7 +28,7 @@ class TaprootKeyInput extends TaprootInput {
   TaprootKeyInput({
     required super.prevOut,
     this.insig,
-    super.sequence = Input.sequenceFinal,
+    super.sequence = InputSequence.enforceLocktime,
   }) : super(witness: [insig != null ? insig.bytes : Uint8List(0)]);
 
   /// Checks if the [raw] input and [witness] data match the expected format for
