@@ -8,11 +8,11 @@ secp256k1-coinlib fork.
   `SchnorrAdaptorSignature`.
 - Adds `InputSequence` abstraction for input sequences. Input sequences are now
     `0xfffffffe` by default and enforce locktimes.
-- Adds `locktimeIsEnforced` to `Transaction` to determine if the locktime is in
-    effect.
 - Adds `Locktime` abstractions for transactions. Transactions have
     `.isUnlocked` to determine if the transaction is available for block
     inclusion.
+- Adds `locktimeIsEnforced` to `Transaction` to determine if the locktime is in
+    effect.
 - `InputCandidate.defaultSigHash` is moved to `TaprootKeyInput` and
     `TaprootSingleScriptSigInput` and `defaultSignedSize` is removed from
     Taproot inputs.
