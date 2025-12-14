@@ -1,4 +1,3 @@
-
 void _checkInt(int i, int min, int max, String type, String name) {
   if (i < min || i > max) {
     throw ArgumentError.value(i, name, "must be a $type");

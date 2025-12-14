@@ -52,7 +52,10 @@ class Wasm {
 
   }
 
+  /// This must be used every single time memory access is required. It must not
+  /// be stored as it can be invalidated at any time.
   Uint8List get memory => _exports.memory.buffer.toDart.asUint8List();
+
   T field<T>(String name) => _exports.getProperty(name.toJS).dartify() as T;
 
 }

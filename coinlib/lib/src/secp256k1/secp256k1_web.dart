@@ -90,9 +90,7 @@ class Secp256k1 extends Secp256k1Base<
     final int Function(int, int) contextRandomize
       = wasm.field("secp256k1_context_randomize");
 
-    final MallocFunction malloc = wasm.field("malloc");
-    final FreeFunction free = wasm.field("free");
-    _heapFactory = HeapFactory(wasm.memory, malloc, free);
+    _heapFactory = HeapFactory(wasm, wasm.field("malloc"), wasm.field("free"));
 
     // Heap arrays
     key32Array = _heapFactory.bytes(Secp256k1Base.privkeySize);
