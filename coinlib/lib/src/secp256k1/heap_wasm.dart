@@ -3,7 +3,7 @@ import 'heap.dart';
 import 'wasm.dart';
 
 typedef MallocFunction = int Function(int);
-typedef FreeFunction = int Function(int);
+typedef FreeFunction = void Function(int);
 
 // Using wasm32, so integers are 32 bits
 final int _intBytes = 4;
@@ -20,7 +20,8 @@ class HeapWasm implements Heap<int> {
   @override
   final int ptr;
 
-  HeapWasm._(this._wasm, this.ptr, FreeFunction free) {
+  HeapWasm._(this._wasm, this.ptr, FreeFunction? free) {
+    if (free == null) return;
     // Copy avoids reference to object by finalizer ensuring that the object is
     // indeed freed.
     final ptrCopy = ptr;
@@ -63,8 +64,7 @@ class HeapIntWasm extends HeapWasm implements HeapInt<int> {
   int get value => _view.getUint32(ptr, Endian.little);
 
   /// If this represents an integer array, get the integer at the [i] position.
-  HeapIntWasm operator[](int i)
-    => HeapIntWasm._(_wasm, ptr+_intBytes*i, (_) => 0);
+  HeapIntWasm operator[](int i) => HeapIntWasm._(_wasm, ptr+_intBytes*i, null);
 
 }
 
