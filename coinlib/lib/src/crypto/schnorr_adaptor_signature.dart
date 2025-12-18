@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+import 'package:coinlib/src/common/serial.dart';
 import 'ec_private_key.dart';
 import 'schnorr_signature.dart';
 import 'package:coinlib/src/secp256k1/secp256k1.dart';
@@ -6,7 +8,7 @@ import 'package:coinlib/src/secp256k1/secp256k1.dart';
 /// signature can be adapted (decrypted) using [adapt] with the discrete-log of
 /// the point (private key to a public key). The signature will be complete and
 /// valid if the correct adaptor was given.
-class SchnorrAdaptorSignature {
+class SchnorrAdaptorSignature with Writable {
 
   /// The signature that contains the adapted nonce but requires the adaptor
   /// scalar
@@ -15,6 +17,12 @@ class SchnorrAdaptorSignature {
   final bool parity;
 
   SchnorrAdaptorSignature(this.preSig, this.parity);
+  SchnorrAdaptorSignature.fromReader(BytesReader reader)
+    : preSig = SchnorrSignature(reader.readSlice(SchnorrSignature.length)),
+      parity = reader.readUInt8() == 1;
+
+  SchnorrAdaptorSignature.fromBytes(Uint8List bytes)
+    : this.fromReader(BytesReader(bytes));
 
   /// Adapts the adaptor signature with the discrete log to the adaptor point
   /// given as an [ECPrivateKey]. The resulting signature is not verified.
@@ -50,6 +58,12 @@ class SchnorrAdaptorSignature {
     } on Secp256k1Exception {
       throw InvalidSchnorrSignature();
     }
+  }
+
+  @override
+  void write(Writer writer) {
+    writer.writeSlice(preSig.data);
+    writer.writeUInt8(parity ? 1 : 0);
   }
 
 }

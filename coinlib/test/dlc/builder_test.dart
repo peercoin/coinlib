@@ -239,7 +239,6 @@ void main() {
             Network.mainnet.minFee,
           )!;
 
-          expect(dlc.terms.toBytes(), buildersFor2CETs.first.terms.toBytes());
           expect(dlc.cets, hasLength(2));
           expect(
             dlc.cets.values.map((cet) => cet.tx),
@@ -264,7 +263,7 @@ void main() {
           expect(
             dlc.refundTransaction,
             txMatcher(
-              dlc.terms.refundLocktime,
+              buildersFor2CETs.first.terms.refundLocktime,
               [
                 getFundOutputWithValue(
                   4, CoinUnit.coin.toSats("2") + sharedDust,

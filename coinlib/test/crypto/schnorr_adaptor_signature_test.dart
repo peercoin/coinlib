@@ -33,6 +33,14 @@ void main() {
 
     });
 
+    test("can read/write", () {
+      final readSig = SchnorrAdaptorSignature.fromBytes(
+        goodAdaptorSig.toBytes(),
+      );
+      expect(bytesToHex(readSig.preSig.data), validSchnorrSig);
+      expect(readSig.parity, false);
+    });
+
   });
 
 }

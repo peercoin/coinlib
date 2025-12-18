@@ -314,7 +314,6 @@ class DLCStatefulBuilder {
     );
 
     return DLCReady(
-      terms: terms,
       refundTransaction: signedRefundTx,
       cets: {
         for (final cet in _cets)
