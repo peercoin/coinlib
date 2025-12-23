@@ -1,0 +1,33 @@
+library;
+
+import 'dart:typed_data';
+import 'package:coinlib/src/common/bigints.dart';
+import 'package:coinlib/src/common/bytes.dart';
+import 'package:coinlib/src/common/hex.dart';
+import 'package:coinlib/src/common/serial.dart';
+import 'package:coinlib/src/crypto/ec_private_key.dart';
+import 'package:coinlib/src/crypto/ec_public_key.dart';
+import 'package:coinlib/src/crypto/hash.dart';
+import 'package:coinlib/src/crypto/schnorr_adaptor_signature.dart';
+import 'package:coinlib/src/musig/library.dart';
+import 'package:coinlib/src/network.dart';
+import 'package:coinlib/src/scripts/programs/p2tr.dart';
+import 'package:coinlib/src/taproot/leaves.dart';
+import 'package:coinlib/src/taproot/taproot.dart';
+import 'package:coinlib/src/tx/coin_selection.dart';
+import 'package:coinlib/src/tx/inputs/input_signature.dart';
+import 'package:coinlib/src/tx/inputs/taproot_single_script_sig_input.dart';
+import 'package:coinlib/src/tx/locktime.dart';
+import 'package:coinlib/src/tx/output.dart';
+import 'package:coinlib/src/tx/sighash/sighash_type.dart';
+import 'package:coinlib/src/tx/sighash/taproot_signature_hasher.dart';
+import 'package:coinlib/src/tx/sign_details.dart';
+import 'package:coinlib/src/tx/transaction.dart';
+import 'package:collection/collection.dart';
+
+part "builder.dart";
+part "create_apo_transaction.dart";
+part "errors.dart";
+part "outcome.dart";
+part "ready.dart";
+part "terms.dart";

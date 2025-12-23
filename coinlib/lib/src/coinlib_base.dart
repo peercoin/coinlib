@@ -17,12 +17,7 @@ export 'package:coinlib/src/crypto/random.dart';
 export 'package:coinlib/src/crypto/schnorr_adaptor_signature.dart';
 export 'package:coinlib/src/crypto/schnorr_signature.dart';
 
-export 'package:coinlib/src/dlc/builder.dart';
-export 'package:coinlib/src/dlc/create_apo_transaction.dart';
-export 'package:coinlib/src/dlc/errors.dart';
-export 'package:coinlib/src/dlc/outcome.dart';
-export 'package:coinlib/src/dlc/ready.dart';
-export 'package:coinlib/src/dlc/terms.dart';
+export 'package:coinlib/src/dlc/library.dart';
 
 export 'package:coinlib/src/encode/base58.dart';
 export 'package:coinlib/src/encode/bech32.dart';

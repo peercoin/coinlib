@@ -1,8 +1,4 @@
-import 'dart:typed_data';
-import 'package:coinlib/src/common/serial.dart';
-import 'package:coinlib/src/crypto/ec_public_key.dart';
-import 'package:coinlib/src/crypto/schnorr_adaptor_signature.dart';
-import 'package:coinlib/src/tx/transaction.dart';
+part of "library.dart";
 
 class CETReady with Writable {
 

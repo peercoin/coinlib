@@ -1,3 +1,5 @@
+part of "library.dart";
+
 class InvalidDLCTerms implements Exception {
 
   final String message;

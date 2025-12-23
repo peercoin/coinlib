@@ -1,21 +1,4 @@
-import 'dart:typed_data';
-import 'package:coinlib/src/common/bigints.dart';
-import 'package:coinlib/src/common/bytes.dart';
-import 'package:coinlib/src/common/hex.dart';
-import 'package:coinlib/src/common/serial.dart';
-import 'package:coinlib/src/crypto/ec_public_key.dart';
-import 'package:coinlib/src/crypto/hash.dart';
-import 'package:coinlib/src/musig/library.dart';
-import 'package:coinlib/src/network.dart';
-import 'package:coinlib/src/taproot/leaves.dart';
-import 'package:coinlib/src/taproot/taproot.dart';
-import 'package:coinlib/src/tx/locktime.dart';
-import 'package:coinlib/src/tx/output.dart';
-import 'package:coinlib/src/tx/transaction.dart';
-import 'package:collection/collection.dart';
-import '../scripts/programs/p2tr.dart';
-import 'outcome.dart';
-import 'errors.dart';
+part of "library.dart";
 
 Map<ECPublicKey, T> _xOnlyUnmodifiableMap<T>(Map<ECPublicKey, T> map)
   => Map.unmodifiable(map.map((key, v) => MapEntry(key.xonly, v)));

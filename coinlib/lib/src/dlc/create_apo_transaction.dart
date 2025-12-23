@@ -1,10 +1,4 @@
-import 'package:coinlib/src/network.dart';
-import 'package:coinlib/src/tx/coin_selection.dart';
-import 'package:coinlib/src/tx/inputs/taproot_single_script_sig_input.dart';
-import 'package:coinlib/src/tx/locktime.dart';
-import 'package:coinlib/src/tx/output.dart';
-import 'package:coinlib/src/tx/transaction.dart';
-import 'package:collection/collection.dart';
+part of "library.dart";
 
 /// For outputs [outputs] of a CET or RT, this reduces the output amounts to
 /// cover the required transaction fee and returns a unsigned [Transaction] with

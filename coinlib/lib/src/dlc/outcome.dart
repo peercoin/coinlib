@@ -1,9 +1,4 @@
-import 'package:coinlib/src/common/bigints.dart';
-import 'package:coinlib/src/common/serial.dart';
-import 'package:coinlib/src/tx/locktime.dart';
-import 'package:coinlib/src/tx/output.dart';
-import 'terms.dart';
-import 'errors.dart';
+part of "library.dart";
 
 /// A CET will pay to the [outputs] with the value of each output evenly reduced
 /// to cover the transaction fee.
