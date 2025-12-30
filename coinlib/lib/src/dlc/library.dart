@@ -28,6 +28,8 @@ import 'package:collection/collection.dart';
 part "builder.dart";
 part "create_apo_transaction.dart";
 part "errors.dart";
+part "funding_collector.dart";
 part "outcome.dart";
+part "participant_funding_commitment.dart";
 part "ready.dart";
 part "terms.dart";

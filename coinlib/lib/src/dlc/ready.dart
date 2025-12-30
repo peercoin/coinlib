@@ -41,4 +41,10 @@ class DLCReady with Writable {
     writer.writeOrderedXPubkeyMap(cets, (cet) => cet.write(writer));
   }
 
+  /// Create the [DLCFundingCollector] class to start construction of the
+  /// Funding Transaction. The [terms] must correspond to this [DLCReady] object
+  /// though this is not validated.
+  DLCFundingCollector beginFunding(DLCTerms terms)
+    => DLCFundingCollector._(terms);
+
 }
