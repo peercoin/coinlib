@@ -409,48 +409,73 @@ class CoinSelection {
 
     if (pool.isEmpty || suffixSum[0] < target) throw InsufficientFunds();
 
-    // Depth-first branch and bound. At each step we either include
+    // Iterative depth-first branch and bound. At each depth we either include
     // pool[depth] or skip it. The "include" branch is explored first to bias
     // towards larger inputs which tends to find solutions faster.
     final selectedFlags = List<bool>.filled(pool.length, false);
+    final phase = List<int>.filled(pool.length, 0);
+    int depth = 0;
+    BigInt currentSum = BigInt.zero;
     int tries = 0;
+    bool found = false;
 
-    bool search(int depth, BigInt currentSum) {
-      if (++tries > bnbMaxTries) return false;
+    outer:
+    while (true) {
+      if (++tries > bnbMaxTries) break;
 
-      // Prune: cannot possibly reach target from here.
-      if (currentSum + suffixSum[depth] < target) return false;
-      // Prune: overshot the changeless window.
-      if (currentSum > target + costOfChange) return false;
+      final reachable = currentSum + suffixSum[depth] >= target;
+      final withinWindow = currentSum <= target + costOfChange;
 
-      if (currentSum >= target) {
-        // Inside the [target, target + costOfChange] window. Validate the
-        // candidate solution against the real CoinSelection constructor as it
-        // is the source of truth for the changeless decision.
-        final picked = <InputCandidate>[
-          for (int i = 0; i < depth; i++)
-            if (selectedFlags[i]) pool[i],
-        ];
-        final selection = trySelection(picked);
-        if (selection.ready && selection.changeless) return true;
-        // Otherwise continue searching; effective-value heuristics may have
-        // disagreed with the real fee (e.g. due to minFee or varint changes).
+      if (reachable && withinWindow) {
+        if (currentSum >= target) {
+          // Inside the [target, target + costOfChange] window. Validate the
+          // candidate solution against the real CoinSelection constructor as
+          // it is the source of truth for the changeless decision.
+          final picked = <InputCandidate>[
+            for (int i = 0; i < depth; i++)
+              if (selectedFlags[i]) pool[i],
+          ];
+          final selection = trySelection(picked);
+          if (selection.ready && selection.changeless) {
+            found = true;
+            break;
+          }
+          // Otherwise continue searching; effective-value heuristics may have
+          // disagreed with the real fee (e.g. due to minFee or varint changes).
+        }
+
+        if (depth < pool.length) {
+          // Descend into the include branch first.
+          phase[depth] = 0;
+          selectedFlags[depth] = true;
+          currentSum += effValues[depth];
+          depth++;
+          continue;
+        }
+        // Else depth == pool.length. Leaf reached without solution: fall
+        // through to backtracking below.
       }
+      // Else: pruned (can't reach target or overshot the window). Fall
+      // through to backtracking.
 
-      if (depth == pool.length) return false;
-
-      // Include branch first.
-      selectedFlags[depth] = true;
-      if (search(depth + 1, currentSum + effValues[depth])) return true;
-
-      // Exclude branch.
-      selectedFlags[depth] = false;
-      if (search(depth + 1, currentSum)) return true;
-
-      return false;
+      // Backtrack to the most recent depth with an untried branch
+      while (true) {
+        if (depth == 0) break outer;
+        depth--;
+        if (phase[depth] == 0) {
+          // Include branch just finished; switch to the exclude branch.
+          selectedFlags[depth] = false;
+          currentSum -= effValues[depth];
+          phase[depth] = 1;
+          depth++;
+          continue outer;
+        }
+        // phase[depth] == 1: both branches tried at this depth. Continue
+        // backtracking up the tree.
+      }
     }
 
-    if (!search(0, BigInt.zero)) throw SolutionNotFound();
+    if (!found) throw SolutionNotFound();
 
     final result = <InputCandidate>[
       for (int i = 0; i < pool.length; i++)
