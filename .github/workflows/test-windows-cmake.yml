@@ -1,0 +1,70 @@
+name: Test Windows cmake ExternalProject build
+
+# Verifies that flutter build windows works with the cmake ExternalProject
+# approach for building secp256k1 — no pre-built DLL required.
+on:
+  push:
+    branches:
+      - fix/windows-cmake-externalproject
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Enable Windows desktop
+        run: flutter config --enable-windows-desktop
+
+      - name: Override coinlib_flutter with local path
+        run: |
+          echo "dependency_overrides:" > coinlib_flutter/example/pubspec_overrides.yaml
+          echo "  coinlib_flutter:" >> coinlib_flutter/example/pubspec_overrides.yaml
+          echo "    path: .." >> coinlib_flutter/example/pubspec_overrides.yaml
+        shell: bash
+
+      - name: Get dependencies
+        run: flutter pub get
+        working-directory: coinlib_flutter/example
+
+      - name: Build Windows release
+        run: flutter build windows --release
+        working-directory: coinlib_flutter/example
+
+      - name: Verify secp256k1.dll is bundled
+        run: |
+          $dll = "build\windows\x64\runner\Release\secp256k1.dll"
+          if (!(Test-Path $dll)) {
+            Write-Error "secp256k1.dll not found at $dll — cmake ExternalProject may not have run or DLL rename failed"
+            exit 1
+          }
+          $size = (Get-Item $dll).Length
+          Write-Host "PASS: secp256k1.dll found at $dll ($size bytes)"
+        shell: pwsh
+        working-directory: coinlib_flutter/example
+
+      - name: Upload ExternalProject logs
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: secp256k1-externalproject-logs
+          path: coinlib_flutter/example/build/windows/x64/secp256k1/
+          if-no-files-found: warn
+
+      - name: Upload build output
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: windows-release-bundle
+          path: coinlib_flutter/example/build/windows/x64/runner/Release/
+          if-no-files-found: warn

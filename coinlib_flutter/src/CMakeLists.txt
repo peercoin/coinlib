@@ -10,7 +10,13 @@ project(coinlib_library VERSION 1.0.0 LANGUAGES C)
 include(ExternalProject)
 
 set(SECP256K1_PREFIX ${CMAKE_BINARY_DIR}/secp256k1)
-set(SECP256K1_CFLAGS "-O2 ${CMAKE_C_FLAGS}")
+
+# MSVC uses /O2 via CMAKE_BUILD_TYPE; -O2 is not a valid MSVC flag.
+if(MSVC)
+  set(SECP256K1_CFLAGS "${CMAKE_C_FLAGS}")
+else()
+  set(SECP256K1_CFLAGS "-O2 ${CMAKE_C_FLAGS}")
+endif()
 
 set(
   SECP256K1_ARGS
@@ -40,6 +46,15 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL Android)
   )
 endif()
 
+# Visual Studio generator requires explicit --config; CMAKE_BUILD_TYPE is ignored.
+if(CMAKE_CONFIGURATION_TYPES)
+  set(SECP256K1_BUILD_CMD   ${CMAKE_COMMAND} --build   . --config $<CONFIG>)
+  set(SECP256K1_INSTALL_CMD ${CMAKE_COMMAND} --install . --config $<CONFIG>)
+else()
+  set(SECP256K1_BUILD_CMD   ${CMAKE_COMMAND} --build   .)
+  set(SECP256K1_INSTALL_CMD ${CMAKE_COMMAND} --install .)
+endif()
+
 ExternalProject_Add(
 
   secp256k1
@@ -52,42 +67,80 @@ ExternalProject_Add(
   # This is necessary to ensure CMake doesn't add cache settings
   CMAKE_GENERATOR ${CMAKE_GENERATOR}
 
+  # Required for Visual Studio to target the correct architecture.
+  CMAKE_GENERATOR_PLATFORM ${CMAKE_GENERATOR_PLATFORM}
+  CMAKE_GENERATOR_TOOLSET  ${CMAKE_GENERATOR_TOOLSET}
+
   CMAKE_ARGS ${SECP256K1_ARGS}
+
+  BUILD_COMMAND   ${SECP256K1_BUILD_CMD}
+  INSTALL_COMMAND ${SECP256K1_INSTALL_CMD}
 
 )
 
 # Post-build processing of library file
 # Move output library to the correct place
 
-set(SECP256K1_VERSIONEDLIB ${SECP256K1_PREFIX}/lib/libsecp256k1.so.2.2.0)
-set(SECP255K1_FINALLIB ${SECP256K1_PREFIX}/lib/libsecp256k1.so)
+if(WIN32)
 
-# Move any versioned .so file to an unversioned .so file.
-# If the versioned file doesn't exist this shouldn't fail as the destination
-# should have been built already
-add_custom_target(
-  removeVersion
-  ALL
-  COMMAND ${CMAKE_COMMAND} -E rename
-    ${SECP256K1_VERSIONEDLIB}
-    ${SECP255K1_FINALLIB}
-    || exit 0
-)
-add_dependencies(removeVersion secp256k1)
+  set(SECP256K1_BIN_DIR ${SECP256K1_PREFIX}/bin)
+  set(SECP256K1_FINAL_DLL ${SECP256K1_BIN_DIR}/secp256k1.dll)
 
-# For Android, move library to JNI directory
-if (${CMAKE_SYSTEM_NAME} STREQUAL Android)
-  set(
-    JNI_DIR
-    ${CMAKE_CURRENT_SOURCE_DIR}/../android/src/main/jniLibs/${ANDROID_ABI}
+  # Rename the versioned DLL (e.g. libsecp256k1-2.dll) to secp256k1.dll.
+  file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/install_secp256k1_dll.cmake [=[
+    file(GLOB _versioned_dlls LIST_DIRECTORIES false "${BIN_DIR}/*secp256k1-*.dll")
+    if(NOT _versioned_dlls)
+      message(FATAL_ERROR "secp256k1 DLL not found (${BIN_DIR}/*secp256k1-*.dll)")
+    endif()
+    list(GET _versioned_dlls 0 _versioned)
+    file(RENAME "${_versioned}" "${BIN_DIR}/secp256k1.dll")
+  ]=])
+
+  ExternalProject_Add_Step(secp256k1 renameDll
+    COMMAND ${CMAKE_COMMAND}
+      -DBIN_DIR=${SECP256K1_BIN_DIR}
+      -P ${CMAKE_CURRENT_BINARY_DIR}/install_secp256k1_dll.cmake
+    DEPENDEES install
+    ALWAYS OFF
   )
+
+  set(SECP256K1_OUTPUT ${SECP256K1_FINAL_DLL} PARENT_SCOPE)
+
+else()
+
+  set(SECP256K1_VERSIONEDLIB ${SECP256K1_PREFIX}/lib/libsecp256k1.so.2.2.0)
+  set(SECP255K1_FINALLIB ${SECP256K1_PREFIX}/lib/libsecp256k1.so)
+
+  # Move any versioned .so file to an unversioned .so file.
+  # If the versioned file doesn't exist this shouldn't fail as the destination
+  # should have been built already
   add_custom_target(
-    moveAndroid
+    removeVersion
     ALL
-    COMMAND mkdir -p ${JNI_DIR}
     COMMAND ${CMAKE_COMMAND} -E rename
+      ${SECP256K1_VERSIONEDLIB}
       ${SECP255K1_FINALLIB}
-      ${JNI_DIR}/libsecp256k1.so
+      || exit 0
   )
-  add_dependencies(moveAndroid removeVersion)
+  add_dependencies(removeVersion secp256k1)
+
+  set(SECP256K1_OUTPUT ${SECP255K1_FINALLIB} PARENT_SCOPE)
+
+  # For Android, move library to JNI directory
+  if (${CMAKE_SYSTEM_NAME} STREQUAL Android)
+    set(
+      JNI_DIR
+      ${CMAKE_CURRENT_SOURCE_DIR}/../android/src/main/jniLibs/${ANDROID_ABI}
+    )
+    add_custom_target(
+      moveAndroid
+      ALL
+      COMMAND mkdir -p ${JNI_DIR}
+      COMMAND ${CMAKE_COMMAND} -E rename
+        ${SECP255K1_FINALLIB}
+        ${JNI_DIR}/libsecp256k1.so
+    )
+    add_dependencies(moveAndroid removeVersion)
+  endif()
+
 endif()

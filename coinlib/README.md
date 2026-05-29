@@ -85,6 +85,9 @@ place the library under a `build` directory.
 
 ## Building for Windows
 
+When using `coinlib_flutter` the native library is built automatically by cmake.
+The scripts below are only needed when using `coinlib` directly outside of Flutter.
+
 ### Native Windows build
 
 **Please note that native windows builds under this section can sometimes freeze
@@ -96,7 +99,7 @@ Building on Windows requires CMake as a dependency.
 
 The Windows shared library can be built using `dart run coinlib:build_windows` in
 the root directory of your package which will produce a shared library into
-`build/libsecp256k1.dll`. This can also be run in the `coinlib` root directory
+`build/secp256k1.dll`. This can also be run in the `coinlib` root directory
 via `dart run bin/build_windows.dart`.
 
 Windows builds use the Visual Studio 17 2022 generator.  Earlier Visual Studio
