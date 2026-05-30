@@ -484,6 +484,119 @@ void main() {
 
     });
 
+    test("Branch and Bound", () {
+      CoinSelection getBnB({
+        required List<int> candidates,
+        required int outValue,
+      }) =>
+          CoinSelection.branchAndBound(
+            version: 1234,
+            candidates: candidates.map(candidateForValue),
+            recipients: [outputForValue(outValue)],
+            changeProgram: changeProgram,
+            feePerKb: feePerKb,
+            minFee: minFee,
+            minChange: minChange,
+            locktime: 0xabcd1234,
+          );
+
+      // Single input is an exact-fee match: input = coin + 1910 funds the
+      // coin recipient changelessly.
+      {
+        final selection = getBnB(
+          candidates: [coin + 1910],
+          outValue: coin,
+        );
+        expectSelectedValues(selection, [coin + 1910]);
+        expect(selection.changeless, true);
+        expect(selection.ready, true);
+      }
+
+      // When some candidates would produce too much change and one is in the
+      // changeless window, BnB picks the changeless one.
+      {
+        final selection = getBnB(
+          candidates: [coin * 5, coin + 1910, coin * 3],
+          outValue: coin,
+        );
+        expectSelectedValues(selection, [coin + 1910]);
+        expect(selection.changeless, true);
+      }
+
+      // Selecting under the minimum-change boundary still counts as a
+      // changeless solution. coin + 2250 + minChange - 1 lands just under the
+      // threshold (the existing constructor vector confirms).
+      {
+        final selection = getBnB(
+          candidates: [coin + 2250 + minChange.toInt() - 1],
+          outValue: coin,
+        );
+        expect(selection.selected.length, 1);
+        expect(selection.changeless, true);
+        expect(selection.ready, true);
+      }
+
+      // No candidates at all: nothing to find.
+      expect(
+        () => getBnB(candidates: [], outValue: coin),
+        throwsA(isA<InsufficientFunds>()),
+      );
+
+      // Total candidate value is below the recipient value: cannot fund.
+      expect(
+        () => getBnB(candidates: [coin ~/ 2], outValue: coin),
+        throwsA(isA<InsufficientFunds>()),
+      );
+
+      // Every candidate produces too much change to be changeless and no
+      // combination lands in the changeless window.
+      expect(
+        () => getBnB(candidates: [coin * 5, coin * 3], outValue: coin),
+        throwsA(isA<SolutionNotFound>()),
+      );
+
+      // Just under the exact-fee amount: cannot reach changeless either way.
+      expect(
+        () => getBnB(
+          candidates: [coin + 1910 - 1],
+          outValue: coin,
+        ),
+        throwsA(isA<InsufficientFunds>()),
+      );
+
+      // Two-input changeless solution. With two P2PKH inputs the signed size
+      // is 339 bytes giving a fee of 3390. Picking exactly that excess across
+      // two inputs lands inside the changeless window.
+      {
+        final selection = getBnB(
+          candidates: [coin * 10, coin + 1500, coin + 1900, coin * 5],
+          outValue: coin * 2,
+        );
+        expect(selection.selected.length, 2);
+        expect(
+          selection.selected.map((c) => c.value.toInt()),
+          unorderedEquals([coin + 1500, coin + 1900]),
+        );
+        expect(selection.changeless, true);
+        expect(selection.ready, true);
+      }
+
+      // InsufficientFunds is also thrown when candidates are signable but all
+      // have effective value <= 0 (their fee exceeds their value).
+      expect(
+        () => CoinSelection.branchAndBound(
+          version: 1234,
+          candidates: [candidateForValue(1)],
+          recipients: [outputForValue(coin)],
+          changeProgram: changeProgram,
+          feePerKb: feePerKb,
+          minFee: minFee,
+          minChange: minChange,
+          locktime: 0xabcd1234,
+        ),
+        throwsA(isA<InsufficientFunds>()),
+      );
+    });
   });
 
 }
