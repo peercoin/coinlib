@@ -36,13 +36,8 @@ void main() {
 
       }
 
-      final noSig = TaprootKeyInput(prevOut: prevOut, sequence: sequence);
-
-      final withSig = TaprootKeyInput(
-        prevOut: prevOut,
-        sequence: sequence,
-        insig: schnorrInSig,
-      );
+      final noSig = TaprootKeyInput(prevOut: prevOut);
+      final withSig = TaprootKeyInput(prevOut: prevOut, insig: schnorrInSig);
 
       expectTaprootKeyInput(noSig, false);
       expectTaprootKeyInput(withSig, true);
@@ -64,11 +59,7 @@ void main() {
 
       expectNoMatch(String asm, List<Uint8List> witness) => expect(
         TaprootKeyInput.match(
-          RawInput(
-            prevOut: prevOut,
-            scriptSig: Script.fromAsm(asm).compiled,
-            sequence: 0,
-          ),
+          RawInput(prevOut: prevOut, scriptSig: Script.fromAsm(asm).compiled),
           witness,
         ),
         null,

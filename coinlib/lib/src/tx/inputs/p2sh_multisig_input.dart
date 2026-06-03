@@ -11,10 +11,10 @@ import 'package:coinlib/src/tx/sighash/legacy_signature_hasher.dart';
 import 'package:coinlib/src/tx/sighash/sighash_type.dart';
 import 'package:coinlib/src/tx/sign_details.dart';
 import 'package:coinlib/src/tx/transaction.dart';
-import 'input.dart';
 import 'input_signature.dart';
 import 'legacy_input.dart';
 import 'raw_input.dart';
+import 'sequence.dart';
 
 /// An input for a Pay-to-Script-Hash output ([P2SH]) with a multisig
 /// redeemScript and any number of required signatures. It can be signed with
@@ -29,7 +29,7 @@ class P2SHMultisigInput extends LegacyInput {
     required super.prevOut,
     required this.program,
     Iterable<ECDSAInputSignature> sigs = const [],
-    super.sequence = Input.sequenceFinal,
+    super.sequence = InputSequence.enforceLocktime,
   }) : sigs = List.unmodifiable(sigs), super(
     scriptSig: Script([
       ScriptOp.fromNumber(0),

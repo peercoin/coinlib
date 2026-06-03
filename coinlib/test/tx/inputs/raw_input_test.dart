@@ -6,20 +6,6 @@ void main() {
 
   group("RawInput", () {
 
-    test("requires uint32 sequence", () {
-      for (final n in [-1, 0x100000000]) {
-        expect(
-          () => RawInput(
-            prevOut: OutPoint(Uint8List(32), 0),
-            scriptSig: Script.fromAsm("0").compiled,
-            sequence: n,
-          ),
-          throwsArgumentError,
-        );
-      }
-    });
-
-
     final hashBytes = Uint8List.fromList(List<int>.generate(32, (i) => i));
 
     test("can be read and written and is always complete", () {
@@ -36,7 +22,7 @@ void main() {
         expect(input.prevOut.n, 0x04030201);
         expect(bytesToHex(input.scriptSig), "00");
         expect(input.script!.asm, "0");
-        expect(input.sequence, 0xa1a2a3a4);
+        expect(input.sequence.value, 0xa1a2a3a4);
         expect(input.complete, true);
         expect(input.size, bytes.length);
         expect(input.toBytes(), bytes);
@@ -45,7 +31,7 @@ void main() {
       final raw = RawInput(
         prevOut: OutPoint(hashBytes, 0x04030201),
         scriptSig: Script.fromAsm("0").compiled,
-        sequence: 0xa1a2a3a4,
+        sequence: InputSequence.fromValue(0xa1a2a3a4),
       );
 
       expectRaw(raw);
@@ -70,7 +56,7 @@ void main() {
       expectNullScript(RawInput raw) {
         expect(raw.script, null);
         expect(raw.scriptSig, scriptSig);
-        expect(raw.sequence, 0xffffffff);
+        expect(raw.sequence, InputSequence.finalWithoutLocktime);
       }
 
       expectNullScript(RawInput.fromReader(BytesReader(bytes)));
@@ -78,18 +64,19 @@ void main() {
         RawInput(
           prevOut: OutPoint(hashBytes, 0x04030201),
           scriptSig: scriptSig,
+          sequence: InputSequence.finalWithoutLocktime,
         ),
       );
 
     });
 
-    test("default max sequence", () {
+    test("default sequence enforces locktime", () {
       expect(
         RawInput(
           prevOut: OutPoint(Uint8List(32), 0),
           scriptSig: Script.fromAsm("0").compiled,
         ).sequence,
-        0xffffffff,
+        InputSequence.enforceLocktime,
       );
     });
 

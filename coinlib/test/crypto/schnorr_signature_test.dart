@@ -12,14 +12,12 @@ void main() {
     final validHex = validSignatures[0];
 
     test("requires 64-bytes", () {
-
       for (final failing in [validHex.substring(2), "${validHex}00"]) {
         expect(
           () => SchnorrSignature.fromHex(failing),
           throwsArgumentError,
         );
       }
-
     });
 
     test(".data is copied cannot be mutated", () {

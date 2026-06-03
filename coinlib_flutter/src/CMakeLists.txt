@@ -19,7 +19,10 @@ set(
   -DSECP256K1_BUILD_TESTS=OFF
   -DSECP256K1_BUILD_EXHAUSTIVE_TESTS=OFF
   -DSECP256K1_BUILD_BENCHMARK=OFF
+  -DSECP256K1_BUILD_EXAMPLES=OFF
   -DSECP256K1_BUILD_CTIME_TESTS=OFF
+  -DSECP256K1_ECMULT_WINDOW_SIZE=15
+  -DSECP256K1_ECMULT_GEN_KB=86
   -DCMAKE_C_FLAGS=${SECP256K1_CFLAGS}
 
   # Passthrough options
@@ -44,8 +47,8 @@ ExternalProject_Add(
 
   secp256k1
 
-  GIT_REPOSITORY https://github.com/bitcoin-core/secp256k1
-  GIT_TAG e3a885d42a7800c1ccebad94ad1e2b82c4df5c65 # v0.5.0
+  GIT_REPOSITORY https://github.com/peercoin/secp256k1-coinlib
+  GIT_TAG 69018e5b939d8d540ca6b237945100f4ecb5681e # v0.7.0
 
   PREFIX ${SECP256K1_PREFIX}
 
@@ -59,7 +62,7 @@ ExternalProject_Add(
 # Post-build processing of library file
 # Move output library to the correct place
 
-set(SECP256K1_VERSIONEDLIB ${SECP256K1_PREFIX}/lib/libsecp256k1.so.2.2.0)
+set(SECP256K1_VERSIONEDLIB ${SECP256K1_PREFIX}/lib/libsecp256k1.so.6.0.0)
 set(SECP255K1_FINALLIB ${SECP256K1_PREFIX}/lib/libsecp256k1.so)
 
 # Move any versioned .so file to an unversioned .so file.

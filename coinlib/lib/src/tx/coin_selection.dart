@@ -5,6 +5,7 @@ import 'package:coinlib/src/tx/inputs/witness_input.dart';
 import 'package:collection/collection.dart';
 import 'inputs/input.dart';
 import 'inputs/taproot_input.dart';
+import 'locktime.dart';
 import 'output.dart';
 import 'transaction.dart';
 
@@ -48,7 +49,7 @@ class CoinSelection {
   final BigInt feePerKb;
   final BigInt minFee;
   final BigInt minChange;
-  final int locktime;
+  final Locktime locktime;
 
   /// The total value of selected inputs
   late final BigInt inputValue;
@@ -87,7 +88,7 @@ class CoinSelection {
     required this.feePerKb,
     required this.minFee,
     required this.minChange,
-    this.locktime = 0,
+    this.locktime = Locktime.zero,
   }) : selected = List.unmodifiable(selected),
     recipients = List.unmodifiable(recipients) {
 
@@ -169,7 +170,7 @@ class CoinSelection {
     required BigInt feePerKb,
     required BigInt minFee,
     required BigInt minChange,
-    int locktime = 0,
+    Locktime locktime = Locktime.zero,
   }) {
 
     final randomSelection = CoinSelection.random(
@@ -216,7 +217,7 @@ class CoinSelection {
     required BigInt feePerKb,
     required BigInt minFee,
     required BigInt minChange,
-    int locktime = 0,
+    Locktime locktime = Locktime.zero,
     bool randomise = false,
     int maxCandidates = 6800,
   }) {
@@ -258,7 +259,7 @@ class CoinSelection {
     required BigInt feePerKb,
     required BigInt minFee,
     required BigInt minChange,
-    int locktime = 0,
+    Locktime locktime = Locktime.zero,
   }) => CoinSelection.inOrderUntilEnough(
     version: version,
     candidates: candidates.toList()..shuffle(),
@@ -281,7 +282,7 @@ class CoinSelection {
     required BigInt feePerKb,
     required BigInt minFee,
     required BigInt minChange,
-    int locktime = 0,
+    Locktime locktime = Locktime.zero,
   }) => CoinSelection.inOrderUntilEnough(
     version: version,
     candidates: candidates.toList().sorted(

@@ -54,15 +54,9 @@ void main() {
 
       }
 
-      final noSig = P2WPKHInput(
-        prevOut: prevOut,
-        sequence: sequence,
-        publicKey: pk,
-      );
-
+      final noSig = P2WPKHInput(prevOut: prevOut, publicKey: pk);
       final withSig = P2WPKHInput(
         prevOut: prevOut,
-        sequence: sequence,
         publicKey: pk,
         insig: insig,
       );
@@ -89,11 +83,7 @@ void main() {
 
       expectNoMatch(String asm, List<Uint8List> witness) => expect(
         P2WPKHInput.match(
-          RawInput(
-            prevOut: prevOut,
-            scriptSig: Script.fromAsm(asm).compiled,
-            sequence: 0,
-          ),
+          RawInput(prevOut: prevOut, scriptSig: Script.fromAsm(asm).compiled),
           witness,
         ),
         null,

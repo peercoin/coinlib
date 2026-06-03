@@ -37,9 +37,6 @@ class NativeSecp256k1 {
   ffi.Pointer<secp256k1_context> get secp256k1_context_static =>
       _secp256k1_context_static.value;
 
-  set secp256k1_context_static(ffi.Pointer<secp256k1_context> value) =>
-      _secp256k1_context_static.value = value;
-
   /// Deprecated alias for secp256k1_context_static.
   late final ffi.Pointer<ffi.Pointer<secp256k1_context>>
       _secp256k1_context_no_precomp =
@@ -47,9 +44,6 @@ class NativeSecp256k1 {
 
   ffi.Pointer<secp256k1_context> get secp256k1_context_no_precomp =>
       _secp256k1_context_no_precomp.value;
-
-  set secp256k1_context_no_precomp(ffi.Pointer<secp256k1_context> value) =>
-      _secp256k1_context_no_precomp.value = value;
 
   /// Perform basic self tests (to be used in conjunction with secp256k1_context_static)
   ///
@@ -296,57 +290,6 @@ class NativeSecp256k1 {
                       ffi.Void Function(ffi.Pointer<ffi.Char> message,
                           ffi.Pointer<ffi.Void> data)>>,
               ffi.Pointer<ffi.Void>)>();
-
-  /// Create a secp256k1 scratch space object.
-  ///
-  /// Returns: a newly created scratch space.
-  /// Args: ctx:  pointer to a context object.
-  /// In:   size: amount of memory to be available as scratch space. Some extra
-  /// (<100 bytes) will be allocated for extra accounting.
-  ffi.Pointer<secp256k1_scratch_space> secp256k1_scratch_space_create(
-    ffi.Pointer<secp256k1_context> ctx,
-    int size,
-  ) {
-    return _secp256k1_scratch_space_create(
-      ctx,
-      size,
-    );
-  }
-
-  late final _secp256k1_scratch_space_createPtr = _lookup<
-      ffi.NativeFunction<
-          ffi.Pointer<secp256k1_scratch_space> Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Size)>>('secp256k1_scratch_space_create');
-  late final _secp256k1_scratch_space_create =
-      _secp256k1_scratch_space_createPtr.asFunction<
-          ffi.Pointer<secp256k1_scratch_space> Function(
-              ffi.Pointer<secp256k1_context>, int)>();
-
-  /// Destroy a secp256k1 scratch space.
-  ///
-  /// The pointer may not be used afterwards.
-  /// Args:       ctx: pointer to a context object.
-  /// scratch: space to destroy
-  void secp256k1_scratch_space_destroy(
-    ffi.Pointer<secp256k1_context> ctx,
-    ffi.Pointer<secp256k1_scratch_space> scratch,
-  ) {
-    return _secp256k1_scratch_space_destroy(
-      ctx,
-      scratch,
-    );
-  }
-
-  late final _secp256k1_scratch_space_destroyPtr = _lookup<
-          ffi.NativeFunction<
-              ffi.Void Function(ffi.Pointer<secp256k1_context>,
-                  ffi.Pointer<secp256k1_scratch_space>)>>(
-      'secp256k1_scratch_space_destroy');
-  late final _secp256k1_scratch_space_destroy =
-      _secp256k1_scratch_space_destroyPtr.asFunction<
-          void Function(ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<secp256k1_scratch_space>)>();
 
   /// Parse a variable-length public key into the pubkey object.
   ///
@@ -843,12 +786,14 @@ class NativeSecp256k1 {
           secp256k1_nonce_function,
           ffi.Pointer<ffi.Void>)>();
 
-  /// Verify an ECDSA secret key.
+  /// Verify an elliptic curve secret key.
   ///
   /// A secret key is valid if it is not 0 and less than the secp256k1 curve order
   /// when interpreted as an integer (most significant byte first). The
   /// probability of choosing a 32-byte string uniformly at random which is an
-  /// invalid secret key is negligible.
+  /// invalid secret key is negligible. However, if it does happen it should
+  /// be assumed that the randomness source is severely broken and there should
+  /// be no retry.
   ///
   /// Returns: 1: secret key is valid
   /// 0: secret key is invalid
@@ -931,27 +876,6 @@ class NativeSecp256k1 {
           int Function(
               ffi.Pointer<secp256k1_context>, ffi.Pointer<ffi.UnsignedChar>)>();
 
-  /// Same as secp256k1_ec_seckey_negate, but DEPRECATED. Will be removed in
-  /// future versions.
-  int secp256k1_ec_privkey_negate(
-    ffi.Pointer<secp256k1_context> ctx,
-    ffi.Pointer<ffi.UnsignedChar> seckey,
-  ) {
-    return _secp256k1_ec_privkey_negate(
-      ctx,
-      seckey,
-    );
-  }
-
-  late final _secp256k1_ec_privkey_negatePtr = _lookup<
-      ffi.NativeFunction<
-          ffi.Int Function(ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<ffi.UnsignedChar>)>>('secp256k1_ec_privkey_negate');
-  late final _secp256k1_ec_privkey_negate =
-      _secp256k1_ec_privkey_negatePtr.asFunction<
-          int Function(
-              ffi.Pointer<secp256k1_context>, ffi.Pointer<ffi.UnsignedChar>)>();
-
   /// Negates a public key in place.
   ///
   /// Returns: 1 always
@@ -1010,32 +934,6 @@ class NativeSecp256k1 {
               ffi.Pointer<ffi.UnsignedChar>)>>('secp256k1_ec_seckey_tweak_add');
   late final _secp256k1_ec_seckey_tweak_add =
       _secp256k1_ec_seckey_tweak_addPtr.asFunction<
-          int Function(ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<ffi.UnsignedChar>, ffi.Pointer<ffi.UnsignedChar>)>();
-
-  /// Same as secp256k1_ec_seckey_tweak_add, but DEPRECATED. Will be removed in
-  /// future versions.
-  int secp256k1_ec_privkey_tweak_add(
-    ffi.Pointer<secp256k1_context> ctx,
-    ffi.Pointer<ffi.UnsignedChar> seckey,
-    ffi.Pointer<ffi.UnsignedChar> tweak32,
-  ) {
-    return _secp256k1_ec_privkey_tweak_add(
-      ctx,
-      seckey,
-      tweak32,
-    );
-  }
-
-  late final _secp256k1_ec_privkey_tweak_addPtr = _lookup<
-          ffi.NativeFunction<
-              ffi.Int Function(
-                  ffi.Pointer<secp256k1_context>,
-                  ffi.Pointer<ffi.UnsignedChar>,
-                  ffi.Pointer<ffi.UnsignedChar>)>>(
-      'secp256k1_ec_privkey_tweak_add');
-  late final _secp256k1_ec_privkey_tweak_add =
-      _secp256k1_ec_privkey_tweak_addPtr.asFunction<
           int Function(ffi.Pointer<secp256k1_context>,
               ffi.Pointer<ffi.UnsignedChar>, ffi.Pointer<ffi.UnsignedChar>)>();
 
@@ -1106,32 +1004,6 @@ class NativeSecp256k1 {
               ffi.Pointer<ffi.UnsignedChar>)>>('secp256k1_ec_seckey_tweak_mul');
   late final _secp256k1_ec_seckey_tweak_mul =
       _secp256k1_ec_seckey_tweak_mulPtr.asFunction<
-          int Function(ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<ffi.UnsignedChar>, ffi.Pointer<ffi.UnsignedChar>)>();
-
-  /// Same as secp256k1_ec_seckey_tweak_mul, but DEPRECATED. Will be removed in
-  /// future versions.
-  int secp256k1_ec_privkey_tweak_mul(
-    ffi.Pointer<secp256k1_context> ctx,
-    ffi.Pointer<ffi.UnsignedChar> seckey,
-    ffi.Pointer<ffi.UnsignedChar> tweak32,
-  ) {
-    return _secp256k1_ec_privkey_tweak_mul(
-      ctx,
-      seckey,
-      tweak32,
-    );
-  }
-
-  late final _secp256k1_ec_privkey_tweak_mulPtr = _lookup<
-          ffi.NativeFunction<
-              ffi.Int Function(
-                  ffi.Pointer<secp256k1_context>,
-                  ffi.Pointer<ffi.UnsignedChar>,
-                  ffi.Pointer<ffi.UnsignedChar>)>>(
-      'secp256k1_ec_privkey_tweak_mul');
-  late final _secp256k1_ec_privkey_tweak_mul =
-      _secp256k1_ec_privkey_tweak_mulPtr.asFunction<
           int Function(ffi.Pointer<secp256k1_context>,
               ffi.Pointer<ffi.UnsignedChar>, ffi.Pointer<ffi.UnsignedChar>)>();
 
@@ -1743,10 +1615,13 @@ class NativeSecp256k1 {
               ffi.Pointer<secp256k1_xonly_pubkey>,
               ffi.Pointer<ffi.UnsignedChar>)>();
 
-  /// Compute the keypair for a secret key.
+  /// Compute the keypair for a valid secret key.
   ///
-  /// Returns: 1: secret was valid, keypair is ready to use
-  /// 0: secret was invalid, try again with a different secret
+  /// See the documentation of `secp256k1_ec_seckey_verify` for more information
+  /// about the validity of secret keys.
+  ///
+  /// Returns: 1: secret key is valid
+  /// 0: secret key is invalid
   /// Args:    ctx: pointer to a context object (not secp256k1_context_static).
   /// Out: keypair: pointer to the created keypair.
   /// In:   seckey: pointer to a 32-byte secret key.
@@ -2191,39 +2066,1038 @@ class NativeSecp256k1 {
           ffi.Pointer<ffi.UnsignedChar>,
           secp256k1_ecdh_hash_function,
           ffi.Pointer<ffi.Void>)>();
+
+  /// Parse a signer's public nonce.
+  ///
+  /// Returns: 1 when the nonce could be parsed, 0 otherwise.
+  /// Args:    ctx: pointer to a context object
+  /// Out:   nonce: pointer to a nonce object
+  /// In:     in66: pointer to the 66-byte nonce to be parsed
+  int secp256k1_musig_pubnonce_parse(
+    ffi.Pointer<secp256k1_context> ctx,
+    ffi.Pointer<secp256k1_musig_pubnonce> nonce,
+    ffi.Pointer<ffi.UnsignedChar> in66,
+  ) {
+    return _secp256k1_musig_pubnonce_parse(
+      ctx,
+      nonce,
+      in66,
+    );
+  }
+
+  late final _secp256k1_musig_pubnonce_parsePtr = _lookup<
+          ffi.NativeFunction<
+              ffi.Int Function(
+                  ffi.Pointer<secp256k1_context>,
+                  ffi.Pointer<secp256k1_musig_pubnonce>,
+                  ffi.Pointer<ffi.UnsignedChar>)>>(
+      'secp256k1_musig_pubnonce_parse');
+  late final _secp256k1_musig_pubnonce_parse =
+      _secp256k1_musig_pubnonce_parsePtr.asFunction<
+          int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<secp256k1_musig_pubnonce>,
+              ffi.Pointer<ffi.UnsignedChar>)>();
+
+  /// Serialize a signer's public nonce
+  ///
+  /// Returns: 1 always
+  /// Args:    ctx: pointer to a context object
+  /// Out:   out66: pointer to a 66-byte array to store the serialized nonce
+  /// In:    nonce: pointer to the nonce
+  int secp256k1_musig_pubnonce_serialize(
+    ffi.Pointer<secp256k1_context> ctx,
+    ffi.Pointer<ffi.UnsignedChar> out66,
+    ffi.Pointer<secp256k1_musig_pubnonce> nonce,
+  ) {
+    return _secp256k1_musig_pubnonce_serialize(
+      ctx,
+      out66,
+      nonce,
+    );
+  }
+
+  late final _secp256k1_musig_pubnonce_serializePtr = _lookup<
+          ffi.NativeFunction<
+              ffi.Int Function(
+                  ffi.Pointer<secp256k1_context>,
+                  ffi.Pointer<ffi.UnsignedChar>,
+                  ffi.Pointer<secp256k1_musig_pubnonce>)>>(
+      'secp256k1_musig_pubnonce_serialize');
+  late final _secp256k1_musig_pubnonce_serialize =
+      _secp256k1_musig_pubnonce_serializePtr.asFunction<
+          int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              ffi.Pointer<secp256k1_musig_pubnonce>)>();
+
+  /// Parse an aggregate public nonce.
+  ///
+  /// Returns: 1 when the nonce could be parsed, 0 otherwise.
+  /// Args:    ctx: pointer to a context object
+  /// Out:   nonce: pointer to a nonce object
+  /// In:     in66: pointer to the 66-byte nonce to be parsed
+  int secp256k1_musig_aggnonce_parse(
+    ffi.Pointer<secp256k1_context> ctx,
+    ffi.Pointer<secp256k1_musig_aggnonce> nonce,
+    ffi.Pointer<ffi.UnsignedChar> in66,
+  ) {
+    return _secp256k1_musig_aggnonce_parse(
+      ctx,
+      nonce,
+      in66,
+    );
+  }
+
+  late final _secp256k1_musig_aggnonce_parsePtr = _lookup<
+          ffi.NativeFunction<
+              ffi.Int Function(
+                  ffi.Pointer<secp256k1_context>,
+                  ffi.Pointer<secp256k1_musig_aggnonce>,
+                  ffi.Pointer<ffi.UnsignedChar>)>>(
+      'secp256k1_musig_aggnonce_parse');
+  late final _secp256k1_musig_aggnonce_parse =
+      _secp256k1_musig_aggnonce_parsePtr.asFunction<
+          int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<secp256k1_musig_aggnonce>,
+              ffi.Pointer<ffi.UnsignedChar>)>();
+
+  /// Serialize an aggregate public nonce
+  ///
+  /// Returns: 1 always
+  /// Args:    ctx: pointer to a context object
+  /// Out:   out66: pointer to a 66-byte array to store the serialized nonce
+  /// In:    nonce: pointer to the nonce
+  int secp256k1_musig_aggnonce_serialize(
+    ffi.Pointer<secp256k1_context> ctx,
+    ffi.Pointer<ffi.UnsignedChar> out66,
+    ffi.Pointer<secp256k1_musig_aggnonce> nonce,
+  ) {
+    return _secp256k1_musig_aggnonce_serialize(
+      ctx,
+      out66,
+      nonce,
+    );
+  }
+
+  late final _secp256k1_musig_aggnonce_serializePtr = _lookup<
+          ffi.NativeFunction<
+              ffi.Int Function(
+                  ffi.Pointer<secp256k1_context>,
+                  ffi.Pointer<ffi.UnsignedChar>,
+                  ffi.Pointer<secp256k1_musig_aggnonce>)>>(
+      'secp256k1_musig_aggnonce_serialize');
+  late final _secp256k1_musig_aggnonce_serialize =
+      _secp256k1_musig_aggnonce_serializePtr.asFunction<
+          int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              ffi.Pointer<secp256k1_musig_aggnonce>)>();
+
+  /// Parse a MuSig partial signature.
+  ///
+  /// Returns: 1 when the signature could be parsed, 0 otherwise.
+  /// Args:    ctx: pointer to a context object
+  /// Out:     sig: pointer to a signature object
+  /// In:     in32: pointer to the 32-byte signature to be parsed
+  int secp256k1_musig_partial_sig_parse(
+    ffi.Pointer<secp256k1_context> ctx,
+    ffi.Pointer<secp256k1_musig_partial_sig> sig,
+    ffi.Pointer<ffi.UnsignedChar> in32,
+  ) {
+    return _secp256k1_musig_partial_sig_parse(
+      ctx,
+      sig,
+      in32,
+    );
+  }
+
+  late final _secp256k1_musig_partial_sig_parsePtr = _lookup<
+          ffi.NativeFunction<
+              ffi.Int Function(
+                  ffi.Pointer<secp256k1_context>,
+                  ffi.Pointer<secp256k1_musig_partial_sig>,
+                  ffi.Pointer<ffi.UnsignedChar>)>>(
+      'secp256k1_musig_partial_sig_parse');
+  late final _secp256k1_musig_partial_sig_parse =
+      _secp256k1_musig_partial_sig_parsePtr.asFunction<
+          int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<secp256k1_musig_partial_sig>,
+              ffi.Pointer<ffi.UnsignedChar>)>();
+
+  /// Serialize a MuSig partial signature
+  ///
+  /// Returns: 1 always
+  /// Args:    ctx: pointer to a context object
+  /// Out:   out32: pointer to a 32-byte array to store the serialized signature
+  /// In:      sig: pointer to the signature
+  int secp256k1_musig_partial_sig_serialize(
+    ffi.Pointer<secp256k1_context> ctx,
+    ffi.Pointer<ffi.UnsignedChar> out32,
+    ffi.Pointer<secp256k1_musig_partial_sig> sig,
+  ) {
+    return _secp256k1_musig_partial_sig_serialize(
+      ctx,
+      out32,
+      sig,
+    );
+  }
+
+  late final _secp256k1_musig_partial_sig_serializePtr = _lookup<
+          ffi.NativeFunction<
+              ffi.Int Function(
+                  ffi.Pointer<secp256k1_context>,
+                  ffi.Pointer<ffi.UnsignedChar>,
+                  ffi.Pointer<secp256k1_musig_partial_sig>)>>(
+      'secp256k1_musig_partial_sig_serialize');
+  late final _secp256k1_musig_partial_sig_serialize =
+      _secp256k1_musig_partial_sig_serializePtr.asFunction<
+          int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              ffi.Pointer<secp256k1_musig_partial_sig>)>();
+
+  /// Computes an aggregate public key and uses it to initialize a keyagg_cache
+  ///
+  /// Different orders of `pubkeys` result in different `agg_pk`s.
+  ///
+  /// Before aggregating, the pubkeys can be sorted with `secp256k1_ec_pubkey_sort`
+  /// which ensures the same `agg_pk` result for the same multiset of pubkeys.
+  /// This is useful to do before `pubkey_agg`, such that the order of pubkeys
+  /// does not affect the aggregate public key.
+  ///
+  /// Returns: 0 if the arguments are invalid, 1 otherwise
+  /// Args:        ctx: pointer to a context object
+  /// Out:      agg_pk: the MuSig-aggregated x-only public key. If you do not need it,
+  /// this arg can be NULL.
+  /// keyagg_cache: if non-NULL, pointer to a musig_keyagg_cache struct that
+  /// is required for signing (or observing the signing session
+  /// and verifying partial signatures).
+  /// In:     pubkeys: input array of pointers to public keys to aggregate. The order
+  /// is important; a different order will result in a different
+  /// aggregate public key.
+  /// n_pubkeys: length of pubkeys array. Must be greater than 0.
+  int secp256k1_musig_pubkey_agg(
+    ffi.Pointer<secp256k1_context> ctx,
+    ffi.Pointer<secp256k1_xonly_pubkey> agg_pk,
+    ffi.Pointer<secp256k1_musig_keyagg_cache> keyagg_cache,
+    ffi.Pointer<ffi.Pointer<secp256k1_pubkey>> pubkeys,
+    int n_pubkeys,
+  ) {
+    return _secp256k1_musig_pubkey_agg(
+      ctx,
+      agg_pk,
+      keyagg_cache,
+      pubkeys,
+      n_pubkeys,
+    );
+  }
+
+  late final _secp256k1_musig_pubkey_aggPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<secp256k1_xonly_pubkey>,
+              ffi.Pointer<secp256k1_musig_keyagg_cache>,
+              ffi.Pointer<ffi.Pointer<secp256k1_pubkey>>,
+              ffi.Size)>>('secp256k1_musig_pubkey_agg');
+  late final _secp256k1_musig_pubkey_agg =
+      _secp256k1_musig_pubkey_aggPtr.asFunction<
+          int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<secp256k1_xonly_pubkey>,
+              ffi.Pointer<secp256k1_musig_keyagg_cache>,
+              ffi.Pointer<ffi.Pointer<secp256k1_pubkey>>,
+              int)>();
+
+  /// Obtain the aggregate public key from a keyagg_cache.
+  ///
+  /// This is only useful if you need the non-xonly public key, in particular for
+  /// plain (non-xonly) tweaking or batch-verifying multiple key aggregations
+  /// (not implemented).
+  ///
+  /// Returns: 0 if the arguments are invalid, 1 otherwise
+  /// Args:        ctx: pointer to a context object
+  /// Out:      agg_pk: the MuSig-aggregated public key.
+  /// In: keyagg_cache: pointer to a `musig_keyagg_cache` struct initialized by
+  /// `musig_pubkey_agg`
+  int secp256k1_musig_pubkey_get(
+    ffi.Pointer<secp256k1_context> ctx,
+    ffi.Pointer<secp256k1_pubkey> agg_pk,
+    ffi.Pointer<secp256k1_musig_keyagg_cache> keyagg_cache,
+  ) {
+    return _secp256k1_musig_pubkey_get(
+      ctx,
+      agg_pk,
+      keyagg_cache,
+    );
+  }
+
+  late final _secp256k1_musig_pubkey_getPtr = _lookup<
+          ffi.NativeFunction<
+              ffi.Int Function(
+                  ffi.Pointer<secp256k1_context>,
+                  ffi.Pointer<secp256k1_pubkey>,
+                  ffi.Pointer<secp256k1_musig_keyagg_cache>)>>(
+      'secp256k1_musig_pubkey_get');
+  late final _secp256k1_musig_pubkey_get =
+      _secp256k1_musig_pubkey_getPtr.asFunction<
+          int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<secp256k1_pubkey>,
+              ffi.Pointer<secp256k1_musig_keyagg_cache>)>();
+
+  /// Apply plain "EC" tweaking to a public key in a given keyagg_cache by adding
+  /// the generator multiplied with `tweak32` to it. This is useful for deriving
+  /// child keys from an aggregate public key via BIP 32 where `tweak32` is set to
+  /// a hash as defined in BIP 32.
+  ///
+  /// Callers are responsible for deriving `tweak32` in a way that does not reduce
+  /// the security of MuSig (for example, by following BIP 32).
+  ///
+  /// The tweaking method is the same as `secp256k1_ec_pubkey_tweak_add`. So after
+  /// the following pseudocode buf and buf2 have identical contents (absent
+  /// earlier failures).
+  ///
+  /// secp256k1_musig_pubkey_agg(..., keyagg_cache, pubkeys, ...)
+  /// secp256k1_musig_pubkey_get(..., agg_pk, keyagg_cache)
+  /// secp256k1_musig_pubkey_ec_tweak_add(..., output_pk, tweak32, keyagg_cache)
+  /// secp256k1_ec_pubkey_serialize(..., buf, ..., output_pk, ...)
+  /// secp256k1_ec_pubkey_tweak_add(..., agg_pk, tweak32)
+  /// secp256k1_ec_pubkey_serialize(..., buf2, ..., agg_pk, ...)
+  ///
+  /// This function is required if you want to _sign_ for a tweaked aggregate key.
+  /// If you are only computing a public key but not intending to create a
+  /// signature for it, use `secp256k1_ec_pubkey_tweak_add` instead.
+  ///
+  /// Returns: 0 if the arguments are invalid, 1 otherwise
+  /// Args:            ctx: pointer to a context object
+  /// Out:   output_pubkey: pointer to a public key to store the result. Will be set
+  /// to an invalid value if this function returns 0. If you
+  /// do not need it, this arg can be NULL.
+  /// In/Out: keyagg_cache: pointer to a `musig_keyagg_cache` struct initialized by
+  /// `musig_pubkey_agg`
+  /// In:          tweak32: pointer to a 32-byte tweak. The tweak is valid if it passes
+  /// `secp256k1_ec_seckey_verify` and is not equal to the
+  /// secret key corresponding to the public key represented
+  /// by keyagg_cache or its negation. For uniformly random
+  /// 32-byte arrays the chance of being invalid is
+  /// negligible (around 1 in 2^128).
+  int secp256k1_musig_pubkey_ec_tweak_add(
+    ffi.Pointer<secp256k1_context> ctx,
+    ffi.Pointer<secp256k1_pubkey> output_pubkey,
+    ffi.Pointer<secp256k1_musig_keyagg_cache> keyagg_cache,
+    ffi.Pointer<ffi.UnsignedChar> tweak32,
+  ) {
+    return _secp256k1_musig_pubkey_ec_tweak_add(
+      ctx,
+      output_pubkey,
+      keyagg_cache,
+      tweak32,
+    );
+  }
+
+  late final _secp256k1_musig_pubkey_ec_tweak_addPtr = _lookup<
+          ffi.NativeFunction<
+              ffi.Int Function(
+                  ffi.Pointer<secp256k1_context>,
+                  ffi.Pointer<secp256k1_pubkey>,
+                  ffi.Pointer<secp256k1_musig_keyagg_cache>,
+                  ffi.Pointer<ffi.UnsignedChar>)>>(
+      'secp256k1_musig_pubkey_ec_tweak_add');
+  late final _secp256k1_musig_pubkey_ec_tweak_add =
+      _secp256k1_musig_pubkey_ec_tweak_addPtr.asFunction<
+          int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<secp256k1_pubkey>,
+              ffi.Pointer<secp256k1_musig_keyagg_cache>,
+              ffi.Pointer<ffi.UnsignedChar>)>();
+
+  /// Apply x-only tweaking to a public key in a given keyagg_cache by adding the
+  /// generator multiplied with `tweak32` to it. This is useful for creating
+  /// Taproot outputs where `tweak32` is set to a TapTweak hash as defined in BIP
+  /// 341.
+  ///
+  /// Callers are responsible for deriving `tweak32` in a way that does not reduce
+  /// the security of MuSig (for example, by following Taproot BIP 341).
+  ///
+  /// The tweaking method is the same as `secp256k1_xonly_pubkey_tweak_add`. So in
+  /// the following pseudocode xonly_pubkey_tweak_add_check (absent earlier
+  /// failures) returns 1.
+  ///
+  /// secp256k1_musig_pubkey_agg(..., agg_pk, keyagg_cache, pubkeys, ...)
+  /// secp256k1_musig_pubkey_xonly_tweak_add(..., output_pk, keyagg_cache, tweak32)
+  /// secp256k1_xonly_pubkey_serialize(..., buf, output_pk)
+  /// secp256k1_xonly_pubkey_tweak_add_check(..., buf, ..., agg_pk, tweak32)
+  ///
+  /// This function is required if you want to _sign_ for a tweaked aggregate key.
+  /// If you are only computing a public key but not intending to create a
+  /// signature for it, use `secp256k1_xonly_pubkey_tweak_add` instead.
+  ///
+  /// Returns: 0 if the arguments are invalid, 1 otherwise
+  /// Args:            ctx: pointer to a context object
+  /// Out:   output_pubkey: pointer to a public key to store the result. Will be set
+  /// to an invalid value if this function returns 0. If you
+  /// do not need it, this arg can be NULL.
+  /// In/Out: keyagg_cache: pointer to a `musig_keyagg_cache` struct initialized by
+  /// `musig_pubkey_agg`
+  /// In:          tweak32: pointer to a 32-byte tweak. The tweak is valid if it passes
+  /// `secp256k1_ec_seckey_verify` and is not equal to the
+  /// secret key corresponding to the public key represented
+  /// by keyagg_cache or its negation. For uniformly random
+  /// 32-byte arrays the chance of being invalid is
+  /// negligible (around 1 in 2^128).
+  int secp256k1_musig_pubkey_xonly_tweak_add(
+    ffi.Pointer<secp256k1_context> ctx,
+    ffi.Pointer<secp256k1_pubkey> output_pubkey,
+    ffi.Pointer<secp256k1_musig_keyagg_cache> keyagg_cache,
+    ffi.Pointer<ffi.UnsignedChar> tweak32,
+  ) {
+    return _secp256k1_musig_pubkey_xonly_tweak_add(
+      ctx,
+      output_pubkey,
+      keyagg_cache,
+      tweak32,
+    );
+  }
+
+  late final _secp256k1_musig_pubkey_xonly_tweak_addPtr = _lookup<
+          ffi.NativeFunction<
+              ffi.Int Function(
+                  ffi.Pointer<secp256k1_context>,
+                  ffi.Pointer<secp256k1_pubkey>,
+                  ffi.Pointer<secp256k1_musig_keyagg_cache>,
+                  ffi.Pointer<ffi.UnsignedChar>)>>(
+      'secp256k1_musig_pubkey_xonly_tweak_add');
+  late final _secp256k1_musig_pubkey_xonly_tweak_add =
+      _secp256k1_musig_pubkey_xonly_tweak_addPtr.asFunction<
+          int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<secp256k1_pubkey>,
+              ffi.Pointer<secp256k1_musig_keyagg_cache>,
+              ffi.Pointer<ffi.UnsignedChar>)>();
+
+  /// Starts a signing session by generating a nonce
+  ///
+  /// This function outputs a secret nonce that will be required for signing and a
+  /// corresponding public nonce that is intended to be sent to other signers.
+  ///
+  /// MuSig differs from regular Schnorr signing in that implementers _must_ take
+  /// special care to not reuse a nonce. This can be ensured by following these rules:
+  ///
+  /// 1. Each call to this function must have a UNIQUE session_secrand32 that must
+  /// NOT BE REUSED in subsequent calls to this function and must be KEPT
+  /// SECRET (even from other signers).
+  /// 2. If you already know the seckey, message or aggregate public key
+  /// cache, they can be optionally provided to derive the nonce and increase
+  /// misuse-resistance. The extra_input32 argument can be used to provide
+  /// additional data that does not repeat in normal scenarios, such as the
+  /// current time.
+  /// 3. Avoid copying (or serializing) the secnonce. This reduces the possibility
+  /// that it is used more than once for signing.
+  ///
+  /// If you don't have access to good randomness for session_secrand32, but you
+  /// have access to a non-repeating counter, then see
+  /// secp256k1_musig_nonce_gen_counter.
+  ///
+  /// Remember that nonce reuse will leak the secret key!
+  /// Note that using the same seckey for multiple MuSig sessions is fine.
+  ///
+  /// Returns: 0 if the arguments are invalid and 1 otherwise
+  /// Args:         ctx: pointer to a context object (not secp256k1_context_static)
+  /// Out:     secnonce: pointer to a structure to store the secret nonce
+  /// pubnonce: pointer to a structure to store the public nonce
+  /// In/Out:
+  /// session_secrand32: a 32-byte session_secrand32 as explained above. Must be unique to this
+  /// call to secp256k1_musig_nonce_gen and must be uniformly
+  /// random. If the function call is successful, the
+  /// session_secrand32 buffer is invalidated to prevent reuse.
+  /// In:
+  /// seckey: the 32-byte secret key that will later be used for signing, if
+  /// already known (can be NULL)
+  /// pubkey: public key of the signer creating the nonce. The secnonce
+  /// output of this function cannot be used to sign for any
+  /// other public key. While the public key should correspond
+  /// to the provided seckey, a mismatch will not cause the
+  /// function to return 0.
+  /// msg32: the 32-byte message that will later be signed, if already known
+  /// (can be NULL)
+  /// keyagg_cache: pointer to the keyagg_cache that was used to create the aggregate
+  /// (and potentially tweaked) public key if already known
+  /// (can be NULL)
+  /// extra_input32: an optional 32-byte array that is input to the nonce
+  /// derivation function (can be NULL)
+  int secp256k1_musig_nonce_gen(
+    ffi.Pointer<secp256k1_context> ctx,
+    ffi.Pointer<secp256k1_musig_secnonce> secnonce,
+    ffi.Pointer<secp256k1_musig_pubnonce> pubnonce,
+    ffi.Pointer<ffi.UnsignedChar> session_secrand32,
+    ffi.Pointer<ffi.UnsignedChar> seckey,
+    ffi.Pointer<secp256k1_pubkey> pubkey,
+    ffi.Pointer<ffi.UnsignedChar> msg32,
+    ffi.Pointer<secp256k1_musig_keyagg_cache> keyagg_cache,
+    ffi.Pointer<ffi.UnsignedChar> extra_input32,
+  ) {
+    return _secp256k1_musig_nonce_gen(
+      ctx,
+      secnonce,
+      pubnonce,
+      session_secrand32,
+      seckey,
+      pubkey,
+      msg32,
+      keyagg_cache,
+      extra_input32,
+    );
+  }
+
+  late final _secp256k1_musig_nonce_genPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<secp256k1_musig_secnonce>,
+              ffi.Pointer<secp256k1_musig_pubnonce>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              ffi.Pointer<secp256k1_pubkey>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              ffi.Pointer<secp256k1_musig_keyagg_cache>,
+              ffi.Pointer<ffi.UnsignedChar>)>>('secp256k1_musig_nonce_gen');
+  late final _secp256k1_musig_nonce_gen =
+      _secp256k1_musig_nonce_genPtr.asFunction<
+          int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<secp256k1_musig_secnonce>,
+              ffi.Pointer<secp256k1_musig_pubnonce>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              ffi.Pointer<secp256k1_pubkey>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              ffi.Pointer<secp256k1_musig_keyagg_cache>,
+              ffi.Pointer<ffi.UnsignedChar>)>();
+
+  /// Alternative way to generate a nonce and start a signing session
+  ///
+  /// This function outputs a secret nonce that will be required for signing and a
+  /// corresponding public nonce that is intended to be sent to other signers.
+  ///
+  /// This function differs from `secp256k1_musig_nonce_gen` by accepting a
+  /// non-repeating counter value instead of a secret random value. This requires
+  /// that a secret key is provided to `secp256k1_musig_nonce_gen_counter`
+  /// (through the keypair argument), as opposed to `secp256k1_musig_nonce_gen`
+  /// where the seckey argument is optional.
+  ///
+  /// MuSig differs from regular Schnorr signing in that implementers _must_ take
+  /// special care to not reuse a nonce. This can be ensured by following these rules:
+  ///
+  /// 1. The nonrepeating_cnt argument must be a counter value that never repeats,
+  /// i.e., you must never call `secp256k1_musig_nonce_gen_counter` twice with
+  /// the same keypair and nonrepeating_cnt value. For example, this implies
+  /// that if the same keypair is used with `secp256k1_musig_nonce_gen_counter`
+  /// on multiple devices, none of the devices should have the same counter
+  /// value as any other device.
+  /// 2. If the seckey, message or aggregate public key cache is already available
+  /// at this stage, any of these can be optionally provided, in which case
+  /// they will be used in the derivation of the nonce and increase
+  /// misuse-resistance. The extra_input32 argument can be used to provide
+  /// additional data that does not repeat in normal scenarios, such as the
+  /// current time.
+  /// 3. Avoid copying (or serializing) the secnonce. This reduces the possibility
+  /// that it is used more than once for signing.
+  ///
+  /// Remember that nonce reuse will leak the secret key!
+  /// Note that using the same keypair for multiple MuSig sessions is fine.
+  ///
+  /// Returns: 0 if the arguments are invalid and 1 otherwise
+  /// Args:         ctx: pointer to a context object (not secp256k1_context_static)
+  /// Out:     secnonce: pointer to a structure to store the secret nonce
+  /// pubnonce: pointer to a structure to store the public nonce
+  /// In:
+  /// nonrepeating_cnt: the value of a counter as explained above. Must be
+  /// unique to this call to secp256k1_musig_nonce_gen.
+  /// keypair: keypair of the signer creating the nonce. The secnonce
+  /// output of this function cannot be used to sign for any
+  /// other keypair.
+  /// msg32: the 32-byte message that will later be signed, if already known
+  /// (can be NULL)
+  /// keyagg_cache: pointer to the keyagg_cache that was used to create the aggregate
+  /// (and potentially tweaked) public key if already known
+  /// (can be NULL)
+  /// extra_input32: an optional 32-byte array that is input to the nonce
+  /// derivation function (can be NULL)
+  int secp256k1_musig_nonce_gen_counter(
+    ffi.Pointer<secp256k1_context> ctx,
+    ffi.Pointer<secp256k1_musig_secnonce> secnonce,
+    ffi.Pointer<secp256k1_musig_pubnonce> pubnonce,
+    int nonrepeating_cnt,
+    ffi.Pointer<secp256k1_keypair> keypair,
+    ffi.Pointer<ffi.UnsignedChar> msg32,
+    ffi.Pointer<secp256k1_musig_keyagg_cache> keyagg_cache,
+    ffi.Pointer<ffi.UnsignedChar> extra_input32,
+  ) {
+    return _secp256k1_musig_nonce_gen_counter(
+      ctx,
+      secnonce,
+      pubnonce,
+      nonrepeating_cnt,
+      keypair,
+      msg32,
+      keyagg_cache,
+      extra_input32,
+    );
+  }
+
+  late final _secp256k1_musig_nonce_gen_counterPtr = _lookup<
+          ffi.NativeFunction<
+              ffi.Int Function(
+                  ffi.Pointer<secp256k1_context>,
+                  ffi.Pointer<secp256k1_musig_secnonce>,
+                  ffi.Pointer<secp256k1_musig_pubnonce>,
+                  ffi.Uint64,
+                  ffi.Pointer<secp256k1_keypair>,
+                  ffi.Pointer<ffi.UnsignedChar>,
+                  ffi.Pointer<secp256k1_musig_keyagg_cache>,
+                  ffi.Pointer<ffi.UnsignedChar>)>>(
+      'secp256k1_musig_nonce_gen_counter');
+  late final _secp256k1_musig_nonce_gen_counter =
+      _secp256k1_musig_nonce_gen_counterPtr.asFunction<
+          int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<secp256k1_musig_secnonce>,
+              ffi.Pointer<secp256k1_musig_pubnonce>,
+              int,
+              ffi.Pointer<secp256k1_keypair>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              ffi.Pointer<secp256k1_musig_keyagg_cache>,
+              ffi.Pointer<ffi.UnsignedChar>)>();
+
+  /// Aggregates the nonces of all signers into a single nonce
+  ///
+  /// This can be done by an untrusted party to reduce the communication
+  /// between signers. Instead of everyone sending nonces to everyone else, there
+  /// can be one party receiving all nonces, aggregating the nonces with this
+  /// function and then sending only the aggregate nonce back to the signers.
+  ///
+  /// If the aggregator does not compute the aggregate nonce correctly, the final
+  /// signature will be invalid.
+  ///
+  /// Returns: 0 if the arguments are invalid, 1 otherwise
+  /// Args:           ctx: pointer to a context object
+  /// Out:       aggnonce: pointer to an aggregate public nonce object for
+  /// musig_nonce_process
+  /// In:       pubnonces: array of pointers to public nonces sent by the
+  /// signers
+  /// n_pubnonces: number of elements in the pubnonces array. Must be
+  /// greater than 0.
+  int secp256k1_musig_nonce_agg(
+    ffi.Pointer<secp256k1_context> ctx,
+    ffi.Pointer<secp256k1_musig_aggnonce> aggnonce,
+    ffi.Pointer<ffi.Pointer<secp256k1_musig_pubnonce>> pubnonces,
+    int n_pubnonces,
+  ) {
+    return _secp256k1_musig_nonce_agg(
+      ctx,
+      aggnonce,
+      pubnonces,
+      n_pubnonces,
+    );
+  }
+
+  late final _secp256k1_musig_nonce_aggPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<secp256k1_musig_aggnonce>,
+              ffi.Pointer<ffi.Pointer<secp256k1_musig_pubnonce>>,
+              ffi.Size)>>('secp256k1_musig_nonce_agg');
+  late final _secp256k1_musig_nonce_agg =
+      _secp256k1_musig_nonce_aggPtr.asFunction<
+          int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<secp256k1_musig_aggnonce>,
+              ffi.Pointer<ffi.Pointer<secp256k1_musig_pubnonce>>,
+              int)>();
+
+  /// Takes the aggregate nonce and creates a session that is required for signing
+  /// and verification of partial signatures.
+  ///
+  /// If the adaptor argument is non-NULL, then the output of
+  /// musig_partial_sig_agg will be a pre-signature which is not a valid Schnorr
+  /// signature. In order to create a valid signature, the pre-signature and the
+  /// secret adaptor must be provided to `musig_adapt`.
+  ///
+  /// Returns: 0 if the arguments are invalid, 1 otherwise
+  /// Args:          ctx: pointer to a context object
+  /// Out:       session: pointer to a struct to store the session
+  /// In:       aggnonce: pointer to an aggregate public nonce object that is the
+  /// output of musig_nonce_agg
+  /// msg32:  the 32-byte message to sign
+  /// keyagg_cache:  pointer to the keyagg_cache that was used to create the
+  /// aggregate (and potentially tweaked) pubkey
+  /// adaptor:  optional pointer to an adaptor point encoded as a public
+  /// key if this signing session is part of an adaptor
+  /// signature protocol (can be NULL)
+  int secp256k1_musig_nonce_process(
+    ffi.Pointer<secp256k1_context> ctx,
+    ffi.Pointer<secp256k1_musig_session> session,
+    ffi.Pointer<secp256k1_musig_aggnonce> aggnonce,
+    ffi.Pointer<ffi.UnsignedChar> msg32,
+    ffi.Pointer<secp256k1_musig_keyagg_cache> keyagg_cache,
+    ffi.Pointer<secp256k1_pubkey> adaptor,
+  ) {
+    return _secp256k1_musig_nonce_process(
+      ctx,
+      session,
+      aggnonce,
+      msg32,
+      keyagg_cache,
+      adaptor,
+    );
+  }
+
+  late final _secp256k1_musig_nonce_processPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<secp256k1_musig_session>,
+              ffi.Pointer<secp256k1_musig_aggnonce>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              ffi.Pointer<secp256k1_musig_keyagg_cache>,
+              ffi.Pointer<secp256k1_pubkey>)>>('secp256k1_musig_nonce_process');
+  late final _secp256k1_musig_nonce_process =
+      _secp256k1_musig_nonce_processPtr.asFunction<
+          int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<secp256k1_musig_session>,
+              ffi.Pointer<secp256k1_musig_aggnonce>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              ffi.Pointer<secp256k1_musig_keyagg_cache>,
+              ffi.Pointer<secp256k1_pubkey>)>();
+
+  /// Produces a partial signature
+  ///
+  /// This function overwrites the given secnonce with zeros and will abort if given a
+  /// secnonce that is all zeros. This is a best effort attempt to protect against nonce
+  /// reuse. However, this is of course easily defeated if the secnonce has been
+  /// copied (or serialized). Remember that nonce reuse will leak the secret key!
+  ///
+  /// For signing to succeed, the secnonce provided to this function must have
+  /// been generated for the provided keypair. This means that when signing for a
+  /// keypair consisting of a seckey and pubkey, the secnonce must have been
+  /// created by calling musig_nonce_gen with that pubkey. Otherwise, the
+  /// illegal_callback is called.
+  ///
+  /// This function does not verify the output partial signature, deviating from
+  /// the BIP 327 specification. It is recommended to verify the output partial
+  /// signature with `secp256k1_musig_partial_sig_verify` to prevent random or
+  /// adversarially provoked computation errors.
+  ///
+  /// Returns: 0 if the arguments are invalid or the provided secnonce has already
+  /// been used for signing, 1 otherwise
+  /// Args:         ctx: pointer to a context object
+  /// Out:  partial_sig: pointer to struct to store the partial signature
+  /// In/Out:  secnonce: pointer to the secnonce struct created in
+  /// musig_nonce_gen that has been never used in a
+  /// partial_sign call before and has been created for the
+  /// keypair
+  /// In:       keypair: pointer to keypair to sign the message with
+  /// keyagg_cache: pointer to the keyagg_cache that was output when the
+  /// aggregate public key for this session
+  /// session: pointer to the session that was created with
+  /// musig_nonce_process
+  int secp256k1_musig_partial_sign(
+    ffi.Pointer<secp256k1_context> ctx,
+    ffi.Pointer<secp256k1_musig_partial_sig> partial_sig,
+    ffi.Pointer<secp256k1_musig_secnonce> secnonce,
+    ffi.Pointer<secp256k1_keypair> keypair,
+    ffi.Pointer<secp256k1_musig_keyagg_cache> keyagg_cache,
+    ffi.Pointer<secp256k1_musig_session> session,
+  ) {
+    return _secp256k1_musig_partial_sign(
+      ctx,
+      partial_sig,
+      secnonce,
+      keypair,
+      keyagg_cache,
+      session,
+    );
+  }
+
+  late final _secp256k1_musig_partial_signPtr = _lookup<
+          ffi.NativeFunction<
+              ffi.Int Function(
+                  ffi.Pointer<secp256k1_context>,
+                  ffi.Pointer<secp256k1_musig_partial_sig>,
+                  ffi.Pointer<secp256k1_musig_secnonce>,
+                  ffi.Pointer<secp256k1_keypair>,
+                  ffi.Pointer<secp256k1_musig_keyagg_cache>,
+                  ffi.Pointer<secp256k1_musig_session>)>>(
+      'secp256k1_musig_partial_sign');
+  late final _secp256k1_musig_partial_sign =
+      _secp256k1_musig_partial_signPtr.asFunction<
+          int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<secp256k1_musig_partial_sig>,
+              ffi.Pointer<secp256k1_musig_secnonce>,
+              ffi.Pointer<secp256k1_keypair>,
+              ffi.Pointer<secp256k1_musig_keyagg_cache>,
+              ffi.Pointer<secp256k1_musig_session>)>();
+
+  /// Verifies an individual signer's partial signature
+  ///
+  /// The signature is verified for a specific signing session. In order to avoid
+  /// accidentally verifying a signature from a different or non-existing signing
+  /// session, you must ensure the following:
+  /// 1. The `keyagg_cache` argument is identical to the one used to create the
+  /// `session` with `musig_nonce_process`.
+  /// 2. The `pubkey` argument must be identical to the one sent by the signer
+  /// before aggregating it with `musig_pubkey_agg` to create the
+  /// `keyagg_cache`.
+  /// 3. The `pubnonce` argument must be identical to the one sent by the signer
+  /// before aggregating it with `musig_nonce_agg` and using the result to
+  /// create the `session` with `musig_nonce_process`.
+  ///
+  /// This function is essential when using protocols with adaptor signatures.
+  /// However, it is not essential for regular MuSig sessions, in the sense that if any
+  /// partial signature does not verify, the full signature will not verify either, so the
+  /// problem will be caught. But this function allows determining the specific party
+  /// who produced an invalid signature.
+  ///
+  /// Returns: 0 if the arguments are invalid or the partial signature does not
+  /// verify, 1 otherwise
+  /// Args         ctx: pointer to a context object
+  /// In:  partial_sig: pointer to partial signature to verify, sent by
+  /// the signer associated with `pubnonce` and `pubkey`
+  /// pubnonce: public nonce of the signer in the signing session
+  /// pubkey: public key of the signer in the signing session
+  /// keyagg_cache: pointer to the keyagg_cache that was output when the
+  /// aggregate public key for this signing session
+  /// session: pointer to the session that was created with
+  /// `musig_nonce_process`
+  int secp256k1_musig_partial_sig_verify(
+    ffi.Pointer<secp256k1_context> ctx,
+    ffi.Pointer<secp256k1_musig_partial_sig> partial_sig,
+    ffi.Pointer<secp256k1_musig_pubnonce> pubnonce,
+    ffi.Pointer<secp256k1_pubkey> pubkey,
+    ffi.Pointer<secp256k1_musig_keyagg_cache> keyagg_cache,
+    ffi.Pointer<secp256k1_musig_session> session,
+  ) {
+    return _secp256k1_musig_partial_sig_verify(
+      ctx,
+      partial_sig,
+      pubnonce,
+      pubkey,
+      keyagg_cache,
+      session,
+    );
+  }
+
+  late final _secp256k1_musig_partial_sig_verifyPtr = _lookup<
+          ffi.NativeFunction<
+              ffi.Int Function(
+                  ffi.Pointer<secp256k1_context>,
+                  ffi.Pointer<secp256k1_musig_partial_sig>,
+                  ffi.Pointer<secp256k1_musig_pubnonce>,
+                  ffi.Pointer<secp256k1_pubkey>,
+                  ffi.Pointer<secp256k1_musig_keyagg_cache>,
+                  ffi.Pointer<secp256k1_musig_session>)>>(
+      'secp256k1_musig_partial_sig_verify');
+  late final _secp256k1_musig_partial_sig_verify =
+      _secp256k1_musig_partial_sig_verifyPtr.asFunction<
+          int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<secp256k1_musig_partial_sig>,
+              ffi.Pointer<secp256k1_musig_pubnonce>,
+              ffi.Pointer<secp256k1_pubkey>,
+              ffi.Pointer<secp256k1_musig_keyagg_cache>,
+              ffi.Pointer<secp256k1_musig_session>)>();
+
+  /// Aggregates partial signatures
+  ///
+  /// Returns: 0 if the arguments are invalid, 1 otherwise (which does NOT mean
+  /// the resulting signature verifies).
+  /// Args:         ctx: pointer to a context object
+  /// Out:        sig64: complete (but possibly invalid) Schnorr signature
+  /// In:       session: pointer to the session that was created with
+  /// musig_nonce_process
+  /// partial_sigs: array of pointers to partial signatures to aggregate
+  /// n_sigs: number of elements in the partial_sigs array. Must be
+  /// greater than 0.
+  int secp256k1_musig_partial_sig_agg(
+    ffi.Pointer<secp256k1_context> ctx,
+    ffi.Pointer<ffi.UnsignedChar> sig64,
+    ffi.Pointer<secp256k1_musig_session> session,
+    ffi.Pointer<ffi.Pointer<secp256k1_musig_partial_sig>> partial_sigs,
+    int n_sigs,
+  ) {
+    return _secp256k1_musig_partial_sig_agg(
+      ctx,
+      sig64,
+      session,
+      partial_sigs,
+      n_sigs,
+    );
+  }
+
+  late final _secp256k1_musig_partial_sig_aggPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              ffi.Pointer<secp256k1_musig_session>,
+              ffi.Pointer<ffi.Pointer<secp256k1_musig_partial_sig>>,
+              ffi.Size)>>('secp256k1_musig_partial_sig_agg');
+  late final _secp256k1_musig_partial_sig_agg =
+      _secp256k1_musig_partial_sig_aggPtr.asFunction<
+          int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              ffi.Pointer<secp256k1_musig_session>,
+              ffi.Pointer<ffi.Pointer<secp256k1_musig_partial_sig>>,
+              int)>();
+
+  /// Extracts the nonce_parity bit from a session
+  ///
+  /// This is used for adaptor signatures.
+  ///
+  /// Returns: 0 if the arguments are invalid, 1 otherwise
+  /// Args:         ctx: pointer to a context object
+  /// Out: nonce_parity: pointer to an integer that indicates the parity
+  /// of the aggregate public nonce. Used for adaptor
+  /// signatures.
+  /// In:       session: pointer to the session that was created with
+  /// musig_nonce_process
+  int secp256k1_musig_nonce_parity(
+    ffi.Pointer<secp256k1_context> ctx,
+    ffi.Pointer<ffi.Int> nonce_parity,
+    ffi.Pointer<secp256k1_musig_session> session,
+  ) {
+    return _secp256k1_musig_nonce_parity(
+      ctx,
+      nonce_parity,
+      session,
+    );
+  }
+
+  late final _secp256k1_musig_nonce_parityPtr = _lookup<
+          ffi.NativeFunction<
+              ffi.Int Function(ffi.Pointer<secp256k1_context>,
+                  ffi.Pointer<ffi.Int>, ffi.Pointer<secp256k1_musig_session>)>>(
+      'secp256k1_musig_nonce_parity');
+  late final _secp256k1_musig_nonce_parity =
+      _secp256k1_musig_nonce_parityPtr.asFunction<
+          int Function(ffi.Pointer<secp256k1_context>, ffi.Pointer<ffi.Int>,
+              ffi.Pointer<secp256k1_musig_session>)>();
+
+  /// Creates a signature from a pre-signature and an adaptor.
+  ///
+  /// If the sec_adaptor32 argument is incorrect, the output signature will be
+  /// invalid. This function does not verify the signature.
+  ///
+  /// Returns: 0 if the arguments are invalid, or pre_sig64 or sec_adaptor32 contain
+  /// invalid (overflowing) values. 1 otherwise (which does NOT mean the
+  /// signature or the adaptor are valid!)
+  /// Args:         ctx: pointer to a context object
+  /// Out:        sig64: 64-byte signature. This pointer may point to the same
+  /// memory area as `pre_sig`.
+  /// In:     pre_sig64: 64-byte pre-signature
+  /// sec_adaptor32: 32-byte secret adaptor to add to the pre-signature
+  /// nonce_parity: the output of `musig_nonce_parity` called with the
+  /// session used for producing the pre-signature
+  int secp256k1_musig_adapt(
+    ffi.Pointer<secp256k1_context> ctx,
+    ffi.Pointer<ffi.UnsignedChar> sig64,
+    ffi.Pointer<ffi.UnsignedChar> pre_sig64,
+    ffi.Pointer<ffi.UnsignedChar> sec_adaptor32,
+    int nonce_parity,
+  ) {
+    return _secp256k1_musig_adapt(
+      ctx,
+      sig64,
+      pre_sig64,
+      sec_adaptor32,
+      nonce_parity,
+    );
+  }
+
+  late final _secp256k1_musig_adaptPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              ffi.Int)>>('secp256k1_musig_adapt');
+  late final _secp256k1_musig_adapt = _secp256k1_musig_adaptPtr.asFunction<
+      int Function(
+          ffi.Pointer<secp256k1_context>,
+          ffi.Pointer<ffi.UnsignedChar>,
+          ffi.Pointer<ffi.UnsignedChar>,
+          ffi.Pointer<ffi.UnsignedChar>,
+          int)>();
+
+  /// Extracts a secret adaptor from a MuSig pre-signature and corresponding
+  /// signature
+  ///
+  /// This function will not fail unless given grossly invalid data; if it is
+  /// merely given signatures that do not verify, the returned value will be
+  /// nonsense. It is therefore important that all data be verified at earlier
+  /// steps of any protocol that uses this function. In particular, this includes
+  /// verifying all partial signatures that were aggregated into pre_sig64.
+  ///
+  /// Returns: 0 if the arguments are NULL, or sig64 or pre_sig64 contain
+  /// grossly invalid (overflowing) values. 1 otherwise (which does NOT
+  /// mean the signatures or the adaptor are valid!)
+  /// Args:         ctx: pointer to a context object
+  /// Out:sec_adaptor32: 32-byte secret adaptor
+  /// In:         sig64: complete, valid 64-byte signature
+  /// pre_sig64: the pre-signature corresponding to sig64, i.e., the
+  /// aggregate of partial signatures without the secret
+  /// adaptor
+  /// nonce_parity: the output of `musig_nonce_parity` called with the
+  /// session used for producing sig64
+  int secp256k1_musig_extract_adaptor(
+    ffi.Pointer<secp256k1_context> ctx,
+    ffi.Pointer<ffi.UnsignedChar> sec_adaptor32,
+    ffi.Pointer<ffi.UnsignedChar> sig64,
+    ffi.Pointer<ffi.UnsignedChar> pre_sig64,
+    int nonce_parity,
+  ) {
+    return _secp256k1_musig_extract_adaptor(
+      ctx,
+      sec_adaptor32,
+      sig64,
+      pre_sig64,
+      nonce_parity,
+    );
+  }
+
+  late final _secp256k1_musig_extract_adaptorPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              ffi.Int)>>('secp256k1_musig_extract_adaptor');
+  late final _secp256k1_musig_extract_adaptor =
+      _secp256k1_musig_extract_adaptorPtr.asFunction<
+          int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              ffi.Pointer<ffi.UnsignedChar>,
+              int)>();
 }
+
+typedef ptrdiff_t = ffi.Long;
+typedef Dartptrdiff_t = int;
 
 final class max_align_t extends ffi.Opaque {}
 
 final class secp256k1_context_struct extends ffi.Opaque {}
-
-final class secp256k1_scratch_space_struct extends ffi.Opaque {}
-
-/// Opaque data structure that holds a parsed and valid public key.
-///
-/// The exact representation of data inside is implementation defined and not
-/// guaranteed to be portable between different platforms or versions. It is
-/// however guaranteed to be 64 bytes in size, and can be safely copied/moved.
-/// If you need to convert to a format suitable for storage or transmission,
-/// use secp256k1_ec_pubkey_serialize and secp256k1_ec_pubkey_parse. To
-/// compare keys, use secp256k1_ec_pubkey_cmp.
-final class secp256k1_pubkey extends ffi.Struct {
-  @ffi.Array.multi([64])
-  external ffi.Array<ffi.UnsignedChar> data;
-}
-
-/// Opaque data structured that holds a parsed ECDSA signature.
-///
-/// The exact representation of data inside is implementation defined and not
-/// guaranteed to be portable between different platforms or versions. It is
-/// however guaranteed to be 64 bytes in size, and can be safely copied/moved.
-/// If you need to convert to a format suitable for storage, transmission, or
-/// comparison, use the secp256k1_ecdsa_signature_serialize_* and
-/// secp256k1_ecdsa_signature_parse_* functions.
-final class secp256k1_ecdsa_signature extends ffi.Struct {
-  @ffi.Array.multi([64])
-  external ffi.Array<ffi.UnsignedChar> data;
-}
 
 /// Opaque data structure that holds context information
 ///
@@ -2249,17 +3123,46 @@ final class secp256k1_ecdsa_signature extends ffi.Struct {
 /// you do not need any locking for the other calls), or use a read-write lock.
 typedef secp256k1_context = secp256k1_context_struct;
 
-/// Opaque data structure that holds rewritable "scratch space"
+/// Opaque data structure that holds a parsed and valid public key.
 ///
-/// The purpose of this structure is to replace dynamic memory allocations,
-/// because we target architectures where this may not be available. It is
-/// essentially a resizable (within specified parameters) block of bytes,
-/// which is initially created either by memory allocation or TODO as a pointer
-/// into some fixed rewritable space.
+/// The exact representation of data inside is implementation defined and not
+/// guaranteed to be portable between different platforms or versions. It is
+/// however guaranteed to be 64 bytes in size, and can be safely copied/moved.
+/// If you need to convert to a format suitable for storage or transmission,
+/// use secp256k1_ec_pubkey_serialize and secp256k1_ec_pubkey_parse. To
+/// compare keys, use secp256k1_ec_pubkey_cmp.
+final class secp256k1_pubkey extends ffi.Struct {
+  @ffi.Array.multi([64])
+  external ffi.Array<ffi.UnsignedChar> data;
+}
+
+/// Opaque data structure that holds a parsed ECDSA signature.
 ///
-/// Unlike the context object, this cannot safely be shared between threads
-/// without additional synchronization logic.
-typedef secp256k1_scratch_space = secp256k1_scratch_space_struct;
+/// The exact representation of data inside is implementation defined and not
+/// guaranteed to be portable between different platforms or versions. It is
+/// however guaranteed to be 64 bytes in size, and can be safely copied/moved.
+/// If you need to convert to a format suitable for storage, transmission, or
+/// comparison, use the secp256k1_ecdsa_signature_serialize_* and
+/// secp256k1_ecdsa_signature_parse_* functions.
+final class secp256k1_ecdsa_signature extends ffi.Struct {
+  @ffi.Array.multi([64])
+  external ffi.Array<ffi.UnsignedChar> data;
+}
+
+typedef secp256k1_nonce_functionFunction = ffi.Int Function(
+    ffi.Pointer<ffi.UnsignedChar> nonce32,
+    ffi.Pointer<ffi.UnsignedChar> msg32,
+    ffi.Pointer<ffi.UnsignedChar> key32,
+    ffi.Pointer<ffi.UnsignedChar> algo16,
+    ffi.Pointer<ffi.Void> data,
+    ffi.UnsignedInt attempt);
+typedef Dartsecp256k1_nonce_functionFunction = int Function(
+    ffi.Pointer<ffi.UnsignedChar> nonce32,
+    ffi.Pointer<ffi.UnsignedChar> msg32,
+    ffi.Pointer<ffi.UnsignedChar> key32,
+    ffi.Pointer<ffi.UnsignedChar> algo16,
+    ffi.Pointer<ffi.Void> data,
+    int attempt);
 
 /// A pointer to a function to deterministically generate a nonce.
 ///
@@ -2278,22 +3181,8 @@ typedef secp256k1_scratch_space = secp256k1_scratch_space_struct;
 /// the message, the algorithm, the key and the attempt.
 typedef secp256k1_nonce_function
     = ffi.Pointer<ffi.NativeFunction<secp256k1_nonce_functionFunction>>;
-typedef secp256k1_nonce_functionFunction = ffi.Int Function(
-    ffi.Pointer<ffi.UnsignedChar> nonce32,
-    ffi.Pointer<ffi.UnsignedChar> msg32,
-    ffi.Pointer<ffi.UnsignedChar> key32,
-    ffi.Pointer<ffi.UnsignedChar> algo16,
-    ffi.Pointer<ffi.Void> data,
-    ffi.UnsignedInt attempt);
-typedef Dartsecp256k1_nonce_functionFunction = int Function(
-    ffi.Pointer<ffi.UnsignedChar> nonce32,
-    ffi.Pointer<ffi.UnsignedChar> msg32,
-    ffi.Pointer<ffi.UnsignedChar> key32,
-    ffi.Pointer<ffi.UnsignedChar> algo16,
-    ffi.Pointer<ffi.Void> data,
-    int attempt);
 
-/// Opaque data structured that holds a parsed ECDSA signature,
+/// Opaque data structure that holds a parsed ECDSA signature,
 /// supporting pubkey recovery.
 ///
 /// The exact representation of data inside is implementation defined and not
@@ -2338,6 +3227,25 @@ final class secp256k1_keypair extends ffi.Struct {
   external ffi.Array<ffi.UnsignedChar> data;
 }
 
+typedef secp256k1_nonce_function_hardenedFunction = ffi.Int Function(
+    ffi.Pointer<ffi.UnsignedChar> nonce32,
+    ffi.Pointer<ffi.UnsignedChar> msg,
+    ffi.Size msglen,
+    ffi.Pointer<ffi.UnsignedChar> key32,
+    ffi.Pointer<ffi.UnsignedChar> xonly_pk32,
+    ffi.Pointer<ffi.UnsignedChar> algo,
+    ffi.Size algolen,
+    ffi.Pointer<ffi.Void> data);
+typedef Dartsecp256k1_nonce_function_hardenedFunction = int Function(
+    ffi.Pointer<ffi.UnsignedChar> nonce32,
+    ffi.Pointer<ffi.UnsignedChar> msg,
+    int msglen,
+    ffi.Pointer<ffi.UnsignedChar> key32,
+    ffi.Pointer<ffi.UnsignedChar> xonly_pk32,
+    ffi.Pointer<ffi.UnsignedChar> algo,
+    int algolen,
+    ffi.Pointer<ffi.Void> data);
+
 /// A pointer to a function to deterministically generate a nonce.
 ///
 /// Same as secp256k1_nonce function with the exception of accepting an
@@ -2364,24 +3272,6 @@ final class secp256k1_keypair extends ffi.Struct {
 /// the message, the key, the pubkey, the algorithm description, and data.
 typedef secp256k1_nonce_function_hardened = ffi
     .Pointer<ffi.NativeFunction<secp256k1_nonce_function_hardenedFunction>>;
-typedef secp256k1_nonce_function_hardenedFunction = ffi.Int Function(
-    ffi.Pointer<ffi.UnsignedChar> nonce32,
-    ffi.Pointer<ffi.UnsignedChar> msg,
-    ffi.Size msglen,
-    ffi.Pointer<ffi.UnsignedChar> key32,
-    ffi.Pointer<ffi.UnsignedChar> xonly_pk32,
-    ffi.Pointer<ffi.UnsignedChar> algo,
-    ffi.Size algolen,
-    ffi.Pointer<ffi.Void> data);
-typedef Dartsecp256k1_nonce_function_hardenedFunction = int Function(
-    ffi.Pointer<ffi.UnsignedChar> nonce32,
-    ffi.Pointer<ffi.UnsignedChar> msg,
-    int msglen,
-    ffi.Pointer<ffi.UnsignedChar> key32,
-    ffi.Pointer<ffi.UnsignedChar> xonly_pk32,
-    ffi.Pointer<ffi.UnsignedChar> algo,
-    int algolen,
-    ffi.Pointer<ffi.Void> data);
 
 /// Data structure that contains additional arguments for schnorrsig_sign_custom.
 ///
@@ -2407,6 +3297,17 @@ final class secp256k1_schnorrsig_extraparams extends ffi.Struct {
   external ffi.Pointer<ffi.Void> ndata;
 }
 
+typedef secp256k1_ecdh_hash_functionFunction = ffi.Int Function(
+    ffi.Pointer<ffi.UnsignedChar> output,
+    ffi.Pointer<ffi.UnsignedChar> x32,
+    ffi.Pointer<ffi.UnsignedChar> y32,
+    ffi.Pointer<ffi.Void> data);
+typedef Dartsecp256k1_ecdh_hash_functionFunction = int Function(
+    ffi.Pointer<ffi.UnsignedChar> output,
+    ffi.Pointer<ffi.UnsignedChar> x32,
+    ffi.Pointer<ffi.UnsignedChar> y32,
+    ffi.Pointer<ffi.Void> data);
+
 /// A pointer to a function that hashes an EC point to obtain an ECDH secret
 ///
 /// Returns: 1 if the point was successfully hashed.
@@ -2419,16 +3320,94 @@ final class secp256k1_schnorrsig_extraparams extends ffi.Struct {
 /// data:       arbitrary data pointer that is passed through
 typedef secp256k1_ecdh_hash_function
     = ffi.Pointer<ffi.NativeFunction<secp256k1_ecdh_hash_functionFunction>>;
-typedef secp256k1_ecdh_hash_functionFunction = ffi.Int Function(
-    ffi.Pointer<ffi.UnsignedChar> output,
-    ffi.Pointer<ffi.UnsignedChar> x32,
-    ffi.Pointer<ffi.UnsignedChar> y32,
-    ffi.Pointer<ffi.Void> data);
-typedef Dartsecp256k1_ecdh_hash_functionFunction = int Function(
-    ffi.Pointer<ffi.UnsignedChar> output,
-    ffi.Pointer<ffi.UnsignedChar> x32,
-    ffi.Pointer<ffi.UnsignedChar> y32,
-    ffi.Pointer<ffi.Void> data);
+typedef int_least8_t = ffi.SignedChar;
+typedef int_least16_t = ffi.Short;
+typedef int_least32_t = ffi.Int;
+typedef int_least64_t = ffi.Long;
+typedef uint_least8_t = ffi.UnsignedChar;
+typedef uint_least16_t = ffi.UnsignedShort;
+typedef uint_least32_t = ffi.UnsignedInt;
+typedef uint_least64_t = ffi.UnsignedLong;
+typedef int_fast8_t = ffi.SignedChar;
+typedef Dartint_fast8_t = int;
+typedef int_fast16_t = ffi.Long;
+typedef Dartint_fast16_t = int;
+typedef int_fast32_t = ffi.Long;
+typedef Dartint_fast32_t = int;
+typedef int_fast64_t = ffi.Long;
+typedef Dartint_fast64_t = int;
+typedef uint_fast8_t = ffi.UnsignedChar;
+typedef Dartuint_fast8_t = int;
+typedef uint_fast16_t = ffi.UnsignedLong;
+typedef Dartuint_fast16_t = int;
+typedef uint_fast32_t = ffi.UnsignedLong;
+typedef Dartuint_fast32_t = int;
+typedef uint_fast64_t = ffi.UnsignedLong;
+typedef Dartuint_fast64_t = int;
+typedef intmax_t = ffi.Long;
+typedef uintmax_t = ffi.UnsignedLong;
+
+/// Opaque data structure that caches information about public key aggregation.
+///
+/// Guaranteed to be 197 bytes in size. No serialization and parsing functions
+/// (yet).
+final class secp256k1_musig_keyagg_cache extends ffi.Struct {
+  @ffi.Array.multi([197])
+  external ffi.Array<ffi.UnsignedChar> data;
+}
+
+/// Opaque data structure that holds a signer's _secret_ nonce.
+///
+/// Guaranteed to be 132 bytes in size.
+///
+/// WARNING: This structure MUST NOT be copied or read or written to directly. A
+/// signer who is online throughout the whole process and can keep this
+/// structure in memory can use the provided API functions for a safe standard
+/// workflow.
+///
+/// Copying this data structure can result in nonce reuse which will leak the
+/// secret signing key.
+final class secp256k1_musig_secnonce extends ffi.Struct {
+  @ffi.Array.multi([132])
+  external ffi.Array<ffi.UnsignedChar> data;
+}
+
+/// Opaque data structure that holds a signer's public nonce.
+///
+/// Guaranteed to be 132 bytes in size. Serialized and parsed with
+/// `musig_pubnonce_serialize` and `musig_pubnonce_parse`.
+final class secp256k1_musig_pubnonce extends ffi.Struct {
+  @ffi.Array.multi([132])
+  external ffi.Array<ffi.UnsignedChar> data;
+}
+
+/// Opaque data structure that holds an aggregate public nonce.
+///
+/// Guaranteed to be 132 bytes in size. Serialized and parsed with
+/// `musig_aggnonce_serialize` and `musig_aggnonce_parse`.
+final class secp256k1_musig_aggnonce extends ffi.Struct {
+  @ffi.Array.multi([132])
+  external ffi.Array<ffi.UnsignedChar> data;
+}
+
+/// Opaque data structure that holds a MuSig session.
+///
+/// This structure is not required to be kept secret for the signing protocol to
+/// be secure. Guaranteed to be 133 bytes in size. No serialization and parsing
+/// functions (yet).
+final class secp256k1_musig_session extends ffi.Struct {
+  @ffi.Array.multi([133])
+  external ffi.Array<ffi.UnsignedChar> data;
+}
+
+/// Opaque data structure that holds a partial MuSig signature.
+///
+/// Guaranteed to be 36 bytes in size. Serialized and parsed with
+/// `musig_partial_sig_serialize` and `musig_partial_sig_parse`.
+final class secp256k1_musig_partial_sig extends ffi.Struct {
+  @ffi.Array.multi([36])
+  external ffi.Array<ffi.UnsignedChar> data;
+}
 
 const int NULL = 0;
 
@@ -2467,3 +3446,105 @@ const int SECP256K1_TAG_PUBKEY_UNCOMPRESSED = 4;
 const int SECP256K1_TAG_PUBKEY_HYBRID_EVEN = 6;
 
 const int SECP256K1_TAG_PUBKEY_HYBRID_ODD = 7;
+
+const int INT8_MIN = -128;
+
+const int INT16_MIN = -32768;
+
+const int INT32_MIN = -2147483648;
+
+const int INT64_MIN = -9223372036854775808;
+
+const int INT8_MAX = 127;
+
+const int INT16_MAX = 32767;
+
+const int INT32_MAX = 2147483647;
+
+const int INT64_MAX = 9223372036854775807;
+
+const int UINT8_MAX = 255;
+
+const int UINT16_MAX = 65535;
+
+const int UINT32_MAX = 4294967295;
+
+const int UINT64_MAX = -1;
+
+const int INT_LEAST8_MIN = -128;
+
+const int INT_LEAST16_MIN = -32768;
+
+const int INT_LEAST32_MIN = -2147483648;
+
+const int INT_LEAST64_MIN = -9223372036854775808;
+
+const int INT_LEAST8_MAX = 127;
+
+const int INT_LEAST16_MAX = 32767;
+
+const int INT_LEAST32_MAX = 2147483647;
+
+const int INT_LEAST64_MAX = 9223372036854775807;
+
+const int UINT_LEAST8_MAX = 255;
+
+const int UINT_LEAST16_MAX = 65535;
+
+const int UINT_LEAST32_MAX = 4294967295;
+
+const int UINT_LEAST64_MAX = -1;
+
+const int INT_FAST8_MIN = -128;
+
+const int INT_FAST16_MIN = -9223372036854775808;
+
+const int INT_FAST32_MIN = -9223372036854775808;
+
+const int INT_FAST64_MIN = -9223372036854775808;
+
+const int INT_FAST8_MAX = 127;
+
+const int INT_FAST16_MAX = 9223372036854775807;
+
+const int INT_FAST32_MAX = 9223372036854775807;
+
+const int INT_FAST64_MAX = 9223372036854775807;
+
+const int UINT_FAST8_MAX = 255;
+
+const int UINT_FAST16_MAX = -1;
+
+const int UINT_FAST32_MAX = -1;
+
+const int UINT_FAST64_MAX = -1;
+
+const int INTPTR_MIN = -9223372036854775808;
+
+const int INTPTR_MAX = 9223372036854775807;
+
+const int UINTPTR_MAX = -1;
+
+const int INTMAX_MIN = -9223372036854775808;
+
+const int INTMAX_MAX = 9223372036854775807;
+
+const int UINTMAX_MAX = -1;
+
+const int PTRDIFF_MIN = -9223372036854775808;
+
+const int PTRDIFF_MAX = 9223372036854775807;
+
+const int SIG_ATOMIC_MIN = -2147483648;
+
+const int SIG_ATOMIC_MAX = 2147483647;
+
+const int SIZE_MAX = -1;
+
+const int WCHAR_MIN = -2147483648;
+
+const int WCHAR_MAX = 2147483647;
+
+const int WINT_MIN = 0;
+
+const int WINT_MAX = 4294967295;

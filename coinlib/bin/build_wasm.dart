@@ -10,37 +10,42 @@ String dockerfile = r"""
 FROM debian:bookworm
 
 # Install dependenices
-RUN apt-get update -y \
-  && apt-get install -y autoconf libtool build-essential git wget
+RUN apt-get update -y && apt-get install -y cmake git wget
 
 # Download and install wasi-sdk
 
-ENV WASI_VERSION=19
+ENV WASI_VERSION=27
 ENV WASI_VERSION_FULL=${WASI_VERSION}.0
-ENV WASI_SDK_PATH=/wasi-sdk-${WASI_VERSION_FULL}
-ENV WASI_ARCHIVE=wasi-sdk-${WASI_VERSION_FULL}-linux.tar.gz
+ENV WASI_SDK_PATH=/wasi-sdk-${WASI_VERSION_FULL}-x86_64-linux
+ENV WASI_ARCHIVE=wasi-sdk-${WASI_VERSION_FULL}-x86_64-linux.tar.gz
 
 RUN wget -nv https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-${WASI_VERSION}/$WASI_ARCHIVE
 RUN tar xvf $WASI_ARCHIVE
 RUN rm $WASI_ARCHIVE
 
-# Clone libsecp256k1 and use v0.5.0
-RUN git clone https://github.com/bitcoin-core/secp256k1 \
-  && cd secp256k1 \
-  && git checkout e3a885d42a7800c1ccebad94ad1e2b82c4df5c65
-WORKDIR /secp256k1
+# Clone secp256k1-coinlib and use v0.7.0
+RUN git clone https://github.com/peercoin/secp256k1-coinlib \
+  && cd secp256k1-coinlib \
+  && git checkout 69018e5b939d8d540ca6b237945100f4ecb5681e
+WORKDIR /secp256k1-coinlib
 
 # Build using wasi-sdk
-RUN ./autogen.sh
-RUN ./configure \
-  --enable-module-recovery --disable-tests --disable-shared \
-  --disable-exhaustive-tests --disable-benchmark \
-  --with-sysroot=${WASI_SDK_PATH}/share/wasi-sysroot \
-  --host=wasm32 --target=wasm32-unknown-wasi \
-  CFLAGS="-O2 -fPIC" CC=${WASI_SDK_PATH}/bin/clang
-RUN make
+RUN cmake -B build \
+      -DSECP256K1_ENABLE_MODULE_RECOVERY=ON \
+      -DSECP256K1_BUILD_TESTS=OFF \
+      -DSECP256K1_DISABLE_SHARED=ON \
+      -DSECP256K1_BUILD_EXHAUSTIVE_TESTS=OFF \
+      -DSECP256K1_BUILD_BENCHMARK=OFF \
+      -DSECP256K1_BUILD_EXAMPLES=OFF \
+      -DSECP256K1_BUILD_CTIME_TESTS=OFF \
+      -DCMAKE_TOOLCHAIN_FILE=${WASI_SDK_PATH}/share/cmake/wasi-sdk.cmake \
+      -DCMAKE_C_FLAGS="-O2 -fPIC" \
+      -DCMAKE_BUILD_TYPE=Release
+RUN cmake --build build
 
 # Link output with wasi standard library and export required functions
+# wasm-ld is a bit broken as it requires manual inclusion of necessary symbols
+# but it works. Using clang to link would probably be better.
 RUN mkdir output
 RUN ${WASI_SDK_PATH}/bin/wasm-ld \
   -o output/secp256k1.wasm \
@@ -69,18 +74,33 @@ RUN ${WASI_SDK_PATH}/bin/wasm-ld \
   --export secp256k1_ec_seckey_negate \
   --export secp256k1_keypair_create \
   --export secp256k1_xonly_pubkey_parse \
+  --export secp256k1_xonly_pubkey_serialize \
   --export secp256k1_schnorrsig_sign32 \
   --export secp256k1_schnorrsig_verify \
   --export secp256k1_ecdh \
-  # The secp256k1 library object files
-  src/libsecp256k1_la-secp256k1.o \
-  src/libsecp256k1_precomputed_la-precomputed_ecmult.o \
-  src/libsecp256k1_precomputed_la-precomputed_ecmult_gen.o \
+  --export secp256k1_ec_pubkey_sort \
+  --export secp256k1_musig_pubkey_agg \
+  --export secp256k1_musig_pubkey_xonly_tweak_add \
+  --export secp256k1_musig_nonce_gen \
+  --export secp256k1_musig_pubnonce_parse \
+  --export secp256k1_musig_pubnonce_serialize \
+  --export secp256k1_musig_nonce_agg \
+  --export secp256k1_musig_nonce_process \
+  --export secp256k1_musig_partial_sign \
+  --export secp256k1_musig_partial_sig_parse \
+  --export secp256k1_musig_partial_sig_serialize \
+  --export secp256k1_musig_partial_sig_verify \
+  --export secp256k1_musig_partial_sig_agg \
+  --export secp256k1_musig_nonce_parity \
+  --export secp256k1_musig_adapt \
+  --export secp256k1_musig_extract_adaptor \
+  # The secp256k1 library file
+  build/lib/libsecp256k1.a \
   # Need to include libc for wasi here as it isn't done for us
   ${WASI_SDK_PATH}/share/wasi-sysroot/lib/wasm32-wasi/libc.a \
   # Need to include another library from clang that isn't included either
   # See https://github.com/WebAssembly/wasi-libc/issues/98
-  ${WASI_SDK_PATH}/lib/clang/15.0.7/lib/wasi/libclang_rt.builtins-wasm32.a
+  ${WASI_SDK_PATH}/lib/clang/20/lib/wasm32-unknown-wasi/libclang_rt.builtins.a
 """;
 
 void binaryFileToDart(String inPath, String outPath, String name) {

@@ -42,7 +42,7 @@ final class TaprootSignatureHasher extends SignatureHasher with Writable {
 
     // Total transaction data
     writer.writeUInt32(tx.version);
-    writer.writeUInt32(tx.locktime);
+    writer.writeUInt32(tx.locktime.value);
 
     if (hashType.allInputs) {
       writer.writeSlice(txHashes.prevouts.singleHash);
@@ -73,7 +73,7 @@ final class TaprootSignatureHasher extends SignatureHasher with Writable {
       }
 
       // Always include sequence
-      writer.writeUInt32(thisInput.sequence);
+      writer.writeUInt32(thisInput.sequence.value);
 
     }
 

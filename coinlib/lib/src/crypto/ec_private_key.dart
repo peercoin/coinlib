@@ -41,7 +41,7 @@ class ECPrivateKey {
   /// created (practically impossible for random 32-bit scalars), then null will
   /// be returned.
   ECPrivateKey? tweak(Uint8List scalar) {
-    checkBytes(scalar, 32, name: "Scalar");
+    checkScalar(scalar);
     final newScalar = secp256k1.privKeyTweak(_data, scalar);
     return newScalar == null ? null : ECPrivateKey(newScalar, compressed: compressed);
   }

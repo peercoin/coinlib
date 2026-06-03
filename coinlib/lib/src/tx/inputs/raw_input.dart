@@ -1,11 +1,11 @@
 import 'dart:typed_data';
-import 'package:coinlib/src/common/checks.dart';
 import 'package:coinlib/src/common/serial.dart';
 import 'package:coinlib/src/tx/outpoint.dart';
 import 'package:coinlib/src/tx/sighash/sighash_type.dart';
 import 'package:coinlib/src/tx/transaction.dart';
 import 'input.dart';
 import 'input_signature.dart';
+import 'sequence.dart';
 
 /// A transaction input without any associated witness data that acts as the
 /// base for all other inputs as all inputs include a outpoint, script and
@@ -17,7 +17,7 @@ class RawInput extends Input {
   @override
   final Uint8List scriptSig;
   @override
-  final int sequence;
+  final InputSequence sequence;
 
   static SigHashType checkHashTypeNotSchnorr(SigHashType type) {
     if (type.schnorrDefault) {
@@ -31,21 +31,19 @@ class RawInput extends Input {
   RawInput({
     required this.prevOut,
     required this.scriptSig,
-    this.sequence = Input.sequenceFinal,
-  }) {
-    checkUint32(sequence, "this.sequence");
-  }
+    this.sequence = InputSequence.enforceLocktime,
+  });
 
   RawInput.fromReader(BytesReader reader)
     : prevOut = OutPoint.fromReader(reader),
     scriptSig = reader.readVarSlice(),
-    sequence = reader.readUInt32();
+    sequence = InputSequence.fromValue(reader.readUInt32());
 
   @override
   void write(Writer writer) {
     prevOut.write(writer);
     writer.writeVarSlice(scriptSig);
-    writer.writeUInt32(sequence);
+    writer.writeUInt32(sequence.value);
   }
 
   /// Always true as a simple [RawInput] is assumed to be fully signed as there

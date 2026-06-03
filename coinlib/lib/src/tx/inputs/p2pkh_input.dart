@@ -4,11 +4,11 @@ import 'package:coinlib/src/scripts/operations.dart';
 import 'package:coinlib/src/scripts/programs/p2pkh.dart';
 import 'package:coinlib/src/scripts/script.dart';
 import 'package:coinlib/src/tx/sign_details.dart';
-import 'input.dart';
 import 'input_signature.dart';
 import 'legacy_input.dart';
 import 'pkh_input.dart';
 import 'raw_input.dart';
+import 'sequence.dart';
 
 /// An input for a Pay-to-Public-Key-Hash output ([P2PKH]). This contains the
 /// public key that should match the hash in the associated output. It is either
@@ -28,7 +28,7 @@ class P2PKHInput extends LegacyInput with PKHInput {
     required super.prevOut,
     required this.publicKey,
     this.insig,
-    super.sequence = Input.sequenceFinal,
+    super.sequence = InputSequence.enforceLocktime,
   }) : super(
     scriptSig: Script([
       if (insig != null) ScriptPushData(insig.bytes),

@@ -8,10 +8,6 @@ void main() {
 
   group("WitnessInput", () {
 
-    final prevOutHash = Uint8List(32);
-    final prevOutN = 0xfeedbeef;
-    final sequence = 0xbeeffeed;
-
     final raw = RawInput.fromReader(BytesReader(rawWitnessInputBytes));
     final witness = [Uint8List.fromList([0, 1, 0xff])];
 
@@ -24,7 +20,7 @@ void main() {
         expect(witIn.prevOut.n, prevOutN);
         expect(witIn.scriptSig, isEmpty);
         expect(witIn.script!.length, 0);
-        expect(witIn.sequence, sequence);
+        expect(witIn.sequence, InputSequence.enforceLocktime);
         expect((witIn as WitnessInput).witness, witness);
         expect(witIn.complete, true);
       }
@@ -35,7 +31,6 @@ void main() {
       final rawWithScriptSig = RawInput(
         prevOut: raw.prevOut,
         scriptSig: Script.fromAsm("0").compiled,
-        sequence: 0,
       );
       expect(WitnessInput.match(rawWithScriptSig, witness), null);
     });
