@@ -2,7 +2,8 @@ import 'dart:typed_data';
 import 'heap.dart';
 
 typedef MallocFunction = int Function(int);
-typedef FreeFunction = int Function(int);
+typedef FreeFunction = void Function(int);
+typedef MemoryGetter = Uint8List Function();
 
 // Using wasm32, so integers are 32 bits
 final int _intBytes = 4;
@@ -28,9 +29,11 @@ class HeapWasm implements Heap<int> {
 class HeapBytesWasm extends HeapWasm implements HeapBytes<int> {
 
   final int size;
-  final Uint8List _view;
+  final MemoryGetter _memory;
 
-  HeapBytesWasm._(this.size, super.ptr, this._view, super.free) : super._();
+  HeapBytesWasm._(this.size, super.ptr, this._memory, super.free) : super._();
+
+  Uint8List get _view => Uint8List.view(_memory().buffer, ptr, size);
 
   @override
   Uint8List get copy => _view.sublist(0);
@@ -45,11 +48,11 @@ class HeapBytesWasm extends HeapWasm implements HeapBytes<int> {
 
 class HeapIntWasm extends HeapWasm implements HeapInt<int> {
 
-  final ByteData _data;
+  final MemoryGetter _memory;
 
-  HeapIntWasm._(this._data, super.ptr, super.free) : super._();
-  HeapIntWasm._withMemory(Uint8List memory, super.ptr, super.free)
-    : _data = ByteData.view(memory.buffer), super._();
+  HeapIntWasm._(this._memory, super.ptr, super.free) : super._();
+
+  ByteData get _data => ByteData.view(_memory().buffer);
 
   @override
   set value(int i) => _data.setUint32(ptr, i, Endian.little);
@@ -59,7 +62,7 @@ class HeapIntWasm extends HeapWasm implements HeapInt<int> {
 
   /// If this represents an integer array, get the integer at the [i] position.
   HeapIntWasm operator[](int i)
-    => HeapIntWasm._(_data, ptr+_intBytes*i, (_) => 0);
+    => HeapIntWasm._(_memory, ptr+_intBytes*i, (_) {});
 
 }
 
@@ -71,8 +74,11 @@ implements HeapPointerArray<int, int> {
   final List<HeapWasm> _objs;
 
   HeapPointerArrayWasm._(
-    super.memory, super.ptr, super.free, this._objs,
-  ) : super._withMemory() {
+    super._memory,
+    super.ptr,
+    super.free,
+    this._objs,
+  ) : super._() {
     // Set pointers of array
     for (int i = 0; i < _objs.length; i++) {
       this[i].value = _objs[i].ptr;
@@ -88,7 +94,7 @@ implements HeapPointerArray<int, int> {
 /// functions.
 class HeapFactory {
 
-  final Uint8List _memory;
+  final MemoryGetter _memory;
   final MallocFunction _malloc;
   final FreeFunction _free;
 
@@ -97,8 +103,7 @@ class HeapFactory {
   /// Allocate a byte array of [size].
   HeapBytesWasm bytes(int size) {
     final ptr = _malloc(size);
-    final list = Uint8List.view(_memory.buffer, ptr, size);
-    return HeapBytesWasm._(size, ptr, list, _free);
+    return HeapBytesWasm._(size, ptr, _memory, _free);
   }
 
   /// Allocate data for a miscellaneous object with [size] bytes.
@@ -106,15 +111,14 @@ class HeapFactory {
   HeapWasm alloc(int size, { int? copyFrom }) {
     final heap = HeapWasm._(_malloc(size), _free);
     if (copyFrom != null) {
-      _memory.setRange(heap.ptr, heap.ptr + size, _memory, copyFrom);
+      final memory = _memory();
+      memory.setRange(heap.ptr, heap.ptr + size, memory, copyFrom);
     }
     return heap;
   }
 
   /// Allocates an integer on the heap.
-  HeapIntWasm integer() => HeapIntWasm._withMemory(
-    _memory, _malloc(_intBytes), _free,
-  );
+  HeapIntWasm integer() => HeapIntWasm._(_memory, _malloc(_intBytes), _free);
 
   /// Creates an array of pointers to the [objs].
   HeapPointerArrayWasm assignPointerArray(List<HeapWasm> objs)

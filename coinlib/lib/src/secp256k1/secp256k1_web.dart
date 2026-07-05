@@ -92,7 +92,7 @@ class Secp256k1 extends Secp256k1Base<
 
     final MallocFunction malloc = wasm.field("malloc");
     final FreeFunction free = wasm.field("free");
-    _heapFactory = HeapFactory(wasm.memory, malloc, free);
+    _heapFactory = HeapFactory(() => wasm.memory, malloc, free);
 
     // Heap arrays
     key32Array = _heapFactory.bytes(Secp256k1Base.privkeySize);
