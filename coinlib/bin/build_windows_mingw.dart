@@ -1,27 +1,20 @@
 import 'dart:io';
 import 'util.dart';
 
-/// Follows peercoin/secp256k1-coinlib's "Building on Windows" instructions.
+/// Follows peercoin/secp256k1-coinlib's "Cross compiling" instructions
+/// using MinGW Makefiles instead of Visual Studio.
 ///
-/// Runnable in "Developer Command Prompt for VS 2022".
+/// Runnable in any terminal with CMake and MinGW in PATH.
 void main() async {
 
   final workDir = Directory.current.path;
 
-  // Clone into tmp directory
-  final tmpDir = await cloneForWindowsInTmpDir();
+  final tmpDir = await cloneForWindowsMinGWInTmpDir();
 
-  // Configure cmake.
   await execWithStdioWin("cmake", [
-    "-G",
-    "Visual Studio 17 2022",
-    "-A",
-    "x64",
-    "-S",
-    ".",
-    "-B",
-    "build",
-    "--debug-output",
+    "-G", "MinGW Makefiles",
+    "-S", ".",
+    "-B", "build",
     "-DSECP256K1_ENABLE_MODULE_RECOVERY=ON",
     "-DSECP256K1_BUILD_TESTS=OFF",
     "-DSECP256K1_BUILD_EXHAUSTIVE_TESTS=OFF",
@@ -31,27 +24,19 @@ void main() async {
     "-DCMAKE_BUILD_TYPE=Release",
   ]);
 
-  // Build.
   await execWithStdioWin("cmake", [
-    "--build",
-    "build",
-    "--config",
-    "RelWithDebInfo",
-    "-v",
+    "--build", "build",
+    "--config", "Release",
   ]);
 
-  // Copy the DLL to build/windows/x64/secp256k1.dll.
   Directory("$workDir${Platform.pathSeparator}build").createSync();
   final dll = File(
     "$tmpDir"
     "${Platform.pathSeparator}secp256k1-coinlib"
     "${Platform.pathSeparator}build"
     "${Platform.pathSeparator}bin"
-    "${Platform.pathSeparator}RelWithDebInfo"
     "${Platform.pathSeparator}libsecp256k1-6.dll",
   );
-
-  print("File exists: ${dll.existsSync()}");
 
   dll.copySync(
     "$workDir"
@@ -60,5 +45,26 @@ void main() async {
   );
 
   print("Output libsecp256k1.dll successfully");
+
+}
+
+Future<String> cloneForWindowsMinGWInTmpDir() async {
+
+  final tmpDir = createTmpDir();
+
+  await execWithStdioWin("git", [
+    "clone",
+    "https://github.com/peercoin/secp256k1-coinlib",
+    "$tmpDir/secp256k1-coinlib",
+  ]);
+  Directory.current = Directory("$tmpDir/secp256k1-coinlib");
+  await execWithStdioWin(
+    "git",
+    ["checkout", "69018e5b939d8d540ca6b237945100f4ecb5681e"],
+  );
+
+  Directory("build").createSync();
+
+  return tmpDir;
 
 }
