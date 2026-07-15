@@ -9,7 +9,7 @@ void main() async {
 
   final workDir = Directory.current.path;
 
-  final tmpDir = await cloneForWindowsMinGWInTmpDir();
+  final tmpDir = await cloneForWindowsInTmpDir();
 
   await execWithStdioWin("cmake", [
     "-G", "MinGW Makefiles",
@@ -45,26 +45,5 @@ void main() async {
   );
 
   print("Output libsecp256k1.dll successfully");
-
-}
-
-Future<String> cloneForWindowsMinGWInTmpDir() async {
-
-  final tmpDir = createTmpDir();
-
-  await execWithStdioWin("git", [
-    "clone",
-    "https://github.com/peercoin/secp256k1-coinlib",
-    "$tmpDir/secp256k1-coinlib",
-  ]);
-  Directory.current = Directory("$tmpDir/secp256k1-coinlib");
-  await execWithStdioWin(
-    "git",
-    ["checkout", "69018e5b939d8d540ca6b237945100f4ecb5681e"],
-  );
-
-  Directory("build").createSync();
-
-  return tmpDir;
 
 }
