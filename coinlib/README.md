@@ -99,8 +99,9 @@ the root directory of your package which will produce a shared library into
 `build/libsecp256k1.dll`. This can also be run in the `coinlib` root directory
 via `dart run bin/build_windows.dart`.
 
-Windows builds use the Visual Studio 17 2022 generator.  Earlier Visual Studio
-toolchains may work by editing `bin/build_windows.dart`.
+Windows builds use the Visual Studio 17 2022 generator. Earlier Visual Studio
+toolchains may work by editing `bin/build_windows.dart`. MingGW can also be used
+with `dart run coinlib:build_windows_mingw`.
 
 ### Cross-compiling for Windows from Linux
 
