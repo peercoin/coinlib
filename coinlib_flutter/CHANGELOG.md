@@ -1,4 +1,4 @@
-## 5.0.0 WIP
+## 5.0.0
 
 Update to underlying coinlib 5.0.0. Please see the CHANGELOG of coinlib.
 

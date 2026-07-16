@@ -1,4 +1,4 @@
-## 5.0.0 WIP
+## 5.0.0
 
 Requires a rebuild of the secp256k1 library as it has moved to the
 secp256k1-coinlib fork.
@@ -16,6 +16,7 @@ secp256k1-coinlib fork.
 - Moves to underlying secp256k1-coinlib.
 - Removed dependency to wasm_interop that had a broken js dependency.
 - Fixes `extraEntropy` being ignored for `Secp256k1Base.schnorrSign`.
+- Adds MinGW build support for Windows
 
 ## 4.1.0
 
