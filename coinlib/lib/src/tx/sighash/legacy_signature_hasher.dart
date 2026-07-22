@@ -71,6 +71,7 @@ final class LegacySignatureHasher extends SignatureHasher {
       inputs: modifiedInputs,
       outputs: modifiedOutputs,
       locktime: tx.locktime,
+      mwebBytes: tx.mwebBytes,
     );
 
     // Add sighash type onto the end

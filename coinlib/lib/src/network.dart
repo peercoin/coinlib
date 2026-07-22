@@ -1,7 +1,7 @@
 class Network {
 
   final int wifPrefix, p2pkhPrefix, p2shPrefix, privHDPrefix, pubHDPrefix;
-  final String bech32Hrp, messagePrefix;
+  final String bech32Hrp, messagePrefix, mwebBech32Hrp;
   final BigInt minFee, minOutput, feePerKb;
 
   Network({
@@ -11,6 +11,7 @@ class Network {
     required this.privHDPrefix,
     required this.pubHDPrefix,
     required this.bech32Hrp,
+    this.mwebBech32Hrp = "",
     required this.messagePrefix,
     required this.minFee,
     required this.minOutput,
@@ -24,6 +25,7 @@ class Network {
     privHDPrefix: 0x0488ade4,
     pubHDPrefix: 0x0488b21e,
     bech32Hrp: "pc",
+    mwebBech32Hrp: "",
     messagePrefix: "Peercoin Signed Message:\n",
     minFee: BigInt.from(1000),
     minOutput: BigInt.from(10000),
@@ -37,6 +39,7 @@ class Network {
     privHDPrefix: 0x043587CF,
     pubHDPrefix: 0x04358394,
     bech32Hrp: "tpc",
+    mwebBech32Hrp: "",
     messagePrefix: "Peercoin Signed Message:\n",
     minFee: BigInt.from(1000),
     minOutput: BigInt.from(10000),
