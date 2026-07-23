@@ -69,6 +69,7 @@ final class LegacySignatureHasher extends SignatureHasher {
       inputs: modifiedInputs,
       outputs: modifiedOutputs,
       locktime: tx.locktime,
+      vExtraData: tx.vExtraData,
     );
 
     // Add sighash type onto the end
