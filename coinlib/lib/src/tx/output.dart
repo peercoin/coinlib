@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/src/address.dart';
 import 'package:coinlib/src/common/checks.dart';
 import 'package:coinlib/src/common/serial.dart';
@@ -57,4 +58,11 @@ class Output with Writable {
   }
 
   Uint8List get scriptPubKey => Uint8List.fromList(_scriptPubKey);
+
+  @override
+  String toString() => "Output("
+      "value: $value, "
+      "scriptPubKey: $_scriptPubKey, "
+      "program: $program"
+      ")";
 }

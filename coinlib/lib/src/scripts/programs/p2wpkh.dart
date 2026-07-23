@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/src/common/bytes.dart';
 import 'package:coinlib/src/crypto/ec_public_key.dart';
 import 'package:coinlib/src/crypto/hash.dart';
@@ -24,4 +25,12 @@ class P2WPKH extends P2Witness {
   P2WPKH.fromPublicKey(ECPublicKey pk) : this.fromHash(hash160(pk.data));
 
   Uint8List get pkHash => data;
+
+  @override
+  String toString() => "$runtimeType("
+      "script: $script, "
+      "version: $version, "
+      "data: $data, "
+      "pkHash: $pkHash"
+      ")";
 }

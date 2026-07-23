@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/src/common/bytes.dart';
 import 'package:coinlib/src/crypto/ec_public_key.dart';
 import 'package:coinlib/src/crypto/hash.dart';
@@ -34,4 +35,10 @@ class P2PKH implements Program {
   P2PKH.fromPublicKey(ECPublicKey pk) : this.fromHash(hash160(pk.data));
 
   Uint8List get pkHash => Uint8List.fromList(_pkHash);
+
+  @override
+  String toString() => "$runtimeType("
+      "script: $script, "
+      "pkHash: $_pkHash"
+      ")";
 }

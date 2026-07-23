@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/src/common/bytes.dart';
 import 'package:coinlib/src/crypto/hash.dart';
 import 'package:coinlib/src/scripts/program.dart';
@@ -27,4 +28,12 @@ class P2WSH extends P2Witness {
       : this.fromHash(sha256Hash(witnessScript.compiled));
 
   Uint8List get scriptHash => data;
+
+  @override
+  String toString() => "$runtimeType("
+      "script: $script, "
+      "version: $version, "
+      "data: $data, "
+      "scriptHash: $scriptHash"
+      ")";
 }

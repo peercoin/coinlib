@@ -1,11 +1,12 @@
 import 'dart:typed_data';
+
+import 'programs/multisig.dart';
 import 'programs/p2pkh.dart';
 import 'programs/p2sh.dart';
 import 'programs/p2tr.dart';
+import 'programs/p2witness.dart';
 import 'programs/p2wpkh.dart';
 import 'programs/p2wsh.dart';
-import 'programs/p2witness.dart';
-import 'programs/multisig.dart';
 import 'script.dart';
 
 /// Thrown when a script doesn't match the program being constructed
@@ -61,6 +62,11 @@ abstract class Program {
       Program.match(Script.decompile(script, requireMinimal: requireMinimal));
 
   factory Program.fromAsm(String asm) => Program.match(Script.fromAsm(asm));
+
+  @override
+  String toString() => "$runtimeType("
+      "script: $script"
+      ")";
 }
 
 /// A program that is not recognised and merely wraps a [Script].
@@ -68,4 +74,9 @@ class RawProgram implements Program {
   @override
   final Script script;
   RawProgram(this.script);
+
+  @override
+  String toString() => "$runtimeType("
+      "script: $script"
+      ")";
 }

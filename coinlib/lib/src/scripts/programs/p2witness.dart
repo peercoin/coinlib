@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/src/scripts/operations.dart';
 import 'package:coinlib/src/scripts/program.dart';
 import 'package:coinlib/src/scripts/script.dart';
@@ -53,4 +54,11 @@ class P2Witness implements Program {
   /// The data of the "witness program". It is called "data" and not "program"
   /// to avoid confusion with the more general [Program] class.
   Uint8List get data => Uint8List.fromList(_data);
+
+  @override
+  String toString() => "$runtimeType("
+      "script: $script, "
+      "version: $version, "
+      "data: $data"
+      ")";
 }

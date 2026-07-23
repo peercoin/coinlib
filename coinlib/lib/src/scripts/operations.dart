@@ -1,9 +1,11 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/src/common/bytes.dart';
 import 'package:coinlib/src/common/hex.dart';
 import 'package:coinlib/src/common/serial.dart';
 import 'package:coinlib/src/crypto/ec_public_key.dart';
 import 'package:coinlib/src/tx/inputs/input_signature.dart';
+
 import 'codes.dart';
 
 class InvalidScriptAsm implements Exception {}
@@ -153,6 +155,16 @@ abstract class ScriptOp {
   /// Returns true when the other [ScriptOp] matches this one.
   /// [ScriptPushDataMatcher] will match with a push data of a particular size.
   bool match(ScriptOp other);
+
+  @override
+  String toString() => "$runtimeType("
+      "compiled: $compiled, "
+      "asm: $asm, "
+      "number: $number, "
+      "ecdsaSig: $ecdsaSig, "
+      "schnorrSig: $schnorrSig, "
+      "publicKey: $publicKey"
+      ")";
 }
 
 /// Represents a [ScriptOp] that is an op code

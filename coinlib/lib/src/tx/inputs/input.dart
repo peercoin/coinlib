@@ -1,7 +1,9 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/src/common/serial.dart';
 import 'package:coinlib/src/scripts/script.dart';
 import 'package:coinlib/src/tx/outpoint.dart';
+
 import 'input_signature.dart';
 import 'p2pkh_input.dart';
 import 'p2sh_multisig_input.dart';
@@ -54,4 +56,12 @@ abstract class Input with Writable {
       return null;
     }
   }
+
+  @override
+  String toString() => "$runtimeType("
+      "prevOut: $prevOut, "
+      "scriptSig: $scriptSig, "
+      "sequence: $sequence, "
+      "signedSize: $signedSize"
+      ")";
 }

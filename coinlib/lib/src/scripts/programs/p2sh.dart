@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/src/common/bytes.dart';
 import 'package:coinlib/src/crypto/hash.dart';
 import 'package:coinlib/src/scripts/operations.dart';
@@ -33,4 +34,10 @@ class P2SH implements Program {
       : this.fromHash(hash160(redeemScript.compiled));
 
   Uint8List get scriptHash => Uint8List.fromList(_scriptHash);
+
+  @override
+  String toString() => "$runtimeType("
+      "script: $script, "
+      "scriptHash: $_scriptHash"
+      ")";
 }

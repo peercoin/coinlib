@@ -1,8 +1,10 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/src/common/bytes.dart';
 import 'package:coinlib/src/common/checks.dart';
 import 'package:coinlib/src/common/hex.dart';
 import 'package:coinlib/src/common/serial.dart';
+
 import 'output.dart';
 
 /// Reference to an [Output] by transaction hash and index
@@ -45,4 +47,10 @@ class OutPoint with Writable {
   @override
   int get hashCode =>
       _hash[1] | _hash[2] << 8 | _hash[3] << 16 | _hash[4] << 24 | n;
+
+  @override
+  String toString() => "$runtimeType("
+      "hash: $_hash, "
+      "n: $n"
+      ")";
 }

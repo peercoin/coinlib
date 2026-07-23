@@ -1,6 +1,8 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/src/common/serial.dart';
 import 'package:collection/collection.dart';
+
 import 'operations.dart';
 
 class Script {
@@ -84,4 +86,10 @@ class Script {
 
   ScriptOp operator [](int i) => ops[i];
   int get length => ops.length;
+
+  @override
+  String toString() => "$runtimeType("
+      "ops: $ops, "
+      "asm: $asm"
+      ")";
 }

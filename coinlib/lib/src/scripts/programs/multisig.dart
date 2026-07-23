@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/src/common/bytes.dart';
 import 'package:coinlib/src/crypto/ec_public_key.dart';
 import 'package:coinlib/src/scripts/operations.dart';
@@ -102,4 +103,11 @@ class MultisigProgram implements Program {
       : this.fromScript(Script.decompile(compiled));
 
   MultisigProgram.fromAsm(String asm) : this.fromScript(Script.fromAsm(asm));
+
+  @override
+  String toString() => "$runtimeType("
+      "script: $script, "
+      "threshold: $threshold, "
+      "pubkeys: $pubkeys"
+      ")";
 }
