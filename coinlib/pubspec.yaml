@@ -9,35 +9,20 @@ environment:
   sdk: '>=3.13.0 <4.0.0'
 
 dev_dependencies:
-  ffigen: ^19.1.0
+  ffigen: ^22.0.0
   lints: ^6.0.0
   test: ^1.21.0
 
 dependencies:
+  code_assets: ^2.0.0
   collection: ^1.17.1
   crypto: ^3.0.2
   dart_base_x: ^1.0.0
   ffi: ^2.1.0
   hex: ^0.2.0
+  hooks: ^2.2.0
+  meta: ^1.19.0
+  native_toolchain_c: ^0.19.4
   path: ^1.8.0
   pointycastle: ^4.0.0
-
-ffigen:
-  name: NativeSecp256k1
-  description: Raw generated bindings to secp256k1
-  output: 'lib/src/secp256k1/secp256k1.ffi.g.dart'
-  headers:
-    entry-points:
-      - 'include/secp256k1_recovery.h'
-      - 'include/secp256k1_schnorrsig.h'
-      - 'include/secp256k1_ecdh.h'
-      - 'include/secp256k1_musig.h'
-  typedefs:
-    exclude:
-      - _.*
-  structs:
-    exclude:
-      - _.*
-  macros:
-    exclude:
-      - _.*
+  record_use: ^1.1.1

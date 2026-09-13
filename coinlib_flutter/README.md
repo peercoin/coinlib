@@ -17,7 +17,7 @@
 
 # Coinlib for Flutter
 
-This package provides flutter support for the
+This package provides Flutter support for the
 [coinlib](https://pub.dev/packages/coinlib) library for Peercoin and
 other cryptocoins. A `CoinlibLoader` widget is included that must be used when
 targeting web to ensure the library is ready to be used.
@@ -26,8 +26,7 @@ An example app is provided in `example/` that demonstrates use of the loader
 widget. Beyond this, the [coinlib](https://pub.dev/packages/coinlib) library
 documentation can be followed.
 
-Android, iOS, Linux, macOS, web, and Windows are supported. If you are using the
-package for Android, iOS, Linux, macOS or web, the library is ready to use. For
-Windows, run `dart run coinlib:build_windows` to build the library. See
-[coinlib's documentation](https://pub.dev/packages/coinlib) for more detailed
-instructions on and options for building the native library.
+Android, iOS, Linux, macOS, web, and Windows are supported. On native platforms,
+the underlying package uses Dart Code Assets to compile and bundle secp256k1
+automatically. Dart 3.13 link hooks remove native symbols that the application
+does not use.
