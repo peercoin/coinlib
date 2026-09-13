@@ -12,6 +12,13 @@ typedef OpaqueMuSigPublicNonce = OpaqueGeneric<int>;
 typedef OpaqueMuSigSession = OpaqueGeneric<int>;
 typedef OpaqueMuSigPartialSig = OpaqueGeneric<int>;
 
+typedef WebInt2 = int Function(int, int);
+typedef WebInt3 = int Function(int, int, int);
+typedef WebInt4 = int Function(int, int, int, int);
+typedef WebInt5 = int Function(int, int, int, int, int);
+typedef WebInt6 = int Function(int, int, int, int, int, int);
+typedef WebInt9 = int Function(int, int, int, int, int, int, int, int, int);
+
 /// Loads and wraps WASM code to be run via the browser JS APIs
 class Secp256k1
     extends
@@ -42,6 +49,87 @@ class Secp256k1
   static const _muSigPartialSigSize = 36;
 
   late final HeapFactory _heapFactory;
+
+  @override
+  late WebInt2 extEcSeckeyVerify;
+  @override
+  late WebInt3 extEcPubkeyCreate;
+  @override
+  late WebInt5 extEcPubkeySerialize;
+  @override
+  late WebInt4 extEcPubkeyParse;
+  @override
+  late WebInt3 extEcdsaSignatureSerializeCompact;
+  @override
+  late WebInt3 extEcdsaSignatureParseCompact;
+  @override
+  late WebInt3 extEcdsaSignatureNormalize;
+  @override
+  late WebInt4 extEcdsaSignatureSerializeDer;
+  @override
+  late WebInt4 extEcdsaSignatureParseDer;
+  @override
+  late WebInt6 extEcdsaSign;
+  @override
+  late WebInt4 extEcdsaVerify;
+  @override
+  late WebInt4 extEcdsaRecoverableSignatureSerializeCompact;
+  @override
+  late WebInt4 extEcdsaRecoverableSignatureParseCompact;
+  @override
+  late WebInt6 extEcdsaSignRecoverable;
+  @override
+  late WebInt4 extEcdsaRecover;
+  @override
+  late WebInt3 extEcSeckeyTweakAdd;
+  @override
+  late WebInt3 extEcPubkeyTweakAdd;
+  @override
+  late WebInt2 extEcSeckeyNegate;
+  @override
+  late WebInt3 extKeypairCreate;
+  @override
+  late WebInt3 extXOnlyPubkeyParse;
+  @override
+  late WebInt3 extXOnlyPubkeySerialize;
+  @override
+  late WebInt5 extSchnorrSign32;
+  @override
+  late WebInt5 extSchnorrVerify;
+  @override
+  late WebInt6 extEcdh;
+  @override
+  late WebInt3 extEcPubkeySort;
+  @override
+  late WebInt5 extMuSigPubkeyAgg;
+  @override
+  late WebInt4 extMuSigPubkeyXOnlyTweakAdd;
+  @override
+  late WebInt9 extMuSigNonceGen;
+  @override
+  late WebInt3 extMuSigPubNonceParse;
+  @override
+  late WebInt3 extMuSigPubNonceSerialize;
+  @override
+  late WebInt4 extMuSigNonceAgg;
+  @override
+  late WebInt6 extMuSigNonceProcess;
+  @override
+  late WebInt6 extMuSigPartialSign;
+  @override
+  late WebInt3 extMuSigPartialSigParse;
+  @override
+  late WebInt3 extMuSigPartialSigSerialize;
+  @override
+  late WebInt6 extMuSigPartialSigVerify;
+  @override
+  late WebInt5 extMuSigPartialSigAgg;
+  @override
+  late WebInt3 extMuSigNonceParity;
+  @override
+  late WebInt5 extMuSigAdapt;
+  @override
+  late WebInt5 extMuSigExtractAdaptor;
 
   @override
   Future<void> internalLoad() async {
