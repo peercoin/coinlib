@@ -1,26 +1,20 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/src/common/hex.dart';
 
 import 'checks.dart';
 
 /// Thrown when attempting to read or write beyond the boundary of data
-class OutOfData implements Exception {
-  final int position;
-  final int readLength;
-  final int bytesLength;
-  OutOfData(this.position, this.readLength, this.bytesLength);
+class OutOfData(final int position, final int readLength, final int bytesLength)
+    implements Exception {
   @override
   String toString() =>
       "Cannot read $readLength bytes at position $position for bytes with "
       "length $bytesLength";
 }
 
-abstract class _ReadWriteBase {
-  int offset;
-  final ByteData bytes;
-
-  _ReadWriteBase(Uint8List bytes, [this.offset = 0])
-      : bytes = bytes.buffer.asByteData();
+abstract class _ReadWriteBase(Uint8List bytes, [var int offset = 0]) {
+  final ByteData bytes = bytes.buffer.asByteData();
 
   T _requireBytes<T>(int n, T Function() f) {
     if (offset + n > bytes.lengthInBytes) {
@@ -35,36 +29,33 @@ abstract class _ReadWriteBase {
 /// Reads serialized data from a Uint8List. Throws an [OutOfData] exception if
 /// there is not enough data to read. If there is an error, the offset may be
 /// different than before.
-class BytesReader extends _ReadWriteBase {
-  BytesReader(super.bytes, [super.offset = 0]);
-
+class BytesReader(super.bytes, [super.offset = 0]) extends _ReadWriteBase {
   int readUInt8() => _requireBytes(1, () => bytes.getUint8(offset++));
   int readUInt16() => _requireBytes(
-        2,
-        () => bytes.getUint16((offset += 2) - 2, Endian.little),
-      );
+    2,
+    () => bytes.getUint16((offset += 2) - 2, Endian.little),
+  );
   int readUInt32() => _requireBytes(
-        4,
-        () => bytes.getUint32((offset += 4) - 4, Endian.little),
-      );
+    4,
+    () => bytes.getUint32((offset += 4) - 4, Endian.little),
+  );
   int readInt32() => _requireBytes(
-        4,
-        () => bytes.getInt32((offset += 4) - 4, Endian.little),
-      );
+    4,
+    () => bytes.getInt32((offset += 4) - 4, Endian.little),
+  );
 
   /// Returns a BigInt to ensure that a full 64 unsigned bits are represented.
   /// Web targets do not have enough precision and native ints are signed.
   BigInt readUInt64() => _requireBytes(
-        8,
-        () => BigInt.from(readUInt32()) | (BigInt.from(readUInt32()) << 32),
-      );
+    8,
+    () => BigInt.from(readUInt32()) | (BigInt.from(readUInt32()) << 32),
+  );
 
   /// Reads [n] bytes
   Uint8List readSlice(int n) => _requireBytes(
-        n,
-        () =>
-            Uint8List.fromList(bytes.buffer.asUint8List((offset += n) - n, n)),
-      );
+    n,
+    () => Uint8List.fromList(bytes.buffer.asUint8List((offset += n) - n, n)),
+  );
 
   BigInt readVarInt() {
     final first = readUInt8();
@@ -124,9 +115,9 @@ mixin Writer {
 
 /// Writes serialized data to a Uint8List. Throws an [OutOfData] exception if
 /// there is not enough space in the bytes to write to.
-class BytesWriter extends _ReadWriteBase with Writer {
-  BytesWriter(super.bytes, [super.offset = 0]);
-
+class BytesWriter(super.bytes, [super.offset = 0])
+    extends _ReadWriteBase
+    with Writer {
   @override
   writeUInt8(int i) {
     checkUint8(i);
@@ -173,15 +164,14 @@ class BytesWriter extends _ReadWriteBase with Writer {
   }
 
   @override
-
   /// Writes an expected number of bytes without any varint
   writeSlice(Uint8List slice) => _requireBytes(
-        slice.length,
-        () {
-          bytes.buffer.asUint8List().setAll(offset, slice);
-          offset += slice.length;
-        },
-      );
+    slice.length,
+    () {
+      bytes.buffer.asUint8List().setAll(offset, slice);
+      offset += slice.length;
+    },
+  );
 
   @override
   writeVarInt(BigInt i) {

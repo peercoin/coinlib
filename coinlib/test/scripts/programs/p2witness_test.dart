@@ -43,10 +43,10 @@ void main() {
 
     test("fromData() success", () {
       expectProgram(int version, String program) => expectP2Witness(
-            P2Witness.fromData(version, hexToBytes(program)),
-            version,
-            program,
-          );
+        P2Witness.fromData(version, hexToBytes(program)),
+        version,
+        program,
+      );
       expectProgram(16, shortBytes);
       expectProgram(16, longBytes);
     });

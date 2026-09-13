@@ -10,7 +10,7 @@ import 'package:coinlib/src/tx/transaction.dart';
 class InputSequence {
   final int value;
 
-  const InputSequence._(this.value);
+  const new _(this.value);
 
   /// The usual sequence value that requires the [Transaction.locktime] to be
   /// enforced.
@@ -21,7 +21,7 @@ class InputSequence {
   static const finalWithoutLocktime = InputSequence._(0xffffffff);
 
   /// Set a specific value for the sequence.
-  InputSequence.fromValue(this.value) {
+  new fromValue(this.value) {
     checkUint32(value, "this.value");
   }
 

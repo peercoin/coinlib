@@ -1,6 +1,8 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/coinlib.dart';
 import 'package:test/test.dart';
+
 import '../vectors/hd_keys.dart';
 
 void forEachHDVector(void Function(HDVector? parent, HDVector vec) f) {
@@ -168,14 +170,14 @@ void main() {
     test("derive()", () {
       forEachHDVector((parent, vec) {
         if (parent != null) {
-          final derivedPriv =
-              HDPrivateKey.decode(parent.privEncoded).derive(vec.index);
+          final derivedPriv = HDPrivateKey.decode(parent.privEncoded)
+              .derive(vec.index);
           expectPriv(derivedPriv);
           vec.expectHDPrivateKey(derivedPriv);
 
           if (!vec.hardened) {
-            final derivedPub =
-                HDKey.decode(parent.pubEncoded).derive(vec.index);
+            final derivedPub = HDKey.decode(parent.pubEncoded)
+                .derive(vec.index);
             expectPub(derivedPub);
             vec.expectHDKey(derivedPub);
           }
@@ -199,15 +201,17 @@ void main() {
       expectPriv(derived);
       hdVectors[0][5].expectHDPrivateKey(derived);
 
-      final pubDerived =
-          HDPublicKey.decode(hdVectors[0][3].pubEncoded, pubPrefix)
-              .derivePath("2/1000000000");
+      final pubDerived = HDPublicKey.decode(
+        hdVectors[0][3].pubEncoded,
+        pubPrefix,
+      ).derivePath("2/1000000000");
       expectPub(pubDerived);
       hdVectors[0][5].expectHDKey(pubDerived);
 
-      final pubMasterDerived =
-          HDPublicKey.decode(hdVectors[1][0].pubEncoded, pubPrefix)
-              .derivePath("m/0");
+      final pubMasterDerived = HDPublicKey.decode(
+        hdVectors[1][0].pubEncoded,
+        pubPrefix,
+      ).derivePath("m/0");
       expectPub(pubMasterDerived);
       hdVectors[1][1].expectHDKey(pubMasterDerived);
     });

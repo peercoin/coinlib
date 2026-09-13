@@ -1,6 +1,8 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/coinlib.dart';
 import 'package:test/test.dart';
+
 import '../vectors/keys.dart';
 
 final hash = Uint8List(32);
@@ -16,9 +18,9 @@ void main() {
   });
 
   MuSigStatefulSigningSession getSession(int i) => MuSigStatefulSigningSession(
-        keys: privs[i].public,
-        ourPublicKey: privs[i].privateKey.pubkey,
-      );
+    keys: privs[i].public,
+    ourPublicKey: privs[i].privateKey.pubkey,
+  );
 
   Uint8List getNonceBytes() => getSession(0).ourPublicNonce.bytes;
 
@@ -125,15 +127,14 @@ void main() {
           KeyToNonceMap otherNonces, [
           int hashLen = 32,
           int key = 0,
-        ]) =>
-            expect(
-              () => sessions.first.sign(
-                otherNonces: otherNonces,
-                hash: Uint8List(hashLen),
-                privKey: privs[key].privateKey,
-              ),
-              throwsArgumentError,
-            );
+        ]) => expect(
+          () => sessions.first.sign(
+            otherNonces: otherNonces,
+            hash: Uint8List(hashLen),
+            privKey: privs[key].privateKey,
+          ),
+          throwsArgumentError,
+        );
 
         // Wrong key
         expectInvalid(otherNoncesMaps.first, 32, 1);
@@ -162,9 +163,9 @@ void main() {
       );
 
       void expectCannotFinish() => expect(
-            () => sessions.first.finish(),
-            throwsStateError,
-          );
+        () => sessions.first.finish(),
+        throwsStateError,
+      );
 
       test("cannot finish before sign", expectCannotFinish);
 

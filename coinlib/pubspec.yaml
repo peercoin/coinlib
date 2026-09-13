@@ -6,7 +6,7 @@ version: 5.0.0
 repository: https://github.com/peercoin/coinlib
 
 environment:
-  sdk: '>=3.4.0 <4.0.0'
+  sdk: '>=3.13.0 <4.0.0'
 
 dev_dependencies:
   ffigen: ^19.1.0

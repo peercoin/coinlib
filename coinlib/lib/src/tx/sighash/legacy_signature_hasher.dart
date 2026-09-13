@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/src/common/serial.dart';
 import 'package:coinlib/src/crypto/hash.dart';
 import 'package:coinlib/src/scripts/operations.dart';
@@ -8,18 +9,18 @@ import 'package:coinlib/src/tx/inputs/sequence.dart';
 import 'package:coinlib/src/tx/output.dart';
 import 'package:coinlib/src/tx/sign_details.dart';
 import 'package:coinlib/src/tx/transaction.dart';
+
 import 'signature_hasher.dart';
 
 /// Produces signature hashes for legacy non-witness inputs.
-final class LegacySignatureHasher extends SignatureHasher {
+final class LegacySignatureHasher(
+  @override final LegacySignDetailsWithScript details,
+) extends SignatureHasher {
   static final ScriptOp _codeseperator = ScriptOpCode.fromName("CODESEPARATOR");
   static final _hashOne = Uint8List(32)..last = 1;
 
-  @override
-  final LegacySignDetailsWithScript details;
-
   /// Produces the hash of an input signature for a non-witness input.
-  LegacySignatureHasher(this.details);
+  this;
 
   @override
   Uint8List get hash {
@@ -37,32 +38,33 @@ final class LegacySignatureHasher extends SignatureHasher {
     final modifiedInputs = (hashType.anyOneCanPay ? [thisInput] : tx.inputs)
         .asMap()
         .map((index, input) {
-      final isThisInput = hashType.anyOneCanPay || index == inputN;
-      return MapEntry(
-        index,
-        RawInput(
-          prevOut: input.prevOut,
-          // Use the corrected previous output script for the input being signed
-          // and blank scripts for all the others
-          scriptSig: isThisInput ? correctedScriptSig : Uint8List(0),
-          // Make sequence 0 for other inputs unless using SIGHASH_ALL
-          sequence: isThisInput || hashType.all
-              ? input.sequence
-              : InputSequence.fromValue(0),
-        ),
-      );
-    }).values;
+          final isThisInput = hashType.anyOneCanPay || index == inputN;
+          return MapEntry(
+            index,
+            RawInput(
+              prevOut: input.prevOut,
+              // Use the corrected previous output script for the input being signed
+              // and blank scripts for all the others
+              scriptSig: isThisInput ? correctedScriptSig : Uint8List(0),
+              // Make sequence 0 for other inputs unless using SIGHASH_ALL
+              sequence: isThisInput || hashType.all
+                  ? input.sequence
+                  : InputSequence.fromValue(0),
+            ),
+          );
+        })
+        .values;
 
     final modifiedOutputs = hashType.all
         ? tx.outputs
         : (hashType.none
-            ? <Output>[]
-            : [
-                // Single output
-                // Include blank outputs upto output index
-                ...Iterable.generate(inputN, (i) => Output.blank()),
-                tx.outputs[inputN],
-              ]);
+              ? <Output>[]
+              : [
+                  // Single output
+                  // Include blank outputs upto output index
+                  ...Iterable.generate(inputN, (i) => Output.blank()),
+                  tx.outputs[inputN],
+                ]);
 
     final modifiedTx = Transaction(
       version: tx.version,

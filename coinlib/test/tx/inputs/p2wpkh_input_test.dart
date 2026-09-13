@@ -1,6 +1,8 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/coinlib.dart';
 import 'package:test/test.dart';
+
 import '../../vectors/keys.dart';
 import '../../vectors/signatures.dart';
 import '../../vectors/inputs.dart';
@@ -22,13 +24,13 @@ void main() {
     });
 
     getWitness(bool hasSig) => [
-          if (hasSig)
-            Uint8List.fromList([
-              ...hexToBytes(der),
-              SigHashType.none().value,
-            ]),
-          hexToBytes(pubkeyVec),
-        ];
+      if (hasSig)
+        Uint8List.fromList([
+          ...hexToBytes(der),
+          SigHashType.none().value,
+        ]),
+      hexToBytes(pubkeyVec),
+    ];
 
     test("valid p2wpkh inputs inc. addSignature", () {
       expectP2WPKHInput(P2WPKHInput input, bool hasSig) {
@@ -76,15 +78,15 @@ void main() {
 
     test("doesn't match non p2wpkh inputs", () {
       expectNoMatch(String asm, List<Uint8List> witness) => expect(
-            P2WPKHInput.match(
-              RawInput(
-                prevOut: prevOut,
-                scriptSig: Script.fromAsm(asm).compiled,
-              ),
-              witness,
-            ),
-            null,
-          );
+        P2WPKHInput.match(
+          RawInput(
+            prevOut: prevOut,
+            scriptSig: Script.fromAsm(asm).compiled,
+          ),
+          witness,
+        ),
+        null,
+      );
 
       expectNoMatch("0", getWitness(true));
       expectNoMatch("", []);

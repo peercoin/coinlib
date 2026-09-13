@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/src/crypto/ec_public_key.dart';
 import 'package:coinlib/src/crypto/random.dart';
 
@@ -8,7 +9,7 @@ import 'package:coinlib/src/crypto/random.dart';
 /// these keys have no known associted private key. Sharing the [rTweak] allows
 /// others to verify this. These keys can be used as Taproot internal keys where
 /// no key-path spending is desired.
-class NUMSPublicKey extends ECPublicKey {
+class NUMSPublicKey._(Uint8List rTweak, super.data) extends ECPublicKey {
   /// To prove that this point does not have an associated private key, the
   /// x-coordinate is the sha256 hash of the uncompressed secp256k1 generator
   /// point bytes. This can be reproduced and verified using the script
@@ -17,15 +18,13 @@ class NUMSPublicKey extends ECPublicKey {
     "50929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0",
   );
 
-  final Uint8List _rTweak;
+  final Uint8List _rTweak = Uint8List.fromList(rTweak);
 
-  NUMSPublicKey._(Uint8List rTweak, super.data)
-      : _rTweak = Uint8List.fromList(rTweak),
-        super();
+  this : super();
 
   /// Constructs a NUMS key from a given [rTweak].
   /// Throws [ArgumentError] if [rTweak] cannot produce a valid public key.
-  factory NUMSPublicKey.fromRTweak(Uint8List rTweak) {
+  factory fromRTweak(Uint8List rTweak) {
     final tweaked = numsPoint.tweak(rTweak);
     if (tweaked == null) {
       throw ArgumentError.value(rTweak, "rTweak", "gives invalid tweaked key");
@@ -34,8 +33,7 @@ class NUMSPublicKey extends ECPublicKey {
   }
 
   /// Generates a new NUMS key with a random [rTweak].
-  factory NUMSPublicKey.generate() =>
-      NUMSPublicKey.fromRTweak(generateRandomBytes(32));
+  factory generate() => NUMSPublicKey.fromRTweak(generateRandomBytes(32));
 
   /// The scalar tweak for this key which may be shared for verification.
   Uint8List get rTweak => Uint8List.fromList(_rTweak);

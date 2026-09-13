@@ -1,5 +1,6 @@
 import 'package:coinlib/coinlib.dart';
 import 'package:test/test.dart';
+
 import '../vectors/keys.dart';
 
 void main() {
@@ -41,9 +42,9 @@ void main() {
 
     test(".fromPubkey", () {
       void expectCompressedKey(String pubkey, String compressed) => expect(
-            ECCompressedPublicKey.fromPubkey(ECPublicKey.fromHex(pubkey)).hex,
-            compressed,
-          );
+        ECCompressedPublicKey.fromPubkey(ECPublicKey.fromHex(pubkey)).hex,
+        compressed,
+      );
 
       expectCompressedKey(longPubkeyVec, pubkeyVec);
       expectCompressedKey(pubkeyVec, pubkeyVec);

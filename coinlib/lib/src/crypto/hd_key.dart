@@ -1,39 +1,36 @@
 import 'dart:convert';
 import 'dart:typed_data';
+
 import 'package:coinlib/src/common/bytes.dart';
 import 'package:coinlib/src/common/checks.dart';
 import 'package:coinlib/src/crypto/ec_private_key.dart';
 import 'package:coinlib/src/crypto/hash.dart';
 import 'package:coinlib/src/encode/base58.dart';
+
 import 'ec_public_key.dart';
 
-class InvalidHDKey implements Exception {}
+class InvalidHDKey implements Exception;
 
-class InvalidHDKeyVersion implements Exception {}
+class InvalidHDKeyVersion implements Exception;
 
-abstract class HDKey {
+abstract class HDKey._({
+  required Uint8List chaincode,
+  required final int depth,
+  required final int index,
+  required final int parentFingerprint,
+}) {
   static const maxIndex = 0xffffffff;
   static const hardenBit = 0x80000000;
   static const encodedLength = 78;
 
-  final Uint8List _chaincode;
-  final int depth;
-  final int index;
-  final int parentFingerprint;
-
-  HDKey._({
-    required Uint8List chaincode,
-    required this.depth,
-    required this.index,
-    required this.parentFingerprint,
-  }) : _chaincode = Uint8List.fromList(chaincode);
+  final Uint8List _chaincode = Uint8List.fromList(chaincode);
 
   /// Decodes a base58 string into a [HDPrivateKey] or [HDPublicKey]. May throw
   /// [InvalidBase58], [InvalidBase58Checksum] or [InvalidHDKey].
   /// If [privVersion] or/and [pubVersion] is provided, it shall require that
   /// the version is equal to either one of these for a corresponsing private or
   /// public key or else it shall throw [InvalidHDKeyVersion].
-  factory HDKey.decode(String b58, {int? privVersion, int? pubVersion}) {
+  factory decode(String b58, {int? privVersion, int? pubVersion}) {
     final data = base58Decode(b58);
     if (data.length != encodedLength) throw InvalidHDKey();
 
@@ -223,7 +220,7 @@ class HDPrivateKey extends HDKey {
   @override
   final ECPrivateKey privateKey;
 
-  HDPrivateKey({
+  new({
     required this.privateKey,
     required super.chaincode,
     required super.depth,
@@ -232,19 +229,19 @@ class HDPrivateKey extends HDKey {
   }) : super._();
 
   /// Creates a master key from an existing private key and chain code.
-  HDPrivateKey.fromKeyAndChainCode(this.privateKey, Uint8List chaincode)
-      : super._(
-          chaincode: chaincode,
-          depth: 0,
-          index: 0,
-          parentFingerprint: 0,
-        ) {
+  new fromKeyAndChainCode(this.privateKey, Uint8List chaincode)
+    : super._(
+        chaincode: chaincode,
+        depth: 0,
+        index: 0,
+        parentFingerprint: 0,
+      ) {
     checkBytes(chaincode, 32, name: "Chaincode");
   }
 
   /// Generates a master key from a 16-64 byte [seed]. The default BIP32 HMAC
   /// [key] can also be changed.
-  factory HDPrivateKey.fromSeed(Uint8List seed, {String key = "Bitcoin seed"}) {
+  factory fromSeed(Uint8List seed, {String key = "Bitcoin seed"}) {
     if (seed.length < 16 || seed.length > 64) {
       throw ArgumentError("Seed should be between 16 and 64 bytes", "seed");
     }
@@ -263,7 +260,7 @@ class HDPrivateKey extends HDKey {
   /// throw [InvalidBase58], [InvalidBase58Checksum] or [InvalidHDKey].
   /// If [version] is provided a [InvalidHDKeyVersion] will be thrown if the
   /// version does not match.
-  factory HDPrivateKey.decode(String b58, [int? version]) {
+  factory decode(String b58, [int? version]) {
     final key = HDKey.decode(b58, privVersion: version);
     if (key is HDPrivateKey) return key;
     throw InvalidHDKey();
@@ -277,36 +274,33 @@ class HDPrivateKey extends HDKey {
       super.derivePath(path) as HDPrivateKey;
 
   HDPublicKey get hdPublicKey => HDPublicKey(
-        publicKey: publicKey,
-        chaincode: chaincode,
-        depth: depth,
-        index: index,
-        parentFingerprint: parentFingerprint,
-      );
+    publicKey: publicKey,
+    chaincode: chaincode,
+    depth: depth,
+    index: index,
+    parentFingerprint: parentFingerprint,
+  );
 
   @override
   ECPublicKey get publicKey => privateKey.pubkey;
 }
 
-class HDPublicKey extends HDKey {
+class HDPublicKey({
+  @override required final ECPublicKey publicKey,
+  required super.chaincode,
+  required super.depth,
+  required super.index,
+  required super.parentFingerprint,
+}) extends HDKey {
   @override
   ECPrivateKey? privateKey;
-  @override
-  final ECPublicKey publicKey;
-
-  HDPublicKey({
-    required this.publicKey,
-    required super.chaincode,
-    required super.depth,
-    required super.index,
-    required super.parentFingerprint,
-  }) : super._();
+  this : super._();
 
   /// Creates a HD public key from a base58 encoded representation ([b58]). May
   /// throw [InvalidBase58], [InvalidBase58Checksum] or [InvalidHDKey].
   /// If [version] is provided a [InvalidHDKeyVersion] will be thrown if the
   /// version does not match.
-  factory HDPublicKey.decode(String b58, [int? version]) {
+  factory decode(String b58, [int? version]) {
     final key = HDKey.decode(b58, pubVersion: version);
     if (key is HDPublicKey) return key;
     throw InvalidHDKey();

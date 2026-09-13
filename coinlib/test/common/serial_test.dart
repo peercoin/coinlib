@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/coinlib.dart';
 import 'package:test/test.dart';
 
@@ -187,10 +188,10 @@ void main() {
 
     test("can write varints", () {
       expectWriteVarInt(String intHex, String expected) => expectWrite(
-            expected.length ~/ 2,
-            (r) => r.writeVarInt(BigInt.parse(intHex, radix: 16)),
-            expected,
-          );
+        expected.length ~/ 2,
+        (r) => r.writeVarInt(BigInt.parse(intHex, radix: 16)),
+        expected,
+      );
 
       expectWriteVarInt("fc", "fc");
       expectWriteVarInt("0201", "fd0102");

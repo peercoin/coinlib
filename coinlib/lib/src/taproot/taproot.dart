@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/src/common/bytes.dart';
 import 'package:coinlib/src/common/serial.dart';
 import 'package:coinlib/src/crypto/ec_private_key.dart';
@@ -10,12 +11,16 @@ import 'package:collection/collection.dart';
 /// This class encapsulates the construction of Taproot tweaked keys given an
 /// internal key and MAST consisting of Tapscript leaves constructed with
 /// [TapBranch] and [TapLeaf] objects.
-class Taproot {
-  final ECPublicKey internalKey;
-  final TapNode? mast;
+class Taproot({
+  required ECPublicKey internalKey,
+  final TapNode? mast,
+}) {
+  final ECPublicKey internalKey = internalKey.xonly;
 
   /// A list of [TapLeaf] objects in the order that they appear in the MAST tree
-  final List<TapLeaf> leaves;
+  final List<TapLeaf> leaves = List.unmodifiable(
+    mast == null ? [] : mast._leaves,
+  );
 
   static final tweakHash = getTaggedHasher("TapTweak");
 
@@ -25,11 +30,7 @@ class Taproot {
   /// The [mast] represents a "Merkelized Abstract Syntax Tree" which is a tree
   /// of scripts that can be spent. This can be constructed via [TapBranch] and
   /// [TapLeaf] objects.
-  Taproot({
-    required ECPublicKey internalKey,
-    this.mast,
-  })  : internalKey = internalKey.xonly,
-        leaves = List.unmodifiable(mast == null ? [] : mast._leaves) {
+  this {
     if (leaves.toSet().length != leaves.length) {
       throw ArgumentError.value(mast, "mast", "contains duplicate leaves");
     }
@@ -99,18 +100,18 @@ class Taproot {
 
   /// The scalar to tweak the internal key
   Uint8List get tweakScalar => _tweakScalarCache ??= tweakHash(
-        Uint8List.fromList([
-          ...internalKey.x,
-          if (mast != null) ...mast!.hash,
-        ]),
-      );
+    Uint8List.fromList([
+      ...internalKey.x,
+      if (mast != null) ...mast!.hash,
+    ]),
+  );
 
   ECPublicKey? _tweakedKeyCache;
 
   /// Obtains the tweaked public key for use in a Taproot program
   ECPublicKey get tweakedKey => _tweakedKeyCache ??= internalKey.tweak(
-        tweakScalar,
-      )!; // Assert not-null. Failure should be practically impossible.
+    tweakScalar,
+  )!; // Assert not-null. Failure should be practically impossible.
 }
 
 /// A node in the MAST tree, either a [TapBranch] or [TapLeaf].
@@ -120,12 +121,8 @@ abstract interface class TapNode {
 }
 
 /// Takes two child nodes within the MAST tree.
-class TapBranch implements TapNode {
+class TapBranch(final TapNode l, final TapNode r) implements TapNode {
   static final branchHash = getTaggedHasher("TapBranch");
-
-  final TapNode l, r;
-
-  TapBranch(this.l, this.r);
 
   // Used to determine which hash should be encoded first. The smallest hash
   // should be first.
@@ -141,25 +138,21 @@ class TapBranch implements TapNode {
   Uint8List? _hashCache;
   @override
   Uint8List get hash => _hashCache ??= branchHash(
-        Uint8List.fromList(_leftFirst() ? l.hash + r.hash : r.hash + l.hash),
-      );
+    Uint8List.fromList(_leftFirst() ? l.hash + r.hash : r.hash + l.hash),
+  );
 
   @override
   List<TapLeaf> get _leaves => l._leaves + r._leaves;
 }
 
 /// A leaf in the MAST tree representing the Tapscript [script].
-class TapLeaf with Writable implements TapNode {
+class TapLeaf(final Script script) with Writable implements TapNode {
   static final leafHash = getTaggedHasher("TapLeaf");
   static const int tapscriptVersion = 0xc0;
 
   /// The Tapscript version is fixed as 0xc0 as this is the only implemented and
   /// enforced version
   final int version = tapscriptVersion;
-  final Script script;
-
-  TapLeaf(this.script);
-
   @override
   void write(Writer writer) {
     writer.writeUInt8(version);

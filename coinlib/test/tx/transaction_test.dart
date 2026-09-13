@@ -1,6 +1,8 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/coinlib.dart';
 import 'package:test/test.dart';
+
 import '../vectors/signatures.dart';
 import '../vectors/tx.dart';
 import '../vectors/keys.dart';
@@ -40,9 +42,9 @@ void main() {
     }
 
     expectInputSignedSize(Input input) => expect(
-          input.size,
-          lessThanOrEqualTo(input.signedSize!),
-        );
+      input.size,
+      lessThanOrEqualTo(input.signedSize!),
+    );
 
     test("valid txs", () {
       for (final vec in validTxVecs) {
@@ -80,7 +82,8 @@ void main() {
     });
 
     test("tx too large", () {
-      final nonScriptSize = 4 // Version
+      final nonScriptSize =
+          4 // Version
           +
           1 // nIn
           +
@@ -94,7 +97,8 @@ void main() {
           +
           4; // Locktime
 
-      final witnessNonScriptSize = 4 // Version
+      final witnessNonScriptSize =
+          4 // Version
           +
           2 // Marker and flag
           +
@@ -141,24 +145,24 @@ void main() {
       }
 
       Transaction txOfSize(int size) => Transaction(
-            inputs: [
-              RawInput(
-                prevOut: examplePrevOut,
-                scriptSig: Uint8List(size - nonScriptSize),
-              ),
-            ],
-            outputs: [],
-          );
+        inputs: [
+          RawInput(
+            prevOut: examplePrevOut,
+            scriptSig: Uint8List(size - nonScriptSize),
+          ),
+        ],
+        outputs: [],
+      );
 
       Transaction witnessTxOfSize(int size) => Transaction(
-            inputs: [
-              WitnessInput(
-                prevOut: examplePrevOut,
-                witness: [Uint8List(size - witnessNonScriptSize)],
-              ),
-            ],
-            outputs: [],
-          );
+        inputs: [
+          WitnessInput(
+            prevOut: examplePrevOut,
+            witness: [Uint8List(size - witnessNonScriptSize)],
+          ),
+        ],
+        outputs: [],
+      );
 
       expect(Transaction.fromBytes(dataOfSize(1000000)).size, 1000000);
       expect(txOfSize(1000000).size, 1000000);
@@ -191,9 +195,9 @@ void main() {
     });
 
     void expectCannotSign(void Function() doSign) => expect(
-          doSign,
-          throwsA(isA<CannotSignInput>()),
-        );
+      doSign,
+      throwsA(isA<CannotSignInput>()),
+    );
 
     test("sign failures", () {
       final privkey = ECPrivateKey.generate();
@@ -396,8 +400,7 @@ void main() {
           "6003525edfd29b63767e465bdf3d61aa60105e4368366c46a62d0f1fb0c6b34b",
         ],
         hashType: SigHashType.all(),
-        hex:
-            "03000000014bb3c6b01f0f2da6466c3668435e1060aa613ddf5b467e76639bd2df5e520360010000006a4730440220103774421b86d889dcf0b68052431f7d78c19acb470922aff6f93c6648d29c50022008cf92d373035b8b3ad6e8a8f061c30ad16967e98eeb04a34fd2bab7aa67d92b01210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ffffffff01a0860100000000001976a914c42e7ef92fdb603af844d064faad95db9bcdfd3d88ac00000000",
+        hex: "03000000014bb3c6b01f0f2da6466c3668435e1060aa613ddf5b467e76639bd2df5e520360010000006a4730440220103774421b86d889dcf0b68052431f7d78c19acb470922aff6f93c6648d29c50022008cf92d373035b8b3ad6e8a8f061c30ad16967e98eeb04a34fd2bab7aa67d92b01210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ffffffff01a0860100000000001976a914c42e7ef92fdb603af844d064faad95db9bcdfd3d88ac00000000",
       );
 
       // SIGHASH_NONE
@@ -408,8 +411,7 @@ void main() {
           "5ce897c22438be2ab7fac85c7fdea596c81b0b515a1163969d0c9805e97ff561",
         ],
         hashType: SigHashType.none(),
-        hex:
-            "030000000161f57fe905980c9d9663115a510b1bc896a5de7f5cc8fab72abe3824c297e85c010000006a47304402201d570d9d1823badb6247a1f1f71eca517fdd1ef93cde819a94caa3fb2d0530cf02204f0cf2517c363dd2e1c46c3f37f1a3c36c869e9013b6741ed2736ba5e73baf9f02210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ffffffff01a0860100000000001976a914c42e7ef92fdb603af844d064faad95db9bcdfd3d88ac00000000",
+        hex: "030000000161f57fe905980c9d9663115a510b1bc896a5de7f5cc8fab72abe3824c297e85c010000006a47304402201d570d9d1823badb6247a1f1f71eca517fdd1ef93cde819a94caa3fb2d0530cf02204f0cf2517c363dd2e1c46c3f37f1a3c36c869e9013b6741ed2736ba5e73baf9f02210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ffffffff01a0860100000000001976a914c42e7ef92fdb603af844d064faad95db9bcdfd3d88ac00000000",
       );
 
       // SIGHASH_SINGLE | ANYONECANPAY
@@ -420,8 +422,7 @@ void main() {
           "f47fe6ce6a79734f252ceac7a0468a077b3d27e5289c5c0fb5294e0c7c07a51a",
         ],
         hashType: SigHashType.single(inputs: InputSigHashOption.anyOneCanPay),
-        hex:
-            "03000000011aa5077c0c4e29b50f5c9c28e5273d7b078a46a0c7ea2c254f73796acee67ff4010000006a47304402206716517f2f9ee8d4fbcbc186f2e31e366e54821b2cbf4d1f9df480be300a4657022016572e39f86552958e043252390f4a17cd08caf1667a08e342b93b9b3ac020ab83210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ffffffff01a0860100000000001976a914c42e7ef92fdb603af844d064faad95db9bcdfd3d88ac00000000",
+        hex: "03000000011aa5077c0c4e29b50f5c9c28e5273d7b078a46a0c7ea2c254f73796acee67ff4010000006a47304402206716517f2f9ee8d4fbcbc186f2e31e366e54821b2cbf4d1f9df480be300a4657022016572e39f86552958e043252390f4a17cd08caf1667a08e342b93b9b3ac020ab83210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ffffffff01a0860100000000001976a914c42e7ef92fdb603af844d064faad95db9bcdfd3d88ac00000000",
       );
 
       // SIGHASH_ALL with 2x inputs
@@ -434,8 +435,7 @@ void main() {
           "22eb14eef7eb88d7b653943aac5f38016fa4ee0aaf51462f8737f788e11b3d78",
         ],
         hashType: SigHashType.all(),
-        hex:
-            "0300000002b87bf355a67eb231f84742af0ecc99eedce81a18e5709ab1f259087eafee2484010000006a4730440220251b28722dd16982c91a2f1aefbfd2d35ff4ce55785e8a7030decfe970c63ad302207e98ac50fa45aad1039bea2e2a18051b693e25efbc7eb83580596cee0d587acf01210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ffffffff783d1be188f737872f4651af0aeea46f01385fac3a9453b6d788ebf7ee14eb22010000006a473044022021142171ef3e40b89ed1083ab57a612cbbf5f039a20e1e02fc25c3f57e01a16b0220087c7f087edcb0014f981b0def6623bebee254c9290d1f7fe9a1a1276ab3d29601210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ffffffff01a0860100000000001976a914c42e7ef92fdb603af844d064faad95db9bcdfd3d88ac00000000",
+        hex: "0300000002b87bf355a67eb231f84742af0ecc99eedce81a18e5709ab1f259087eafee2484010000006a4730440220251b28722dd16982c91a2f1aefbfd2d35ff4ce55785e8a7030decfe970c63ad302207e98ac50fa45aad1039bea2e2a18051b693e25efbc7eb83580596cee0d587acf01210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ffffffff783d1be188f737872f4651af0aeea46f01385fac3a9453b6d788ebf7ee14eb22010000006a473044022021142171ef3e40b89ed1083ab57a612cbbf5f039a20e1e02fc25c3f57e01a16b0220087c7f087edcb0014f981b0def6623bebee254c9290d1f7fe9a1a1276ab3d29601210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ffffffff01a0860100000000001976a914c42e7ef92fdb603af844d064faad95db9bcdfd3d88ac00000000",
       );
 
       // SIGHASH_ALL | ANYONECANPAY with 2x inputs
@@ -448,8 +448,7 @@ void main() {
           "ead28731d0bf3d5d2ac014edb5b4edfa862d9ea6a67ae1147e32b5c4c6cfebab",
         ],
         hashType: SigHashType.all(inputs: InputSigHashOption.anyOneCanPay),
-        hex:
-            "03000000027f7e44472a20b6551ecd2e471ede6ecbace2518d6502a8a203d8e8667c58d7c8010000006a47304402201117e6fb5b1cb0fd893c506051f60b1a7b0cf7bd404a1793a6a02c3fca6b0d5b0220761bef6978d8820694707de4569cd8ece2226ad8f67b6d97b5156cfc17697c3081210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ffffffffabebcfc6c4b5327e14e17aa6a69e2d86faedb4b5ed14c02a5d3dbfd03187d2ea010000006a47304402202afa1ec80ed42799869da5698b5ee0341a25bcdf3a4eafd142be5b4f90f4a03e022019bb83ad4b12a7ea7c65d8bdc4f112825ba2327f502377fa18f0395854bfa77581210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ffffffff01a0860100000000001976a914c42e7ef92fdb603af844d064faad95db9bcdfd3d88ac00000000",
+        hex: "03000000027f7e44472a20b6551ecd2e471ede6ecbace2518d6502a8a203d8e8667c58d7c8010000006a47304402201117e6fb5b1cb0fd893c506051f60b1a7b0cf7bd404a1793a6a02c3fca6b0d5b0220761bef6978d8820694707de4569cd8ece2226ad8f67b6d97b5156cfc17697c3081210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ffffffffabebcfc6c4b5327e14e17aa6a69e2d86faedb4b5ed14c02a5d3dbfd03187d2ea010000006a47304402202afa1ec80ed42799869da5698b5ee0341a25bcdf3a4eafd142be5b4f90f4a03e022019bb83ad4b12a7ea7c65d8bdc4f112825ba2327f502377fa18f0395854bfa77581210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ffffffff01a0860100000000001976a914c42e7ef92fdb603af844d064faad95db9bcdfd3d88ac00000000",
       );
     });
 
@@ -571,8 +570,8 @@ void main() {
       //  63ea0ecff27d9bffd00b09b92b682900e6093a2729f9f0a36746be32dbdeb074
 
       TapLeaf checkSigLeafForVector(KeyTestVector vec) => TapLeaf(
-            Script([ScriptPushData(vec.publicObj.x), ScriptOpCode.checksig]),
-          );
+        Script([ScriptPushData(vec.publicObj.x), ScriptOpCode.checksig]),
+      );
 
       final rTweak = hexToBytes(
         "b8bbb28a422ab2f235f27b7e40f0189bd1c581bf44342fb6e8f3b6e772b29627",
@@ -795,80 +794,86 @@ void main() {
         ),
       ];
 
-      final tx = Transaction(
-        inputs: [
-          // Legacy inputs
-          ...List.generate(
-            4,
-            (i) => P2PKHInput(
-              prevOut: examplePrevOut,
-              publicKey: keyVec.publicObj,
-              sequence: InputSequence.finalWithoutLocktime,
-            ),
-          ),
-          // Witness inputs
-          ...List.generate(
-            3,
-            (i) => P2WPKHInput(
-              prevOut: examplePrevOut,
-              publicKey: keyVec.publicObj,
-              sequence: InputSequence.finalWithoutLocktime,
-            ),
-          ),
-          // Taproot inputs
-          ...List.generate(
-            3,
-            (i) => TaprootKeyInput(
-              prevOut: examplePrevOut,
-              sequence: InputSequence.finalWithoutLocktime,
-            ),
-          ),
-        ],
-        outputs: [exampleOutput],
-      )
-          // Sign legacy
-          .signLegacy(inputN: 0, key: keyVec.privateObj)
-          .signLegacy(
-            inputN: 2,
-            key: keyVec.privateObj,
-            hashType: sigHashAOCP,
-          )
-          .signLegacy(
-            inputN: 3,
-            key: keyVec.privateObj,
-            hashType: SigHashType.single(),
-          )
-          // Sign witness
-          .signLegacyWitness(inputN: 4, key: keyVec.privateObj, value: value)
-          .signLegacyWitness(
-            inputN: 5,
-            key: keyVec.privateObj,
-            hashType: sigHashAOCP,
-            value: value,
-          )
-          .signLegacyWitness(
-            inputN: 6,
-            key: keyVec.privateObj,
-            hashType: SigHashType.none(),
-            value: value,
-          )
-          // Sign taproot
-          .signTaproot(
-            inputN: 7,
-            key: keyVec.privateObj,
-            prevOuts: taprootPrevOuts,
-          )
-          .signTaproot(
-        inputN: 8,
-        key: keyVec.privateObj,
-        hashType: sigHashAOCP,
-        prevOuts: [taprootPrevOuts[8]],
-      ).signTaproot(
-        inputN: 9,
-        key: keyVec.privateObj,
-        hashType: SigHashType.none(),
-        prevOuts: taprootPrevOuts,
-      );
+      final tx =
+          Transaction(
+                inputs: [
+                  // Legacy inputs
+                  ...List.generate(
+                    4,
+                    (i) => P2PKHInput(
+                      prevOut: examplePrevOut,
+                      publicKey: keyVec.publicObj,
+                      sequence: InputSequence.finalWithoutLocktime,
+                    ),
+                  ),
+                  // Witness inputs
+                  ...List.generate(
+                    3,
+                    (i) => P2WPKHInput(
+                      prevOut: examplePrevOut,
+                      publicKey: keyVec.publicObj,
+                      sequence: InputSequence.finalWithoutLocktime,
+                    ),
+                  ),
+                  // Taproot inputs
+                  ...List.generate(
+                    3,
+                    (i) => TaprootKeyInput(
+                      prevOut: examplePrevOut,
+                      sequence: InputSequence.finalWithoutLocktime,
+                    ),
+                  ),
+                ],
+                outputs: [exampleOutput],
+              )
+              // Sign legacy
+              .signLegacy(inputN: 0, key: keyVec.privateObj)
+              .signLegacy(
+                inputN: 2,
+                key: keyVec.privateObj,
+                hashType: sigHashAOCP,
+              )
+              .signLegacy(
+                inputN: 3,
+                key: keyVec.privateObj,
+                hashType: SigHashType.single(),
+              )
+              // Sign witness
+              .signLegacyWitness(
+                inputN: 4,
+                key: keyVec.privateObj,
+                value: value,
+              )
+              .signLegacyWitness(
+                inputN: 5,
+                key: keyVec.privateObj,
+                hashType: sigHashAOCP,
+                value: value,
+              )
+              .signLegacyWitness(
+                inputN: 6,
+                key: keyVec.privateObj,
+                hashType: SigHashType.none(),
+                value: value,
+              )
+              // Sign taproot
+              .signTaproot(
+                inputN: 7,
+                key: keyVec.privateObj,
+                prevOuts: taprootPrevOuts,
+              )
+              .signTaproot(
+                inputN: 8,
+                key: keyVec.privateObj,
+                hashType: sigHashAOCP,
+                prevOuts: [taprootPrevOuts[8]],
+              )
+              .signTaproot(
+                inputN: 9,
+                key: keyVec.privateObj,
+                hashType: SigHashType.none(),
+                prevOuts: taprootPrevOuts,
+              );
 
       void expectComplete(Transaction tx, Iterable<bool> completes) =>
           expect(tx.inputs.map((i) => i.complete), completes);

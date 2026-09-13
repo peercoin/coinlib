@@ -8,17 +8,16 @@ import 'dart:ffi' as ffi;
 class NativeSecp256k1 {
   /// Holds the symbol lookup function.
   final ffi.Pointer<T> Function<T extends ffi.NativeType>(String symbolName)
-      _lookup;
+  _lookup;
 
   /// The symbols are looked up in [dynamicLibrary].
   NativeSecp256k1(ffi.DynamicLibrary dynamicLibrary)
-      : _lookup = dynamicLibrary.lookup;
+    : _lookup = dynamicLibrary.lookup;
 
   /// The symbols are looked up with [lookup].
   NativeSecp256k1.fromLookup(
-      ffi.Pointer<T> Function<T extends ffi.NativeType>(String symbolName)
-          lookup)
-      : _lookup = lookup;
+    ffi.Pointer<T> Function<T extends ffi.NativeType>(String symbolName) lookup,
+  ) : _lookup = lookup;
 
   /// A built-in constant secp256k1 context object with static storage duration, to be
   /// used in conjunction with secp256k1_selftest.
@@ -31,16 +30,18 @@ class NativeSecp256k1 {
   ///
   /// It is highly recommended to call secp256k1_selftest before using this context.
   late final ffi.Pointer<ffi.Pointer<secp256k1_context>>
-      _secp256k1_context_static =
-      _lookup<ffi.Pointer<secp256k1_context>>('secp256k1_context_static');
+  _secp256k1_context_static = _lookup<ffi.Pointer<secp256k1_context>>(
+    'secp256k1_context_static',
+  );
 
   ffi.Pointer<secp256k1_context> get secp256k1_context_static =>
       _secp256k1_context_static.value;
 
   /// Deprecated alias for secp256k1_context_static.
   late final ffi.Pointer<ffi.Pointer<secp256k1_context>>
-      _secp256k1_context_no_precomp =
-      _lookup<ffi.Pointer<secp256k1_context>>('secp256k1_context_no_precomp');
+  _secp256k1_context_no_precomp = _lookup<ffi.Pointer<secp256k1_context>>(
+    'secp256k1_context_no_precomp',
+  );
 
   ffi.Pointer<secp256k1_context> get secp256k1_context_no_precomp =>
       _secp256k1_context_no_precomp.value;
@@ -66,8 +67,8 @@ class NativeSecp256k1 {
 
   late final _secp256k1_selftestPtr =
       _lookup<ffi.NativeFunction<ffi.Void Function()>>('secp256k1_selftest');
-  late final _secp256k1_selftest =
-      _secp256k1_selftestPtr.asFunction<void Function()>();
+  late final _secp256k1_selftest = _secp256k1_selftestPtr
+      .asFunction<void Function()>();
 
   /// Create a secp256k1 context object (in dynamically allocated memory).
   ///
@@ -101,10 +102,12 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_context_createPtr = _lookup<
-      ffi.NativeFunction<
-          ffi.Pointer<secp256k1_context> Function(
-              ffi.UnsignedInt)>>('secp256k1_context_create');
+  late final _secp256k1_context_createPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Pointer<secp256k1_context> Function(ffi.UnsignedInt)
+        >
+      >('secp256k1_context_create');
   late final _secp256k1_context_create = _secp256k1_context_createPtr
       .asFunction<ffi.Pointer<secp256k1_context> Function(int)>();
 
@@ -127,13 +130,18 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_context_clonePtr = _lookup<
-      ffi.NativeFunction<
+  late final _secp256k1_context_clonePtr =
+      _lookup<
+        ffi.NativeFunction<
           ffi.Pointer<secp256k1_context> Function(
-              ffi.Pointer<secp256k1_context>)>>('secp256k1_context_clone');
-  late final _secp256k1_context_clone = _secp256k1_context_clonePtr.asFunction<
-      ffi.Pointer<secp256k1_context> Function(
-          ffi.Pointer<secp256k1_context>)>();
+            ffi.Pointer<secp256k1_context>,
+          )
+        >
+      >('secp256k1_context_clone');
+  late final _secp256k1_context_clone = _secp256k1_context_clonePtr
+      .asFunction<
+        ffi.Pointer<secp256k1_context> Function(ffi.Pointer<secp256k1_context>)
+      >();
 
   /// Destroy a secp256k1 context object (created in dynamically allocated memory).
   ///
@@ -156,10 +164,10 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_context_destroyPtr = _lookup<
-          ffi
-          .NativeFunction<ffi.Void Function(ffi.Pointer<secp256k1_context>)>>(
-      'secp256k1_context_destroy');
+  late final _secp256k1_context_destroyPtr =
+      _lookup<
+        ffi.NativeFunction<ffi.Void Function(ffi.Pointer<secp256k1_context>)>
+      >('secp256k1_context_destroy');
   late final _secp256k1_context_destroy = _secp256k1_context_destroyPtr
       .asFunction<void Function(ffi.Pointer<secp256k1_context>)>();
 
@@ -202,10 +210,14 @@ class NativeSecp256k1 {
   void secp256k1_context_set_illegal_callback(
     ffi.Pointer<secp256k1_context> ctx,
     ffi.Pointer<
-            ffi.NativeFunction<
-                ffi.Void Function(
-                    ffi.Pointer<ffi.Char> message, ffi.Pointer<ffi.Void> data)>>
-        fun,
+      ffi.NativeFunction<
+        ffi.Void Function(
+          ffi.Pointer<ffi.Char> message,
+          ffi.Pointer<ffi.Void> data,
+        )
+      >
+    >
+    fun,
     ffi.Pointer<ffi.Void> data,
   ) {
     return _secp256k1_context_set_illegal_callback(
@@ -215,25 +227,39 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_context_set_illegal_callbackPtr = _lookup<
-          ffi.NativeFunction<
-              ffi.Void Function(
-                  ffi.Pointer<secp256k1_context>,
-                  ffi.Pointer<
-                      ffi.NativeFunction<
-                          ffi.Void Function(ffi.Pointer<ffi.Char> message,
-                              ffi.Pointer<ffi.Void> data)>>,
-                  ffi.Pointer<ffi.Void>)>>(
-      'secp256k1_context_set_illegal_callback');
+  late final _secp256k1_context_set_illegal_callbackPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Void Function(
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<
+              ffi.NativeFunction<
+                ffi.Void Function(
+                  ffi.Pointer<ffi.Char> message,
+                  ffi.Pointer<ffi.Void> data,
+                )
+              >
+            >,
+            ffi.Pointer<ffi.Void>,
+          )
+        >
+      >('secp256k1_context_set_illegal_callback');
   late final _secp256k1_context_set_illegal_callback =
-      _secp256k1_context_set_illegal_callbackPtr.asFunction<
-          void Function(
+      _secp256k1_context_set_illegal_callbackPtr
+          .asFunction<
+            void Function(
               ffi.Pointer<secp256k1_context>,
               ffi.Pointer<
-                  ffi.NativeFunction<
-                      ffi.Void Function(ffi.Pointer<ffi.Char> message,
-                          ffi.Pointer<ffi.Void> data)>>,
-              ffi.Pointer<ffi.Void>)>();
+                ffi.NativeFunction<
+                  ffi.Void Function(
+                    ffi.Pointer<ffi.Char> message,
+                    ffi.Pointer<ffi.Void> data,
+                  )
+                >
+              >,
+              ffi.Pointer<ffi.Void>,
+            )
+          >();
 
   /// Set a callback function to be called when an internal consistency check
   /// fails.
@@ -259,10 +285,14 @@ class NativeSecp256k1 {
   void secp256k1_context_set_error_callback(
     ffi.Pointer<secp256k1_context> ctx,
     ffi.Pointer<
-            ffi.NativeFunction<
-                ffi.Void Function(
-                    ffi.Pointer<ffi.Char> message, ffi.Pointer<ffi.Void> data)>>
-        fun,
+      ffi.NativeFunction<
+        ffi.Void Function(
+          ffi.Pointer<ffi.Char> message,
+          ffi.Pointer<ffi.Void> data,
+        )
+      >
+    >
+    fun,
     ffi.Pointer<ffi.Void> data,
   ) {
     return _secp256k1_context_set_error_callback(
@@ -272,24 +302,39 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_context_set_error_callbackPtr = _lookup<
-      ffi.NativeFunction<
+  late final _secp256k1_context_set_error_callbackPtr =
+      _lookup<
+        ffi.NativeFunction<
           ffi.Void Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<
-                  ffi.NativeFunction<
-                      ffi.Void Function(ffi.Pointer<ffi.Char> message,
-                          ffi.Pointer<ffi.Void> data)>>,
-              ffi.Pointer<ffi.Void>)>>('secp256k1_context_set_error_callback');
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<
+              ffi.NativeFunction<
+                ffi.Void Function(
+                  ffi.Pointer<ffi.Char> message,
+                  ffi.Pointer<ffi.Void> data,
+                )
+              >
+            >,
+            ffi.Pointer<ffi.Void>,
+          )
+        >
+      >('secp256k1_context_set_error_callback');
   late final _secp256k1_context_set_error_callback =
-      _secp256k1_context_set_error_callbackPtr.asFunction<
-          void Function(
+      _secp256k1_context_set_error_callbackPtr
+          .asFunction<
+            void Function(
               ffi.Pointer<secp256k1_context>,
               ffi.Pointer<
-                  ffi.NativeFunction<
-                      ffi.Void Function(ffi.Pointer<ffi.Char> message,
-                          ffi.Pointer<ffi.Void> data)>>,
-              ffi.Pointer<ffi.Void>)>();
+                ffi.NativeFunction<
+                  ffi.Void Function(
+                    ffi.Pointer<ffi.Char> message,
+                    ffi.Pointer<ffi.Void> data,
+                  )
+                >
+              >,
+              ffi.Pointer<ffi.Void>,
+            )
+          >();
 
   /// Parse a variable-length public key into the pubkey object.
   ///
@@ -318,20 +363,26 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_ec_pubkey_parsePtr = _lookup<
-      ffi.NativeFunction<
+  late final _secp256k1_ec_pubkey_parsePtr =
+      _lookup<
+        ffi.NativeFunction<
           ffi.Int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<secp256k1_pubkey>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Size)>>('secp256k1_ec_pubkey_parse');
-  late final _secp256k1_ec_pubkey_parse =
-      _secp256k1_ec_pubkey_parsePtr.asFunction<
-          int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<secp256k1_pubkey>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              int)>();
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<secp256k1_pubkey>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            ffi.Size,
+          )
+        >
+      >('secp256k1_ec_pubkey_parse');
+  late final _secp256k1_ec_pubkey_parse = _secp256k1_ec_pubkey_parsePtr
+      .asFunction<
+        int Function(
+          ffi.Pointer<secp256k1_context>,
+          ffi.Pointer<secp256k1_pubkey>,
+          ffi.Pointer<ffi.UnsignedChar>,
+          int,
+        )
+      >();
 
   /// Serialize a pubkey object into a serialized byte sequence.
   ///
@@ -363,22 +414,28 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_ec_pubkey_serializePtr = _lookup<
-      ffi.NativeFunction<
+  late final _secp256k1_ec_pubkey_serializePtr =
+      _lookup<
+        ffi.NativeFunction<
           ffi.Int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Pointer<ffi.Size>,
-              ffi.Pointer<secp256k1_pubkey>,
-              ffi.UnsignedInt)>>('secp256k1_ec_pubkey_serialize');
-  late final _secp256k1_ec_pubkey_serialize =
-      _secp256k1_ec_pubkey_serializePtr.asFunction<
-          int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Pointer<ffi.Size>,
-              ffi.Pointer<secp256k1_pubkey>,
-              int)>();
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            ffi.Pointer<ffi.Size>,
+            ffi.Pointer<secp256k1_pubkey>,
+            ffi.UnsignedInt,
+          )
+        >
+      >('secp256k1_ec_pubkey_serialize');
+  late final _secp256k1_ec_pubkey_serialize = _secp256k1_ec_pubkey_serializePtr
+      .asFunction<
+        int Function(
+          ffi.Pointer<secp256k1_context>,
+          ffi.Pointer<ffi.UnsignedChar>,
+          ffi.Pointer<ffi.Size>,
+          ffi.Pointer<secp256k1_pubkey>,
+          int,
+        )
+      >();
 
   /// Compare two public keys using lexicographic (of compressed serialization) order
   ///
@@ -400,15 +457,24 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_ec_pubkey_cmpPtr = _lookup<
-      ffi.NativeFunction<
+  late final _secp256k1_ec_pubkey_cmpPtr =
+      _lookup<
+        ffi.NativeFunction<
           ffi.Int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<secp256k1_pubkey>,
-              ffi.Pointer<secp256k1_pubkey>)>>('secp256k1_ec_pubkey_cmp');
-  late final _secp256k1_ec_pubkey_cmp = _secp256k1_ec_pubkey_cmpPtr.asFunction<
-      int Function(ffi.Pointer<secp256k1_context>,
-          ffi.Pointer<secp256k1_pubkey>, ffi.Pointer<secp256k1_pubkey>)>();
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<secp256k1_pubkey>,
+            ffi.Pointer<secp256k1_pubkey>,
+          )
+        >
+      >('secp256k1_ec_pubkey_cmp');
+  late final _secp256k1_ec_pubkey_cmp = _secp256k1_ec_pubkey_cmpPtr
+      .asFunction<
+        int Function(
+          ffi.Pointer<secp256k1_context>,
+          ffi.Pointer<secp256k1_pubkey>,
+          ffi.Pointer<secp256k1_pubkey>,
+        )
+      >();
 
   /// Sort public keys using lexicographic (of compressed serialization) order
   ///
@@ -429,16 +495,24 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_ec_pubkey_sortPtr = _lookup<
-      ffi.NativeFunction<
+  late final _secp256k1_ec_pubkey_sortPtr =
+      _lookup<
+        ffi.NativeFunction<
           ffi.Int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<ffi.Pointer<secp256k1_pubkey>>,
-              ffi.Size)>>('secp256k1_ec_pubkey_sort');
-  late final _secp256k1_ec_pubkey_sort =
-      _secp256k1_ec_pubkey_sortPtr.asFunction<
-          int Function(ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<ffi.Pointer<secp256k1_pubkey>>, int)>();
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<ffi.Pointer<secp256k1_pubkey>>,
+            ffi.Size,
+          )
+        >
+      >('secp256k1_ec_pubkey_sort');
+  late final _secp256k1_ec_pubkey_sort = _secp256k1_ec_pubkey_sortPtr
+      .asFunction<
+        int Function(
+          ffi.Pointer<secp256k1_context>,
+          ffi.Pointer<ffi.Pointer<secp256k1_pubkey>>,
+          int,
+        )
+      >();
 
   /// Parse an ECDSA signature in compact (64 bytes) format.
   ///
@@ -466,19 +540,25 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_ecdsa_signature_parse_compactPtr = _lookup<
-          ffi.NativeFunction<
-              ffi.Int Function(
-                  ffi.Pointer<secp256k1_context>,
-                  ffi.Pointer<secp256k1_ecdsa_signature>,
-                  ffi.Pointer<ffi.UnsignedChar>)>>(
-      'secp256k1_ecdsa_signature_parse_compact');
+  late final _secp256k1_ecdsa_signature_parse_compactPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Int Function(
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<secp256k1_ecdsa_signature>,
+            ffi.Pointer<ffi.UnsignedChar>,
+          )
+        >
+      >('secp256k1_ecdsa_signature_parse_compact');
   late final _secp256k1_ecdsa_signature_parse_compact =
-      _secp256k1_ecdsa_signature_parse_compactPtr.asFunction<
-          int Function(
+      _secp256k1_ecdsa_signature_parse_compactPtr
+          .asFunction<
+            int Function(
               ffi.Pointer<secp256k1_context>,
               ffi.Pointer<secp256k1_ecdsa_signature>,
-              ffi.Pointer<ffi.UnsignedChar>)>();
+              ffi.Pointer<ffi.UnsignedChar>,
+            )
+          >();
 
   /// Parse a DER ECDSA signature.
   ///
@@ -508,20 +588,27 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_ecdsa_signature_parse_derPtr = _lookup<
-      ffi.NativeFunction<
+  late final _secp256k1_ecdsa_signature_parse_derPtr =
+      _lookup<
+        ffi.NativeFunction<
           ffi.Int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<secp256k1_ecdsa_signature>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Size)>>('secp256k1_ecdsa_signature_parse_der');
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<secp256k1_ecdsa_signature>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            ffi.Size,
+          )
+        >
+      >('secp256k1_ecdsa_signature_parse_der');
   late final _secp256k1_ecdsa_signature_parse_der =
-      _secp256k1_ecdsa_signature_parse_derPtr.asFunction<
-          int Function(
+      _secp256k1_ecdsa_signature_parse_derPtr
+          .asFunction<
+            int Function(
               ffi.Pointer<secp256k1_context>,
               ffi.Pointer<secp256k1_ecdsa_signature>,
               ffi.Pointer<ffi.UnsignedChar>,
-              int)>();
+              int,
+            )
+          >();
 
   /// Serialize an ECDSA signature in DER format.
   ///
@@ -547,21 +634,27 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_ecdsa_signature_serialize_derPtr = _lookup<
-          ffi.NativeFunction<
-              ffi.Int Function(
-                  ffi.Pointer<secp256k1_context>,
-                  ffi.Pointer<ffi.UnsignedChar>,
-                  ffi.Pointer<ffi.Size>,
-                  ffi.Pointer<secp256k1_ecdsa_signature>)>>(
-      'secp256k1_ecdsa_signature_serialize_der');
+  late final _secp256k1_ecdsa_signature_serialize_derPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Int Function(
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            ffi.Pointer<ffi.Size>,
+            ffi.Pointer<secp256k1_ecdsa_signature>,
+          )
+        >
+      >('secp256k1_ecdsa_signature_serialize_der');
   late final _secp256k1_ecdsa_signature_serialize_der =
-      _secp256k1_ecdsa_signature_serialize_derPtr.asFunction<
-          int Function(
+      _secp256k1_ecdsa_signature_serialize_derPtr
+          .asFunction<
+            int Function(
               ffi.Pointer<secp256k1_context>,
               ffi.Pointer<ffi.UnsignedChar>,
               ffi.Pointer<ffi.Size>,
-              ffi.Pointer<secp256k1_ecdsa_signature>)>();
+              ffi.Pointer<secp256k1_ecdsa_signature>,
+            )
+          >();
 
   /// Serialize an ECDSA signature in compact (64 byte) format.
   ///
@@ -583,19 +676,25 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_ecdsa_signature_serialize_compactPtr = _lookup<
-          ffi.NativeFunction<
-              ffi.Int Function(
-                  ffi.Pointer<secp256k1_context>,
-                  ffi.Pointer<ffi.UnsignedChar>,
-                  ffi.Pointer<secp256k1_ecdsa_signature>)>>(
-      'secp256k1_ecdsa_signature_serialize_compact');
+  late final _secp256k1_ecdsa_signature_serialize_compactPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Int Function(
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            ffi.Pointer<secp256k1_ecdsa_signature>,
+          )
+        >
+      >('secp256k1_ecdsa_signature_serialize_compact');
   late final _secp256k1_ecdsa_signature_serialize_compact =
-      _secp256k1_ecdsa_signature_serialize_compactPtr.asFunction<
-          int Function(
+      _secp256k1_ecdsa_signature_serialize_compactPtr
+          .asFunction<
+            int Function(
               ffi.Pointer<secp256k1_context>,
               ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Pointer<secp256k1_ecdsa_signature>)>();
+              ffi.Pointer<secp256k1_ecdsa_signature>,
+            )
+          >();
 
   /// Verify an ECDSA signature.
   ///
@@ -635,19 +734,26 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_ecdsa_verifyPtr = _lookup<
-      ffi.NativeFunction<
+  late final _secp256k1_ecdsa_verifyPtr =
+      _lookup<
+        ffi.NativeFunction<
           ffi.Int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<secp256k1_ecdsa_signature>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Pointer<secp256k1_pubkey>)>>('secp256k1_ecdsa_verify');
-  late final _secp256k1_ecdsa_verify = _secp256k1_ecdsa_verifyPtr.asFunction<
-      int Function(
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<secp256k1_ecdsa_signature>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            ffi.Pointer<secp256k1_pubkey>,
+          )
+        >
+      >('secp256k1_ecdsa_verify');
+  late final _secp256k1_ecdsa_verify = _secp256k1_ecdsa_verifyPtr
+      .asFunction<
+        int Function(
           ffi.Pointer<secp256k1_context>,
           ffi.Pointer<secp256k1_ecdsa_signature>,
           ffi.Pointer<ffi.UnsignedChar>,
-          ffi.Pointer<secp256k1_pubkey>)>();
+          ffi.Pointer<secp256k1_pubkey>,
+        )
+      >();
 
   /// Convert a signature to a normalized lower-S form.
   ///
@@ -701,34 +807,42 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_ecdsa_signature_normalizePtr = _lookup<
-          ffi.NativeFunction<
-              ffi.Int Function(
-                  ffi.Pointer<secp256k1_context>,
-                  ffi.Pointer<secp256k1_ecdsa_signature>,
-                  ffi.Pointer<secp256k1_ecdsa_signature>)>>(
-      'secp256k1_ecdsa_signature_normalize');
+  late final _secp256k1_ecdsa_signature_normalizePtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Int Function(
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<secp256k1_ecdsa_signature>,
+            ffi.Pointer<secp256k1_ecdsa_signature>,
+          )
+        >
+      >('secp256k1_ecdsa_signature_normalize');
   late final _secp256k1_ecdsa_signature_normalize =
-      _secp256k1_ecdsa_signature_normalizePtr.asFunction<
-          int Function(
+      _secp256k1_ecdsa_signature_normalizePtr
+          .asFunction<
+            int Function(
               ffi.Pointer<secp256k1_context>,
               ffi.Pointer<secp256k1_ecdsa_signature>,
-              ffi.Pointer<secp256k1_ecdsa_signature>)>();
+              ffi.Pointer<secp256k1_ecdsa_signature>,
+            )
+          >();
 
   /// An implementation of RFC6979 (using HMAC-SHA256) as nonce generation function.
   /// If a data pointer is passed, it is assumed to be a pointer to 32 bytes of
   /// extra entropy.
   late final ffi.Pointer<secp256k1_nonce_function>
-      _secp256k1_nonce_function_rfc6979 =
-      _lookup<secp256k1_nonce_function>('secp256k1_nonce_function_rfc6979');
+  _secp256k1_nonce_function_rfc6979 = _lookup<secp256k1_nonce_function>(
+    'secp256k1_nonce_function_rfc6979',
+  );
 
   secp256k1_nonce_function get secp256k1_nonce_function_rfc6979 =>
       _secp256k1_nonce_function_rfc6979.value;
 
   /// A default safe nonce generation function (currently equal to secp256k1_nonce_function_rfc6979).
   late final ffi.Pointer<secp256k1_nonce_function>
-      _secp256k1_nonce_function_default =
-      _lookup<secp256k1_nonce_function>('secp256k1_nonce_function_default');
+  _secp256k1_nonce_function_default = _lookup<secp256k1_nonce_function>(
+    'secp256k1_nonce_function_default',
+  );
 
   secp256k1_nonce_function get secp256k1_nonce_function_default =>
       _secp256k1_nonce_function_default.value;
@@ -768,23 +882,30 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_ecdsa_signPtr = _lookup<
-      ffi.NativeFunction<
+  late final _secp256k1_ecdsa_signPtr =
+      _lookup<
+        ffi.NativeFunction<
           ffi.Int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<secp256k1_ecdsa_signature>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              secp256k1_nonce_function,
-              ffi.Pointer<ffi.Void>)>>('secp256k1_ecdsa_sign');
-  late final _secp256k1_ecdsa_sign = _secp256k1_ecdsa_signPtr.asFunction<
-      int Function(
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<secp256k1_ecdsa_signature>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            secp256k1_nonce_function,
+            ffi.Pointer<ffi.Void>,
+          )
+        >
+      >('secp256k1_ecdsa_sign');
+  late final _secp256k1_ecdsa_sign = _secp256k1_ecdsa_signPtr
+      .asFunction<
+        int Function(
           ffi.Pointer<secp256k1_context>,
           ffi.Pointer<secp256k1_ecdsa_signature>,
           ffi.Pointer<ffi.UnsignedChar>,
           ffi.Pointer<ffi.UnsignedChar>,
           secp256k1_nonce_function,
-          ffi.Pointer<ffi.Void>)>();
+          ffi.Pointer<ffi.Void>,
+        )
+      >();
 
   /// Verify an elliptic curve secret key.
   ///
@@ -809,14 +930,22 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_ec_seckey_verifyPtr = _lookup<
-      ffi.NativeFunction<
-          ffi.Int Function(ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<ffi.UnsignedChar>)>>('secp256k1_ec_seckey_verify');
-  late final _secp256k1_ec_seckey_verify =
-      _secp256k1_ec_seckey_verifyPtr.asFunction<
-          int Function(
-              ffi.Pointer<secp256k1_context>, ffi.Pointer<ffi.UnsignedChar>)>();
+  late final _secp256k1_ec_seckey_verifyPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Int Function(
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<ffi.UnsignedChar>,
+          )
+        >
+      >('secp256k1_ec_seckey_verify');
+  late final _secp256k1_ec_seckey_verify = _secp256k1_ec_seckey_verifyPtr
+      .asFunction<
+        int Function(
+          ffi.Pointer<secp256k1_context>,
+          ffi.Pointer<ffi.UnsignedChar>,
+        )
+      >();
 
   /// Compute the public key for a secret key.
   ///
@@ -837,16 +966,24 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_ec_pubkey_createPtr = _lookup<
-      ffi.NativeFunction<
+  late final _secp256k1_ec_pubkey_createPtr =
+      _lookup<
+        ffi.NativeFunction<
           ffi.Int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<secp256k1_pubkey>,
-              ffi.Pointer<ffi.UnsignedChar>)>>('secp256k1_ec_pubkey_create');
-  late final _secp256k1_ec_pubkey_create =
-      _secp256k1_ec_pubkey_createPtr.asFunction<
-          int Function(ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<secp256k1_pubkey>, ffi.Pointer<ffi.UnsignedChar>)>();
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<secp256k1_pubkey>,
+            ffi.Pointer<ffi.UnsignedChar>,
+          )
+        >
+      >('secp256k1_ec_pubkey_create');
+  late final _secp256k1_ec_pubkey_create = _secp256k1_ec_pubkey_createPtr
+      .asFunction<
+        int Function(
+          ffi.Pointer<secp256k1_context>,
+          ffi.Pointer<secp256k1_pubkey>,
+          ffi.Pointer<ffi.UnsignedChar>,
+        )
+      >();
 
   /// Negates a secret key in place.
   ///
@@ -867,14 +1004,22 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_ec_seckey_negatePtr = _lookup<
-      ffi.NativeFunction<
-          ffi.Int Function(ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<ffi.UnsignedChar>)>>('secp256k1_ec_seckey_negate');
-  late final _secp256k1_ec_seckey_negate =
-      _secp256k1_ec_seckey_negatePtr.asFunction<
-          int Function(
-              ffi.Pointer<secp256k1_context>, ffi.Pointer<ffi.UnsignedChar>)>();
+  late final _secp256k1_ec_seckey_negatePtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Int Function(
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<ffi.UnsignedChar>,
+          )
+        >
+      >('secp256k1_ec_seckey_negate');
+  late final _secp256k1_ec_seckey_negate = _secp256k1_ec_seckey_negatePtr
+      .asFunction<
+        int Function(
+          ffi.Pointer<secp256k1_context>,
+          ffi.Pointer<ffi.UnsignedChar>,
+        )
+      >();
 
   /// Negates a public key in place.
   ///
@@ -891,14 +1036,22 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_ec_pubkey_negatePtr = _lookup<
-      ffi.NativeFunction<
-          ffi.Int Function(ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<secp256k1_pubkey>)>>('secp256k1_ec_pubkey_negate');
-  late final _secp256k1_ec_pubkey_negate =
-      _secp256k1_ec_pubkey_negatePtr.asFunction<
-          int Function(
-              ffi.Pointer<secp256k1_context>, ffi.Pointer<secp256k1_pubkey>)>();
+  late final _secp256k1_ec_pubkey_negatePtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Int Function(
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<secp256k1_pubkey>,
+          )
+        >
+      >('secp256k1_ec_pubkey_negate');
+  late final _secp256k1_ec_pubkey_negate = _secp256k1_ec_pubkey_negatePtr
+      .asFunction<
+        int Function(
+          ffi.Pointer<secp256k1_context>,
+          ffi.Pointer<secp256k1_pubkey>,
+        )
+      >();
 
   /// Tweak a secret key by adding tweak to it.
   ///
@@ -926,16 +1079,24 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_ec_seckey_tweak_addPtr = _lookup<
-      ffi.NativeFunction<
+  late final _secp256k1_ec_seckey_tweak_addPtr =
+      _lookup<
+        ffi.NativeFunction<
           ffi.Int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Pointer<ffi.UnsignedChar>)>>('secp256k1_ec_seckey_tweak_add');
-  late final _secp256k1_ec_seckey_tweak_add =
-      _secp256k1_ec_seckey_tweak_addPtr.asFunction<
-          int Function(ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<ffi.UnsignedChar>, ffi.Pointer<ffi.UnsignedChar>)>();
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            ffi.Pointer<ffi.UnsignedChar>,
+          )
+        >
+      >('secp256k1_ec_seckey_tweak_add');
+  late final _secp256k1_ec_seckey_tweak_add = _secp256k1_ec_seckey_tweak_addPtr
+      .asFunction<
+        int Function(
+          ffi.Pointer<secp256k1_context>,
+          ffi.Pointer<ffi.UnsignedChar>,
+          ffi.Pointer<ffi.UnsignedChar>,
+        )
+      >();
 
   /// Tweak a public key by adding tweak times the generator to it.
   ///
@@ -961,16 +1122,24 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_ec_pubkey_tweak_addPtr = _lookup<
-      ffi.NativeFunction<
+  late final _secp256k1_ec_pubkey_tweak_addPtr =
+      _lookup<
+        ffi.NativeFunction<
           ffi.Int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<secp256k1_pubkey>,
-              ffi.Pointer<ffi.UnsignedChar>)>>('secp256k1_ec_pubkey_tweak_add');
-  late final _secp256k1_ec_pubkey_tweak_add =
-      _secp256k1_ec_pubkey_tweak_addPtr.asFunction<
-          int Function(ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<secp256k1_pubkey>, ffi.Pointer<ffi.UnsignedChar>)>();
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<secp256k1_pubkey>,
+            ffi.Pointer<ffi.UnsignedChar>,
+          )
+        >
+      >('secp256k1_ec_pubkey_tweak_add');
+  late final _secp256k1_ec_pubkey_tweak_add = _secp256k1_ec_pubkey_tweak_addPtr
+      .asFunction<
+        int Function(
+          ffi.Pointer<secp256k1_context>,
+          ffi.Pointer<secp256k1_pubkey>,
+          ffi.Pointer<ffi.UnsignedChar>,
+        )
+      >();
 
   /// Tweak a secret key by multiplying it by a tweak.
   ///
@@ -996,16 +1165,24 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_ec_seckey_tweak_mulPtr = _lookup<
-      ffi.NativeFunction<
+  late final _secp256k1_ec_seckey_tweak_mulPtr =
+      _lookup<
+        ffi.NativeFunction<
           ffi.Int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Pointer<ffi.UnsignedChar>)>>('secp256k1_ec_seckey_tweak_mul');
-  late final _secp256k1_ec_seckey_tweak_mul =
-      _secp256k1_ec_seckey_tweak_mulPtr.asFunction<
-          int Function(ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<ffi.UnsignedChar>, ffi.Pointer<ffi.UnsignedChar>)>();
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            ffi.Pointer<ffi.UnsignedChar>,
+          )
+        >
+      >('secp256k1_ec_seckey_tweak_mul');
+  late final _secp256k1_ec_seckey_tweak_mul = _secp256k1_ec_seckey_tweak_mulPtr
+      .asFunction<
+        int Function(
+          ffi.Pointer<secp256k1_context>,
+          ffi.Pointer<ffi.UnsignedChar>,
+          ffi.Pointer<ffi.UnsignedChar>,
+        )
+      >();
 
   /// Tweak a public key by multiplying it by a tweak value.
   ///
@@ -1029,16 +1206,24 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_ec_pubkey_tweak_mulPtr = _lookup<
-      ffi.NativeFunction<
+  late final _secp256k1_ec_pubkey_tweak_mulPtr =
+      _lookup<
+        ffi.NativeFunction<
           ffi.Int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<secp256k1_pubkey>,
-              ffi.Pointer<ffi.UnsignedChar>)>>('secp256k1_ec_pubkey_tweak_mul');
-  late final _secp256k1_ec_pubkey_tweak_mul =
-      _secp256k1_ec_pubkey_tweak_mulPtr.asFunction<
-          int Function(ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<secp256k1_pubkey>, ffi.Pointer<ffi.UnsignedChar>)>();
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<secp256k1_pubkey>,
+            ffi.Pointer<ffi.UnsignedChar>,
+          )
+        >
+      >('secp256k1_ec_pubkey_tweak_mul');
+  late final _secp256k1_ec_pubkey_tweak_mul = _secp256k1_ec_pubkey_tweak_mulPtr
+      .asFunction<
+        int Function(
+          ffi.Pointer<secp256k1_context>,
+          ffi.Pointer<secp256k1_pubkey>,
+          ffi.Pointer<ffi.UnsignedChar>,
+        )
+      >();
 
   /// Randomizes the context to provide enhanced protection against side-channel leakage.
   ///
@@ -1081,14 +1266,22 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_context_randomizePtr = _lookup<
-      ffi.NativeFunction<
-          ffi.Int Function(ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<ffi.UnsignedChar>)>>('secp256k1_context_randomize');
-  late final _secp256k1_context_randomize =
-      _secp256k1_context_randomizePtr.asFunction<
-          int Function(
-              ffi.Pointer<secp256k1_context>, ffi.Pointer<ffi.UnsignedChar>)>();
+  late final _secp256k1_context_randomizePtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Int Function(
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<ffi.UnsignedChar>,
+          )
+        >
+      >('secp256k1_context_randomize');
+  late final _secp256k1_context_randomize = _secp256k1_context_randomizePtr
+      .asFunction<
+        int Function(
+          ffi.Pointer<secp256k1_context>,
+          ffi.Pointer<ffi.UnsignedChar>,
+        )
+      >();
 
   /// Add a number of public keys together.
   ///
@@ -1112,20 +1305,26 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_ec_pubkey_combinePtr = _lookup<
-      ffi.NativeFunction<
+  late final _secp256k1_ec_pubkey_combinePtr =
+      _lookup<
+        ffi.NativeFunction<
           ffi.Int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<secp256k1_pubkey>,
-              ffi.Pointer<ffi.Pointer<secp256k1_pubkey>>,
-              ffi.Size)>>('secp256k1_ec_pubkey_combine');
-  late final _secp256k1_ec_pubkey_combine =
-      _secp256k1_ec_pubkey_combinePtr.asFunction<
-          int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<secp256k1_pubkey>,
-              ffi.Pointer<ffi.Pointer<secp256k1_pubkey>>,
-              int)>();
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<secp256k1_pubkey>,
+            ffi.Pointer<ffi.Pointer<secp256k1_pubkey>>,
+            ffi.Size,
+          )
+        >
+      >('secp256k1_ec_pubkey_combine');
+  late final _secp256k1_ec_pubkey_combine = _secp256k1_ec_pubkey_combinePtr
+      .asFunction<
+        int Function(
+          ffi.Pointer<secp256k1_context>,
+          ffi.Pointer<secp256k1_pubkey>,
+          ffi.Pointer<ffi.Pointer<secp256k1_pubkey>>,
+          int,
+        )
+      >();
 
   /// Compute a tagged hash as defined in BIP-340.
   ///
@@ -1160,23 +1359,30 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_tagged_sha256Ptr = _lookup<
-      ffi.NativeFunction<
+  late final _secp256k1_tagged_sha256Ptr =
+      _lookup<
+        ffi.NativeFunction<
           ffi.Int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Size,
-              ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Size)>>('secp256k1_tagged_sha256');
-  late final _secp256k1_tagged_sha256 = _secp256k1_tagged_sha256Ptr.asFunction<
-      int Function(
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            ffi.Size,
+            ffi.Pointer<ffi.UnsignedChar>,
+            ffi.Size,
+          )
+        >
+      >('secp256k1_tagged_sha256');
+  late final _secp256k1_tagged_sha256 = _secp256k1_tagged_sha256Ptr
+      .asFunction<
+        int Function(
           ffi.Pointer<secp256k1_context>,
           ffi.Pointer<ffi.UnsignedChar>,
           ffi.Pointer<ffi.UnsignedChar>,
           int,
           ffi.Pointer<ffi.UnsignedChar>,
-          int)>();
+          int,
+        )
+      >();
 
   /// Parse a compact ECDSA signature (64 bytes + recovery id).
   ///
@@ -1199,20 +1405,27 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_ecdsa_recoverable_signature_parse_compactPtr = _lookup<
-      ffi.NativeFunction<
+  late final _secp256k1_ecdsa_recoverable_signature_parse_compactPtr =
+      _lookup<
+        ffi.NativeFunction<
           ffi.Int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<secp256k1_ecdsa_recoverable_signature>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Int)>>('secp256k1_ecdsa_recoverable_signature_parse_compact');
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<secp256k1_ecdsa_recoverable_signature>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            ffi.Int,
+          )
+        >
+      >('secp256k1_ecdsa_recoverable_signature_parse_compact');
   late final _secp256k1_ecdsa_recoverable_signature_parse_compact =
-      _secp256k1_ecdsa_recoverable_signature_parse_compactPtr.asFunction<
-          int Function(
+      _secp256k1_ecdsa_recoverable_signature_parse_compactPtr
+          .asFunction<
+            int Function(
               ffi.Pointer<secp256k1_context>,
               ffi.Pointer<secp256k1_ecdsa_recoverable_signature>,
               ffi.Pointer<ffi.UnsignedChar>,
-              int)>();
+              int,
+            )
+          >();
 
   /// Convert a recoverable signature into a normal signature.
   ///
@@ -1232,19 +1445,25 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_ecdsa_recoverable_signature_convertPtr = _lookup<
-          ffi.NativeFunction<
-              ffi.Int Function(
-                  ffi.Pointer<secp256k1_context>,
-                  ffi.Pointer<secp256k1_ecdsa_signature>,
-                  ffi.Pointer<secp256k1_ecdsa_recoverable_signature>)>>(
-      'secp256k1_ecdsa_recoverable_signature_convert');
+  late final _secp256k1_ecdsa_recoverable_signature_convertPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Int Function(
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<secp256k1_ecdsa_signature>,
+            ffi.Pointer<secp256k1_ecdsa_recoverable_signature>,
+          )
+        >
+      >('secp256k1_ecdsa_recoverable_signature_convert');
   late final _secp256k1_ecdsa_recoverable_signature_convert =
-      _secp256k1_ecdsa_recoverable_signature_convertPtr.asFunction<
-          int Function(
+      _secp256k1_ecdsa_recoverable_signature_convertPtr
+          .asFunction<
+            int Function(
               ffi.Pointer<secp256k1_context>,
               ffi.Pointer<secp256k1_ecdsa_signature>,
-              ffi.Pointer<secp256k1_ecdsa_recoverable_signature>)>();
+              ffi.Pointer<secp256k1_ecdsa_recoverable_signature>,
+            )
+          >();
 
   /// Serialize an ECDSA signature in compact format (64 bytes + recovery id).
   ///
@@ -1269,20 +1488,25 @@ class NativeSecp256k1 {
 
   late final _secp256k1_ecdsa_recoverable_signature_serialize_compactPtr =
       _lookup<
-              ffi.NativeFunction<
-                  ffi.Int Function(
-                      ffi.Pointer<secp256k1_context>,
-                      ffi.Pointer<ffi.UnsignedChar>,
-                      ffi.Pointer<ffi.Int>,
-                      ffi.Pointer<secp256k1_ecdsa_recoverable_signature>)>>(
-          'secp256k1_ecdsa_recoverable_signature_serialize_compact');
+        ffi.NativeFunction<
+          ffi.Int Function(
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            ffi.Pointer<ffi.Int>,
+            ffi.Pointer<secp256k1_ecdsa_recoverable_signature>,
+          )
+        >
+      >('secp256k1_ecdsa_recoverable_signature_serialize_compact');
   late final _secp256k1_ecdsa_recoverable_signature_serialize_compact =
-      _secp256k1_ecdsa_recoverable_signature_serialize_compactPtr.asFunction<
-          int Function(
+      _secp256k1_ecdsa_recoverable_signature_serialize_compactPtr
+          .asFunction<
+            int Function(
               ffi.Pointer<secp256k1_context>,
               ffi.Pointer<ffi.UnsignedChar>,
               ffi.Pointer<ffi.Int>,
-              ffi.Pointer<secp256k1_ecdsa_recoverable_signature>)>();
+              ffi.Pointer<secp256k1_ecdsa_recoverable_signature>,
+            )
+          >();
 
   /// Create a recoverable ECDSA signature.
   ///
@@ -1314,24 +1538,31 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_ecdsa_sign_recoverablePtr = _lookup<
-      ffi.NativeFunction<
+  late final _secp256k1_ecdsa_sign_recoverablePtr =
+      _lookup<
+        ffi.NativeFunction<
           ffi.Int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<secp256k1_ecdsa_recoverable_signature>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              secp256k1_nonce_function,
-              ffi.Pointer<ffi.Void>)>>('secp256k1_ecdsa_sign_recoverable');
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<secp256k1_ecdsa_recoverable_signature>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            secp256k1_nonce_function,
+            ffi.Pointer<ffi.Void>,
+          )
+        >
+      >('secp256k1_ecdsa_sign_recoverable');
   late final _secp256k1_ecdsa_sign_recoverable =
-      _secp256k1_ecdsa_sign_recoverablePtr.asFunction<
-          int Function(
+      _secp256k1_ecdsa_sign_recoverablePtr
+          .asFunction<
+            int Function(
               ffi.Pointer<secp256k1_context>,
               ffi.Pointer<secp256k1_ecdsa_recoverable_signature>,
               ffi.Pointer<ffi.UnsignedChar>,
               ffi.Pointer<ffi.UnsignedChar>,
               secp256k1_nonce_function,
-              ffi.Pointer<ffi.Void>)>();
+              ffi.Pointer<ffi.Void>,
+            )
+          >();
 
   /// Recover an ECDSA public key from a signature.
   ///
@@ -1355,19 +1586,26 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_ecdsa_recoverPtr = _lookup<
-      ffi.NativeFunction<
+  late final _secp256k1_ecdsa_recoverPtr =
+      _lookup<
+        ffi.NativeFunction<
           ffi.Int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<secp256k1_pubkey>,
-              ffi.Pointer<secp256k1_ecdsa_recoverable_signature>,
-              ffi.Pointer<ffi.UnsignedChar>)>>('secp256k1_ecdsa_recover');
-  late final _secp256k1_ecdsa_recover = _secp256k1_ecdsa_recoverPtr.asFunction<
-      int Function(
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<secp256k1_pubkey>,
+            ffi.Pointer<secp256k1_ecdsa_recoverable_signature>,
+            ffi.Pointer<ffi.UnsignedChar>,
+          )
+        >
+      >('secp256k1_ecdsa_recover');
+  late final _secp256k1_ecdsa_recover = _secp256k1_ecdsa_recoverPtr
+      .asFunction<
+        int Function(
           ffi.Pointer<secp256k1_context>,
           ffi.Pointer<secp256k1_pubkey>,
           ffi.Pointer<secp256k1_ecdsa_recoverable_signature>,
-          ffi.Pointer<ffi.UnsignedChar>)>();
+          ffi.Pointer<ffi.UnsignedChar>,
+        )
+      >();
 
   /// Parse a 32-byte sequence into a xonly_pubkey object.
   ///
@@ -1390,18 +1628,24 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_xonly_pubkey_parsePtr = _lookup<
-      ffi.NativeFunction<
+  late final _secp256k1_xonly_pubkey_parsePtr =
+      _lookup<
+        ffi.NativeFunction<
           ffi.Int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<secp256k1_xonly_pubkey>,
-              ffi.Pointer<ffi.UnsignedChar>)>>('secp256k1_xonly_pubkey_parse');
-  late final _secp256k1_xonly_pubkey_parse =
-      _secp256k1_xonly_pubkey_parsePtr.asFunction<
-          int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<secp256k1_xonly_pubkey>,
-              ffi.Pointer<ffi.UnsignedChar>)>();
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<secp256k1_xonly_pubkey>,
+            ffi.Pointer<ffi.UnsignedChar>,
+          )
+        >
+      >('secp256k1_xonly_pubkey_parse');
+  late final _secp256k1_xonly_pubkey_parse = _secp256k1_xonly_pubkey_parsePtr
+      .asFunction<
+        int Function(
+          ffi.Pointer<secp256k1_context>,
+          ffi.Pointer<secp256k1_xonly_pubkey>,
+          ffi.Pointer<ffi.UnsignedChar>,
+        )
+      >();
 
   /// Serialize an xonly_pubkey object into a 32-byte sequence.
   ///
@@ -1422,19 +1666,25 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_xonly_pubkey_serializePtr = _lookup<
-          ffi.NativeFunction<
-              ffi.Int Function(
-                  ffi.Pointer<secp256k1_context>,
-                  ffi.Pointer<ffi.UnsignedChar>,
-                  ffi.Pointer<secp256k1_xonly_pubkey>)>>(
-      'secp256k1_xonly_pubkey_serialize');
+  late final _secp256k1_xonly_pubkey_serializePtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Int Function(
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            ffi.Pointer<secp256k1_xonly_pubkey>,
+          )
+        >
+      >('secp256k1_xonly_pubkey_serialize');
   late final _secp256k1_xonly_pubkey_serialize =
-      _secp256k1_xonly_pubkey_serializePtr.asFunction<
-          int Function(
+      _secp256k1_xonly_pubkey_serializePtr
+          .asFunction<
+            int Function(
               ffi.Pointer<secp256k1_context>,
               ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Pointer<secp256k1_xonly_pubkey>)>();
+              ffi.Pointer<secp256k1_xonly_pubkey>,
+            )
+          >();
 
   /// Compare two x-only public keys using lexicographic order
   ///
@@ -1456,19 +1706,24 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_xonly_pubkey_cmpPtr = _lookup<
-          ffi.NativeFunction<
-              ffi.Int Function(
-                  ffi.Pointer<secp256k1_context>,
-                  ffi.Pointer<secp256k1_xonly_pubkey>,
-                  ffi.Pointer<secp256k1_xonly_pubkey>)>>(
-      'secp256k1_xonly_pubkey_cmp');
-  late final _secp256k1_xonly_pubkey_cmp =
-      _secp256k1_xonly_pubkey_cmpPtr.asFunction<
-          int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<secp256k1_xonly_pubkey>,
-              ffi.Pointer<secp256k1_xonly_pubkey>)>();
+  late final _secp256k1_xonly_pubkey_cmpPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Int Function(
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<secp256k1_xonly_pubkey>,
+            ffi.Pointer<secp256k1_xonly_pubkey>,
+          )
+        >
+      >('secp256k1_xonly_pubkey_cmp');
+  late final _secp256k1_xonly_pubkey_cmp = _secp256k1_xonly_pubkey_cmpPtr
+      .asFunction<
+        int Function(
+          ffi.Pointer<secp256k1_context>,
+          ffi.Pointer<secp256k1_xonly_pubkey>,
+          ffi.Pointer<secp256k1_xonly_pubkey>,
+        )
+      >();
 
   /// Converts a secp256k1_pubkey into a secp256k1_xonly_pubkey.
   ///
@@ -1494,21 +1749,27 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_xonly_pubkey_from_pubkeyPtr = _lookup<
-          ffi.NativeFunction<
-              ffi.Int Function(
-                  ffi.Pointer<secp256k1_context>,
-                  ffi.Pointer<secp256k1_xonly_pubkey>,
-                  ffi.Pointer<ffi.Int>,
-                  ffi.Pointer<secp256k1_pubkey>)>>(
-      'secp256k1_xonly_pubkey_from_pubkey');
+  late final _secp256k1_xonly_pubkey_from_pubkeyPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Int Function(
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<secp256k1_xonly_pubkey>,
+            ffi.Pointer<ffi.Int>,
+            ffi.Pointer<secp256k1_pubkey>,
+          )
+        >
+      >('secp256k1_xonly_pubkey_from_pubkey');
   late final _secp256k1_xonly_pubkey_from_pubkey =
-      _secp256k1_xonly_pubkey_from_pubkeyPtr.asFunction<
-          int Function(
+      _secp256k1_xonly_pubkey_from_pubkeyPtr
+          .asFunction<
+            int Function(
               ffi.Pointer<secp256k1_context>,
               ffi.Pointer<secp256k1_xonly_pubkey>,
               ffi.Pointer<ffi.Int>,
-              ffi.Pointer<secp256k1_pubkey>)>();
+              ffi.Pointer<secp256k1_pubkey>,
+            )
+          >();
 
   /// Tweak an x-only public key by adding the generator multiplied with tweak32
   /// to it.
@@ -1543,21 +1804,27 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_xonly_pubkey_tweak_addPtr = _lookup<
-          ffi.NativeFunction<
-              ffi.Int Function(
-                  ffi.Pointer<secp256k1_context>,
-                  ffi.Pointer<secp256k1_pubkey>,
-                  ffi.Pointer<secp256k1_xonly_pubkey>,
-                  ffi.Pointer<ffi.UnsignedChar>)>>(
-      'secp256k1_xonly_pubkey_tweak_add');
+  late final _secp256k1_xonly_pubkey_tweak_addPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Int Function(
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<secp256k1_pubkey>,
+            ffi.Pointer<secp256k1_xonly_pubkey>,
+            ffi.Pointer<ffi.UnsignedChar>,
+          )
+        >
+      >('secp256k1_xonly_pubkey_tweak_add');
   late final _secp256k1_xonly_pubkey_tweak_add =
-      _secp256k1_xonly_pubkey_tweak_addPtr.asFunction<
-          int Function(
+      _secp256k1_xonly_pubkey_tweak_addPtr
+          .asFunction<
+            int Function(
               ffi.Pointer<secp256k1_context>,
               ffi.Pointer<secp256k1_pubkey>,
               ffi.Pointer<secp256k1_xonly_pubkey>,
-              ffi.Pointer<ffi.UnsignedChar>)>();
+              ffi.Pointer<ffi.UnsignedChar>,
+            )
+          >();
 
   /// Checks that a tweaked pubkey is the result of calling
   /// secp256k1_xonly_pubkey_tweak_add with internal_pubkey and tweak32.
@@ -1597,23 +1864,29 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_xonly_pubkey_tweak_add_checkPtr = _lookup<
-          ffi.NativeFunction<
-              ffi.Int Function(
-                  ffi.Pointer<secp256k1_context>,
-                  ffi.Pointer<ffi.UnsignedChar>,
-                  ffi.Int,
-                  ffi.Pointer<secp256k1_xonly_pubkey>,
-                  ffi.Pointer<ffi.UnsignedChar>)>>(
-      'secp256k1_xonly_pubkey_tweak_add_check');
+  late final _secp256k1_xonly_pubkey_tweak_add_checkPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Int Function(
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            ffi.Int,
+            ffi.Pointer<secp256k1_xonly_pubkey>,
+            ffi.Pointer<ffi.UnsignedChar>,
+          )
+        >
+      >('secp256k1_xonly_pubkey_tweak_add_check');
   late final _secp256k1_xonly_pubkey_tweak_add_check =
-      _secp256k1_xonly_pubkey_tweak_add_checkPtr.asFunction<
-          int Function(
+      _secp256k1_xonly_pubkey_tweak_add_checkPtr
+          .asFunction<
+            int Function(
               ffi.Pointer<secp256k1_context>,
               ffi.Pointer<ffi.UnsignedChar>,
               int,
               ffi.Pointer<secp256k1_xonly_pubkey>,
-              ffi.Pointer<ffi.UnsignedChar>)>();
+              ffi.Pointer<ffi.UnsignedChar>,
+            )
+          >();
 
   /// Compute the keypair for a valid secret key.
   ///
@@ -1637,16 +1910,24 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_keypair_createPtr = _lookup<
-      ffi.NativeFunction<
+  late final _secp256k1_keypair_createPtr =
+      _lookup<
+        ffi.NativeFunction<
           ffi.Int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<secp256k1_keypair>,
-              ffi.Pointer<ffi.UnsignedChar>)>>('secp256k1_keypair_create');
-  late final _secp256k1_keypair_create =
-      _secp256k1_keypair_createPtr.asFunction<
-          int Function(ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<secp256k1_keypair>, ffi.Pointer<ffi.UnsignedChar>)>();
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<secp256k1_keypair>,
+            ffi.Pointer<ffi.UnsignedChar>,
+          )
+        >
+      >('secp256k1_keypair_create');
+  late final _secp256k1_keypair_create = _secp256k1_keypair_createPtr
+      .asFunction<
+        int Function(
+          ffi.Pointer<secp256k1_context>,
+          ffi.Pointer<secp256k1_keypair>,
+          ffi.Pointer<ffi.UnsignedChar>,
+        )
+      >();
 
   /// Get the secret key from a keypair.
   ///
@@ -1666,15 +1947,24 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_keypair_secPtr = _lookup<
-      ffi.NativeFunction<
+  late final _secp256k1_keypair_secPtr =
+      _lookup<
+        ffi.NativeFunction<
           ffi.Int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Pointer<secp256k1_keypair>)>>('secp256k1_keypair_sec');
-  late final _secp256k1_keypair_sec = _secp256k1_keypair_secPtr.asFunction<
-      int Function(ffi.Pointer<secp256k1_context>,
-          ffi.Pointer<ffi.UnsignedChar>, ffi.Pointer<secp256k1_keypair>)>();
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            ffi.Pointer<secp256k1_keypair>,
+          )
+        >
+      >('secp256k1_keypair_sec');
+  late final _secp256k1_keypair_sec = _secp256k1_keypair_secPtr
+      .asFunction<
+        int Function(
+          ffi.Pointer<secp256k1_context>,
+          ffi.Pointer<ffi.UnsignedChar>,
+          ffi.Pointer<secp256k1_keypair>,
+        )
+      >();
 
   /// Get the public key from a keypair.
   ///
@@ -1694,15 +1984,24 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_keypair_pubPtr = _lookup<
-      ffi.NativeFunction<
+  late final _secp256k1_keypair_pubPtr =
+      _lookup<
+        ffi.NativeFunction<
           ffi.Int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<secp256k1_pubkey>,
-              ffi.Pointer<secp256k1_keypair>)>>('secp256k1_keypair_pub');
-  late final _secp256k1_keypair_pub = _secp256k1_keypair_pubPtr.asFunction<
-      int Function(ffi.Pointer<secp256k1_context>,
-          ffi.Pointer<secp256k1_pubkey>, ffi.Pointer<secp256k1_keypair>)>();
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<secp256k1_pubkey>,
+            ffi.Pointer<secp256k1_keypair>,
+          )
+        >
+      >('secp256k1_keypair_pub');
+  late final _secp256k1_keypair_pub = _secp256k1_keypair_pubPtr
+      .asFunction<
+        int Function(
+          ffi.Pointer<secp256k1_context>,
+          ffi.Pointer<secp256k1_pubkey>,
+          ffi.Pointer<secp256k1_keypair>,
+        )
+      >();
 
   /// Get the x-only public key from a keypair.
   ///
@@ -1730,20 +2029,26 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_keypair_xonly_pubPtr = _lookup<
-      ffi.NativeFunction<
+  late final _secp256k1_keypair_xonly_pubPtr =
+      _lookup<
+        ffi.NativeFunction<
           ffi.Int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<secp256k1_xonly_pubkey>,
-              ffi.Pointer<ffi.Int>,
-              ffi.Pointer<secp256k1_keypair>)>>('secp256k1_keypair_xonly_pub');
-  late final _secp256k1_keypair_xonly_pub =
-      _secp256k1_keypair_xonly_pubPtr.asFunction<
-          int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<secp256k1_xonly_pubkey>,
-              ffi.Pointer<ffi.Int>,
-              ffi.Pointer<secp256k1_keypair>)>();
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<secp256k1_xonly_pubkey>,
+            ffi.Pointer<ffi.Int>,
+            ffi.Pointer<secp256k1_keypair>,
+          )
+        >
+      >('secp256k1_keypair_xonly_pub');
+  late final _secp256k1_keypair_xonly_pub = _secp256k1_keypair_xonly_pubPtr
+      .asFunction<
+        int Function(
+          ffi.Pointer<secp256k1_context>,
+          ffi.Pointer<secp256k1_xonly_pubkey>,
+          ffi.Pointer<ffi.Int>,
+          ffi.Pointer<secp256k1_keypair>,
+        )
+      >();
 
   /// Tweak a keypair by adding tweak32 to the secret key and updating the public
   /// key accordingly.
@@ -1775,17 +2080,25 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_keypair_xonly_tweak_addPtr = _lookup<
-          ffi.NativeFunction<
-              ffi.Int Function(
-                  ffi.Pointer<secp256k1_context>,
-                  ffi.Pointer<secp256k1_keypair>,
-                  ffi.Pointer<ffi.UnsignedChar>)>>(
-      'secp256k1_keypair_xonly_tweak_add');
+  late final _secp256k1_keypair_xonly_tweak_addPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Int Function(
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<secp256k1_keypair>,
+            ffi.Pointer<ffi.UnsignedChar>,
+          )
+        >
+      >('secp256k1_keypair_xonly_tweak_add');
   late final _secp256k1_keypair_xonly_tweak_add =
-      _secp256k1_keypair_xonly_tweak_addPtr.asFunction<
-          int Function(ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<secp256k1_keypair>, ffi.Pointer<ffi.UnsignedChar>)>();
+      _secp256k1_keypair_xonly_tweak_addPtr
+          .asFunction<
+            int Function(
+              ffi.Pointer<secp256k1_context>,
+              ffi.Pointer<secp256k1_keypair>,
+              ffi.Pointer<ffi.UnsignedChar>,
+            )
+          >();
 
   /// An implementation of the nonce generation function as defined in Bitcoin
   /// Improvement Proposal 340 "Schnorr Signatures for secp256k1"
@@ -1799,9 +2112,9 @@ class NativeSecp256k1 {
   /// Therefore, to create BIP-340 compliant signatures, algo must be set to
   /// "BIP0340/nonce" and algolen to 13.
   late final ffi.Pointer<secp256k1_nonce_function_hardened>
-      _secp256k1_nonce_function_bip340 =
-      _lookup<secp256k1_nonce_function_hardened>(
-          'secp256k1_nonce_function_bip340');
+  _secp256k1_nonce_function_bip340 = _lookup<secp256k1_nonce_function_hardened>(
+    'secp256k1_nonce_function_bip340',
+  );
 
   secp256k1_nonce_function_hardened get secp256k1_nonce_function_bip340 =>
       _secp256k1_nonce_function_bip340.value;
@@ -1845,22 +2158,28 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_schnorrsig_sign32Ptr = _lookup<
-      ffi.NativeFunction<
+  late final _secp256k1_schnorrsig_sign32Ptr =
+      _lookup<
+        ffi.NativeFunction<
           ffi.Int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Pointer<secp256k1_keypair>,
-              ffi.Pointer<ffi.UnsignedChar>)>>('secp256k1_schnorrsig_sign32');
-  late final _secp256k1_schnorrsig_sign32 =
-      _secp256k1_schnorrsig_sign32Ptr.asFunction<
-          int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Pointer<secp256k1_keypair>,
-              ffi.Pointer<ffi.UnsignedChar>)>();
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            ffi.Pointer<secp256k1_keypair>,
+            ffi.Pointer<ffi.UnsignedChar>,
+          )
+        >
+      >('secp256k1_schnorrsig_sign32');
+  late final _secp256k1_schnorrsig_sign32 = _secp256k1_schnorrsig_sign32Ptr
+      .asFunction<
+        int Function(
+          ffi.Pointer<secp256k1_context>,
+          ffi.Pointer<ffi.UnsignedChar>,
+          ffi.Pointer<ffi.UnsignedChar>,
+          ffi.Pointer<secp256k1_keypair>,
+          ffi.Pointer<ffi.UnsignedChar>,
+        )
+      >();
 
   /// Same as secp256k1_schnorrsig_sign32, but DEPRECATED. Will be removed in
   /// future versions.
@@ -1880,22 +2199,28 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_schnorrsig_signPtr = _lookup<
-      ffi.NativeFunction<
+  late final _secp256k1_schnorrsig_signPtr =
+      _lookup<
+        ffi.NativeFunction<
           ffi.Int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Pointer<secp256k1_keypair>,
-              ffi.Pointer<ffi.UnsignedChar>)>>('secp256k1_schnorrsig_sign');
-  late final _secp256k1_schnorrsig_sign =
-      _secp256k1_schnorrsig_signPtr.asFunction<
-          int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Pointer<secp256k1_keypair>,
-              ffi.Pointer<ffi.UnsignedChar>)>();
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            ffi.Pointer<secp256k1_keypair>,
+            ffi.Pointer<ffi.UnsignedChar>,
+          )
+        >
+      >('secp256k1_schnorrsig_sign');
+  late final _secp256k1_schnorrsig_sign = _secp256k1_schnorrsig_signPtr
+      .asFunction<
+        int Function(
+          ffi.Pointer<secp256k1_context>,
+          ffi.Pointer<ffi.UnsignedChar>,
+          ffi.Pointer<ffi.UnsignedChar>,
+          ffi.Pointer<secp256k1_keypair>,
+          ffi.Pointer<ffi.UnsignedChar>,
+        )
+      >();
 
   /// Create a Schnorr signature with a more flexible API.
   ///
@@ -1935,25 +2260,31 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_schnorrsig_sign_customPtr = _lookup<
-          ffi.NativeFunction<
-              ffi.Int Function(
-                  ffi.Pointer<secp256k1_context>,
-                  ffi.Pointer<ffi.UnsignedChar>,
-                  ffi.Pointer<ffi.UnsignedChar>,
-                  ffi.Size,
-                  ffi.Pointer<secp256k1_keypair>,
-                  ffi.Pointer<secp256k1_schnorrsig_extraparams>)>>(
-      'secp256k1_schnorrsig_sign_custom');
+  late final _secp256k1_schnorrsig_sign_customPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Int Function(
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            ffi.Size,
+            ffi.Pointer<secp256k1_keypair>,
+            ffi.Pointer<secp256k1_schnorrsig_extraparams>,
+          )
+        >
+      >('secp256k1_schnorrsig_sign_custom');
   late final _secp256k1_schnorrsig_sign_custom =
-      _secp256k1_schnorrsig_sign_customPtr.asFunction<
-          int Function(
+      _secp256k1_schnorrsig_sign_customPtr
+          .asFunction<
+            int Function(
               ffi.Pointer<secp256k1_context>,
               ffi.Pointer<ffi.UnsignedChar>,
               ffi.Pointer<ffi.UnsignedChar>,
               int,
               ffi.Pointer<secp256k1_keypair>,
-              ffi.Pointer<secp256k1_schnorrsig_extraparams>)>();
+              ffi.Pointer<secp256k1_schnorrsig_extraparams>,
+            )
+          >();
 
   /// Verify a Schnorr signature.
   ///
@@ -1980,30 +2311,35 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_schnorrsig_verifyPtr = _lookup<
-          ffi.NativeFunction<
-              ffi.Int Function(
-                  ffi.Pointer<secp256k1_context>,
-                  ffi.Pointer<ffi.UnsignedChar>,
-                  ffi.Pointer<ffi.UnsignedChar>,
-                  ffi.Size,
-                  ffi.Pointer<secp256k1_xonly_pubkey>)>>(
-      'secp256k1_schnorrsig_verify');
-  late final _secp256k1_schnorrsig_verify =
-      _secp256k1_schnorrsig_verifyPtr.asFunction<
-          int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              int,
-              ffi.Pointer<secp256k1_xonly_pubkey>)>();
+  late final _secp256k1_schnorrsig_verifyPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Int Function(
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            ffi.Size,
+            ffi.Pointer<secp256k1_xonly_pubkey>,
+          )
+        >
+      >('secp256k1_schnorrsig_verify');
+  late final _secp256k1_schnorrsig_verify = _secp256k1_schnorrsig_verifyPtr
+      .asFunction<
+        int Function(
+          ffi.Pointer<secp256k1_context>,
+          ffi.Pointer<ffi.UnsignedChar>,
+          ffi.Pointer<ffi.UnsignedChar>,
+          int,
+          ffi.Pointer<secp256k1_xonly_pubkey>,
+        )
+      >();
 
   /// An implementation of SHA256 hash function that applies to compressed public key.
   /// Populates the output parameter with 32 bytes.
   late final ffi.Pointer<secp256k1_ecdh_hash_function>
-      _secp256k1_ecdh_hash_function_sha256 =
-      _lookup<secp256k1_ecdh_hash_function>(
-          'secp256k1_ecdh_hash_function_sha256');
+  _secp256k1_ecdh_hash_function_sha256 = _lookup<secp256k1_ecdh_hash_function>(
+    'secp256k1_ecdh_hash_function_sha256',
+  );
 
   secp256k1_ecdh_hash_function get secp256k1_ecdh_hash_function_sha256 =>
       _secp256k1_ecdh_hash_function_sha256.value;
@@ -2011,9 +2347,9 @@ class NativeSecp256k1 {
   /// A default ECDH hash function (currently equal to secp256k1_ecdh_hash_function_sha256).
   /// Populates the output parameter with 32 bytes.
   late final ffi.Pointer<secp256k1_ecdh_hash_function>
-      _secp256k1_ecdh_hash_function_default =
-      _lookup<secp256k1_ecdh_hash_function>(
-          'secp256k1_ecdh_hash_function_default');
+  _secp256k1_ecdh_hash_function_default = _lookup<secp256k1_ecdh_hash_function>(
+    'secp256k1_ecdh_hash_function_default',
+  );
 
   secp256k1_ecdh_hash_function get secp256k1_ecdh_hash_function_default =>
       _secp256k1_ecdh_hash_function_default.value;
@@ -2049,23 +2385,30 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_ecdhPtr = _lookup<
-      ffi.NativeFunction<
+  late final _secp256k1_ecdhPtr =
+      _lookup<
+        ffi.NativeFunction<
           ffi.Int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Pointer<secp256k1_pubkey>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              secp256k1_ecdh_hash_function,
-              ffi.Pointer<ffi.Void>)>>('secp256k1_ecdh');
-  late final _secp256k1_ecdh = _secp256k1_ecdhPtr.asFunction<
-      int Function(
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            ffi.Pointer<secp256k1_pubkey>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            secp256k1_ecdh_hash_function,
+            ffi.Pointer<ffi.Void>,
+          )
+        >
+      >('secp256k1_ecdh');
+  late final _secp256k1_ecdh = _secp256k1_ecdhPtr
+      .asFunction<
+        int Function(
           ffi.Pointer<secp256k1_context>,
           ffi.Pointer<ffi.UnsignedChar>,
           ffi.Pointer<secp256k1_pubkey>,
           ffi.Pointer<ffi.UnsignedChar>,
           secp256k1_ecdh_hash_function,
-          ffi.Pointer<ffi.Void>)>();
+          ffi.Pointer<ffi.Void>,
+        )
+      >();
 
   /// Parse a signer's public nonce.
   ///
@@ -2085,19 +2428,25 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_musig_pubnonce_parsePtr = _lookup<
-          ffi.NativeFunction<
-              ffi.Int Function(
-                  ffi.Pointer<secp256k1_context>,
-                  ffi.Pointer<secp256k1_musig_pubnonce>,
-                  ffi.Pointer<ffi.UnsignedChar>)>>(
-      'secp256k1_musig_pubnonce_parse');
+  late final _secp256k1_musig_pubnonce_parsePtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Int Function(
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<secp256k1_musig_pubnonce>,
+            ffi.Pointer<ffi.UnsignedChar>,
+          )
+        >
+      >('secp256k1_musig_pubnonce_parse');
   late final _secp256k1_musig_pubnonce_parse =
-      _secp256k1_musig_pubnonce_parsePtr.asFunction<
-          int Function(
+      _secp256k1_musig_pubnonce_parsePtr
+          .asFunction<
+            int Function(
               ffi.Pointer<secp256k1_context>,
               ffi.Pointer<secp256k1_musig_pubnonce>,
-              ffi.Pointer<ffi.UnsignedChar>)>();
+              ffi.Pointer<ffi.UnsignedChar>,
+            )
+          >();
 
   /// Serialize a signer's public nonce
   ///
@@ -2117,19 +2466,25 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_musig_pubnonce_serializePtr = _lookup<
-          ffi.NativeFunction<
-              ffi.Int Function(
-                  ffi.Pointer<secp256k1_context>,
-                  ffi.Pointer<ffi.UnsignedChar>,
-                  ffi.Pointer<secp256k1_musig_pubnonce>)>>(
-      'secp256k1_musig_pubnonce_serialize');
+  late final _secp256k1_musig_pubnonce_serializePtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Int Function(
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            ffi.Pointer<secp256k1_musig_pubnonce>,
+          )
+        >
+      >('secp256k1_musig_pubnonce_serialize');
   late final _secp256k1_musig_pubnonce_serialize =
-      _secp256k1_musig_pubnonce_serializePtr.asFunction<
-          int Function(
+      _secp256k1_musig_pubnonce_serializePtr
+          .asFunction<
+            int Function(
               ffi.Pointer<secp256k1_context>,
               ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Pointer<secp256k1_musig_pubnonce>)>();
+              ffi.Pointer<secp256k1_musig_pubnonce>,
+            )
+          >();
 
   /// Parse an aggregate public nonce.
   ///
@@ -2149,19 +2504,25 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_musig_aggnonce_parsePtr = _lookup<
-          ffi.NativeFunction<
-              ffi.Int Function(
-                  ffi.Pointer<secp256k1_context>,
-                  ffi.Pointer<secp256k1_musig_aggnonce>,
-                  ffi.Pointer<ffi.UnsignedChar>)>>(
-      'secp256k1_musig_aggnonce_parse');
+  late final _secp256k1_musig_aggnonce_parsePtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Int Function(
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<secp256k1_musig_aggnonce>,
+            ffi.Pointer<ffi.UnsignedChar>,
+          )
+        >
+      >('secp256k1_musig_aggnonce_parse');
   late final _secp256k1_musig_aggnonce_parse =
-      _secp256k1_musig_aggnonce_parsePtr.asFunction<
-          int Function(
+      _secp256k1_musig_aggnonce_parsePtr
+          .asFunction<
+            int Function(
               ffi.Pointer<secp256k1_context>,
               ffi.Pointer<secp256k1_musig_aggnonce>,
-              ffi.Pointer<ffi.UnsignedChar>)>();
+              ffi.Pointer<ffi.UnsignedChar>,
+            )
+          >();
 
   /// Serialize an aggregate public nonce
   ///
@@ -2181,19 +2542,25 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_musig_aggnonce_serializePtr = _lookup<
-          ffi.NativeFunction<
-              ffi.Int Function(
-                  ffi.Pointer<secp256k1_context>,
-                  ffi.Pointer<ffi.UnsignedChar>,
-                  ffi.Pointer<secp256k1_musig_aggnonce>)>>(
-      'secp256k1_musig_aggnonce_serialize');
+  late final _secp256k1_musig_aggnonce_serializePtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Int Function(
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            ffi.Pointer<secp256k1_musig_aggnonce>,
+          )
+        >
+      >('secp256k1_musig_aggnonce_serialize');
   late final _secp256k1_musig_aggnonce_serialize =
-      _secp256k1_musig_aggnonce_serializePtr.asFunction<
-          int Function(
+      _secp256k1_musig_aggnonce_serializePtr
+          .asFunction<
+            int Function(
               ffi.Pointer<secp256k1_context>,
               ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Pointer<secp256k1_musig_aggnonce>)>();
+              ffi.Pointer<secp256k1_musig_aggnonce>,
+            )
+          >();
 
   /// Parse a MuSig partial signature.
   ///
@@ -2213,19 +2580,25 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_musig_partial_sig_parsePtr = _lookup<
-          ffi.NativeFunction<
-              ffi.Int Function(
-                  ffi.Pointer<secp256k1_context>,
-                  ffi.Pointer<secp256k1_musig_partial_sig>,
-                  ffi.Pointer<ffi.UnsignedChar>)>>(
-      'secp256k1_musig_partial_sig_parse');
+  late final _secp256k1_musig_partial_sig_parsePtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Int Function(
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<secp256k1_musig_partial_sig>,
+            ffi.Pointer<ffi.UnsignedChar>,
+          )
+        >
+      >('secp256k1_musig_partial_sig_parse');
   late final _secp256k1_musig_partial_sig_parse =
-      _secp256k1_musig_partial_sig_parsePtr.asFunction<
-          int Function(
+      _secp256k1_musig_partial_sig_parsePtr
+          .asFunction<
+            int Function(
               ffi.Pointer<secp256k1_context>,
               ffi.Pointer<secp256k1_musig_partial_sig>,
-              ffi.Pointer<ffi.UnsignedChar>)>();
+              ffi.Pointer<ffi.UnsignedChar>,
+            )
+          >();
 
   /// Serialize a MuSig partial signature
   ///
@@ -2245,19 +2618,25 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_musig_partial_sig_serializePtr = _lookup<
-          ffi.NativeFunction<
-              ffi.Int Function(
-                  ffi.Pointer<secp256k1_context>,
-                  ffi.Pointer<ffi.UnsignedChar>,
-                  ffi.Pointer<secp256k1_musig_partial_sig>)>>(
-      'secp256k1_musig_partial_sig_serialize');
+  late final _secp256k1_musig_partial_sig_serializePtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Int Function(
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            ffi.Pointer<secp256k1_musig_partial_sig>,
+          )
+        >
+      >('secp256k1_musig_partial_sig_serialize');
   late final _secp256k1_musig_partial_sig_serialize =
-      _secp256k1_musig_partial_sig_serializePtr.asFunction<
-          int Function(
+      _secp256k1_musig_partial_sig_serializePtr
+          .asFunction<
+            int Function(
               ffi.Pointer<secp256k1_context>,
               ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Pointer<secp256k1_musig_partial_sig>)>();
+              ffi.Pointer<secp256k1_musig_partial_sig>,
+            )
+          >();
 
   /// Computes an aggregate public key and uses it to initialize a keyagg_cache
   ///
@@ -2295,22 +2674,28 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_musig_pubkey_aggPtr = _lookup<
-      ffi.NativeFunction<
+  late final _secp256k1_musig_pubkey_aggPtr =
+      _lookup<
+        ffi.NativeFunction<
           ffi.Int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<secp256k1_xonly_pubkey>,
-              ffi.Pointer<secp256k1_musig_keyagg_cache>,
-              ffi.Pointer<ffi.Pointer<secp256k1_pubkey>>,
-              ffi.Size)>>('secp256k1_musig_pubkey_agg');
-  late final _secp256k1_musig_pubkey_agg =
-      _secp256k1_musig_pubkey_aggPtr.asFunction<
-          int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<secp256k1_xonly_pubkey>,
-              ffi.Pointer<secp256k1_musig_keyagg_cache>,
-              ffi.Pointer<ffi.Pointer<secp256k1_pubkey>>,
-              int)>();
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<secp256k1_xonly_pubkey>,
+            ffi.Pointer<secp256k1_musig_keyagg_cache>,
+            ffi.Pointer<ffi.Pointer<secp256k1_pubkey>>,
+            ffi.Size,
+          )
+        >
+      >('secp256k1_musig_pubkey_agg');
+  late final _secp256k1_musig_pubkey_agg = _secp256k1_musig_pubkey_aggPtr
+      .asFunction<
+        int Function(
+          ffi.Pointer<secp256k1_context>,
+          ffi.Pointer<secp256k1_xonly_pubkey>,
+          ffi.Pointer<secp256k1_musig_keyagg_cache>,
+          ffi.Pointer<ffi.Pointer<secp256k1_pubkey>>,
+          int,
+        )
+      >();
 
   /// Obtain the aggregate public key from a keyagg_cache.
   ///
@@ -2335,19 +2720,24 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_musig_pubkey_getPtr = _lookup<
-          ffi.NativeFunction<
-              ffi.Int Function(
-                  ffi.Pointer<secp256k1_context>,
-                  ffi.Pointer<secp256k1_pubkey>,
-                  ffi.Pointer<secp256k1_musig_keyagg_cache>)>>(
-      'secp256k1_musig_pubkey_get');
-  late final _secp256k1_musig_pubkey_get =
-      _secp256k1_musig_pubkey_getPtr.asFunction<
-          int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<secp256k1_pubkey>,
-              ffi.Pointer<secp256k1_musig_keyagg_cache>)>();
+  late final _secp256k1_musig_pubkey_getPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Int Function(
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<secp256k1_pubkey>,
+            ffi.Pointer<secp256k1_musig_keyagg_cache>,
+          )
+        >
+      >('secp256k1_musig_pubkey_get');
+  late final _secp256k1_musig_pubkey_get = _secp256k1_musig_pubkey_getPtr
+      .asFunction<
+        int Function(
+          ffi.Pointer<secp256k1_context>,
+          ffi.Pointer<secp256k1_pubkey>,
+          ffi.Pointer<secp256k1_musig_keyagg_cache>,
+        )
+      >();
 
   /// Apply plain "EC" tweaking to a public key in a given keyagg_cache by adding
   /// the generator multiplied with `tweak32` to it. This is useful for deriving
@@ -2399,21 +2789,27 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_musig_pubkey_ec_tweak_addPtr = _lookup<
-          ffi.NativeFunction<
-              ffi.Int Function(
-                  ffi.Pointer<secp256k1_context>,
-                  ffi.Pointer<secp256k1_pubkey>,
-                  ffi.Pointer<secp256k1_musig_keyagg_cache>,
-                  ffi.Pointer<ffi.UnsignedChar>)>>(
-      'secp256k1_musig_pubkey_ec_tweak_add');
+  late final _secp256k1_musig_pubkey_ec_tweak_addPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Int Function(
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<secp256k1_pubkey>,
+            ffi.Pointer<secp256k1_musig_keyagg_cache>,
+            ffi.Pointer<ffi.UnsignedChar>,
+          )
+        >
+      >('secp256k1_musig_pubkey_ec_tweak_add');
   late final _secp256k1_musig_pubkey_ec_tweak_add =
-      _secp256k1_musig_pubkey_ec_tweak_addPtr.asFunction<
-          int Function(
+      _secp256k1_musig_pubkey_ec_tweak_addPtr
+          .asFunction<
+            int Function(
               ffi.Pointer<secp256k1_context>,
               ffi.Pointer<secp256k1_pubkey>,
               ffi.Pointer<secp256k1_musig_keyagg_cache>,
-              ffi.Pointer<ffi.UnsignedChar>)>();
+              ffi.Pointer<ffi.UnsignedChar>,
+            )
+          >();
 
   /// Apply x-only tweaking to a public key in a given keyagg_cache by adding the
   /// generator multiplied with `tweak32` to it. This is useful for creating
@@ -2463,21 +2859,27 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_musig_pubkey_xonly_tweak_addPtr = _lookup<
-          ffi.NativeFunction<
-              ffi.Int Function(
-                  ffi.Pointer<secp256k1_context>,
-                  ffi.Pointer<secp256k1_pubkey>,
-                  ffi.Pointer<secp256k1_musig_keyagg_cache>,
-                  ffi.Pointer<ffi.UnsignedChar>)>>(
-      'secp256k1_musig_pubkey_xonly_tweak_add');
+  late final _secp256k1_musig_pubkey_xonly_tweak_addPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Int Function(
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<secp256k1_pubkey>,
+            ffi.Pointer<secp256k1_musig_keyagg_cache>,
+            ffi.Pointer<ffi.UnsignedChar>,
+          )
+        >
+      >('secp256k1_musig_pubkey_xonly_tweak_add');
   late final _secp256k1_musig_pubkey_xonly_tweak_add =
-      _secp256k1_musig_pubkey_xonly_tweak_addPtr.asFunction<
-          int Function(
+      _secp256k1_musig_pubkey_xonly_tweak_addPtr
+          .asFunction<
+            int Function(
               ffi.Pointer<secp256k1_context>,
               ffi.Pointer<secp256k1_pubkey>,
               ffi.Pointer<secp256k1_musig_keyagg_cache>,
-              ffi.Pointer<ffi.UnsignedChar>)>();
+              ffi.Pointer<ffi.UnsignedChar>,
+            )
+          >();
 
   /// Starts a signing session by generating a nonce
   ///
@@ -2553,30 +2955,36 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_musig_nonce_genPtr = _lookup<
-      ffi.NativeFunction<
+  late final _secp256k1_musig_nonce_genPtr =
+      _lookup<
+        ffi.NativeFunction<
           ffi.Int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<secp256k1_musig_secnonce>,
-              ffi.Pointer<secp256k1_musig_pubnonce>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Pointer<secp256k1_pubkey>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Pointer<secp256k1_musig_keyagg_cache>,
-              ffi.Pointer<ffi.UnsignedChar>)>>('secp256k1_musig_nonce_gen');
-  late final _secp256k1_musig_nonce_gen =
-      _secp256k1_musig_nonce_genPtr.asFunction<
-          int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<secp256k1_musig_secnonce>,
-              ffi.Pointer<secp256k1_musig_pubnonce>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Pointer<secp256k1_pubkey>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Pointer<secp256k1_musig_keyagg_cache>,
-              ffi.Pointer<ffi.UnsignedChar>)>();
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<secp256k1_musig_secnonce>,
+            ffi.Pointer<secp256k1_musig_pubnonce>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            ffi.Pointer<secp256k1_pubkey>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            ffi.Pointer<secp256k1_musig_keyagg_cache>,
+            ffi.Pointer<ffi.UnsignedChar>,
+          )
+        >
+      >('secp256k1_musig_nonce_gen');
+  late final _secp256k1_musig_nonce_gen = _secp256k1_musig_nonce_genPtr
+      .asFunction<
+        int Function(
+          ffi.Pointer<secp256k1_context>,
+          ffi.Pointer<secp256k1_musig_secnonce>,
+          ffi.Pointer<secp256k1_musig_pubnonce>,
+          ffi.Pointer<ffi.UnsignedChar>,
+          ffi.Pointer<ffi.UnsignedChar>,
+          ffi.Pointer<secp256k1_pubkey>,
+          ffi.Pointer<ffi.UnsignedChar>,
+          ffi.Pointer<secp256k1_musig_keyagg_cache>,
+          ffi.Pointer<ffi.UnsignedChar>,
+        )
+      >();
 
   /// Alternative way to generate a nonce and start a signing session
   ///
@@ -2649,21 +3057,25 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_musig_nonce_gen_counterPtr = _lookup<
-          ffi.NativeFunction<
-              ffi.Int Function(
-                  ffi.Pointer<secp256k1_context>,
-                  ffi.Pointer<secp256k1_musig_secnonce>,
-                  ffi.Pointer<secp256k1_musig_pubnonce>,
-                  ffi.Uint64,
-                  ffi.Pointer<secp256k1_keypair>,
-                  ffi.Pointer<ffi.UnsignedChar>,
-                  ffi.Pointer<secp256k1_musig_keyagg_cache>,
-                  ffi.Pointer<ffi.UnsignedChar>)>>(
-      'secp256k1_musig_nonce_gen_counter');
+  late final _secp256k1_musig_nonce_gen_counterPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Int Function(
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<secp256k1_musig_secnonce>,
+            ffi.Pointer<secp256k1_musig_pubnonce>,
+            ffi.Uint64,
+            ffi.Pointer<secp256k1_keypair>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            ffi.Pointer<secp256k1_musig_keyagg_cache>,
+            ffi.Pointer<ffi.UnsignedChar>,
+          )
+        >
+      >('secp256k1_musig_nonce_gen_counter');
   late final _secp256k1_musig_nonce_gen_counter =
-      _secp256k1_musig_nonce_gen_counterPtr.asFunction<
-          int Function(
+      _secp256k1_musig_nonce_gen_counterPtr
+          .asFunction<
+            int Function(
               ffi.Pointer<secp256k1_context>,
               ffi.Pointer<secp256k1_musig_secnonce>,
               ffi.Pointer<secp256k1_musig_pubnonce>,
@@ -2671,7 +3083,9 @@ class NativeSecp256k1 {
               ffi.Pointer<secp256k1_keypair>,
               ffi.Pointer<ffi.UnsignedChar>,
               ffi.Pointer<secp256k1_musig_keyagg_cache>,
-              ffi.Pointer<ffi.UnsignedChar>)>();
+              ffi.Pointer<ffi.UnsignedChar>,
+            )
+          >();
 
   /// Aggregates the nonces of all signers into a single nonce
   ///
@@ -2705,20 +3119,26 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_musig_nonce_aggPtr = _lookup<
-      ffi.NativeFunction<
+  late final _secp256k1_musig_nonce_aggPtr =
+      _lookup<
+        ffi.NativeFunction<
           ffi.Int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<secp256k1_musig_aggnonce>,
-              ffi.Pointer<ffi.Pointer<secp256k1_musig_pubnonce>>,
-              ffi.Size)>>('secp256k1_musig_nonce_agg');
-  late final _secp256k1_musig_nonce_agg =
-      _secp256k1_musig_nonce_aggPtr.asFunction<
-          int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<secp256k1_musig_aggnonce>,
-              ffi.Pointer<ffi.Pointer<secp256k1_musig_pubnonce>>,
-              int)>();
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<secp256k1_musig_aggnonce>,
+            ffi.Pointer<ffi.Pointer<secp256k1_musig_pubnonce>>,
+            ffi.Size,
+          )
+        >
+      >('secp256k1_musig_nonce_agg');
+  late final _secp256k1_musig_nonce_agg = _secp256k1_musig_nonce_aggPtr
+      .asFunction<
+        int Function(
+          ffi.Pointer<secp256k1_context>,
+          ffi.Pointer<secp256k1_musig_aggnonce>,
+          ffi.Pointer<ffi.Pointer<secp256k1_musig_pubnonce>>,
+          int,
+        )
+      >();
 
   /// Takes the aggregate nonce and creates a session that is required for signing
   /// and verification of partial signatures.
@@ -2757,24 +3177,30 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_musig_nonce_processPtr = _lookup<
-      ffi.NativeFunction<
+  late final _secp256k1_musig_nonce_processPtr =
+      _lookup<
+        ffi.NativeFunction<
           ffi.Int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<secp256k1_musig_session>,
-              ffi.Pointer<secp256k1_musig_aggnonce>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Pointer<secp256k1_musig_keyagg_cache>,
-              ffi.Pointer<secp256k1_pubkey>)>>('secp256k1_musig_nonce_process');
-  late final _secp256k1_musig_nonce_process =
-      _secp256k1_musig_nonce_processPtr.asFunction<
-          int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<secp256k1_musig_session>,
-              ffi.Pointer<secp256k1_musig_aggnonce>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Pointer<secp256k1_musig_keyagg_cache>,
-              ffi.Pointer<secp256k1_pubkey>)>();
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<secp256k1_musig_session>,
+            ffi.Pointer<secp256k1_musig_aggnonce>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            ffi.Pointer<secp256k1_musig_keyagg_cache>,
+            ffi.Pointer<secp256k1_pubkey>,
+          )
+        >
+      >('secp256k1_musig_nonce_process');
+  late final _secp256k1_musig_nonce_process = _secp256k1_musig_nonce_processPtr
+      .asFunction<
+        int Function(
+          ffi.Pointer<secp256k1_context>,
+          ffi.Pointer<secp256k1_musig_session>,
+          ffi.Pointer<secp256k1_musig_aggnonce>,
+          ffi.Pointer<ffi.UnsignedChar>,
+          ffi.Pointer<secp256k1_musig_keyagg_cache>,
+          ffi.Pointer<secp256k1_pubkey>,
+        )
+      >();
 
   /// Produces a partial signature
   ///
@@ -2825,25 +3251,30 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_musig_partial_signPtr = _lookup<
-          ffi.NativeFunction<
-              ffi.Int Function(
-                  ffi.Pointer<secp256k1_context>,
-                  ffi.Pointer<secp256k1_musig_partial_sig>,
-                  ffi.Pointer<secp256k1_musig_secnonce>,
-                  ffi.Pointer<secp256k1_keypair>,
-                  ffi.Pointer<secp256k1_musig_keyagg_cache>,
-                  ffi.Pointer<secp256k1_musig_session>)>>(
-      'secp256k1_musig_partial_sign');
-  late final _secp256k1_musig_partial_sign =
-      _secp256k1_musig_partial_signPtr.asFunction<
-          int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<secp256k1_musig_partial_sig>,
-              ffi.Pointer<secp256k1_musig_secnonce>,
-              ffi.Pointer<secp256k1_keypair>,
-              ffi.Pointer<secp256k1_musig_keyagg_cache>,
-              ffi.Pointer<secp256k1_musig_session>)>();
+  late final _secp256k1_musig_partial_signPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Int Function(
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<secp256k1_musig_partial_sig>,
+            ffi.Pointer<secp256k1_musig_secnonce>,
+            ffi.Pointer<secp256k1_keypair>,
+            ffi.Pointer<secp256k1_musig_keyagg_cache>,
+            ffi.Pointer<secp256k1_musig_session>,
+          )
+        >
+      >('secp256k1_musig_partial_sign');
+  late final _secp256k1_musig_partial_sign = _secp256k1_musig_partial_signPtr
+      .asFunction<
+        int Function(
+          ffi.Pointer<secp256k1_context>,
+          ffi.Pointer<secp256k1_musig_partial_sig>,
+          ffi.Pointer<secp256k1_musig_secnonce>,
+          ffi.Pointer<secp256k1_keypair>,
+          ffi.Pointer<secp256k1_musig_keyagg_cache>,
+          ffi.Pointer<secp256k1_musig_session>,
+        )
+      >();
 
   /// Verifies an individual signer's partial signature
   ///
@@ -2894,25 +3325,31 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_musig_partial_sig_verifyPtr = _lookup<
-          ffi.NativeFunction<
-              ffi.Int Function(
-                  ffi.Pointer<secp256k1_context>,
-                  ffi.Pointer<secp256k1_musig_partial_sig>,
-                  ffi.Pointer<secp256k1_musig_pubnonce>,
-                  ffi.Pointer<secp256k1_pubkey>,
-                  ffi.Pointer<secp256k1_musig_keyagg_cache>,
-                  ffi.Pointer<secp256k1_musig_session>)>>(
-      'secp256k1_musig_partial_sig_verify');
+  late final _secp256k1_musig_partial_sig_verifyPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Int Function(
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<secp256k1_musig_partial_sig>,
+            ffi.Pointer<secp256k1_musig_pubnonce>,
+            ffi.Pointer<secp256k1_pubkey>,
+            ffi.Pointer<secp256k1_musig_keyagg_cache>,
+            ffi.Pointer<secp256k1_musig_session>,
+          )
+        >
+      >('secp256k1_musig_partial_sig_verify');
   late final _secp256k1_musig_partial_sig_verify =
-      _secp256k1_musig_partial_sig_verifyPtr.asFunction<
-          int Function(
+      _secp256k1_musig_partial_sig_verifyPtr
+          .asFunction<
+            int Function(
               ffi.Pointer<secp256k1_context>,
               ffi.Pointer<secp256k1_musig_partial_sig>,
               ffi.Pointer<secp256k1_musig_pubnonce>,
               ffi.Pointer<secp256k1_pubkey>,
               ffi.Pointer<secp256k1_musig_keyagg_cache>,
-              ffi.Pointer<secp256k1_musig_session>)>();
+              ffi.Pointer<secp256k1_musig_session>,
+            )
+          >();
 
   /// Aggregates partial signatures
   ///
@@ -2941,22 +3378,29 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_musig_partial_sig_aggPtr = _lookup<
-      ffi.NativeFunction<
+  late final _secp256k1_musig_partial_sig_aggPtr =
+      _lookup<
+        ffi.NativeFunction<
           ffi.Int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Pointer<secp256k1_musig_session>,
-              ffi.Pointer<ffi.Pointer<secp256k1_musig_partial_sig>>,
-              ffi.Size)>>('secp256k1_musig_partial_sig_agg');
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            ffi.Pointer<secp256k1_musig_session>,
+            ffi.Pointer<ffi.Pointer<secp256k1_musig_partial_sig>>,
+            ffi.Size,
+          )
+        >
+      >('secp256k1_musig_partial_sig_agg');
   late final _secp256k1_musig_partial_sig_agg =
-      _secp256k1_musig_partial_sig_aggPtr.asFunction<
-          int Function(
+      _secp256k1_musig_partial_sig_aggPtr
+          .asFunction<
+            int Function(
               ffi.Pointer<secp256k1_context>,
               ffi.Pointer<ffi.UnsignedChar>,
               ffi.Pointer<secp256k1_musig_session>,
               ffi.Pointer<ffi.Pointer<secp256k1_musig_partial_sig>>,
-              int)>();
+              int,
+            )
+          >();
 
   /// Extracts the nonce_parity bit from a session
   ///
@@ -2981,15 +3425,24 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_musig_nonce_parityPtr = _lookup<
-          ffi.NativeFunction<
-              ffi.Int Function(ffi.Pointer<secp256k1_context>,
-                  ffi.Pointer<ffi.Int>, ffi.Pointer<secp256k1_musig_session>)>>(
-      'secp256k1_musig_nonce_parity');
-  late final _secp256k1_musig_nonce_parity =
-      _secp256k1_musig_nonce_parityPtr.asFunction<
-          int Function(ffi.Pointer<secp256k1_context>, ffi.Pointer<ffi.Int>,
-              ffi.Pointer<secp256k1_musig_session>)>();
+  late final _secp256k1_musig_nonce_parityPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Int Function(
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<ffi.Int>,
+            ffi.Pointer<secp256k1_musig_session>,
+          )
+        >
+      >('secp256k1_musig_nonce_parity');
+  late final _secp256k1_musig_nonce_parity = _secp256k1_musig_nonce_parityPtr
+      .asFunction<
+        int Function(
+          ffi.Pointer<secp256k1_context>,
+          ffi.Pointer<ffi.Int>,
+          ffi.Pointer<secp256k1_musig_session>,
+        )
+      >();
 
   /// Creates a signature from a pre-signature and an adaptor.
   ///
@@ -3022,21 +3475,28 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_musig_adaptPtr = _lookup<
-      ffi.NativeFunction<
+  late final _secp256k1_musig_adaptPtr =
+      _lookup<
+        ffi.NativeFunction<
           ffi.Int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Int)>>('secp256k1_musig_adapt');
-  late final _secp256k1_musig_adapt = _secp256k1_musig_adaptPtr.asFunction<
-      int Function(
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            ffi.Int,
+          )
+        >
+      >('secp256k1_musig_adapt');
+  late final _secp256k1_musig_adapt = _secp256k1_musig_adaptPtr
+      .asFunction<
+        int Function(
           ffi.Pointer<secp256k1_context>,
           ffi.Pointer<ffi.UnsignedChar>,
           ffi.Pointer<ffi.UnsignedChar>,
           ffi.Pointer<ffi.UnsignedChar>,
-          int)>();
+          int,
+        )
+      >();
 
   /// Extracts a secret adaptor from a MuSig pre-signature and corresponding
   /// signature
@@ -3074,22 +3534,29 @@ class NativeSecp256k1 {
     );
   }
 
-  late final _secp256k1_musig_extract_adaptorPtr = _lookup<
-      ffi.NativeFunction<
+  late final _secp256k1_musig_extract_adaptorPtr =
+      _lookup<
+        ffi.NativeFunction<
           ffi.Int Function(
-              ffi.Pointer<secp256k1_context>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Pointer<ffi.UnsignedChar>,
-              ffi.Int)>>('secp256k1_musig_extract_adaptor');
+            ffi.Pointer<secp256k1_context>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            ffi.Pointer<ffi.UnsignedChar>,
+            ffi.Int,
+          )
+        >
+      >('secp256k1_musig_extract_adaptor');
   late final _secp256k1_musig_extract_adaptor =
-      _secp256k1_musig_extract_adaptorPtr.asFunction<
-          int Function(
+      _secp256k1_musig_extract_adaptorPtr
+          .asFunction<
+            int Function(
               ffi.Pointer<secp256k1_context>,
               ffi.Pointer<ffi.UnsignedChar>,
               ffi.Pointer<ffi.UnsignedChar>,
               ffi.Pointer<ffi.UnsignedChar>,
-              int)>();
+              int,
+            )
+          >();
 }
 
 typedef ptrdiff_t = ffi.Long;
@@ -3150,19 +3617,21 @@ final class secp256k1_ecdsa_signature extends ffi.Struct {
 }
 
 typedef secp256k1_nonce_functionFunction = ffi.Int Function(
-    ffi.Pointer<ffi.UnsignedChar> nonce32,
-    ffi.Pointer<ffi.UnsignedChar> msg32,
-    ffi.Pointer<ffi.UnsignedChar> key32,
-    ffi.Pointer<ffi.UnsignedChar> algo16,
-    ffi.Pointer<ffi.Void> data,
-    ffi.UnsignedInt attempt);
+  ffi.Pointer<ffi.UnsignedChar> nonce32,
+  ffi.Pointer<ffi.UnsignedChar> msg32,
+  ffi.Pointer<ffi.UnsignedChar> key32,
+  ffi.Pointer<ffi.UnsignedChar> algo16,
+  ffi.Pointer<ffi.Void> data,
+  ffi.UnsignedInt attempt,
+);
 typedef Dartsecp256k1_nonce_functionFunction = int Function(
-    ffi.Pointer<ffi.UnsignedChar> nonce32,
-    ffi.Pointer<ffi.UnsignedChar> msg32,
-    ffi.Pointer<ffi.UnsignedChar> key32,
-    ffi.Pointer<ffi.UnsignedChar> algo16,
-    ffi.Pointer<ffi.Void> data,
-    int attempt);
+  ffi.Pointer<ffi.UnsignedChar> nonce32,
+  ffi.Pointer<ffi.UnsignedChar> msg32,
+  ffi.Pointer<ffi.UnsignedChar> key32,
+  ffi.Pointer<ffi.UnsignedChar> algo16,
+  ffi.Pointer<ffi.Void> data,
+  int attempt,
+);
 
 /// A pointer to a function to deterministically generate a nonce.
 ///
@@ -3179,8 +3648,8 @@ typedef Dartsecp256k1_nonce_functionFunction = int Function(
 ///
 /// Except for test cases, this function should compute some cryptographic hash of
 /// the message, the algorithm, the key and the attempt.
-typedef secp256k1_nonce_function
-    = ffi.Pointer<ffi.NativeFunction<secp256k1_nonce_functionFunction>>;
+typedef secp256k1_nonce_function =
+    ffi.Pointer<ffi.NativeFunction<secp256k1_nonce_functionFunction>>;
 
 /// Opaque data structure that holds a parsed ECDSA signature,
 /// supporting pubkey recovery.
@@ -3228,23 +3697,25 @@ final class secp256k1_keypair extends ffi.Struct {
 }
 
 typedef secp256k1_nonce_function_hardenedFunction = ffi.Int Function(
-    ffi.Pointer<ffi.UnsignedChar> nonce32,
-    ffi.Pointer<ffi.UnsignedChar> msg,
-    ffi.Size msglen,
-    ffi.Pointer<ffi.UnsignedChar> key32,
-    ffi.Pointer<ffi.UnsignedChar> xonly_pk32,
-    ffi.Pointer<ffi.UnsignedChar> algo,
-    ffi.Size algolen,
-    ffi.Pointer<ffi.Void> data);
+  ffi.Pointer<ffi.UnsignedChar> nonce32,
+  ffi.Pointer<ffi.UnsignedChar> msg,
+  ffi.Size msglen,
+  ffi.Pointer<ffi.UnsignedChar> key32,
+  ffi.Pointer<ffi.UnsignedChar> xonly_pk32,
+  ffi.Pointer<ffi.UnsignedChar> algo,
+  ffi.Size algolen,
+  ffi.Pointer<ffi.Void> data,
+);
 typedef Dartsecp256k1_nonce_function_hardenedFunction = int Function(
-    ffi.Pointer<ffi.UnsignedChar> nonce32,
-    ffi.Pointer<ffi.UnsignedChar> msg,
-    int msglen,
-    ffi.Pointer<ffi.UnsignedChar> key32,
-    ffi.Pointer<ffi.UnsignedChar> xonly_pk32,
-    ffi.Pointer<ffi.UnsignedChar> algo,
-    int algolen,
-    ffi.Pointer<ffi.Void> data);
+  ffi.Pointer<ffi.UnsignedChar> nonce32,
+  ffi.Pointer<ffi.UnsignedChar> msg,
+  int msglen,
+  ffi.Pointer<ffi.UnsignedChar> key32,
+  ffi.Pointer<ffi.UnsignedChar> xonly_pk32,
+  ffi.Pointer<ffi.UnsignedChar> algo,
+  int algolen,
+  ffi.Pointer<ffi.Void> data,
+);
 
 /// A pointer to a function to deterministically generate a nonce.
 ///
@@ -3270,8 +3741,8 @@ typedef Dartsecp256k1_nonce_function_hardenedFunction = int Function(
 ///
 /// Except for test cases, this function should compute some cryptographic hash of
 /// the message, the key, the pubkey, the algorithm description, and data.
-typedef secp256k1_nonce_function_hardened = ffi
-    .Pointer<ffi.NativeFunction<secp256k1_nonce_function_hardenedFunction>>;
+typedef secp256k1_nonce_function_hardened =
+    ffi.Pointer<ffi.NativeFunction<secp256k1_nonce_function_hardenedFunction>>;
 
 /// Data structure that contains additional arguments for schnorrsig_sign_custom.
 ///
@@ -3298,15 +3769,17 @@ final class secp256k1_schnorrsig_extraparams extends ffi.Struct {
 }
 
 typedef secp256k1_ecdh_hash_functionFunction = ffi.Int Function(
-    ffi.Pointer<ffi.UnsignedChar> output,
-    ffi.Pointer<ffi.UnsignedChar> x32,
-    ffi.Pointer<ffi.UnsignedChar> y32,
-    ffi.Pointer<ffi.Void> data);
+  ffi.Pointer<ffi.UnsignedChar> output,
+  ffi.Pointer<ffi.UnsignedChar> x32,
+  ffi.Pointer<ffi.UnsignedChar> y32,
+  ffi.Pointer<ffi.Void> data,
+);
 typedef Dartsecp256k1_ecdh_hash_functionFunction = int Function(
-    ffi.Pointer<ffi.UnsignedChar> output,
-    ffi.Pointer<ffi.UnsignedChar> x32,
-    ffi.Pointer<ffi.UnsignedChar> y32,
-    ffi.Pointer<ffi.Void> data);
+  ffi.Pointer<ffi.UnsignedChar> output,
+  ffi.Pointer<ffi.UnsignedChar> x32,
+  ffi.Pointer<ffi.UnsignedChar> y32,
+  ffi.Pointer<ffi.Void> data,
+);
 
 /// A pointer to a function that hashes an EC point to obtain an ECDH secret
 ///
@@ -3318,8 +3791,8 @@ typedef Dartsecp256k1_ecdh_hash_functionFunction = int Function(
 /// In:      x32:        pointer to a 32-byte x coordinate
 /// y32:        pointer to a 32-byte y coordinate
 /// data:       arbitrary data pointer that is passed through
-typedef secp256k1_ecdh_hash_function
-    = ffi.Pointer<ffi.NativeFunction<secp256k1_ecdh_hash_functionFunction>>;
+typedef secp256k1_ecdh_hash_function =
+    ffi.Pointer<ffi.NativeFunction<secp256k1_ecdh_hash_functionFunction>>;
 typedef int_least8_t = ffi.SignedChar;
 typedef int_least16_t = ffi.Short;
 typedef int_least32_t = ffi.Int;

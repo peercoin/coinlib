@@ -13,10 +13,10 @@ List<int> _charsToWords(String encoded) =>
     encoded.codeUnits.map((c) => alphabet.codeUnits.indexOf(c)).toList();
 
 List<int> _hrpExpand(String hrp) => [
-      ...hrp.codeUnits.map((c) => c >> 5),
-      0,
-      ...hrp.codeUnits.map((c) => c & 31),
-    ];
+  ...hrp.codeUnits.map((c) => c >> 5),
+  0,
+  ...hrp.codeUnits.map((c) => c & 31),
+];
 
 int _polymodStep(int pre) {
   final b = pre >> 25;
@@ -66,12 +66,9 @@ List<int>? convertBits(List<int> data, int from, int to, bool pad) {
   return result;
 }
 
-class InvalidBech32 implements Exception {
-  final String message;
-  InvalidBech32([this.message = ""]);
-}
+class InvalidBech32([final String message = ""]) implements Exception;
 
-class InvalidBech32Checksum implements Exception {}
+class InvalidBech32Checksum implements Exception;
 
 enum Bech32Type { bech32, bech32m }
 
@@ -87,7 +84,7 @@ class Bech32 {
   final List<int> words;
   final Bech32Type type;
 
-  Bech32._skipValidation({
+  new _skipValidation({
     required this.hrp,
     required List<int> words,
     required this.type,
@@ -95,12 +92,12 @@ class Bech32 {
 
   /// Creates an encodable object with the human-readable-part ([hrp]), [words]
   /// for the given bech32 [type] (bech32 or bech32m).
-  Bech32({
+  new({
     required String hrp,
     required List<int> words,
     required this.type,
-  })  : hrp = hrp.toLowerCase(),
-        words = List.unmodifiable(words) {
+  }) : hrp = hrp.toLowerCase(),
+       words = List.unmodifiable(words) {
     if (hrp.isEmpty) throw InvalidBech32("Missing HRP");
     _throwOnInvalidHrp(hrp);
 
@@ -116,7 +113,7 @@ class Bech32 {
   /// Decodes a bech32 string into the hrp, 5-bit words and type. May throw an
   /// [InvalidBech32]. It will throw [InvalidBech32Checksum] if the bech32 is
   /// valid but doesn't have a valid checksum for either bech32 or bech32m.
-  factory Bech32.decode(String encoded) {
+  factory decode(String encoded) {
     if (encoded.length > maxLength) {
       throw InvalidBech32("Bech32 too long");
     }
@@ -152,8 +149,11 @@ class Bech32 {
       throw InvalidBech32Checksum();
     }
 
-    final bech32 =
-        Bech32._skipValidation(hrp: hrp, words: dataWords, type: type);
+    final bech32 = Bech32._skipValidation(
+      hrp: hrp,
+      words: dataWords,
+      type: type,
+    );
     bech32._encodedCache = encoded;
     return bech32;
   }

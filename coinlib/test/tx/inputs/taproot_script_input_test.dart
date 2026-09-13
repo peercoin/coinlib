@@ -1,6 +1,8 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/coinlib.dart';
 import 'package:test/test.dart';
+
 import '../../vectors/inputs.dart';
 import '../../vectors/taproot.dart';
 
@@ -76,15 +78,15 @@ void main() {
 
     test("doesn't match non script-spend inputs", () {
       expectNoMatch(String asm, List<Uint8List> witness) => expect(
-            TaprootScriptInput.match(
-              RawInput(
-                prevOut: prevOut,
-                scriptSig: Script.fromAsm(asm).compiled,
-              ),
-              witness,
-            ),
-            null,
-          );
+        TaprootScriptInput.match(
+          RawInput(
+            prevOut: prevOut,
+            scriptSig: Script.fromAsm(asm).compiled,
+          ),
+          witness,
+        ),
+        null,
+      );
 
       expectNoMatch("0", witness);
       // Requires script

@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/coinlib.dart';
 import 'package:test/test.dart';
 
@@ -58,19 +59,12 @@ final prevOuts = [
   ),
 ];
 
-class TaprootSignatureVector {
-  final int inputN;
-  final SigHashType hashType;
-  final bool useLeafHash;
-  final String sigHashHex;
-
-  TaprootSignatureVector({
-    required this.inputN,
-    required this.hashType,
-    this.useLeafHash = false,
-    required this.sigHashHex,
-  });
-
+class TaprootSignatureVector({
+  required final int inputN,
+  required final SigHashType hashType,
+  final bool useLeafHash = false,
+  required final String sigHashHex,
+}) {
   Uint8List? get leafHash => useLeafHash
       ? hexToBytes(
           "2bfe58ab6d9fd575bdc3a624e4825dd2b375d64ac033fbc46ea79dbab4f69a3e",
@@ -194,7 +188,7 @@ void main() {
       (SigHashType.all(), prevOuts.length - 1),
       (
         SigHashType.all(inputs: InputSigHashOption.anyOneCanPay),
-        prevOuts.length
+        prevOuts.length,
       ),
       (SigHashType.all(inputs: InputSigHashOption.anyPrevOut), prevOuts.length),
       (
@@ -206,16 +200,16 @@ void main() {
       (SigHashType.all(inputs: InputSigHashOption.anyPrevOutAnyScript), 1),
     ]) {
       () => expect(
-            () => TaprootSignatureHasher(
-              TaprootKeySignDetails(
-                tx: tx,
-                inputN: 0,
-                prevOuts: prevOuts.sublist(0, length),
-                hashType: hashType,
-              ),
-            ),
-            throwsArgumentError,
-          );
+        () => TaprootSignatureHasher(
+          TaprootKeySignDetails(
+            tx: tx,
+            inputN: 0,
+            prevOuts: prevOuts.sublist(0, length),
+            hashType: hashType,
+          ),
+        ),
+        throwsArgumentError,
+      );
     }
   });
 }

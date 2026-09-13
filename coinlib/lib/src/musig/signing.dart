@@ -8,13 +8,13 @@ typedef KeyToNonceMap = Map<ECPublicKey, MuSigPublicNonce>;
 /// This class is stateful unlike most of the classes in the library. This is to
 /// prevent re-use of earlier parts of the signing session, ensuring signing
 /// nonces are used no more than once.
-class MuSigStatefulSigningSession {
+class MuSigStatefulSigningSession({
   /// The keys being used for MuSig2
-  final MuSigPublicKeys keys;
+  required final MuSigPublicKeys keys,
 
   /// The public key of the signer
-  final ECPublicKey ourPublicKey;
-
+  required final ECPublicKey ourPublicKey,
+}) {
   /// The public signing nonce that must be shared with all other signers
   late final MuSigPublicNonce ourPublicNonce;
 
@@ -32,10 +32,7 @@ class MuSigStatefulSigningSession {
   /// [ourPublicNonce] needs to be shared with other signers. Once all details
   /// and public nonces have been obtained, [sign] can be called to create a
   /// partial signature.
-  MuSigStatefulSigningSession({
-    required this.keys,
-    required this.ourPublicKey,
-  }) {
+  this {
     if (!keys.pubKeys.contains(ourPublicKey)) {
       throw ArgumentError.value(
         ourPublicKey,

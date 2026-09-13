@@ -1,8 +1,10 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/src/common/serial.dart';
 import 'package:coinlib/src/tx/outpoint.dart';
 import 'package:coinlib/src/tx/sighash/sighash_type.dart';
 import 'package:coinlib/src/tx/transaction.dart';
+
 import 'input.dart';
 import 'input_signature.dart';
 import 'sequence.dart';
@@ -27,16 +29,16 @@ class RawInput extends Input {
     return type;
   }
 
-  RawInput({
+  new({
     required this.prevOut,
     required this.scriptSig,
     this.sequence = InputSequence.enforceLocktime,
   });
 
-  RawInput.fromReader(BytesReader reader)
-      : prevOut = OutPoint.fromReader(reader),
-        scriptSig = reader.readVarSlice(),
-        sequence = InputSequence.fromValue(reader.readUInt32());
+  new fromReader(BytesReader reader)
+    : prevOut = OutPoint.fromReader(reader),
+      scriptSig = reader.readVarSlice(),
+      sequence = InputSequence.fromValue(reader.readUInt32());
 
   @override
   void write(Writer writer) {

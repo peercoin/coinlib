@@ -1,36 +1,41 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/src/secp256k1/secp256k1.dart';
 import 'package:coinlib/src/common/bytes.dart';
 import 'package:coinlib/src/common/hex.dart';
+
 import 'ec_private_key.dart';
 import 'ec_public_key.dart';
 
-class InvalidSchnorrSignature extends Error {}
+class InvalidSchnorrSignature extends Error;
 
-class SchnorrSignature {
+class SchnorrSignature(Uint8List data) {
   static const length = 64;
 
-  final Uint8List _data;
+  final Uint8List _data = copyCheckBytes(
+    data,
+    length,
+    name: "Schnorr signature",
+  );
 
   /// Takes a 64-byte serialized Schnorr signature as [data] that contains
   /// 32-byte r and s values. The r and s values are not checked for validity.
   /// If they are invalid then [verify] will always fail.
-  SchnorrSignature(Uint8List data)
-      : _data = copyCheckBytes(data, length, name: "Schnorr signature");
+  this;
 
   /// Takes a HEX encoded 64-byte schnorr signature.
-  SchnorrSignature.fromHex(String hex) : this(hexToBytes(hex));
+  new fromHex(String hex) : this(hexToBytes(hex));
 
   /// Construct a signature from an R point and s scalar.
-  SchnorrSignature.fromRS(ECPublicKey r, ECPrivateKey s)
-      : this(Uint8List.fromList(r.x + s.data));
+  new fromRS(ECPublicKey r, ECPrivateKey s)
+    : this(Uint8List.fromList(r.x + s.data));
 
   /// Creates a signature using a private key ([privkey]) for a given 32-byte
   /// [hash]. The signature will be generated deterministically and shall be the
   /// same for a given hash and key.
   /// [InvalidSchnorrSignature] is thrown if the resulting signature is invalid.
   /// This shouldn't happen unless there is a computation error.
-  factory SchnorrSignature.sign(ECPrivateKey privkey, Uint8List hash) {
+  factory sign(ECPrivateKey privkey, Uint8List hash) {
     checkBytes(hash, 32);
 
     final sig = SchnorrSignature(secp256k1.schnorrSign(hash, privkey.data));

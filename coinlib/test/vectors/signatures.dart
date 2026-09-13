@@ -34,25 +34,19 @@ final invalidDerSigs = [
 final validSchnorrSig =
     "e907831f80848d1069a5371b402410364bdf1c5f8307b0084c55f1ce2dca821525f66a4a85ea8b71e482a74f382d2ce5ebeee8fdb2172f477df4900d310536c0";
 
-class RecSigVector {
-  final String compact;
-  final bool compressed;
-  final int recid;
-  final String? pubkey;
-  RecSigVector({
-    required this.compact,
-    required this.compressed,
-    required this.recid,
-    required this.pubkey,
-  });
+class RecSigVector({
+  required final String compact,
+  required final bool compressed,
+  required final int recid,
+  required final String? pubkey,
+}) {
   String get signature => compact.substring(2);
 }
 
 final validRecoverableSigs = [
   // Compressed
   RecSigVector(
-    compact:
-        "201faf14ade8fd0e1a3e7a426cec7c1298d64a7a647a6fdd5926fc745eda006e4a4bd7ad09896ddb98e7aac15bb0c09b4d95cb48a8099d946d36738c582853a876",
+    compact: "201faf14ade8fd0e1a3e7a426cec7c1298d64a7a647a6fdd5926fc745eda006e4a4bd7ad09896ddb98e7aac15bb0c09b4d95cb48a8099d946d36738c582853a876",
     compressed: true,
     recid: 1,
     pubkey:
@@ -60,25 +54,21 @@ final validRecoverableSigs = [
   ),
   // Uncompressed
   RecSigVector(
-    compact:
-        "1c1faf14ade8fd0e1a3e7a426cec7c1298d64a7a647a6fdd5926fc745eda006e4a4bd7ad09896ddb98e7aac15bb0c09b4d95cb48a8099d946d36738c582853a876",
+    compact: "1c1faf14ade8fd0e1a3e7a426cec7c1298d64a7a647a6fdd5926fc745eda006e4a4bd7ad09896ddb98e7aac15bb0c09b4d95cb48a8099d946d36738c582853a876",
     compressed: false,
     recid: 1,
-    pubkey:
-        "0435d4392797482c7531bf5c21464f8a4c64508b5feef83ba6e435dad04a3a35fe952f0c59b0bd8f99092657cdd3688ded3ce2cd0043e88424d475924c6424647b",
+    pubkey: "0435d4392797482c7531bf5c21464f8a4c64508b5feef83ba6e435dad04a3a35fe952f0c59b0bd8f99092657cdd3688ded3ce2cd0043e88424d475924c6424647b",
   ),
   // Good luck finding a signature with overflowing public key with recids 3 and 4
   RecSigVector(
-    compact:
-        "221faf14ade8fd0e1a3e7a426cec7c1298d64a7a647a6fdd5926fc745eda006e4a4bd7ad09896ddb98e7aac15bb0c09b4d95cb48a8099d946d36738c582853a876",
+    compact: "221faf14ade8fd0e1a3e7a426cec7c1298d64a7a647a6fdd5926fc745eda006e4a4bd7ad09896ddb98e7aac15bb0c09b4d95cb48a8099d946d36738c582853a876",
     compressed: true,
     recid: 3,
     pubkey: null,
   ),
   // A null signature (zeroed) will return a null public key
   RecSigVector(
-    compact:
-        "2000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    compact: "2000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
     compressed: true,
     recid: 1,
     pubkey: null,
@@ -87,32 +77,30 @@ final validRecoverableSigs = [
 
 final validRecSigSigns = [
   RecSigVector(
-    compact:
-        "20f2f7cfb77e04c808556500d39008337e9b02a788045d03de0a727636b6497675383ed64a7023d4850f99985fa8fbd7528ca803685db3d8376f10720436d3ed84",
+    compact: "20f2f7cfb77e04c808556500d39008337e9b02a788045d03de0a727636b6497675383ed64a7023d4850f99985fa8fbd7528ca803685db3d8376f10720436d3ed84",
     compressed: true,
     recid: 1,
     pubkey:
         "024289801366bcee6172b771cf5a7f13aaecd237a0b9a1ff9d769cabc2e6b70a34",
   ),
   RecSigVector(
-    compact:
-        "1cf2f7cfb77e04c808556500d39008337e9b02a788045d03de0a727636b6497675383ed64a7023d4850f99985fa8fbd7528ca803685db3d8376f10720436d3ed84",
+    compact: "1cf2f7cfb77e04c808556500d39008337e9b02a788045d03de0a727636b6497675383ed64a7023d4850f99985fa8fbd7528ca803685db3d8376f10720436d3ed84",
     compressed: false,
     recid: 1,
-    pubkey:
-        "044289801366bcee6172b771cf5a7f13aaecd237a0b9a1ff9d769cabc2e6b70a34cec320a0565fb7caf11b1ca2f445f9b7b012dda5718b3cface369ee3a034ded6",
+    pubkey: "044289801366bcee6172b771cf5a7f13aaecd237a0b9a1ff9d769cabc2e6b70a34cec320a0565fb7caf11b1ca2f445f9b7b012dda5718b3cface369ee3a034ded6",
   ),
 ];
 
 final sigHashAOCP = SigHashType.all(inputs: InputSigHashOption.anyOneCanPay);
 final sigHashAPO = SigHashType.all(inputs: InputSigHashOption.anyPrevOut);
-final sigHashAPOAS =
-    SigHashType.all(inputs: InputSigHashOption.anyPrevOutAnyScript);
+final sigHashAPOAS = SigHashType.all(
+  inputs: InputSigHashOption.anyPrevOutAnyScript,
+);
 
 SchnorrInputSignature _sigForType(SigHashType type) => SchnorrInputSignature(
-      SchnorrSignature.fromHex(validSchnorrSig),
-      type,
-    );
+  SchnorrSignature.fromHex(validSchnorrSig),
+  type,
+);
 
 final schnorrInSig = _sigForType(SigHashType.none());
 final schnorrInSigAPO = _sigForType(sigHashAPO);

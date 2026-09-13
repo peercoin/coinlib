@@ -1,4 +1,5 @@
 import 'package:coinlib/src/common/checks.dart';
+
 import 'inputs/sequence.dart';
 
 /// A locktime restricts when a transaction can be mined.
@@ -18,15 +19,15 @@ sealed class Locktime {
 
   final int value;
 
-  const Locktime._noCheck(this.value);
+  const new _noCheck(this.value);
 
-  Locktime._(this.value) {
+  new _(this.value) {
     checkUint32(value);
   }
 
   /// Creates a [BlockHeightLocktime] or [MedianTimeLocktime] from the raw
   /// value.
-  factory Locktime(int value) {
+  factory(int value) {
     if (value < _timeThreshold) return BlockHeightLocktime(value);
     return MedianTimeLocktime._(value);
   }
@@ -36,17 +37,17 @@ sealed class Locktime {
   /// is unlocked.
   bool isUnlocked(DateTime medianTime, int blockHeight) =>
       this is BlockHeightLocktime
-          ? value <= blockHeight
-          : (this as MedianTimeLocktime).time.compareTo(medianTime) <= 0;
+      ? value <= blockHeight
+      : (this as MedianTimeLocktime).time.compareTo(medianTime) <= 0;
 }
 
 class BlockHeightLocktime extends Locktime {
-  const BlockHeightLocktime._noCheck(super.height) : super._noCheck();
+  const new _noCheck(super.height) : super._noCheck();
 
   /// Restricts the transaction to block heights greater or equal to [height].
   ///
   /// The [height] be less than 500000000.
-  BlockHeightLocktime(int height) : super._(height) {
+  new(int height) : super._(height) {
     if (height >= Locktime._timeThreshold) {
       throw ArgumentError.value(
         height,
@@ -57,8 +58,8 @@ class BlockHeightLocktime extends Locktime {
   }
 }
 
-class MedianTimeLocktime extends Locktime {
-  MedianTimeLocktime._(int value) : super._(value) {
+class MedianTimeLocktime._(int value) extends Locktime {
+  this : super._(value) {
     if (value < Locktime._timeThreshold) {
       throw ArgumentError.value(
         value,
@@ -72,7 +73,7 @@ class MedianTimeLocktime extends Locktime {
   /// previous 11 blocks is greater than or equal to [time].
   ///
   /// Must be between "1985-11-05 00:53:20" and "2106-02-07 06:28:15".
-  MedianTimeLocktime(
+  new(
     DateTime time,
   ) : this._(time.millisecondsSinceEpoch ~/ 1000);
 

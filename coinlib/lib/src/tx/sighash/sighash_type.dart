@@ -1,10 +1,9 @@
-class InvalidOutputSigHashValue extends ArgumentError {
-  InvalidOutputSigHashValue(int value)
-      : super.value(value, "value", "not a valid output sighash value");
+class InvalidOutputSigHashValue(int value) extends ArgumentError {
+  this : super.value(value, "value", "not a valid output sighash value");
 }
 
 /// Signature hash options that control what outputs are included.
-enum OutputSigHashOption {
+enum OutputSigHashOption(final int value, final String string) {
   /// Sign all outputs
   all(1, "ALL"),
 
@@ -13,10 +12,6 @@ enum OutputSigHashOption {
 
   /// Sign the output at the same index as the input
   single(3, "SINGLE");
-
-  final int value;
-  final String string;
-  const OutputSigHashOption(this.value, this.string);
 
   static const Map<int, OutputSigHashOption> _valuesToOption = {
     1: OutputSigHashOption.all,
@@ -30,7 +25,7 @@ enum OutputSigHashOption {
       _valuesToOption.containsKey(value & ~0xf0);
 
   /// Creates an option from the sighash value, ignoring the input part.
-  factory OutputSigHashOption.fromValue(int value) =>
+  factory fromValue(int value) =>
       _valuesToOption[value & ~0xf0] ??
       (throw InvalidOutputSigHashValue(value));
 
@@ -38,13 +33,12 @@ enum OutputSigHashOption {
   String toString() => string;
 }
 
-class InvalidInputSigHashValue extends ArgumentError {
-  InvalidInputSigHashValue(int value)
-      : super.value(value, "value", "not a valid input sighash value");
+class InvalidInputSigHashValue(int value) extends ArgumentError {
+  this : super.value(value, "value", "not a valid input sighash value");
 }
 
 /// Signature hash options that control what input data is included.
-enum InputSigHashOption {
+enum InputSigHashOption(final int value, final String string) {
   /// Include all inputs
   all(0, ""),
 
@@ -62,10 +56,6 @@ enum InputSigHashOption {
   /// scripts.
   anyPrevOutAnyScript(0xc0, "|ANYPREVOUTANYSCRIPT");
 
-  final int value;
-  final String string;
-  const InputSigHashOption(this.value, this.string);
-
   static const Map<int, InputSigHashOption> _valuesToOption = {
     0: InputSigHashOption.all,
     0x80: InputSigHashOption.anyOneCanPay,
@@ -79,7 +69,7 @@ enum InputSigHashOption {
       _valuesToOption.containsKey(value & ~0x0f);
 
   /// Creates an option from the sighash value, ignoring the output part.
-  factory InputSigHashOption.fromValue(int value) =>
+  factory fromValue(int value) =>
       _valuesToOption[value & ~0x0f] ?? (throw InvalidInputSigHashValue(value));
 
   @override
@@ -114,46 +104,46 @@ class SigHashType {
   }
 
   /// Constructs from the byte representation of the sighash type.
-  SigHashType.fromValue(int value)
-      : outputs = value == 0
-            // SIGHASH_ALL behaviour when default schnorr value of 0
-            ? OutputSigHashOption.all
-            : OutputSigHashOption.fromValue(value),
-        inputs = InputSigHashOption.fromValue(value),
-        schnorrDefault = value == 0 {
+  new fromValue(int value)
+    : outputs = value == 0
+          // SIGHASH_ALL behaviour when default schnorr value of 0
+          ? OutputSigHashOption.all
+          : OutputSigHashOption.fromValue(value),
+      inputs = InputSigHashOption.fromValue(value),
+      schnorrDefault = value == 0 {
     checkValue(value);
   }
 
   /// [outputs] must specify if ALL, SINGLE, or NONE is to be used.
   /// [inputs] may restrict inputs to sign to ANYONECANPAY, ANYPREVOUT
   /// or ANYPREVOUTANYSCRIPT.
-  const SigHashType({
+  const new({
     required this.outputs,
     required this.inputs,
   }) : schnorrDefault = false;
 
   /// Functions like [all()] with the same options but produces distinct
   /// signatures and is only acceptable for Taproot Schnorr signatures.
-  const SigHashType.schnorrDefault()
-      : outputs = OutputSigHashOption.all,
-        inputs = InputSigHashOption.all,
-        schnorrDefault = true;
+  const new schnorrDefault()
+    : outputs = OutputSigHashOption.all,
+      inputs = InputSigHashOption.all,
+      schnorrDefault = true;
 
   /// Signs all outputs as ALL which is used for typical transactions.
   /// May include restriction on [inputs] to be signed.
-  const SigHashType.all({
+  const new all({
     InputSigHashOption inputs = InputSigHashOption.all,
   }) : this(outputs: OutputSigHashOption.all, inputs: inputs);
 
   /// Signs no outputs as NONE.
   /// May include restriction on [inputs] to be signed.
-  const SigHashType.none({
+  const new none({
     InputSigHashOption inputs = InputSigHashOption.all,
   }) : this(outputs: OutputSigHashOption.none, inputs: inputs);
 
   /// Signs a single output at the same index as the input as SINGLE.
   /// May include restriction on [inputs] to be signed.
-  const SigHashType.single({
+  const new single({
     InputSigHashOption inputs = InputSigHashOption.all,
   }) : this(outputs: OutputSigHashOption.single, inputs: inputs);
 

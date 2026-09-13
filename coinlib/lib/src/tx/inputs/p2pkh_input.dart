@@ -4,6 +4,7 @@ import 'package:coinlib/src/scripts/operations.dart';
 import 'package:coinlib/src/scripts/programs/p2pkh.dart';
 import 'package:coinlib/src/scripts/script.dart';
 import 'package:coinlib/src/tx/sign_details.dart';
+
 import 'input_signature.dart';
 import 'legacy_input.dart';
 import 'pkh_input.dart';
@@ -15,25 +16,22 @@ import 'sequence.dart';
 /// signed or unsigned. The [sign] method can be used to sign the input with the
 /// corresponding [ECPrivateKey] or a signature can be added without checks
 /// using [addSignature].
-class P2PKHInput extends LegacyInput with PKHInput {
-  @override
-  final ECPublicKey publicKey;
-  @override
-  final ECDSAInputSignature? insig;
+class P2PKHInput({
+  required super.prevOut,
+  @override required final ECPublicKey publicKey,
+  @override final ECDSAInputSignature? insig,
+  super.sequence = InputSequence.enforceLocktime,
+}) extends LegacyInput with PKHInput {
   @override
   final int? signedSize = 147;
 
-  P2PKHInput({
-    required super.prevOut,
-    required this.publicKey,
-    this.insig,
-    super.sequence = InputSequence.enforceLocktime,
-  }) : super(
-          scriptSig: Script([
-            if (insig != null) ScriptPushData(insig.bytes),
-            ScriptPushData(publicKey.data),
-          ]).compiled,
-        );
+  this
+    : super(
+        scriptSig: Script([
+          if (insig != null) ScriptPushData(insig.bytes),
+          ScriptPushData(publicKey.data),
+        ]).compiled,
+      );
 
   /// Checks if the [RawInput] matches the expected format for a [P2PKHInput],
   /// with or without a signature. If it does it returns a [P2PKHInput] for the
@@ -62,35 +60,33 @@ class P2PKHInput extends LegacyInput with PKHInput {
   P2PKHInput sign({
     required LegacySignDetails details,
     required ECPrivateKey key,
-  }) =>
-      addSignature(
-        createInputSignature(
-          key: checkKey(key),
-          details: details.addScript(scriptCode),
-        ),
-      );
+  }) => addSignature(
+    createInputSignature(
+      key: checkKey(key),
+      details: details.addScript(scriptCode),
+    ),
+  );
 
   @override
-
   /// Returns a new [P2PKHInput] with the [ECDSAInputSignature] added. Any
   /// existing signature is replaced.
   P2PKHInput addSignature(ECDSAInputSignature insig) => P2PKHInput(
-        prevOut: prevOut,
-        publicKey: publicKey,
-        insig: insig,
-        sequence: sequence,
-      );
+    prevOut: prevOut,
+    publicKey: publicKey,
+    insig: insig,
+    sequence: sequence,
+  );
 
   @override
   P2PKHInput filterSignatures(bool Function(InputSignature insig) predicate) =>
       insig == null || predicate(insig!)
-          ? this
-          : P2PKHInput(
-              prevOut: prevOut,
-              publicKey: publicKey,
-              insig: null,
-              sequence: sequence,
-            );
+      ? this
+      : P2PKHInput(
+          prevOut: prevOut,
+          publicKey: publicKey,
+          insig: null,
+          sequence: sequence,
+        );
 
   @override
   Script get script => super.script!;

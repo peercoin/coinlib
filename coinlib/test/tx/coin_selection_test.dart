@@ -2,23 +2,18 @@ import 'dart:typed_data';
 
 import 'package:coinlib/coinlib.dart';
 import 'package:test/test.dart';
+
 import '../vectors/keys.dart';
 import '../vectors/tx.dart';
 
-class CoinSelectionVector {
-  final List<int> inputValues;
-  final List<int> outputValues;
-  final int expFee, expSignedSize;
-  final bool expEnoughFunds, expChangeless;
-  CoinSelectionVector({
-    required this.inputValues,
-    required this.outputValues,
-    required this.expFee,
-    required this.expSignedSize,
-    required this.expEnoughFunds,
-    required this.expChangeless,
-  });
-
+class CoinSelectionVector({
+  required final List<int> inputValues,
+  required final List<int> outputValues,
+  required final int expFee,
+  required final int expSignedSize,
+  required final bool expEnoughFunds,
+  required final bool expChangeless,
+}) {
   int get inputValue => inputValues.fold(0, (a, b) => a + b);
   int get outputValue => outputValues.fold(0, (a, b) => a + b);
   int get expChangeValue => inputValue - outputValue - expFee;
@@ -118,14 +113,14 @@ void main() {
     });
 
     InputCandidate candidateForValue(int value) => InputCandidate(
-          input: input,
-          value: BigInt.from(value),
-        );
+      input: input,
+      value: BigInt.from(value),
+    );
 
     Output outputForValue(int value) => Output.fromProgram(
-          BigInt.from(value),
-          exampleOutput.program!,
-        );
+      BigInt.from(value),
+      exampleOutput.program!,
+    );
 
     test("gives correct calculated fields", () {
       // Assume feePerKb of 10000, min fee of 1000, min change of 100000
@@ -299,15 +294,15 @@ void main() {
 
     test(".random", () {
       CoinSelection getRandom(int outValue) => CoinSelection.random(
-            version: 1234,
-            candidates: candidates.map((value) => candidateForValue(value)),
-            recipients: [outputForValue(outValue)],
-            changeProgram: changeProgram,
-            feePerKb: feePerKb,
-            minFee: minFee,
-            minChange: minChange,
-            locktime: Locktime(0xabcd1234),
-          );
+        version: 1234,
+        candidates: candidates.map((value) => candidateForValue(value)),
+        recipients: [outputForValue(outValue)],
+        changeProgram: changeProgram,
+        feePerKb: feePerKb,
+        minFee: minFee,
+        minChange: minChange,
+        locktime: Locktime(0xabcd1234),
+      );
 
       // Only need one
       {

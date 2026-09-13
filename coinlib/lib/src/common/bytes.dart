@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+
 import 'package:collection/collection.dart';
 
 /// Throws an [ArgumentError] if the [bytes] are not of the required [length]
@@ -19,8 +20,7 @@ Uint8List copyCheckBytes(
   Uint8List bytes,
   int length, {
   String name = "Bytes",
-}) =>
-    Uint8List.fromList(checkBytes(bytes, length, name: name));
+}) => Uint8List.fromList(checkBytes(bytes, length, name: name));
 
 /// Determines if two [Uint8List] lists are equal
 bool bytesEqual(Uint8List a, Uint8List b) => ListEquality<int>().equals(a, b);

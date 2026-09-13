@@ -1,5 +1,6 @@
 import 'package:coinlib/coinlib.dart';
 import 'package:test/test.dart';
+
 import '../vectors/keys.dart';
 
 final privKey = WIF

@@ -1,6 +1,8 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/coinlib.dart';
 import 'package:test/test.dart';
+
 import 'vectors/taproot.dart';
 
 final wrongNetwork = Network(
@@ -317,7 +319,9 @@ void main() {
         () => UnknownWitnessAddress.fromHex(
           "0001",
           version: 16,
-          hrp: "\x7f" "1axkwrx",
+          hrp:
+              "\x7f"
+              "1axkwrx",
         ),
         throwsArgumentError,
       );
@@ -345,8 +349,11 @@ void main() {
         "thishrpis78byteslongleadingthetotalsizetobe90characterswitheverythingincluded1";
 
     test("arguments correct size", () {
-      final addr =
-          UnknownWitnessAddress.fromHex("0001", version: 16, hrp: longHrp);
+      final addr = UnknownWitnessAddress.fromHex(
+        "0001",
+        version: 16,
+        hrp: longHrp,
+      );
 
       expectValidAddress(
         "${longHrp}1sqqqs3t97ut",

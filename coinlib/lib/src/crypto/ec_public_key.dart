@@ -1,20 +1,21 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/src/secp256k1/secp256k1.dart';
 import 'package:coinlib/src/common/bytes.dart';
 import 'package:coinlib/src/common/hex.dart';
 
-class InvalidPublicKey implements Exception {}
+class InvalidPublicKey implements Exception;
 
 /// Represents an ECC public key on the secp256k1 curve that has an associated
 /// private key
-class ECPublicKey {
+class ECPublicKey(Uint8List data) {
   /// Either 33 compressed or 65 uncompressed bytes
-  final Uint8List _data;
+  final Uint8List _data = Uint8List.fromList(data);
 
   /// Constructs a public key from a 33-byte compressed or 65-byte uncompressed
   /// representation. [InvalidPublicKey] will be thrown if the public key is
   /// invalid or in the wrong format.
-  ECPublicKey(Uint8List data) : _data = Uint8List.fromList(data) {
+  this {
     if (data.length != 33 && data.length != 65) {
       throw InvalidPublicKey();
     }
@@ -23,15 +24,15 @@ class ECPublicKey {
 
   /// Constructs a public key from HEX encoded data that must represent a
   /// 33-byte compressed key, or 65-byte uncompressed key
-  ECPublicKey.fromHex(String hex) : this(hexToBytes(hex));
+  new fromHex(String hex) : this(hexToBytes(hex));
 
   /// Constructs a public key from a 32-byte X coordinate where the Y coordinate
   /// is made even.
-  ECPublicKey.fromXOnly(Uint8List xcoord)
-      : this(
-          Uint8List.fromList([2, ...checkBytes(xcoord, 32, name: "xcoord")]),
-        );
-  ECPublicKey.fromXOnlyHex(String hex) : this.fromXOnly(hexToBytes(hex));
+  new fromXOnly(Uint8List xcoord)
+    : this(
+        Uint8List.fromList([2, ...checkBytes(xcoord, 32, name: "xcoord")]),
+      );
+  new fromXOnlyHex(String hex) : this.fromXOnly(hexToBytes(hex));
 
   /// Tweaks the public key with a scalar multiplied by the generator point. In
   /// the instance a new key cannot be created (practically impossible for
@@ -63,8 +64,8 @@ class ECPublicKey {
   /// the Y-coorindate is not even, then the odd equivilent can be obtained via
   /// [xonly].
   bool get yIsEven
-      // Compressed even type
-      =>
+  // Compressed even type
+  =>
       _data[0] == 2
       // Uncompressed even type
       ||

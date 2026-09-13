@@ -1,21 +1,20 @@
 import 'ec_private_key.dart';
 import 'schnorr_signature.dart';
+
 import 'package:coinlib/src/secp256k1/secp256k1.dart';
 
 /// A Schnorr signature where the nonce has been adapted by a point. The
 /// signature can be adapted (decrypted) using [adapt] with the discrete-log of
 /// the point (private key to a public key). The signature will be complete and
 /// valid if the correct adaptor was given.
-class SchnorrAdaptorSignature {
+class SchnorrAdaptorSignature(
   /// The signature that contains the adapted nonce but requires the adaptor
   /// scalar
-  final SchnorrSignature preSig;
+  final SchnorrSignature preSig,
 
   /// True when the nonce y-coord is odd
-  final bool parity;
-
-  SchnorrAdaptorSignature(this.preSig, this.parity);
-
+  final bool parity,
+) {
   /// Adapts the adaptor signature with the discrete log to the adaptor point
   /// given as an [ECPrivateKey]. The resulting signature is not verified.
   /// Either the [adaptorScalar] should be known to be correct or the signature

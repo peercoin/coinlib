@@ -1,6 +1,8 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/coinlib.dart';
 import 'package:test/test.dart';
+
 import '../vectors/signatures.dart';
 
 void main() {
@@ -176,9 +178,9 @@ void main() {
       });
 
       expectSig(String sigHex, bool valid) => expect(
-            ECDSASignature.fromCompactHex(sigHex).verify(pubKey, msgHash),
-            valid,
-          );
+        ECDSASignature.fromCompactHex(sigHex).verify(pubKey, msgHash),
+        valid,
+      );
 
       test("verifies low s-value signature", () {
         expectSig(

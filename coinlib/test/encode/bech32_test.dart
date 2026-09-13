@@ -1,15 +1,16 @@
 import 'package:coinlib/coinlib.dart';
 import 'package:test/test.dart';
+
 import '../vectors/bech32.dart';
 
 void main() {
   group("Bech32", () {
     throwsInvalidWithMsg(String msg) => throwsA(
-          allOf(
-            isA<InvalidBech32>(),
-            predicate<InvalidBech32>((e) => e.message == msg),
-          ),
-        );
+      allOf(
+        isA<InvalidBech32>(),
+        predicate<InvalidBech32>((e) => e.message == msg),
+      ),
+    );
 
     expectValidVectors(List<String> vectors, Bech32Type type) {
       for (final vector in vectors) {
@@ -88,11 +89,10 @@ void main() {
         List<int> words,
         Bech32Type type,
         String expected,
-      ) =>
-          expect(
-            Bech32(hrp: hrp, words: words, type: type).encode(),
-            expected,
-          );
+      ) => expect(
+        Bech32(hrp: hrp, words: words, type: type).encode(),
+        expected,
+      );
 
       expectBech32(
         "bc",

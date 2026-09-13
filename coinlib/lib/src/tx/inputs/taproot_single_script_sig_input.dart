@@ -1,10 +1,12 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/src/crypto/ec_private_key.dart';
 import 'package:coinlib/src/taproot/leaves.dart';
 import 'package:coinlib/src/taproot/taproot.dart';
 import 'package:coinlib/src/tx/outpoint.dart';
 import 'package:coinlib/src/tx/sign_details.dart';
 import 'package:coinlib/src/tx/transaction.dart';
+
 import 'input_signature.dart';
 import 'raw_input.dart';
 import 'sequence.dart';
@@ -12,10 +14,13 @@ import 'taproot_input.dart';
 import 'taproot_script_input.dart';
 
 /// An input that provides a single signature to satisfy a tapscript [leaf].
-class TaprootSingleScriptSigInput extends TaprootInput {
-  final TapLeafChecksig leaf;
-  final SchnorrInputSignature? insig;
-
+class TaprootSingleScriptSigInput._({
+  required final TapLeafChecksig leaf,
+  required Uint8List controlBlock,
+  required super.sequence,
+  OutPoint? prevOut,
+  final SchnorrInputSignature? insig,
+}) extends TaprootInput {
   @override
   // 41 bytes for legacy input data
   // 64 witness signature bytes
@@ -35,50 +40,45 @@ class TaprootSingleScriptSigInput extends TaprootInput {
   // Minus the sighash byte
   int get defaultSignedSize => signedSize - 1;
 
-  TaprootSingleScriptSigInput._({
-    required this.leaf,
-    required Uint8List controlBlock,
-    required super.sequence,
-    OutPoint? prevOut,
-    this.insig,
-  }) : super(
-          prevOut: prevOut ?? OutPoint.nothing,
-          witness: [
-            if (insig != null) insig.bytes,
-            leaf.script.compiled,
-            controlBlock,
-          ],
-        );
+  this
+    : super(
+        prevOut: prevOut ?? OutPoint.nothing,
+        witness: [
+          if (insig != null) insig.bytes,
+          leaf.script.compiled,
+          controlBlock,
+        ],
+      );
 
   /// Constructs an input with all the information for signing with any sighash
   /// type.
-  TaprootSingleScriptSigInput({
+  new({
     required OutPoint prevOut,
     required Taproot taproot,
     required TapLeafChecksig leaf,
     SchnorrInputSignature? insig,
     InputSequence sequence = InputSequence.enforceLocktime,
   }) : this._(
-          prevOut: prevOut,
-          controlBlock: taproot.controlBlockForLeaf(leaf),
-          leaf: leaf,
-          insig: insig,
-          sequence: sequence,
-        );
+         prevOut: prevOut,
+         controlBlock: taproot.controlBlockForLeaf(leaf),
+         leaf: leaf,
+         insig: insig,
+         sequence: sequence,
+       );
 
   /// Create an APO input specifying a [Taproot] and [TapLeaf] that can be
   /// signed using ANYPREVOUT or ANYPREVOUTANYSCRIPT.
-  TaprootSingleScriptSigInput.anyPrevOut({
+  new anyPrevOut({
     required Taproot taproot,
     required TapLeafChecksig leaf,
     SchnorrInputSignature? insig,
     InputSequence sequence = InputSequence.enforceLocktime,
   }) : this._(
-          leaf: leaf,
-          controlBlock: taproot.controlBlockForLeaf(leaf),
-          insig: insig,
-          sequence: sequence,
-        );
+         leaf: leaf,
+         controlBlock: taproot.controlBlockForLeaf(leaf),
+         insig: insig,
+         sequence: sequence,
+       );
 
   /// Matches a [RawInput] as a [TaprootSingleScriptSigInput] if it contains the
   /// control block and [TapLeafChecksig] leaf script.
@@ -118,26 +118,24 @@ class TaprootSingleScriptSigInput extends TaprootInput {
   /// used.
   TaprootSingleScriptSigInput addPrevOut(
     OutPoint prevOut,
-  ) =>
-      TaprootSingleScriptSigInput._(
-        prevOut: prevOut,
-        leaf: leaf,
-        controlBlock: witness.last,
-        insig: (insig != null && insig!.hashType.requiresApo) ? insig : null,
-        sequence: sequence,
-      );
+  ) => TaprootSingleScriptSigInput._(
+    prevOut: prevOut,
+    leaf: leaf,
+    controlBlock: witness.last,
+    insig: (insig != null && insig!.hashType.requiresApo) ? insig : null,
+    sequence: sequence,
+  );
 
   /// Add a preprepared input signature.
   TaprootSingleScriptSigInput addSignature(
     SchnorrInputSignature insig,
-  ) =>
-      TaprootSingleScriptSigInput._(
-        prevOut: prevOut,
-        leaf: leaf,
-        controlBlock: witness.last,
-        insig: insig,
-        sequence: sequence,
-      );
+  ) => TaprootSingleScriptSigInput._(
+    prevOut: prevOut,
+    leaf: leaf,
+    controlBlock: witness.last,
+    insig: insig,
+    sequence: sequence,
+  );
 
   /// Sign the input for the tapscript key.
   TaprootSingleScriptSigInput sign({

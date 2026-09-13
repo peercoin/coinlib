@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/src/common/serial.dart';
 import 'package:coinlib/src/crypto/hash.dart';
 import 'package:coinlib/src/tx/output.dart';
@@ -8,32 +9,23 @@ typedef OutputList = List<Output>;
 
 /// Provides cached hashes for a transaction object for the purposes of creating
 /// signature hashes
-class TransactionSignatureHashes {
-  final PrecomputeHasher prevouts;
-  final PrecomputeHasher sequences;
-  final PrecomputeHasher outputs;
-
-  TransactionSignatureHashes(Transaction tx)
-      : prevouts = PrecomputeHasher.prevouts(tx),
-        sequences = PrecomputeHasher.sequences(tx),
-        outputs = PrecomputeHasher.outputs(tx);
+class TransactionSignatureHashes(Transaction tx) {
+  final PrecomputeHasher prevouts = PrecomputeHasher.prevouts(tx);
+  final PrecomputeHasher sequences = PrecomputeHasher.sequences(tx);
+  final PrecomputeHasher outputs = PrecomputeHasher.outputs(tx);
 }
 
 /// Provides cached hashes for the previous output data used for Taproot
 /// signatures.
-class PrevOutSignatureHashes {
-  final PrecomputeHasher amounts;
-  final PrecomputeHasher scripts;
-
-  PrevOutSignatureHashes(OutputList prevOuts)
-      : amounts = PrecomputeHasher.inAmounts(prevOuts),
-        scripts = PrecomputeHasher.prevScripts(prevOuts);
+class PrevOutSignatureHashes(OutputList prevOuts) {
+  final PrecomputeHasher amounts = PrecomputeHasher.inAmounts(prevOuts);
+  final PrecomputeHasher scripts = PrecomputeHasher.prevScripts(prevOuts);
 }
 
-class PrecomputeHasher<T extends Object> with Writable {
-  final void Function(Writer writer, T obj) _write;
-  final T _obj;
-
+class PrecomputeHasher<T extends Object>._(
+  final T _obj,
+  final void Function(Writer writer, T obj) _write,
+) with Writable {
   static void _writePrevouts(Writer writer, Transaction tx) {
     for (final input in tx.inputs) {
       input.prevOut.write(writer);
@@ -66,8 +58,6 @@ class PrecomputeHasher<T extends Object> with Writable {
 
   static void _singleOutput(Writer writer, Output output) =>
       output.write(writer);
-
-  PrecomputeHasher._(this._obj, this._write);
 
   static PrecomputeHasher<Transaction> prevouts(Transaction tx) =>
       PrecomputeHasher._(tx, _writePrevouts);

@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+
 import 'programs/p2pkh.dart';
 import 'programs/p2sh.dart';
 import 'programs/p2tr.dart';
@@ -9,7 +10,7 @@ import 'programs/multisig.dart';
 import 'script.dart';
 
 /// Thrown when a script doesn't match the program being constructed
-class NoProgramMatch implements Exception {}
+class NoProgramMatch implements Exception;
 
 /// An interface for programs that wrap a [Script] with associated
 /// functionality. This is seperated from the [Script] class to present
@@ -21,7 +22,7 @@ abstract class Program {
   /// or a basic [RawProgram] if there is no match. The script should use
   /// minimal pushes. [Program.decompile] can be used directly on compiled
   /// scripts or [Program.fromAsm] can be used to match directly against ASM.
-  factory Program.match(Script script) {
+  factory match(Script script) {
     try {
       return P2PKH.fromScript(script);
     } on NoProgramMatch catch (_) {}
@@ -57,15 +58,11 @@ abstract class Program {
 
   /// Decompile a script and match against a program. Must be mininal push data
   /// by default
-  factory Program.decompile(Uint8List script, {bool requireMinimal = true}) =>
+  factory decompile(Uint8List script, {bool requireMinimal = true}) =>
       Program.match(Script.decompile(script, requireMinimal: requireMinimal));
 
-  factory Program.fromAsm(String asm) => Program.match(Script.fromAsm(asm));
+  factory fromAsm(String asm) => Program.match(Script.fromAsm(asm));
 }
 
 /// A program that is not recognised and merely wraps a [Script].
-class RawProgram implements Program {
-  @override
-  final Script script;
-  RawProgram(this.script);
-}
+class RawProgram(@override final Script script) implements Program;
