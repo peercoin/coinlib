@@ -34,17 +34,16 @@ void main() {
         String string, {
         required bool supportsLegacy,
         required bool requiresApo,
-      }) =>
-          expectValid(
-            value,
-            SigHashType(outputs: outputs, inputs: inputs),
-            outputs,
-            inputs,
-            string,
-            schnorrDefault: false,
-            supportsLegacy: supportsLegacy,
-            requiresApo: requiresApo,
-          );
+      }) => expectValid(
+        value,
+        SigHashType(outputs: outputs, inputs: inputs),
+        outputs,
+        inputs,
+        string,
+        schnorrDefault: false,
+        supportsLegacy: supportsLegacy,
+        requiresApo: requiresApo,
+      );
 
       expectValid(
         0,

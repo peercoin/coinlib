@@ -1,6 +1,8 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/coinlib.dart';
 import 'package:test/test.dart';
+
 import '../vectors/keys.dart';
 
 final scalar = Uint8List(32)..last = 1;

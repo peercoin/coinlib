@@ -3,52 +3,52 @@ import 'package:coinlib/src/crypto/random.dart';
 import 'package:coinlib/src/scripts/program.dart';
 import 'package:coinlib/src/tx/inputs/witness_input.dart';
 import 'package:collection/collection.dart';
+
 import 'inputs/input.dart';
 import 'inputs/taproot_input.dart';
 import 'locktime.dart';
 import 'output.dart';
 import 'transaction.dart';
 
-class InsufficientFunds implements Exception {}
+class InsufficientFunds implements Exception;
 
 /// A candidate input to spend a UTXO with the UTXO value
-class InputCandidate {
+class InputCandidate({
   /// Input that can spend the UTXO
-  final Input input;
+  required final Input input,
 
   /// Value of UTXO to be spent
-  final BigInt value;
+  required final BigInt value,
 
   /// True if it is known that the default sighash type is being used which
   /// allows one less byte to be used for Taproot signatures.
-  final bool defaultSigHash;
-
+  final bool defaultSigHash = false,
+}) {
   /// Provides an [input] alongside the [value] being spent that may be
   /// selected.
   ///
   /// [defaultSigHash] can be set to true if it is known that a Taproot input
   /// will definitely be signed with SIGHASH_DEFAULT. The fee calculation will
   /// be incorrect if this is set for a non-default sighash type.
-  InputCandidate({
-    required this.input,
-    required this.value,
-    this.defaultSigHash = false,
-  });
+  this;
 }
 
 /// Represents a selection of inputs to fund a transaction. If the inputs
 /// provide sufficient value to cover the ouputs and fee for a transaction that
 /// isn't too large, [ready] shall be true and it is possible to obtain a
 /// signable [transaction].
-class CoinSelection {
-  final int version;
-  final List<InputCandidate> selected;
-  final List<Output> recipients;
-  final Program changeProgram;
-  final BigInt feePerKb;
-  final BigInt minFee;
-  final BigInt minChange;
-  final Locktime locktime;
+class CoinSelection({
+  final int version = Transaction.currentVersion,
+  required Iterable<InputCandidate> selected,
+  required Iterable<Output> recipients,
+  required final Program changeProgram,
+  required final BigInt feePerKb,
+  required final BigInt minFee,
+  required final BigInt minChange,
+  final Locktime locktime = Locktime.zero,
+}) {
+  final List<InputCandidate> selected = List.unmodifiable(selected);
+  final List<Output> recipients = List.unmodifiable(recipients);
 
   /// The total value of selected inputs
   late final BigInt inputValue;
@@ -66,14 +66,16 @@ class CoinSelection {
   /// The maximum size of the transaction after being fully signed
   late final int signedSize;
 
-  int _sizeGivenChange(int fixedSize, bool includeChange) => fixedSize +
-      recipients.fold(0, (acc, output) => acc + output.size) +
-      (includeChange
-          ? Output.fromProgram(BigInt.zero, changeProgram).size
-          : 0) +
-      MeasureWriter.varIntSizeOfInt(
-        recipients.length + (includeChange ? 1 : 0),
-      ) as int;
+  int _sizeGivenChange(int fixedSize, bool includeChange) =>
+      fixedSize +
+              recipients.fold(0, (acc, output) => acc + output.size) +
+              (includeChange
+                  ? Output.fromProgram(BigInt.zero, changeProgram).size
+                  : 0) +
+              MeasureWriter.varIntSizeOfInt(
+                recipients.length + (includeChange ? 1 : 0),
+              )
+          as int;
 
   BigInt _feeForSize(int size) {
     final feeForSize = feePerKb * BigInt.from(size) ~/ BigInt.from(1000);
@@ -84,26 +86,20 @@ class CoinSelection {
   /// and provide change to the [changeProgram]. The [feePerKb] specifies the
   /// required fee in sats per KB with a minimum fee specified with
   /// [minFee]. The [minChange] is the minimum allowed change.
-  CoinSelection({
-    this.version = Transaction.currentVersion,
-    required Iterable<InputCandidate> selected,
-    required Iterable<Output> recipients,
-    required this.changeProgram,
-    required this.feePerKb,
-    required this.minFee,
-    required this.minChange,
-    this.locktime = Locktime.zero,
-  })  : selected = List.unmodifiable(selected),
-        recipients = List.unmodifiable(recipients) {
+  this {
     if (selected.any((candidate) => candidate.input.signedSize == null)) {
       throw ArgumentError("Cannot select inputs without known max signed size");
     }
 
     // Get input and recipient values
-    inputValue =
-        selected.fold(BigInt.zero, (acc, candidate) => acc + candidate.value);
-    recipientValue =
-        recipients.fold(BigInt.zero, (acc, output) => acc + output.value);
+    inputValue = selected.fold(
+      BigInt.zero,
+      (acc, candidate) => acc + candidate.value,
+    );
+    recipientValue = recipients.fold(
+      BigInt.zero,
+      (acc, output) => acc + output.value,
+    );
 
     final isWitness = selected.any(
       (candidate) => candidate.input is WitnessInput,
@@ -112,21 +108,21 @@ class CoinSelection {
     // Get unchanging size
     final int fixedSize
         // Version and locktime
-        = 8
-            // Add witness marker and flag
-            +
-            (isWitness ? 2 : 0)
-            // Fully signed inputs
-            +
-            MeasureWriter.varIntSizeOfInt(selected.length) +
-            selected.fold(0, (acc, candidate) {
-              final input = candidate.input;
-              final inputSize =
-                  input is TaprootInput && candidate.defaultSigHash
-                      ? input.defaultSignedSize
-                      : input.signedSize;
-              return acc + inputSize!;
-            });
+        =
+        8
+        // Add witness marker and flag
+        +
+        (isWitness ? 2 : 0)
+        // Fully signed inputs
+        +
+        MeasureWriter.varIntSizeOfInt(selected.length) +
+        selected.fold(0, (acc, candidate) {
+          final input = candidate.input;
+          final inputSize = input is TaprootInput && candidate.defaultSigHash
+              ? input.defaultSignedSize
+              : input.signedSize;
+          return acc + inputSize!;
+        });
 
     // Determine size and fee with change
     final sizeWithChange = _sizeGivenChange(fixedSize, true);
@@ -162,7 +158,7 @@ class CoinSelection {
   /// input amount is reached. If the resulting transaction is too large or not
   /// enough funds have been reached it will fall back to adding the largest
   /// input values first.
-  factory CoinSelection.optimal({
+  factory optimal({
     int version = Transaction.currentVersion,
     required Iterable<InputCandidate> candidates,
     required Iterable<Output> recipients,
@@ -207,7 +203,7 @@ class CoinSelection {
   /// The algorithm will only take upto 6800 candidates by default to avoid
   /// taking too long and due to size limitations. This can be changed with
   /// [maxCandidates].
-  factory CoinSelection.inOrderUntilEnough({
+  factory inOrderUntilEnough({
     int version = Transaction.currentVersion,
     required Iterable<InputCandidate> candidates,
     required Iterable<Output> recipients,
@@ -247,7 +243,7 @@ class CoinSelection {
 
   /// A simple selection algorithm that selects inputs randomly from the
   /// [candidates] until the required amount has been reached.
-  factory CoinSelection.random({
+  factory random({
     int version = Transaction.currentVersion,
     required Iterable<InputCandidate> candidates,
     required Iterable<Output> recipients,
@@ -256,22 +252,21 @@ class CoinSelection {
     required BigInt minFee,
     required BigInt minChange,
     Locktime locktime = Locktime.zero,
-  }) =>
-      CoinSelection.inOrderUntilEnough(
-        version: version,
-        candidates: candidates.toList()..shuffle(),
-        recipients: recipients,
-        changeProgram: changeProgram,
-        feePerKb: feePerKb,
-        minFee: minFee,
-        minChange: minChange,
-        locktime: locktime,
-      );
+  }) => CoinSelection.inOrderUntilEnough(
+    version: version,
+    candidates: candidates.toList()..shuffle(),
+    recipients: recipients,
+    changeProgram: changeProgram,
+    feePerKb: feePerKb,
+    minFee: minFee,
+    minChange: minChange,
+    locktime: locktime,
+  );
 
   /// A simple selection algorithm that selects inputs from the [candidates]
   /// starting from the largest value until the required amount has been
   /// reached. The order of the selected inputs are randomised.
-  factory CoinSelection.largestFirst({
+  factory largestFirst({
     int version = Transaction.currentVersion,
     required Iterable<InputCandidate> candidates,
     required Iterable<Output> recipients,
@@ -280,20 +275,19 @@ class CoinSelection {
     required BigInt minFee,
     required BigInt minChange,
     Locktime locktime = Locktime.zero,
-  }) =>
-      CoinSelection.inOrderUntilEnough(
-        version: version,
-        candidates: candidates.toList().sorted(
-              (a, b) => b.value.compareTo(a.value),
-            ),
-        recipients: recipients,
-        changeProgram: changeProgram,
-        feePerKb: feePerKb,
-        minFee: minFee,
-        minChange: minChange,
-        randomise: true,
-        locktime: locktime,
-      );
+  }) => CoinSelection.inOrderUntilEnough(
+    version: version,
+    candidates: candidates.toList().sorted(
+      (a, b) => b.value.compareTo(a.value),
+    ),
+    recipients: recipients,
+    changeProgram: changeProgram,
+    feePerKb: feePerKb,
+    minFee: minFee,
+    minChange: minChange,
+    randomise: true,
+    locktime: locktime,
+  );
 
   /// Obtains the transaction with selected inputs and outputs including any
   /// change at a random location, ready to be signed. Throws

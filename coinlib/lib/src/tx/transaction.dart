@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/src/common/checks.dart';
 import 'package:coinlib/src/common/hex.dart';
 import 'package:coinlib/src/common/serial.dart';
@@ -8,6 +9,7 @@ import 'package:coinlib/src/tx/inputs/sequence.dart';
 import 'package:coinlib/src/tx/inputs/taproot_key_input.dart';
 import 'package:coinlib/src/tx/inputs/taproot_single_script_sig_input.dart';
 import 'package:coinlib/src/tx/locktime.dart';
+
 import 'inputs/input.dart';
 import 'inputs/input_signature.dart';
 import 'inputs/legacy_input.dart';
@@ -18,20 +20,23 @@ import 'sighash/sighash_type.dart';
 import 'output.dart';
 import 'sign_details.dart';
 
-class TransactionTooLarge implements Exception {}
+class TransactionTooLarge implements Exception;
 
-class InvalidTransaction implements Exception {}
+class InvalidTransaction implements Exception;
 
-class CannotSignInput implements Exception {
-  final String message;
-  CannotSignInput(this.message);
+class CannotSignInput(final String message) implements Exception {
   @override
   String toString() => "CannotSignInput: $message";
 }
 
 /// Allows construction and signing of Peercoin transactions including those
 /// with witness data.
-class Transaction with Writable {
+class Transaction({
+  final int version = currentVersion,
+  required Iterable<Input> inputs,
+  required Iterable<Output> outputs,
+  final Locktime locktime = Locktime.zero,
+}) with Writable {
   static const currentVersion = 3;
   static const maxSize = 1000000;
 
@@ -44,10 +49,8 @@ class Transaction with Writable {
   static const maxOutputs =
       (maxSize - minOtherSize - minInputSize) ~/ minOutputSize;
 
-  final int version;
-  final List<Input> inputs;
-  final List<Output> outputs;
-  final Locktime locktime;
+  final List<Input> inputs = List.unmodifiable(inputs);
+  final List<Output> outputs = List.unmodifiable(outputs);
 
   /// Constructs a transaction with the given [inputs] and [outputs].
   /// [TransactionTooLarge] will be thrown if the resulting transction exceeds
@@ -55,13 +58,7 @@ class Transaction with Writable {
   ///
   /// To follow the behaviour of the reference Peercoin client, the [locktime]
   /// can be set to the current tip block height via [BlockHeightLocktime].
-  Transaction({
-    this.version = currentVersion,
-    required Iterable<Input> inputs,
-    required Iterable<Output> outputs,
-    this.locktime = Locktime.zero,
-  })  : inputs = List.unmodifiable(inputs),
-        outputs = List.unmodifiable(outputs) {
+  this {
     checkInt32(version);
     if (size > maxSize) throw TransactionTooLarge();
   }
@@ -118,7 +115,7 @@ class Transaction with Writable {
   /// non-witness transaction.
   /// If [expectWitness] is omitted or null, then this method will determine the
   /// correct transaction type from the data, starting with a witness type.
-  factory Transaction.fromReader(BytesReader reader, {bool? expectWitness}) {
+  factory fromReader(BytesReader reader, {bool? expectWitness}) {
     bool tooLarge = false;
     final start = reader.offset;
 
@@ -150,12 +147,12 @@ class Transaction with Writable {
   }
 
   /// Constructs a transaction from serialised bytes. See [fromReader()].
-  factory Transaction.fromBytes(Uint8List bytes, {bool? expectWitness}) =>
+  factory fromBytes(Uint8List bytes, {bool? expectWitness}) =>
       Transaction.fromReader(BytesReader(bytes), expectWitness: expectWitness);
 
   /// Constructs a transaction from the serialised data encoded as hex. See
   /// [fromReader()].
-  factory Transaction.fromHex(String hex, {bool? expectWitness}) =>
+  factory fromHex(String hex, {bool? expectWitness}) =>
       Transaction.fromBytes(hexToBytes(hex), expectWitness: expectWitness);
 
   @override
@@ -187,11 +184,11 @@ class Transaction with Writable {
   }
 
   Transaction _newInputs(List<Input> newInputs) => Transaction(
-        version: version,
-        inputs: newInputs,
-        outputs: outputs,
-        locktime: locktime,
-      );
+    version: version,
+    inputs: newInputs,
+    outputs: outputs,
+    locktime: locktime,
+  );
 
   T _requireInputOfType<T>(int inputN) {
     if (inputN < 0 || inputN >= inputs.length) {
@@ -203,8 +200,8 @@ class Transaction with Writable {
   }
 
   Transaction _replaceNewlySigned(int n, Input input) => _newInputs(
-        [...inputs.take(n), input, ...inputs.skip(n + 1)],
-      );
+    [...inputs.take(n), input, ...inputs.skip(n + 1)],
+  );
 
   /// Sign a [LegacyInput] at [inputN] with the [key]. The signature hash is
   /// SIGHASH_ALL by default but can be changed via [hashType].
@@ -212,15 +209,13 @@ class Transaction with Writable {
     required int inputN,
     required ECPrivateKey key,
     SigHashType hashType = const SigHashType.all(),
-  }) =>
-      _replaceNewlySigned(
-        inputN,
-        _requireInputOfType<LegacyInput>(inputN).sign(
-          details:
-              LegacySignDetails(tx: this, inputN: inputN, hashType: hashType),
-          key: key,
-        ),
-      );
+  }) => _replaceNewlySigned(
+    inputN,
+    _requireInputOfType<LegacyInput>(inputN).sign(
+      details: LegacySignDetails(tx: this, inputN: inputN, hashType: hashType),
+      key: key,
+    ),
+  );
 
   /// Sign a [LegacyWitnessInput] at [inputN] with the [key]. Must contain the
   /// [value] being spent. The signature hash is SIGHASH_ALL by default but can
@@ -230,19 +225,18 @@ class Transaction with Writable {
     required ECPrivateKey key,
     required BigInt value,
     SigHashType hashType = const SigHashType.all(),
-  }) =>
-      _replaceNewlySigned(
-        inputN,
-        _requireInputOfType<LegacyWitnessInput>(inputN).sign(
-          details: LegacyWitnessSignDetails(
-            tx: this,
-            inputN: inputN,
-            value: value,
-            hashType: hashType,
-          ),
-          key: key,
-        ),
-      );
+  }) => _replaceNewlySigned(
+    inputN,
+    _requireInputOfType<LegacyWitnessInput>(inputN).sign(
+      details: LegacyWitnessSignDetails(
+        tx: this,
+        inputN: inputN,
+        value: value,
+        hashType: hashType,
+      ),
+      key: key,
+    ),
+  );
 
   /// Sign a [TaprootKeyInput] at [inputN] with the tweaked [key].
   ///
@@ -257,19 +251,18 @@ class Transaction with Writable {
     required ECPrivateKey key,
     required List<Output> prevOuts,
     SigHashType hashType = const SigHashType.schnorrDefault(),
-  }) =>
-      _replaceNewlySigned(
-        inputN,
-        _requireInputOfType<TaprootKeyInput>(inputN).sign(
-          details: TaprootKeySignDetails(
-            tx: this,
-            inputN: inputN,
-            prevOuts: prevOuts,
-            hashType: hashType,
-          ),
-          key: key,
-        ),
-      );
+  }) => _replaceNewlySigned(
+    inputN,
+    _requireInputOfType<TaprootKeyInput>(inputN).sign(
+      details: TaprootKeySignDetails(
+        tx: this,
+        inputN: inputN,
+        prevOuts: prevOuts,
+        hashType: hashType,
+      ),
+      key: key,
+    ),
+  );
 
   /// Sign a [TaprootSingleScriptSigInput] at [inputN] with the [key].
   ///
@@ -285,19 +278,18 @@ class Transaction with Writable {
     required ECPrivateKey key,
     required List<Output> prevOuts,
     SigHashType hashType = const SigHashType.schnorrDefault(),
-  }) =>
-      _replaceNewlySigned(
-        inputN,
-        _requireInputOfType<TaprootSingleScriptSigInput>(inputN).sign(
-          details: TaprootScriptSignDetails(
-            tx: this,
-            inputN: inputN,
-            prevOuts: prevOuts,
-            hashType: hashType,
-          ),
-          key: key,
-        ),
-      );
+  }) => _replaceNewlySigned(
+    inputN,
+    _requireInputOfType<TaprootSingleScriptSigInput>(inputN).sign(
+      details: TaprootScriptSignDetails(
+        tx: this,
+        inputN: inputN,
+        prevOuts: prevOuts,
+        hashType: hashType,
+      ),
+      key: key,
+    ),
+  );
 
   /// Replaces the input at [n] with the new [input] and invalidates other
   /// input signatures that have standard sighash types accordingly. This is
@@ -315,8 +307,8 @@ class Transaction with Writable {
         .map(
           (input) => input.filterSignatures(
             (insig)
-                // Allow ANYONECANPAY, ANYPREVOUT or ANYPREVOUTANYSCRIPT
-                =>
+            // Allow ANYONECANPAY, ANYPREVOUT or ANYPREVOUTANYSCRIPT
+            =>
                 insig.hashType.inputs != InputSigHashOption.all
                 // Allow signature if previous output hasn't changed and the sequence
                 // has not changed for taproot inputs or when using SIGHASH_ALL.
@@ -335,20 +327,20 @@ class Transaction with Writable {
   /// Returns a new [Transaction] with the [input] added to the end of the input
   /// list.
   Transaction addInput(Input input) => Transaction(
-        version: version,
-        inputs: [
-          // Only keep ANYONECANPAY, ANYPREVOUT and ANYPREVOUTANYSCRIPT signatures
-          // when adding a new input
-          ...inputs.map(
-            (input) => input.filterSignatures(
-              (insig) => insig.hashType.inputs != InputSigHashOption.all,
-            ),
-          ),
-          input,
-        ],
-        outputs: outputs,
-        locktime: locktime,
-      );
+    version: version,
+    inputs: [
+      // Only keep ANYONECANPAY, ANYPREVOUT and ANYPREVOUTANYSCRIPT signatures
+      // when adding a new input
+      ...inputs.map(
+        (input) => input.filterSignatures(
+          (insig) => insig.hashType.inputs != InputSigHashOption.all,
+        ),
+      ),
+      input,
+    ],
+    outputs: outputs,
+    locktime: locktime,
+  );
 
   /// Returns a new [Transaction] with the [output] added to the end of the
   /// output list.
@@ -360,8 +352,8 @@ class Transaction with Writable {
             i,
             input.filterSignatures(
               (insig)
-                  // Allow signatures that sign no outpus
-                  =>
+              // Allow signatures that sign no outpus
+              =>
                   insig.hashType.none
                   // Allow signatures that sign a single output which isn't the one
                   // being added
@@ -452,8 +444,8 @@ class Transaction with Writable {
   ///
   /// If there are no inputs, then this is false.
   bool get locktimeIsEnforced => inputs.any(
-        (input) => input.sequence.locktimeIsEnforced,
-      );
+    (input) => input.sequence.locktimeIsEnforced,
+  );
 
   /// Given the [medianTime] of the previous 11 blocks and the current
   /// [blockHeight], returns true if the transaction is unlocked and available
@@ -464,6 +456,5 @@ class Transaction with Writable {
   bool isUnlocked({
     required DateTime medianTime,
     required int blockHeight,
-  }) =>
-      !locktimeIsEnforced || locktime.isUnlocked(medianTime, blockHeight);
+  }) => !locktimeIsEnforced || locktime.isUnlocked(medianTime, blockHeight);
 }

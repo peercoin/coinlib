@@ -1,22 +1,19 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/coinlib.dart';
 import 'package:test/test.dart';
+
 import '../vectors/keys.dart';
 
-class OutputVector {
-  final BigInt value;
-  final Uint8List scriptBytes;
-  final Uint8List outBytes;
-  final Type progType;
-  final String? address;
-  OutputVector({
-    required this.value,
-    required String scriptHex,
-    required String outHex,
-    required this.progType,
-    this.address,
-  })  : scriptBytes = hexToBytes(scriptHex),
-        outBytes = hexToBytes(outHex);
+class OutputVector({
+  required final BigInt value,
+  required String scriptHex,
+  required String outHex,
+  required final Type progType,
+  final String? address,
+}) {
+  final Uint8List scriptBytes = hexToBytes(scriptHex);
+  final Uint8List outBytes = hexToBytes(outHex);
 }
 
 final vectors = [
@@ -32,8 +29,7 @@ final vectors = [
     value: Output.maxValue,
     scriptHex:
         "0020ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-    outHex:
-        "ffffffffffffffff220020ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    outHex: "ffffffffffffffff220020ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
     progType: P2WSH,
     address: "pc1qlllllllllllllllllllllllllllllllllllllllllllllllllllsm5knxw",
   ),

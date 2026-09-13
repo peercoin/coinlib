@@ -1,11 +1,15 @@
 import "dart:ffi";
 import "dart:io";
+
 import "package:coinlib/src/crypto/random.dart";
 import "package:coinlib/src/secp256k1/heap.dart";
 import 'package:ffi/ffi.dart';
+
 import "heap_ffi.dart";
 import "secp256k1.ffi.g.dart";
+
 import "package:path/path.dart";
+
 import "secp256k1_base.dart";
 
 const _name = "secp256k1";
@@ -50,29 +54,32 @@ typedef OpaqueMuSigSession = OpaqueGeneric<MuSigSessionPtr>;
 typedef OpaqueMuSigPartialSig = OpaqueGeneric<MuSigPartialSigPtr>;
 
 /// Specialises Secp256k1Base to use the FFI
-class Secp256k1 extends Secp256k1Base<
-    Pointer<secp256k1_context>,
-    Pointer<UnsignedChar>,
-    PubKeyPtr,
-    Pointer<Size>,
-    Pointer<secp256k1_ecdsa_signature>,
-    Pointer<secp256k1_ecdsa_recoverable_signature>,
-    Pointer<secp256k1_keypair>,
-    Pointer<secp256k1_xonly_pubkey>,
-    Pointer<Int>,
-    MuSigAggCachePtr,
-    Pointer<PubKeyPtr>,
-    MuSigSecNoncePtr,
-    MuSigPublicNoncePtr,
-    Pointer<secp256k1_musig_aggnonce>,
-    Pointer<MuSigPublicNoncePtr>,
-    MuSigSessionPtr,
-    MuSigPartialSigPtr,
-    Pointer<MuSigPartialSigPtr>,
-    Pointer<Never>> {
+class Secp256k1()
+    extends
+        Secp256k1Base<
+          Pointer<secp256k1_context>,
+          Pointer<UnsignedChar>,
+          PubKeyPtr,
+          Pointer<Size>,
+          Pointer<secp256k1_ecdsa_signature>,
+          Pointer<secp256k1_ecdsa_recoverable_signature>,
+          Pointer<secp256k1_keypair>,
+          Pointer<secp256k1_xonly_pubkey>,
+          Pointer<Int>,
+          MuSigAggCachePtr,
+          Pointer<PubKeyPtr>,
+          MuSigSecNoncePtr,
+          MuSigPublicNoncePtr,
+          Pointer<secp256k1_musig_aggnonce>,
+          Pointer<MuSigPublicNoncePtr>,
+          MuSigSessionPtr,
+          MuSigPartialSigPtr,
+          Pointer<MuSigPartialSigPtr>,
+          Pointer<Never>
+        > {
   final _lib = NativeSecp256k1(_openLibrary());
 
-  Secp256k1() {
+  this {
     // Set functions
     extEcSeckeyVerify = _lib.secp256k1_ec_seckey_verify;
     extEcPubkeyCreate = _lib.secp256k1_ec_pubkey_create;
@@ -164,13 +171,13 @@ class Secp256k1 extends Secp256k1Base<
 
   @override
   HeapPointerArray<Pointer<MuSigPublicNoncePtr>, MuSigPublicNoncePtr>
-      setMuSigPubNonceArray(Iterable<Heap<MuSigPublicNoncePtr>> objs) =>
-          HeapPointerArrayFfi.assign(malloc(objs.length), objs.cast());
+  setMuSigPubNonceArray(Iterable<Heap<MuSigPublicNoncePtr>> objs) =>
+      HeapPointerArrayFfi.assign(malloc(objs.length), objs.cast());
 
   @override
   HeapPointerArray<Pointer<MuSigPartialSigPtr>, MuSigPartialSigPtr>
-      setMuSigPartialSigArray(Iterable<Heap<MuSigPartialSigPtr>> objs) =>
-          HeapPointerArrayFfi.assign(malloc(objs.length), objs.cast());
+  setMuSigPartialSigArray(Iterable<Heap<MuSigPartialSigPtr>> objs) =>
+      HeapPointerArrayFfi.assign(malloc(objs.length), objs.cast());
 
   @override
   Heap<MuSigAggCachePtr> allocMuSigCache() => HeapFfi(malloc());

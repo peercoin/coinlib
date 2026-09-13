@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+
 import 'heap.dart';
 
 typedef MallocFunction = int Function(int);
@@ -9,26 +10,26 @@ typedef MemoryGetter = Uint8List Function();
 final int _intBytes = 4;
 
 /// Represents objects on the heap. These can be created using [HeapFactory].
-class HeapWasm implements Heap<int> {
+class HeapWasm._(@override final int ptr, FreeFunction free)
+    implements Heap<int> {
   static final Finalizer<void Function()> _finalizer = Finalizer(
     (free) => free(),
   );
 
-  @override
-  final int ptr;
-
-  HeapWasm._(this.ptr, FreeFunction free) {
+  this {
     _finalizer.attach(this, () => free(ptr));
   }
 }
 
 /// Encapsulates a WASM heap-allocated unsigned char array, accessible as a
 /// Uint8List. Must be created through [HeapFactory].
-class HeapBytesWasm extends HeapWasm implements HeapBytes<int> {
-  final int size;
-  final MemoryGetter _memory;
-
-  HeapBytesWasm._(this.size, super.ptr, this._memory, super.free) : super._();
+class HeapBytesWasm._(
+  final int size,
+  super.ptr,
+  final MemoryGetter _memory,
+  super.free,
+) extends HeapWasm implements HeapBytes<int> {
+  this : super._();
 
   Uint8List get _view => Uint8List.view(_memory().buffer, ptr, size);
 
@@ -42,10 +43,10 @@ class HeapBytesWasm extends HeapWasm implements HeapBytes<int> {
   load(Uint8List data) => _view.setAll(0, data);
 }
 
-class HeapIntWasm extends HeapWasm implements HeapInt<int> {
-  final MemoryGetter _memory;
-
-  HeapIntWasm._(this._memory, super.ptr, super.free) : super._();
+class HeapIntWasm._(final MemoryGetter _memory, super.ptr, super.free)
+    extends HeapWasm
+    implements HeapInt<int> {
+  this : super._();
 
   ByteData get _data => ByteData.view(_memory().buffer);
 
@@ -60,17 +61,14 @@ class HeapIntWasm extends HeapWasm implements HeapInt<int> {
       HeapIntWasm._(_memory, ptr + _intBytes * i, (_) {});
 }
 
-class HeapPointerArrayWasm extends HeapIntWasm
-    implements HeapPointerArray<int, int> {
+class HeapPointerArrayWasm._(
+  super._memory,
+  super.ptr,
+  super.free,
+  final List<HeapWasm> _objs,
+) extends HeapIntWasm implements HeapPointerArray<int, int> {
   // Also store the objects in dart to handle the lifetimes
-  final List<HeapWasm> _objs;
-
-  HeapPointerArrayWasm._(
-    super._memory,
-    super.ptr,
-    super.free,
-    this._objs,
-  ) : super._() {
+  this : super._() {
     // Set pointers of array
     for (int i = 0; i < _objs.length; i++) {
       this[i].value = _objs[i].ptr;
@@ -83,13 +81,11 @@ class HeapPointerArrayWasm extends HeapIntWasm
 
 /// Provides [HeapWasm] objects with the same memory and malloc and free
 /// functions.
-class HeapFactory {
-  final MemoryGetter _memory;
-  final MallocFunction _malloc;
-  final FreeFunction _free;
-
-  HeapFactory(this._memory, this._malloc, this._free);
-
+class HeapFactory(
+  final MemoryGetter _memory,
+  final MallocFunction _malloc,
+  final FreeFunction _free,
+) {
   /// Allocate a byte array of [size].
   HeapBytesWasm bytes(int size) {
     final ptr = _malloc(size);

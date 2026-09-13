@@ -1,14 +1,14 @@
 import 'package:coinlib/coinlib.dart';
 import 'package:test/test.dart';
+
 import '../../vectors/keys.dart';
 
-class MultisigVector {
-  final String asm;
-  final String? hex;
-  final List<String>? pubkeys;
-  final int? threshold;
-  MultisigVector({required this.asm, this.hex, this.pubkeys, this.threshold});
-}
+class MultisigVector({
+  required final String asm,
+  final String? hex,
+  final List<String>? pubkeys,
+  final int? threshold,
+});
 
 final correctVectors = [
   // 1-of-1 pointless but valid
@@ -65,7 +65,8 @@ final invalidVectors = [
   MultisigVector(asm: "01 $pubkeyVec OP_DUP OP_CHECKMULTISIG"),
   // Wrong public key length
   MultisigVector(
-    asm: "01 0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f817"
+    asm:
+        "01 0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f817"
         " 01 OP_CHECKMULTISIG",
   ),
   // Not push data for public key

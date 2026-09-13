@@ -1,21 +1,15 @@
-class Network {
-  final int wifPrefix, p2pkhPrefix, p2shPrefix, privHDPrefix, pubHDPrefix;
-  final String bech32Hrp, messagePrefix;
-  final BigInt minFee, minOutput, feePerKb;
-
-  Network({
-    required this.wifPrefix,
-    required this.p2pkhPrefix,
-    required this.p2shPrefix,
-    required this.privHDPrefix,
-    required this.pubHDPrefix,
-    required this.bech32Hrp,
-    required this.messagePrefix,
-    required this.minFee,
-    required this.minOutput,
-    required this.feePerKb,
-  });
-
+class Network({
+  required final int wifPrefix,
+  required final int p2pkhPrefix,
+  required final int p2shPrefix,
+  required final int privHDPrefix,
+  required final int pubHDPrefix,
+  required final String bech32Hrp,
+  required final String messagePrefix,
+  required final BigInt minFee,
+  required final BigInt minOutput,
+  required final BigInt feePerKb,
+}) {
   static final mainnet = Network(
     wifPrefix: 183,
     p2pkhPrefix: 55,

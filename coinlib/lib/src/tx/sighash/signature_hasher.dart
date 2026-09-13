@@ -1,7 +1,9 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/src/tx/inputs/input.dart';
 import 'package:coinlib/src/tx/sign_details.dart';
 import 'package:coinlib/src/tx/transaction.dart';
+
 import 'sighash_type.dart';
 
 abstract class SignatureHasher {

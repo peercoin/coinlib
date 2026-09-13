@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/src/common/serial.dart';
 import 'package:coinlib/src/crypto/ec_private_key.dart';
 import 'package:coinlib/src/scripts/operations.dart';
@@ -8,6 +9,7 @@ import 'package:coinlib/src/tx/inputs/taproot_input.dart';
 import 'package:coinlib/src/tx/outpoint.dart';
 import 'package:coinlib/src/tx/sighash/sighash_type.dart';
 import 'package:coinlib/src/tx/sign_details.dart';
+
 import 'input_signature.dart';
 import 'raw_input.dart';
 import 'sequence.dart';
@@ -18,38 +20,38 @@ import 'sequence.dart';
 /// create signatures as necessary. Insertion of signatures and other data can
 /// be done manually via [updateStack]. These signatures must be handled by the
 /// consumer and will not be filtered upon a transaction update.
-class TaprootScriptInput extends TaprootInput {
+class TaprootScriptInput({
+  required super.prevOut,
+  required Uint8List controlBlock,
+
   /// The tapscript embedded in the witness data, not to be confused with the
   /// empty [script].
-  final Script tapscript;
+  required final Script tapscript,
+  List<Uint8List>? stack,
+  super.sequence = InputSequence.enforceLocktime,
+}) extends TaprootInput {
+  this
+    : super(
+        witness: [
+          ...?stack,
+          tapscript.compiled,
+          controlBlock,
+        ],
+      );
 
-  TaprootScriptInput({
-    required super.prevOut,
-    required Uint8List controlBlock,
-    required this.tapscript,
-    List<Uint8List>? stack,
-    super.sequence = InputSequence.enforceLocktime,
-  }) : super(
-          witness: [
-            if (stack != null) ...stack,
-            tapscript.compiled,
-            controlBlock,
-          ],
-        );
-
-  TaprootScriptInput.fromTaprootLeaf({
+  new fromTaprootLeaf({
     required OutPoint prevOut,
     required Taproot taproot,
     required TapLeaf leaf,
     List<Uint8List>? stack,
     InputSequence sequence = InputSequence.enforceLocktime,
   }) : this(
-          prevOut: prevOut,
-          controlBlock: taproot.controlBlockForLeaf(leaf),
-          tapscript: leaf.script,
-          stack: stack,
-          sequence: sequence,
-        );
+         prevOut: prevOut,
+         controlBlock: taproot.controlBlockForLeaf(leaf),
+         tapscript: leaf.script,
+         stack: stack,
+         sequence: sequence,
+       );
 
   /// Checks if the [raw] input and [witness] data match the expected format for
   /// a [TaprootScriptInput] with the control block and script. If it matches
@@ -106,11 +108,10 @@ class TaprootScriptInput extends TaprootInput {
   SchnorrInputSignature createScriptSignature({
     required TaprootScriptSignDetails details,
     required ECPrivateKey key,
-  }) =>
-      createInputSignature(
-        details: details.addLeafHash(TapLeaf(tapscript).hash),
-        key: key,
-      );
+  }) => createInputSignature(
+    details: details.addLeafHash(TapLeaf(tapscript).hash),
+    key: key,
+  );
 
   Uint8List get controlBlock => witness.last;
 }

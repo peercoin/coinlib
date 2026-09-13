@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/src/scripts/operations.dart';
 import 'package:coinlib/src/scripts/program.dart';
 import 'package:coinlib/src/scripts/script.dart';
@@ -12,7 +13,7 @@ class P2Witness implements Program {
 
   bool _programSizeOk(int size) => size >= 2 && size <= 40;
 
-  P2Witness.fromScript(this.script) {
+  new fromScript(this.script) {
     if (script.ops.length != 2 ||
         script[0] is! ScriptOpCode ||
         script[1] is! ScriptPushData) {
@@ -33,18 +34,18 @@ class P2Witness implements Program {
     version = ver;
   }
 
-  P2Witness.decompile(Uint8List compiled)
-      : this.fromScript(Script.decompile(compiled));
+  new decompile(Uint8List compiled)
+    : this.fromScript(Script.decompile(compiled));
 
-  P2Witness.fromAsm(String asm) : this.fromScript(Script.fromAsm(asm));
+  new fromAsm(String asm) : this.fromScript(Script.fromAsm(asm));
 
   /// Creates a non-specific segwit program from "witness program" data.
-  P2Witness.fromData(this.version, Uint8List data)
-      : _data = Uint8List.fromList(data),
-        script = Script([
-          ScriptOp.fromNumber(version),
-          ScriptPushData(data),
-        ]) {
+  new fromData(this.version, Uint8List data)
+    : _data = Uint8List.fromList(data),
+      script = Script([
+        ScriptOp.fromNumber(version),
+        ScriptPushData(data),
+      ]) {
     if (version < 0 || version > 16 || !_programSizeOk(data.length)) {
       throw ArgumentError.value(data, "this.data", "wrong size");
     }

@@ -1,8 +1,10 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/src/crypto/ec_private_key.dart';
 import 'package:coinlib/src/crypto/ec_public_key.dart';
 import 'package:coinlib/src/scripts/programs/p2wpkh.dart';
 import 'package:coinlib/src/tx/sign_details.dart';
+
 import 'input_signature.dart';
 import 'pkh_input.dart';
 import 'raw_input.dart';
@@ -15,25 +17,22 @@ import 'sequence.dart';
 /// input with the corresponding [ECPrivateKey] or a signature can be added
 /// without checks using [addSignature]. Signature and public key data is
 /// stored in the witness data.
-class P2WPKHInput extends LegacyWitnessInput with PKHInput {
-  @override
-  final ECPublicKey publicKey;
-  @override
-  final ECDSAInputSignature? insig;
+class P2WPKHInput({
+  required super.prevOut,
+  @override required final ECPublicKey publicKey,
+  @override final ECDSAInputSignature? insig,
+  super.sequence = InputSequence.enforceLocktime,
+}) extends LegacyWitnessInput with PKHInput {
   @override
   final int? signedSize = 147;
 
-  P2WPKHInput({
-    required super.prevOut,
-    required this.publicKey,
-    this.insig,
-    super.sequence = InputSequence.enforceLocktime,
-  }) : super(
-          witness: [
-            if (insig != null) insig.bytes,
-            publicKey.data,
-          ],
-        );
+  this
+    : super(
+        witness: [
+          if (insig != null) insig.bytes,
+          publicKey.data,
+        ],
+      );
 
   /// Checks if the [raw] input and [witness] data match the expected format for
   /// a P2WPKHInput, with or without a signature. If it does it returns a
@@ -65,33 +64,31 @@ class P2WPKHInput extends LegacyWitnessInput with PKHInput {
   LegacyWitnessInput sign({
     required LegacyWitnessSignDetails details,
     required ECPrivateKey key,
-  }) =>
-      addSignature(
-        createInputSignature(
-          key: checkKey(key),
-          details: details.addScript(scriptCode),
-        ),
-      );
+  }) => addSignature(
+    createInputSignature(
+      key: checkKey(key),
+      details: details.addScript(scriptCode),
+    ),
+  );
 
   @override
-
   /// Returns a new [P2WPKHInput] with the [ECDSAInputSignature] added. Any
   /// existing signature is replaced.
   P2WPKHInput addSignature(ECDSAInputSignature insig) => P2WPKHInput(
-        prevOut: prevOut,
-        publicKey: publicKey,
-        insig: insig,
-        sequence: sequence,
-      );
+    prevOut: prevOut,
+    publicKey: publicKey,
+    insig: insig,
+    sequence: sequence,
+  );
 
   @override
   P2WPKHInput filterSignatures(bool Function(InputSignature insig) predicate) =>
       insig == null || predicate(insig!)
-          ? this
-          : P2WPKHInput(
-              prevOut: prevOut,
-              publicKey: publicKey,
-              insig: null,
-              sequence: sequence,
-            );
+      ? this
+      : P2WPKHInput(
+          prevOut: prevOut,
+          publicKey: publicKey,
+          insig: null,
+          sequence: sequence,
+        );
 }

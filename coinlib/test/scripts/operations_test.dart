@@ -1,26 +1,20 @@
 import 'dart:typed_data';
+
 import 'package:test/test.dart';
 import 'package:coinlib/coinlib.dart';
+
 import '../vectors/keys.dart';
 import '../vectors/signatures.dart';
 import 'common.dart';
 
-class OperationVector {
-  final String? inputAsm;
-  final String inputHex;
-  final bool isPush;
-  final String? outputAsm;
-  final String? outputHex;
-  final int? number;
-  OperationVector({
-    this.inputAsm,
-    required this.inputHex,
-    required this.isPush,
-    this.outputAsm,
-    this.outputHex,
-    this.number,
-  });
-}
+class OperationVector({
+  final String? inputAsm,
+  required final String inputHex,
+  required final bool isPush,
+  final String? outputAsm,
+  final String? outputHex,
+  final int? number,
+});
 
 final vectors = [
   // Basic numbers
@@ -98,17 +92,13 @@ final vectors = [
     isPush: true,
   ),
   OperationVector(
-    inputAsm:
-        "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a",
-    inputHex:
-        "4b000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a",
+    inputAsm: "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a",
+    inputHex: "4b000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a",
     isPush: true,
   ),
   OperationVector(
-    inputAsm:
-        "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b",
-    inputHex:
-        "4c4c000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b",
+    inputAsm: "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b",
+    inputHex: "4c4c000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b",
     isPush: true,
   ),
   OperationVector(

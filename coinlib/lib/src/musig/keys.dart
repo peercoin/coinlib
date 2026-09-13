@@ -3,16 +3,14 @@ part of "library.dart";
 /// Takes the public keys ([pubKeys]) for MuSig2 and provides the [aggregate]
 /// public key. This will automatically order the keys and provide a consistent
 /// aggregate key.
-class MuSigPublicKeys {
-  final Set<ECPublicKey> pubKeys;
-  late final ECPublicKey aggregate;
+class MuSigPublicKeys._(
+  Set<ECPublicKey> pubKeys,
+  final ECPublicKey aggregate,
+  final OpaqueMuSigCache _aggCache,
+) {
+  final Set<ECPublicKey> pubKeys = Set.unmodifiable(pubKeys);
 
-  late final OpaqueMuSigCache _aggCache;
-
-  MuSigPublicKeys._(Set<ECPublicKey> pubKeys, this.aggregate, this._aggCache)
-      : pubKeys = Set.unmodifiable(pubKeys);
-
-  factory MuSigPublicKeys(Set<ECPublicKey> pubKeys) {
+  factory(Set<ECPublicKey> pubKeys) {
     if (pubKeys.isEmpty) {
       throw ArgumentError.value(pubKeys, "pubKeys", "should not be empty");
     }
@@ -40,13 +38,13 @@ class MuSigPrivate {
   final ECPrivateKey privateKey;
   final MuSigPublicKeys public;
 
-  MuSigPrivate._(this.privateKey, this.public);
+  new _(this.privateKey, this.public);
 
-  MuSigPrivate(this.privateKey, Set<ECPublicKey> otherKeys)
-      : public = MuSigPublicKeys({privateKey.pubkey, ...otherKeys});
+  new(this.privateKey, Set<ECPublicKey> otherKeys)
+    : public = MuSigPublicKeys({privateKey.pubkey, ...otherKeys});
 
   MuSigPrivate tweak(Uint8List scalar) => MuSigPrivate._(
-        privateKey,
-        public.tweak(scalar),
-      );
+    privateKey,
+    public.tweak(scalar),
+  );
 }

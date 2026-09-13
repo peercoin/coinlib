@@ -1,11 +1,9 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/src/common/hex.dart';
 
-class Base58Vector {
-  final Uint8List data;
-  final String encoded;
-  Base58Vector({required String hex, required this.encoded})
-      : data = hexToBytes(hex);
+class Base58Vector({required String hex, required final String encoded}) {
+  final Uint8List data = hexToBytes(hex);
 }
 
 final base58ValidVectors = [

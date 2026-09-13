@@ -1,6 +1,8 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/coinlib.dart';
 import 'package:test/test.dart';
+
 import '../vectors/taproot.dart';
 
 void main() {
@@ -35,9 +37,9 @@ void main() {
 
     test("duplicate leaves not allowed", () {
       expectNoDuplicates(TapBranch mast) => expect(
-            () => Taproot(internalKey: exampleKey, mast: mast),
-            throwsArgumentError,
-          );
+        () => Taproot(internalKey: exampleKey, mast: mast),
+        throwsArgumentError,
+      );
       expectNoDuplicates(TapBranch(exampleLeaf, exampleLeaf));
       expectNoDuplicates(TapBranch(exampleLeaf, identicalLeaf));
     });

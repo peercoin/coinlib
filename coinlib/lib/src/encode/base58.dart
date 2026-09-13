@@ -1,13 +1,15 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/src/crypto/hash.dart';
 import 'package:dart_base_x/dart_base_x.dart';
 
-final _codec =
-    BaseXCodec("123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz");
+final _codec = BaseXCodec(
+  "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz",
+);
 
-class InvalidBase58 implements Exception {}
+class InvalidBase58 implements Exception;
 
-class InvalidBase58Checksum implements Exception {}
+class InvalidBase58Checksum implements Exception;
 
 Uint8List _checksum(Uint8List data) => sha256DoubleHash(data).sublist(0, 4);
 

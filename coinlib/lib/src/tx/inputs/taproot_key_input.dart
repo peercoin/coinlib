@@ -1,18 +1,22 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/src/crypto/ec_private_key.dart';
 import 'package:coinlib/src/scripts/programs/p2tr.dart';
 import 'package:coinlib/src/taproot/taproot.dart';
 import 'package:coinlib/src/tx/inputs/taproot_input.dart';
 import 'package:coinlib/src/tx/sign_details.dart';
 import 'package:coinlib/src/tx/transaction.dart';
+
 import 'input_signature.dart';
 import 'raw_input.dart';
 import 'sequence.dart';
 
 /// A [TaprootInput] which spends using the key-path
-class TaprootKeyInput extends TaprootInput {
-  final SchnorrInputSignature? insig;
-
+class TaprootKeyInput({
+  required super.prevOut,
+  final SchnorrInputSignature? insig,
+  super.sequence = InputSequence.enforceLocktime,
+}) extends TaprootInput {
   @override
   // 41 bytes for legacy input data
   // 64 witness signature bytes
@@ -24,11 +28,7 @@ class TaprootKeyInput extends TaprootInput {
   // Minus the sighash byte
   int get defaultSignedSize => signedSize - 1;
 
-  TaprootKeyInput({
-    required super.prevOut,
-    this.insig,
-    super.sequence = InputSequence.enforceLocktime,
-  }) : super(witness: [insig != null ? insig.bytes : Uint8List(0)]);
+  this : super(witness: [insig != null ? insig.bytes : Uint8List(0)]);
 
   /// Checks if the [raw] input and [witness] data match the expected format for
   /// a [TaprootKeyInput], with a signature. If it does it returns a
@@ -69,22 +69,21 @@ class TaprootKeyInput extends TaprootInput {
   /// Returns a new [TaprootKeyInput] with the [SchnorrInputSignature] added.
   /// Any existing signature is replaced.
   TaprootKeyInput addSignature(SchnorrInputSignature insig) => TaprootKeyInput(
-        prevOut: prevOut,
-        insig: insig,
-        sequence: sequence,
-      );
+    prevOut: prevOut,
+    insig: insig,
+    sequence: sequence,
+  );
 
   @override
   TaprootKeyInput filterSignatures(
     bool Function(InputSignature insig) predicate,
-  ) =>
-      insig == null || predicate(insig!)
-          ? this
-          : TaprootKeyInput(
-              prevOut: prevOut,
-              insig: null,
-              sequence: sequence,
-            );
+  ) => insig == null || predicate(insig!)
+      ? this
+      : TaprootKeyInput(
+          prevOut: prevOut,
+          insig: null,
+          sequence: sequence,
+        );
 
   @override
   bool get complete => insig != null;

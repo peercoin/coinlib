@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/src/common/serial.dart';
 import 'package:coinlib/src/crypto/ec_private_key.dart';
 import 'package:coinlib/src/crypto/ec_public_key.dart';
@@ -11,6 +12,7 @@ import 'package:coinlib/src/tx/sighash/legacy_signature_hasher.dart';
 import 'package:coinlib/src/tx/sighash/sighash_type.dart';
 import 'package:coinlib/src/tx/sign_details.dart';
 import 'package:coinlib/src/tx/transaction.dart';
+
 import 'input_signature.dart';
 import 'legacy_input.dart';
 import 'raw_input.dart';
@@ -20,23 +22,22 @@ import 'sequence.dart';
 /// redeemScript and any number of required signatures. It can be signed with
 /// one of the associated [ECPrivateKey] objects using [sign] or an existing
 /// signature can be inserted with [insertSignature].
-class P2SHMultisigInput extends LegacyInput {
-  final MultisigProgram program;
-  final List<ECDSAInputSignature> sigs;
+class P2SHMultisigInput({
+  required super.prevOut,
+  required final MultisigProgram program,
+  Iterable<ECDSAInputSignature> sigs = const [],
+  super.sequence = InputSequence.enforceLocktime,
+}) extends LegacyInput {
+  final List<ECDSAInputSignature> sigs = List.unmodifiable(sigs);
 
-  P2SHMultisigInput({
-    required super.prevOut,
-    required this.program,
-    Iterable<ECDSAInputSignature> sigs = const [],
-    super.sequence = InputSequence.enforceLocktime,
-  })  : sigs = List.unmodifiable(sigs),
-        super(
-          scriptSig: Script([
-            ScriptOp.fromNumber(0),
-            ...sigs.map((sig) => ScriptPushData(sig.bytes)),
-            ScriptPushData(program.script.compiled),
-          ]).compiled,
-        ) {
+  this
+    : super(
+        scriptSig: Script([
+          ScriptOp.fromNumber(0),
+          ...sigs.map((sig) => ScriptPushData(sig.bytes)),
+          ScriptPushData(program.script.compiled),
+        ]).compiled,
+      ) {
     if (sigs.length > program.threshold) {
       throw ArgumentError(
         "P2SHMultisigInput signatures n=${sigs.length} over "
@@ -76,8 +77,10 @@ class P2SHMultisigInput extends LegacyInput {
     if (ops.length > 2 + multisig.threshold) return null;
 
     // Convert signature data into ECDSAInputSignatures
-    final sigs =
-        ops.getRange(1, ops.length - 1).map((op) => op.ecdsaSig).toList();
+    final sigs = ops
+        .getRange(1, ops.length - 1)
+        .map((op) => op.ecdsaSig)
+        .toList();
 
     // Fail if any signature is null
     if (sigs.any((sig) => sig == null)) return null;
@@ -135,8 +138,10 @@ class P2SHMultisigInput extends LegacyInput {
     final pubkeys = program.pubkeys;
 
     // Create list that will match signatures to the public keys in order
-    List<ECDSAInputSignature?> positionedSigs =
-        List.filled(pubkeys.length, null);
+    List<ECDSAInputSignature?> positionedSigs = List.filled(
+      pubkeys.length,
+      null,
+    );
 
     // Iterate both public key positions and signatures sequentially as they
     // should already be in order
@@ -145,17 +150,17 @@ class P2SHMultisigInput extends LegacyInput {
 
       // Check existing first to ensure they get matched
       if (
-          // Check all signatures have not already been matched
-          sigI != sigs.length
-              // Do not add any more when threshold is reached
-              &&
-              numAdded < program.threshold
-              // Check signature against candidate public key and message hash
-              &&
-              sigs[sigI].signature.verify(
-                    pubkeys[pos],
-                    getSigHash(sigs[sigI].hashType),
-                  )) {
+      // Check all signatures have not already been matched
+      sigI != sigs.length
+          // Do not add any more when threshold is reached
+          &&
+          numAdded < program.threshold
+          // Check signature against candidate public key and message hash
+          &&
+          sigs[sigI].signature.verify(
+            pubkeys[pos],
+            getSigHash(sigs[sigI].hashType),
+          )) {
         // Existing signature matched for this public key
         positionedSigs[pos] = sigs[sigI++];
       }
@@ -169,9 +174,9 @@ class P2SHMultisigInput extends LegacyInput {
       program: program,
       // Remove nulls leaving actual signatures and trim down to threshold if
       // needed
-      sigs: positionedSigs
-          .whereType<ECDSAInputSignature>()
-          .take(program.threshold),
+      sigs: positionedSigs.whereType<ECDSAInputSignature>().take(
+        program.threshold,
+      ),
       sequence: sequence,
     );
   }
@@ -179,13 +184,12 @@ class P2SHMultisigInput extends LegacyInput {
   @override
   P2SHMultisigInput filterSignatures(
     bool Function(InputSignature insig) predicate,
-  ) =>
-      P2SHMultisigInput(
-        prevOut: prevOut,
-        program: program,
-        sigs: sigs.where((sig) => predicate(sig)),
-        sequence: sequence,
-      );
+  ) => P2SHMultisigInput(
+    prevOut: prevOut,
+    program: program,
+    sigs: sigs.where((sig) => predicate(sig)),
+    sequence: sequence,
+  );
 
   @override
   bool get complete => sigs.length == program.threshold;
@@ -196,7 +200,8 @@ class P2SHMultisigInput extends LegacyInput {
   int get _signedScriptSize =>
       1 // Extra 0
       +
-      program.threshold * 73 // Add 73 bytes per signature
+      program.threshold *
+          73 // Add 73 bytes per signature
       // Determine the length of the program pushdata by actually compiling it.
       // Not the most efficient but the simplest solution.
       +

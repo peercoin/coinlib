@@ -1,10 +1,12 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/src/crypto/ecdsa_signature.dart';
 import 'package:coinlib/src/crypto/schnorr_signature.dart';
 import 'package:coinlib/src/tx/sighash/sighash_type.dart';
+
 import 'input.dart';
 
-class InvalidInputSignature implements Exception {}
+class InvalidInputSignature implements Exception;
 
 SigHashType _hashTypeFromValueWithCheck(int value) {
   if (value == 0 || !SigHashType.validValue(value)) {
@@ -21,19 +23,15 @@ abstract interface class InputSignature {
 
 /// Encapsulates an ECDSA [signature] and [hashType] for inclusion in an
 /// [Input].
-class ECDSAInputSignature implements InputSignature {
-  final ECDSASignature signature;
-  @override
-  final SigHashType hashType;
-
-  ECDSAInputSignature(
-    this.signature, [
-    this.hashType = const SigHashType.all(),
-  ]) {
+class ECDSAInputSignature(
+  final ECDSASignature signature, [
+  @override final SigHashType hashType = const SigHashType.all(),
+]) implements InputSignature {
+  this {
     if (!hashType.supportsLegacy) throw InvalidInputSignature();
   }
 
-  factory ECDSAInputSignature.fromBytes(Uint8List bytes) {
+  factory fromBytes(Uint8List bytes) {
     if (bytes.isEmpty) throw InvalidInputSignature();
 
     late ECDSASignature sig;
@@ -52,17 +50,11 @@ class ECDSAInputSignature implements InputSignature {
 
 /// Encapsulates a Schnorr [signature] and [hashType] for inclusion in a Taproot
 /// input.
-class SchnorrInputSignature implements InputSignature {
-  final SchnorrSignature signature;
-  @override
-  final SigHashType hashType;
-
-  SchnorrInputSignature(
-    this.signature, [
-    this.hashType = const SigHashType.schnorrDefault(),
-  ]);
-
-  factory SchnorrInputSignature.fromBytes(Uint8List bytes) {
+class SchnorrInputSignature(
+  final SchnorrSignature signature, [
+  @override final SigHashType hashType = const SigHashType.schnorrDefault(),
+]) implements InputSignature {
+  factory fromBytes(Uint8List bytes) {
     if (bytes.length != 64 && bytes.length != 65) throw InvalidInputSignature();
 
     return SchnorrInputSignature(
@@ -75,7 +67,7 @@ class SchnorrInputSignature implements InputSignature {
 
   @override
   Uint8List get bytes => Uint8List.fromList([
-        ...signature.data,
-        if (!hashType.schnorrDefault) hashType.value,
-      ]);
+    ...signature.data,
+    if (!hashType.schnorrDefault) hashType.value,
+  ]);
 }

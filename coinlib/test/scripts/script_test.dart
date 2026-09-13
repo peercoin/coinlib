@@ -1,20 +1,16 @@
 import 'dart:typed_data';
+
 import 'package:test/test.dart';
 import 'package:coinlib/coinlib.dart';
+
 import 'common.dart';
 
-class ScriptVector {
-  final String inputAsm;
-  final String inputHex;
-  final String? outputAsm;
-  final String? outputHex;
-  ScriptVector({
-    required this.inputAsm,
-    required this.inputHex,
-    this.outputAsm,
-    this.outputHex,
-  });
-}
+class ScriptVector({
+  required final String inputAsm,
+  required final String inputHex,
+  final String? outputAsm,
+  final String? outputHex,
+});
 
 final vectors = [
   // Basic scripts

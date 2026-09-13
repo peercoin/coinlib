@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/coinlib.dart';
 import 'package:test/test.dart';
 

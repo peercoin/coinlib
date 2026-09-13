@@ -1,25 +1,16 @@
 import 'package:coinlib/coinlib.dart';
 
-class TaprootVector {
-  final Taproot object;
-  final String tweakScalarHex;
-  final String xTweakedKeyHex;
-
-  final List<String> leafHashes;
-  final List<String> controlBlocks;
-
-  TaprootVector({
-    required this.object,
-    required this.tweakScalarHex,
-    required this.xTweakedKeyHex,
-    this.leafHashes = const [],
-    this.controlBlocks = const [],
-  });
-}
+class TaprootVector({
+  required final Taproot object,
+  required final String tweakScalarHex,
+  required final String xTweakedKeyHex,
+  final List<String> leafHashes = const [],
+  final List<String> controlBlocks = const [],
+});
 
 TapLeaf leafFromHex(String hex) => TapLeaf(
-      Script.decompile(hexToBytes(hex)),
-    );
+  Script.decompile(hexToBytes(hex)),
+);
 
 final taprootVectors = [
   TaprootVector(

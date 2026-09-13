@@ -1,22 +1,22 @@
 /// Thrown when a number does not match the expected format for a given
 /// [CoinUnit].
-class BadAmountString implements Exception {}
+class BadAmountString implements Exception;
 
 /// Objects of this class represent a coin denomination with a given number of
 /// [decimals]. Use [coin] for whole coins with 6 decimal places and [sats] for
 /// the smallest unit with no decimal places.
-class CoinUnit {
+class CoinUnit(
+  /// The number of decimal places for this unit
+  final int decimals,
+) {
   static final _numberRegex = RegExp(r"^\d+(\.\d+)?$");
   static final _trailZeroRegex = RegExp(r"\.?0*$");
 
-  /// The number of decimal places for this unit
-  final int decimals;
-
   /// The number of satoshis per unit
-  final BigInt satsPerUnit;
+  final BigInt satsPerUnit = BigInt.from(10).pow(decimals);
 
   /// Creates a unit with a given number of [decimals].
-  CoinUnit(this.decimals) : satsPerUnit = BigInt.from(10).pow(decimals);
+  this;
 
   /// Obtains the number of satoshis from a string representation of this unit.
   ///

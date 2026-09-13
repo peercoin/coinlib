@@ -1,19 +1,14 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/coinlib.dart';
 
-class KeyTestVector {
-  final String private;
-  final String public;
-  final bool compressed;
-  final String wif;
-  final int version;
-  KeyTestVector({
-    required this.private,
-    required this.public,
-    required this.compressed,
-    required this.wif,
-    required this.version,
-  });
+class KeyTestVector({
+  required final String private,
+  required final String public,
+  required final bool compressed,
+  required final String wif,
+  required final int version,
+}) {
   ECPrivateKey get privateObj =>
       ECPrivateKey.fromHex(private, compressed: compressed);
   ECPublicKey get publicObj => ECPublicKey.fromHex(public);
@@ -38,8 +33,7 @@ final keyPairVectors = [
   ),
   KeyTestVector(
     private: "0000000000000000000000000000000000000000000000000000000000000001",
-    public:
-        "0479be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8",
+    public: "0479be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8",
     compressed: false,
     wif: "5HpHagT65TZzG1PH3CSu63k8DbpvD8s5ip4nEB3kEsreAnchuDf",
     version: 0x80,
@@ -62,8 +56,7 @@ final keyPairVectors = [
   ),
   KeyTestVector(
     private: "6c4313b03f2e7324d75e642f0ab81b734b724e13fec930f309e222470236d66b",
-    public:
-        "044289801366bcee6172b771cf5a7f13aaecd237a0b9a1ff9d769cabc2e6b70a34cec320a0565fb7caf11b1ca2f445f9b7b012dda5718b3cface369ee3a034ded6",
+    public: "044289801366bcee6172b771cf5a7f13aaecd237a0b9a1ff9d769cabc2e6b70a34cec320a0565fb7caf11b1ca2f445f9b7b012dda5718b3cface369ee3a034ded6",
     compressed: false,
     wif: "5JdxzLtFPHNe7CAL8EBC6krdFv9pwPoRo4e3syMZEQT9srmK8hh",
     version: 0x80,
@@ -78,8 +71,7 @@ final keyPairVectors = [
   ),
   KeyTestVector(
     private: "6c4313b03f2e7324d75e642f0ab81b734b724e13fec930f309e222470236d66b",
-    public:
-        "044289801366bcee6172b771cf5a7f13aaecd237a0b9a1ff9d769cabc2e6b70a34cec320a0565fb7caf11b1ca2f445f9b7b012dda5718b3cface369ee3a034ded6",
+    public: "044289801366bcee6172b771cf5a7f13aaecd237a0b9a1ff9d769cabc2e6b70a34cec320a0565fb7caf11b1ca2f445f9b7b012dda5718b3cface369ee3a034ded6",
     compressed: false,
     wif: "92Qba5hnyWSn5Ffcka56yMQauaWY6ZLd91Vzxbi4a9CCetaHtYj",
     version: 0xef,
@@ -94,12 +86,11 @@ final keyPairVectors = [
   ),
 ];
 
-class PubkeyVector {
-  final String hex;
-  final bool compressed;
-  final bool evenY;
-  PubkeyVector(this.hex, {required this.compressed, required this.evenY});
-}
+class PubkeyVector(
+  final String hex, {
+  required final bool compressed,
+  required final bool evenY,
+});
 
 final validPubKeys = [
   PubkeyVector(
@@ -144,20 +135,20 @@ final invalidTweaks = [
 ];
 
 ECPrivateKey getPrivKey(int i, [bool compressed = true]) => ECPrivateKey(
-      Uint8List(32)..last = i + 1,
-      compressed: compressed,
-    );
+  Uint8List(32)..last = i + 1,
+  compressed: compressed,
+);
 
 ECPublicKey getPubKey(int i, [bool compressed = true]) =>
     getPrivKey(i, compressed).pubkey;
 
 MuSigPrivate getMuSigPrivate(int i, [bool compressed = true]) => MuSigPrivate(
-      getPrivKey(i, compressed),
-      {
-        for (int j = 0; j < 3; j++)
-          if (j != i) getPubKey(j, compressed),
-      },
-    );
+  getPrivKey(i, compressed),
+  {
+    for (int j = 0; j < 3; j++)
+      if (j != i) getPubKey(j, compressed),
+  },
+);
 
 MuSigPublicKeys getMuSigKeys([bool compressed = true]) =>
     getMuSigPrivate(0, compressed).public;

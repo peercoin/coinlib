@@ -1,26 +1,25 @@
 import 'dart:ffi';
 import 'dart:typed_data';
+
 import 'package:ffi/ffi.dart';
+
 import 'heap.dart';
 
-class HeapFfi<T extends SizedNativeType> implements Heap<Pointer<T>> {
+class HeapFfi<T extends SizedNativeType>(@override final Pointer<T> ptr)
+    implements Heap<Pointer<T>> {
   static final Finalizer<Pointer> _finalizer = Finalizer(
     (ptr) => malloc.free(ptr),
   );
 
-  @override
-  final Pointer<T> ptr;
-
-  HeapFfi(this.ptr) {
+  this {
     _finalizer.attach(this, ptr);
   }
 }
 
-class HeapBytesFfi extends HeapFfi<UnsignedChar>
+class HeapBytesFfi(final int size)
+    extends HeapFfi<UnsignedChar>
     implements HeapBytes<Pointer<UnsignedChar>> {
-  final int size;
-
-  HeapBytesFfi(this.size) : super(malloc.allocate(size));
+  this : super(malloc.allocate(size));
 
   Uint8List get _view => ptr.cast<Uint8>().asTypedList(size);
 
@@ -38,8 +37,8 @@ class HeapBytesFfi extends HeapFfi<UnsignedChar>
 // lead to errors during Dart compilation, so each seperate integer type needs
 // duplicated code.
 
-class HeapIntFfi extends HeapFfi<Int> implements HeapInt<Pointer<Int>> {
-  HeapIntFfi() : super(malloc());
+class HeapIntFfi() extends HeapFfi<Int> implements HeapInt<Pointer<Int>> {
+  this : super(malloc());
 
   @override
   set value(int i) => ptr.value = i;
@@ -48,8 +47,8 @@ class HeapIntFfi extends HeapFfi<Int> implements HeapInt<Pointer<Int>> {
   int get value => ptr.value;
 }
 
-class HeapSizeFfi extends HeapFfi<Size> implements HeapInt<Pointer<Size>> {
-  HeapSizeFfi() : super(malloc());
+class HeapSizeFfi() extends HeapFfi<Size> implements HeapInt<Pointer<Size>> {
+  this : super(malloc());
 
   @override
   set value(int i) => ptr.value = i;
@@ -58,29 +57,29 @@ class HeapSizeFfi extends HeapFfi<Size> implements HeapInt<Pointer<Size>> {
   int get value => ptr.value;
 }
 
-class HeapPointerArrayFfi<T extends SizedNativeType> extends HeapFfi<Pointer<T>>
+class HeapPointerArrayFfi<T extends SizedNativeType>.assign(
+  super.ptr,
+  Iterable<HeapFfi<T>> objs,
+) extends HeapFfi<Pointer<T>>
     implements HeapPointerArray<Pointer<Pointer<T>>, Pointer<T>> {
   // Keep objects referenced by this object so they are not freed whilst this
   // object is alive.
-  final List<HeapFfi<T>> _objs;
+  final List<HeapFfi<T>> _objs = objs.toList();
 
-  HeapPointerArrayFfi.assign(
-    super.ptr,
-    Iterable<HeapFfi<T>> objs,
-  ) : _objs = objs.toList() {
+  this {
     for (int i = 0; i < objs.length; i++) {
       ptr[i] = _objs[i].ptr;
     }
   }
 
-  HeapPointerArrayFfi.alloc(
+  new alloc(
     Pointer<Pointer<T>> ptr,
     int length,
     Pointer<T> Function() alloc,
   ) : this.assign(
-          ptr,
-          List.generate(length, (_) => HeapFfi(alloc())),
-        );
+        ptr,
+        List.generate(length, (_) => HeapFfi(alloc())),
+      );
 
   @override
   List<Pointer<T>> get list => List.generate(_objs.length, (i) => ptr[i]);

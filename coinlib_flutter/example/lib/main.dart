@@ -6,8 +6,7 @@ void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class const MyApp({super.key}) extends StatelessWidget {
 
   static String expPubkey =
     "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798";

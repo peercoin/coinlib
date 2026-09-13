@@ -1,6 +1,8 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/coinlib.dart';
 import 'package:test/test.dart';
+
 import '../../vectors/inputs.dart';
 import '../../vectors/keys.dart';
 import '../../vectors/signatures.dart';
@@ -28,10 +30,10 @@ void main() {
     });
 
     scriptForNumSigs(int numSigs) => Script([
-          ScriptOp.fromNumber(0),
-          ...insigs.sublist(0, numSigs).map((sig) => ScriptPushData(sig.bytes)),
-          ScriptPushData(multisig.script.compiled),
-        ]);
+      ScriptOp.fromNumber(0),
+      ...insigs.sublist(0, numSigs).map((sig) => ScriptPushData(sig.bytes)),
+      ScriptPushData(multisig.script.compiled),
+    ]);
 
     bytesForNumSigs(int numSigs) {
       final scriptSig = scriptForNumSigs(numSigs).compiled;
@@ -149,9 +151,9 @@ void main() {
       // Insert signatures out of order and ensure they are ordered
 
       Uint8List getSigHash(SigHashType type) => Uint8List.fromList([
-            ...List.filled(31, 0),
-            type.value,
-          ]);
+        ...List.filled(31, 0),
+        type.value,
+      ]);
 
       final keys = List.generate(4, (i) => ECPrivateKey.generate());
 

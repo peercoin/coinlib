@@ -1,6 +1,7 @@
 import 'package:coinlib/src/secp256k1/heap.dart';
 import 'package:coinlib/src/crypto/random.dart';
 import 'package:coinlib/src/secp256k1/wasm.dart';
+
 import 'heap_wasm.dart';
 import "secp256k1_base.dart";
 import 'secp256k1.wasm.g.dart';
@@ -12,8 +13,29 @@ typedef OpaqueMuSigSession = OpaqueGeneric<int>;
 typedef OpaqueMuSigPartialSig = OpaqueGeneric<int>;
 
 /// Loads and wraps WASM code to be run via the browser JS APIs
-class Secp256k1 extends Secp256k1Base<int, int, int, int, int, int, int, int,
-    int, int, int, int, int, int, int, int, int, int, int> {
+class Secp256k1
+    extends
+        Secp256k1Base<
+          int,
+          int,
+          int,
+          int,
+          int,
+          int,
+          int,
+          int,
+          int,
+          int,
+          int,
+          int,
+          int,
+          int,
+          int,
+          int,
+          int,
+          int,
+          int
+        > {
   static const _muSigCacheSize = 197;
   static const _muSigNonceSize = 132;
   static const _muSigSessionSize = 133;
@@ -34,21 +56,28 @@ class Secp256k1 extends Secp256k1Base<int, int, int, int, int, int, int, int,
     extEcPubkeySerialize = wasm.field("secp256k1_ec_pubkey_serialize");
     extEcPubkeyParse = wasm.field("secp256k1_ec_pubkey_parse");
     extEcdsaSign = wasm.field("secp256k1_ecdsa_sign");
-    extEcdsaSignatureSerializeCompact =
-        wasm.field("secp256k1_ecdsa_signature_serialize_compact");
-    extEcdsaSignatureParseCompact =
-        wasm.field("secp256k1_ecdsa_signature_parse_compact");
-    extEcdsaSignatureNormalize =
-        wasm.field("secp256k1_ecdsa_signature_normalize");
-    extEcdsaSignatureSerializeDer =
-        wasm.field("secp256k1_ecdsa_signature_serialize_der");
-    extEcdsaSignatureParseDer =
-        wasm.field("secp256k1_ecdsa_signature_parse_der");
+    extEcdsaSignatureSerializeCompact = wasm.field(
+      "secp256k1_ecdsa_signature_serialize_compact",
+    );
+    extEcdsaSignatureParseCompact = wasm.field(
+      "secp256k1_ecdsa_signature_parse_compact",
+    );
+    extEcdsaSignatureNormalize = wasm.field(
+      "secp256k1_ecdsa_signature_normalize",
+    );
+    extEcdsaSignatureSerializeDer = wasm.field(
+      "secp256k1_ecdsa_signature_serialize_der",
+    );
+    extEcdsaSignatureParseDer = wasm.field(
+      "secp256k1_ecdsa_signature_parse_der",
+    );
     extEcdsaVerify = wasm.field("secp256k1_ecdsa_verify");
-    extEcdsaRecoverableSignatureSerializeCompact =
-        wasm.field("secp256k1_ecdsa_recoverable_signature_serialize_compact");
-    extEcdsaRecoverableSignatureParseCompact =
-        wasm.field("secp256k1_ecdsa_recoverable_signature_parse_compact");
+    extEcdsaRecoverableSignatureSerializeCompact = wasm.field(
+      "secp256k1_ecdsa_recoverable_signature_serialize_compact",
+    );
+    extEcdsaRecoverableSignatureParseCompact = wasm.field(
+      "secp256k1_ecdsa_recoverable_signature_parse_compact",
+    );
     extEcdsaSignRecoverable = wasm.field("secp256k1_ecdsa_sign_recoverable");
     extEcdsaRecover = wasm.field("secp256k1_ecdsa_recover");
     extEcSeckeyTweakAdd = wasm.field("secp256k1_ec_seckey_tweak_add");
@@ -62,18 +91,21 @@ class Secp256k1 extends Secp256k1Base<int, int, int, int, int, int, int, int,
     extEcdh = wasm.field("secp256k1_ecdh");
     extEcPubkeySort = wasm.field("secp256k1_ec_pubkey_sort");
     extMuSigPubkeyAgg = wasm.field("secp256k1_musig_pubkey_agg");
-    extMuSigPubkeyXOnlyTweakAdd =
-        wasm.field("secp256k1_musig_pubkey_xonly_tweak_add");
+    extMuSigPubkeyXOnlyTweakAdd = wasm.field(
+      "secp256k1_musig_pubkey_xonly_tweak_add",
+    );
     extMuSigNonceGen = wasm.field("secp256k1_musig_nonce_gen");
     extMuSigPubNonceParse = wasm.field("secp256k1_musig_pubnonce_parse");
-    extMuSigPubNonceSerialize =
-        wasm.field("secp256k1_musig_pubnonce_serialize");
+    extMuSigPubNonceSerialize = wasm.field(
+      "secp256k1_musig_pubnonce_serialize",
+    );
     extMuSigNonceAgg = wasm.field("secp256k1_musig_nonce_agg");
     extMuSigNonceProcess = wasm.field("secp256k1_musig_nonce_process");
     extMuSigPartialSign = wasm.field("secp256k1_musig_partial_sign");
     extMuSigPartialSigParse = wasm.field("secp256k1_musig_partial_sig_parse");
-    extMuSigPartialSigSerialize =
-        wasm.field("secp256k1_musig_partial_sig_serialize");
+    extMuSigPartialSigSerialize = wasm.field(
+      "secp256k1_musig_partial_sig_serialize",
+    );
     extMuSigPartialSigVerify = wasm.field("secp256k1_musig_partial_sig_verify");
     extMuSigPartialSigAgg = wasm.field("secp256k1_musig_partial_sig_agg");
     extMuSigNonceParity = wasm.field("secp256k1_musig_nonce_parity");
@@ -81,10 +113,12 @@ class Secp256k1 extends Secp256k1Base<int, int, int, int, int, int, int, int,
     extMuSigExtractAdaptor = wasm.field("secp256k1_musig_extract_adaptor");
 
     // Local functions for loading purposes
-    final int Function(int) contextCreate =
-        wasm.field("secp256k1_context_create");
-    final int Function(int, int) contextRandomize =
-        wasm.field("secp256k1_context_randomize");
+    final int Function(int) contextCreate = wasm.field(
+      "secp256k1_context_create",
+    );
+    final int Function(int, int) contextRandomize = wasm.field(
+      "secp256k1_context_randomize",
+    );
 
     final MallocFunction malloc = wasm.field("malloc");
     final FreeFunction free = wasm.field("free");
@@ -135,24 +169,22 @@ class Secp256k1 extends Secp256k1Base<int, int, int, int, int, int, int, int,
   @override
   HeapPointerArray<int, int> setMuSigPubNonceArray(
     Iterable<Heap<int>> objs,
-  ) =>
-      _heapFactory.assignPointerArray(objs.toList().cast());
+  ) => _heapFactory.assignPointerArray(objs.toList().cast());
 
   @override
   // Identical in implementation to setMuSigPubNonceArray
   HeapPointerArray<int, int> setMuSigPartialSigArray(
     Iterable<Heap<int>> objs,
-  ) =>
-      setMuSigPubNonceArray(objs);
+  ) => setMuSigPubNonceArray(objs);
 
   @override
   Heap<int> allocMuSigCache() => _heapFactory.alloc(_muSigCacheSize);
 
   @override
   Heap<int> copyMuSigCache(int copyFrom) => _heapFactory.alloc(
-        _muSigCacheSize,
-        copyFrom: copyFrom,
-      );
+    _muSigCacheSize,
+    copyFrom: copyFrom,
+  );
 
   @override
   Heap<int> allocMuSigSecNonce() => _heapFactory.alloc(_muSigNonceSize);

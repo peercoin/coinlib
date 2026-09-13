@@ -1,26 +1,28 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/src/common/serial.dart';
 import 'package:coinlib/src/crypto/hash.dart';
 import 'package:coinlib/src/tx/sign_details.dart';
 import 'package:coinlib/src/tx/transaction.dart';
+
 import 'precomputed_signature_hashes.dart';
 import 'signature_hasher.dart';
 
 /// Produces signature hashes for taproot inputs
-final class TaprootSignatureHasher extends SignatureHasher with Writable {
+final class TaprootSignatureHasher(@override final TaprootSignDetails details)
+    extends SignatureHasher
+    with Writable {
   static final tapSigHash = getTaggedHasher("TapSighash");
 
-  @override
-  final TaprootSignDetails details;
-  final TransactionSignatureHashes txHashes;
-  final PrevOutSignatureHashes? prevOutHashes;
+  final TransactionSignatureHashes txHashes = TransactionSignatureHashes(
+    details.tx,
+  );
+  final PrevOutSignatureHashes? prevOutHashes = details.hashType.allInputs
+      ? PrevOutSignatureHashes(details.prevOuts)
+      : null;
 
   /// Produces the hash for a Taproot input signature.
-  TaprootSignatureHasher(this.details)
-      : txHashes = TransactionSignatureHashes(details.tx),
-        prevOutHashes = details.hashType.allInputs
-            ? PrevOutSignatureHashes(details.prevOuts)
-            : null {
+  this {
     if (details.isScript &&
         details.leafHash == null &&
         !hashType.anyPrevOutAnyScript) {

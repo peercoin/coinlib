@@ -1,14 +1,16 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/src/common/bytes.dart';
 import 'package:coinlib/src/common/hex.dart';
 import 'package:coinlib/src/common/serial.dart';
 import 'package:coinlib/src/crypto/ec_public_key.dart';
 import 'package:coinlib/src/tx/inputs/input_signature.dart';
+
 import 'codes.dart';
 
-class InvalidScriptAsm implements Exception {}
+class InvalidScriptAsm implements Exception;
 
-class PushDataNotMinimal implements Exception {}
+class PushDataNotMinimal implements Exception;
 
 /// Represents a single operation or script pushdata
 abstract class ScriptOp {
@@ -41,7 +43,7 @@ abstract class ScriptOp {
   ECPublicKey? get publicKey;
 
   /// Interpret a single script ASM string into a [ScriptOp].
-  factory ScriptOp.fromAsm(String asm) {
+  factory fromAsm(String asm) {
     if (asm.isEmpty) throw InvalidScriptAsm();
 
     // If it starts with OP_, then it is an opcode
@@ -88,7 +90,7 @@ abstract class ScriptOp {
   /// if there is not enough data to read.
   /// If [requireMinimal] is true, a pushdata operation must be encoded
   /// minimally or else [PushDataNotMinimal] will be thrown.
-  factory ScriptOp.fromReader(
+  factory fromReader(
     BytesReader reader, {
     bool requireMinimal = false,
   }) {
@@ -134,7 +136,7 @@ abstract class ScriptOp {
 
   /// Constructs an [ScriptOp] from a number, returning the smallest
   /// representation
-  factory ScriptOp.fromNumber(int n) {
+  factory fromNumber(int n) {
     if (n < -1 || n > 0xffffffff) {
       throw ArgumentError.value(n, "n", "out of range");
     }
@@ -156,17 +158,14 @@ abstract class ScriptOp {
 }
 
 /// Represents a [ScriptOp] that is an op code
-class ScriptOpCode implements ScriptOp {
+class ScriptOpCode(final int code) implements ScriptOp {
   static final checksig = ScriptOpCode.fromName("CHECKSIG");
   static final checkmultisig = ScriptOpCode.fromName("CHECKMULTISIG");
   static final number1 = ScriptOpCode(ScriptOp.op1);
 
-  final int code;
-  ScriptOpCode(this.code);
-
   /// The [name] should be capitalised without the `OP_` such as `CHECKSIG`. If
   /// [name] isn't an opcode, it will return an `INVALIDOPCODE`.
-  ScriptOpCode.fromName(String name) : this(scriptOpNameToCode[name] ?? 0xff);
+  new fromName(String name) : this(scriptOpNameToCode[name] ?? 0xff);
 
   @override
   Uint8List get compiled => Uint8List.fromList([code]);
@@ -206,10 +205,8 @@ class ScriptOpCode implements ScriptOp {
 }
 
 /// Represents a [ScriptOp] that is a pushdata
-class ScriptPushData implements ScriptOp {
-  final Uint8List _data;
-
-  ScriptPushData(Uint8List data) : _data = Uint8List.fromList(data);
+class ScriptPushData(Uint8List data) implements ScriptOp {
+  final Uint8List _data = Uint8List.fromList(data);
 
   List<int> _compiledList() {
     // Compress down to numerical opcode
@@ -265,7 +262,8 @@ class ScriptPushData implements ScriptOp {
     final isNeg = (_data.last & 0x80) == 0x80;
 
     // Absolute number with sign bit removed
-    final abs = (_data[0] |
+    final abs =
+        (_data[0] |
             (_data.length > 1 ? _data[1] << 8 : 0) |
             (_data.length > 2 ? _data[2] << 16 : 0) |
             (_data.length > 3 ? _data[3] << 24 : 0)
@@ -313,10 +311,8 @@ class ScriptPushData implements ScriptOp {
 }
 
 /// Provides comparison with [ScriptPushData] of a particular size.
-class ScriptPushDataMatcher implements ScriptOp {
-  final int size;
-
-  ScriptPushDataMatcher(this.size) {
+class ScriptPushDataMatcher(final int size) implements ScriptOp {
+  this {
     if (size == 0 || size > 0xffffffff) {
       throw ArgumentError.value(size, "this.size", "outside of range");
     }

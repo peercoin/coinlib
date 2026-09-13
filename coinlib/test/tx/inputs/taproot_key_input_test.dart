@@ -1,6 +1,8 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/coinlib.dart';
 import 'package:test/test.dart';
+
 import '../../vectors/keys.dart';
 import '../../vectors/signatures.dart';
 import '../../vectors/inputs.dart';
@@ -51,15 +53,15 @@ void main() {
 
     test("doesn't match non key-spend inputs", () {
       expectNoMatch(String asm, List<Uint8List> witness) => expect(
-            TaprootKeyInput.match(
-              RawInput(
-                prevOut: prevOut,
-                scriptSig: Script.fromAsm(asm).compiled,
-              ),
-              witness,
-            ),
-            null,
-          );
+        TaprootKeyInput.match(
+          RawInput(
+            prevOut: prevOut,
+            scriptSig: Script.fromAsm(asm).compiled,
+          ),
+          witness,
+        ),
+        null,
+      );
 
       expectNoMatch("0", getWitness(true));
       expectNoMatch("", [...getWitness(true), ...getWitness(true)]);

@@ -15,9 +15,9 @@ void main() {
     }
 
     void expectInvalid(CoinUnit unit, String str) => expect(
-          () => unit.toSats(str),
-          throwsA(isA<BadAmountString>()),
-        );
+      () => unit.toSats(str),
+      throwsA(isA<BadAmountString>()),
+    );
 
     test("valid coin", () {
       void expectCoin(String original, String sats, String result) =>
