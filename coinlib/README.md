@@ -31,11 +31,9 @@ you may add `coinlib` to your project via:
 dart pub add coinlib
 ```
 
-If you are using the library for web, the library is ready to use. If you are
-using the library on Linux, macOS, or Windows, then please see
-["Building for Linux"](#building-for-linux),
-["Building for macOS"](#building-for-macos), or
-["Building for Windows"](#building-for-windows) below.
+The native secp256k1 library is compiled and bundled automatically on Android,
+iOS, Linux, macOS, and Windows using Dart Code Assets. Web uses the bundled
+WebAssembly module.
 
 The library can be imported via:
 
@@ -56,86 +54,17 @@ final signedTx = unsignedTx.signLegacy(inputN: 0, key: privateKey);
 
 An example is found in the `example/` directory.
 
-## Building for Linux
-
-Docker or Podman is required to build the library for Linux.
-
-The linux shared library can be built using `dart run coinlib:build_linux` in
-the root directory of your package which will produce a shared library into
-`build/libsecp256k1.so`. This can also be run in the `coinlib` root directory
-via `dart run bin/build_linux.dart`.
-
-This library can be in the `build` directory under the PWD, installed as a
-system library, or within `$LD_LIBRARY_PATH`.
-
-## Building for macOS
-
-Building for macOS requires autotools that may be installed using homebrew:
+For a native CLI release bundle, use the Code Assets-aware build command:
 
 ```
-brew install autoconf automake libtool
+dart build cli --target bin/your_app.dart
 ```
 
-The macOS dynamic library must either be provided as
-`$PWD/build/libsecp256k1.dylib` when running dart code, or provided as a system
-framework named `secp256k1.framework`.
-
-To build the dynamic library, run `dart run coinlib:build_macos` which will
-place the library under a `build` directory.
-
-## Building for Windows
-
-### Native Windows build
-
-**Please note that native windows builds under this section can sometimes freeze
-during the build process.** If this happens please use the WSL build process
-described in
-["Cross-compiling for Windows using WSL"](#cross-compiling-for-windows-using-wsl).
-
-Building on Windows requires CMake as a dependency.
-
-The Windows shared library can be built using `dart run coinlib:build_windows` in
-the root directory of your package which will produce a shared library into
-`build/libsecp256k1.dll`. This can also be run in the `coinlib` root directory
-via `dart run bin/build_windows.dart`.
-
-Windows builds use the Visual Studio 17 2022 generator. Earlier Visual Studio
-toolchains may work by editing `bin/build_windows.dart`. MingGW can also be used
-with `dart run coinlib:build_windows_mingw`.
-
-### Cross-compiling for Windows from Linux
-
-Cross-compile a secp256k1 DLL for Windows on an Ubuntu 20.04 host with
-`dart run coinlib:build_windows_crosscompile`. This can also be run in the
-`coinlib` root directory via `dart run bin/build_windows_crosscompile.dart`.
-
-### Cross-compiling for Windows using WSL
-
-Builds on Windows can be accomplished using WSL2 (Windows Subsystem for Linux).
-First, install the following packages to the WSL(2) host:
-
- - `autoconf`
- - `libtool`
- - `build-essential`
- - `git`
- - `cmake`
- - `mingw-w64`
-
-as in:
-
-```
-apt-get update -y
-apt-get install -y autoconf libtool build-essential git cmake mingw-w64
-```
-
-Then, cross-compile a secp256k1 DLL for Windows on an Ubuntu 20.04 WSL2 instance
-on a Windows host with `dart run coinlib:build_wsl` or
-`dart run bin/build_wsl.dart` in the `coinlib` root directory, or complete the
-above
-["Cross-compiling for Windows on Linux"](#cross-compiling-for-windows-from-linux)
-after installing Docker or Podman in WSL. The build can also be completed
-without installing Flutter to WSL by following
-[bitcoin-core/secp256k1's "Cross compiling" guide](https://github.com/bitcoin-core/secp256k1?tab=readme-ov-file#cross-compiling).
+The Dart 3.13 link hook records reachable FFI bindings and removes unused
+native symbols from the bundled library. The first native build downloads a
+pinned secp256k1 source archive, verifies its SHA-256 checksum, and caches it in
+the hook output directory. A network connection and platform C toolchain are
+required for that first build.
 
 ## Development
 
@@ -147,8 +76,10 @@ The WebAssembly (WASM) module is pre-compiled and ready to use. FFI bindings
 are pre-generated. These only need to be updated when the underlying secp256k1
 library is changed.
 
-Bindings for the native libraries (excluding WebAssembly) are generated from the
-`headers/secp256k1.h` file using `dart run ffigen` within the `coinlib` package.
+Bindings for the native libraries (excluding WebAssembly) are generated from
+the same pinned source archive using `dart run tool/ffigen.dart` within the
+`coinlib` package. The command also regenerates the mapping used by the native
+link hook.
 
 The WebAssembly module has been pre-built to
 `lib/src/secp256k1/secp256k1.wasm.g.dart`. It may be rebuilt using `dart run

@@ -1,46 +1,40 @@
 import 'dart:typed_data';
+
 import 'package:coinlib/coinlib.dart';
 import 'package:coinlib/src/crypto/random.dart';
+
 import 'heap.dart';
 
-class Secp256k1Exception implements Exception {
-  final String what;
-  Secp256k1Exception(this.what);
+class Secp256k1Exception(final String what) implements Exception {
   @override
   String toString() => what;
 }
 
-class SigWithRecId {
-  final Uint8List signature;
-  final int recid;
-  SigWithRecId(this.signature, this.recid);
-}
+class SigWithRecId(final Uint8List signature, final int recid);
 
-class OpaqueGeneric<Ptr> {
-  final Heap<Ptr> _heap;
-  OpaqueGeneric(this._heap);
-}
+class OpaqueGeneric<Ptr>(final Heap<Ptr> _heap);
 
 abstract class Secp256k1Base<
-    CtxPtr,
-    UCharPtr,
-    PubKeyPtr,
-    SizeTPtr,
-    SignaturePtr,
-    RecoverableSignaturePtr,
-    KeyPairPtr,
-    XPubKeyPtr,
-    IntPtr,
-    MuSigAggCachePtr,
-    PubKeyPtrPtr,
-    MuSigSecNoncePtr,
-    MuSigPubNoncePtr,
-    MuSigAggNoncePtr,
-    MuSigPubNoncePtrPtr,
-    MuSigSessionPtr,
-    MuSigPartialSigPtr,
-    MuSigPartialSigPtrPtr,
-    NullPtr> {
+  CtxPtr,
+  UCharPtr,
+  PubKeyPtr,
+  SizeTPtr,
+  SignaturePtr,
+  RecoverableSignaturePtr,
+  KeyPairPtr,
+  XPubKeyPtr,
+  IntPtr,
+  MuSigAggCachePtr,
+  PubKeyPtrPtr,
+  MuSigSecNoncePtr,
+  MuSigPubNoncePtr,
+  MuSigAggNoncePtr,
+  MuSigPubNoncePtrPtr,
+  MuSigSessionPtr,
+  MuSigPartialSigPtr,
+  MuSigPartialSigPtrPtr,
+  NullPtr
+> {
   static const contextNone = 1;
   static const compressedFlags = 258;
   static const uncompressedFlags = 2;
@@ -59,130 +53,147 @@ abstract class Secp256k1Base<
   static const xonlySize = 32;
 
   // Functions
-  late int Function(CtxPtr, UCharPtr) extEcSeckeyVerify;
-  late int Function(CtxPtr, PubKeyPtr, UCharPtr) extEcPubkeyCreate;
-  late int Function(
+  int Function(CtxPtr, UCharPtr) get extEcSeckeyVerify;
+  int Function(CtxPtr, PubKeyPtr, UCharPtr) get extEcPubkeyCreate;
+  int Function(
     CtxPtr,
     UCharPtr,
     SizeTPtr,
     PubKeyPtr,
     int,
-  ) extEcPubkeySerialize;
-  late int Function(CtxPtr, PubKeyPtr, UCharPtr, int) extEcPubkeyParse;
-  late int Function(
+  )
+  get extEcPubkeySerialize;
+  int Function(CtxPtr, PubKeyPtr, UCharPtr, int) get extEcPubkeyParse;
+  int Function(
     CtxPtr,
     UCharPtr,
     SignaturePtr,
-  ) extEcdsaSignatureSerializeCompact;
-  late int Function(
+  )
+  get extEcdsaSignatureSerializeCompact;
+  int Function(
     CtxPtr,
     SignaturePtr,
     UCharPtr,
-  ) extEcdsaSignatureParseCompact;
-  late int Function(
+  )
+  get extEcdsaSignatureParseCompact;
+  int Function(
     CtxPtr,
     SignaturePtr,
     SignaturePtr,
-  ) extEcdsaSignatureNormalize;
-  late int Function(
+  )
+  get extEcdsaSignatureNormalize;
+  int Function(
     CtxPtr,
     UCharPtr,
     SizeTPtr,
     SignaturePtr,
-  ) extEcdsaSignatureSerializeDer;
-  late int Function(
+  )
+  get extEcdsaSignatureSerializeDer;
+  int Function(
     CtxPtr,
     SignaturePtr,
     UCharPtr,
     int,
-  ) extEcdsaSignatureParseDer;
-  late int Function(
+  )
+  get extEcdsaSignatureParseDer;
+  int Function(
     CtxPtr,
     SignaturePtr,
     UCharPtr,
     UCharPtr,
     NullPtr,
     NullPtr,
-  ) extEcdsaSign;
-  late int Function(
+  )
+  get extEcdsaSign;
+  int Function(
     CtxPtr,
     SignaturePtr,
     UCharPtr,
     PubKeyPtr,
-  ) extEcdsaVerify;
-  late int Function(
+  )
+  get extEcdsaVerify;
+  int Function(
     CtxPtr,
     UCharPtr,
     IntPtr,
     RecoverableSignaturePtr,
-  ) extEcdsaRecoverableSignatureSerializeCompact;
-  late int Function(
+  )
+  get extEcdsaRecoverableSignatureSerializeCompact;
+  int Function(
     CtxPtr,
     RecoverableSignaturePtr,
     UCharPtr,
     int,
-  ) extEcdsaRecoverableSignatureParseCompact;
-  late int Function(
+  )
+  get extEcdsaRecoverableSignatureParseCompact;
+  int Function(
     CtxPtr,
     RecoverableSignaturePtr,
     UCharPtr,
     UCharPtr,
     NullPtr,
     NullPtr,
-  ) extEcdsaSignRecoverable;
-  late int Function(
+  )
+  get extEcdsaSignRecoverable;
+  int Function(
     CtxPtr,
     PubKeyPtr,
     RecoverableSignaturePtr,
     UCharPtr,
-  ) extEcdsaRecover;
-  late int Function(CtxPtr, UCharPtr, UCharPtr) extEcSeckeyTweakAdd;
-  late int Function(CtxPtr, PubKeyPtr, UCharPtr) extEcPubkeyTweakAdd;
-  late int Function(CtxPtr, UCharPtr) extEcSeckeyNegate;
+  )
+  get extEcdsaRecover;
+  int Function(CtxPtr, UCharPtr, UCharPtr) get extEcSeckeyTweakAdd;
+  int Function(CtxPtr, PubKeyPtr, UCharPtr) get extEcPubkeyTweakAdd;
+  int Function(CtxPtr, UCharPtr) get extEcSeckeyNegate;
 
   // Schnorr functions
-  late int Function(CtxPtr, KeyPairPtr, UCharPtr) extKeypairCreate;
-  late int Function(CtxPtr, XPubKeyPtr, UCharPtr) extXOnlyPubkeyParse;
-  late int Function(CtxPtr, UCharPtr, XPubKeyPtr) extXOnlyPubkeySerialize;
-  late int Function(
+  int Function(CtxPtr, KeyPairPtr, UCharPtr) get extKeypairCreate;
+  int Function(CtxPtr, XPubKeyPtr, UCharPtr) get extXOnlyPubkeyParse;
+  int Function(CtxPtr, UCharPtr, XPubKeyPtr) get extXOnlyPubkeySerialize;
+  int Function(
     CtxPtr,
     UCharPtr,
     UCharPtr,
     KeyPairPtr,
     UCharPtr,
-  ) extSchnorrSign32;
-  late int Function(
+  )
+  get extSchnorrSign32;
+  int Function(
     CtxPtr,
     UCharPtr,
     UCharPtr,
     int,
     XPubKeyPtr,
-  ) extSchnorrVerify;
-  late int Function(
+  )
+  get extSchnorrVerify;
+  int Function(
     CtxPtr,
     UCharPtr,
     PubKeyPtr,
     UCharPtr,
     NullPtr,
     NullPtr,
-  ) extEcdh;
+  )
+  get extEcdh;
 
   // MuSig2 relevant functions
-  late int Function(CtxPtr, PubKeyPtrPtr, int) extEcPubkeySort;
-  late int Function(
+  int Function(CtxPtr, PubKeyPtrPtr, int) get extEcPubkeySort;
+  int Function(
     CtxPtr,
     XPubKeyPtr,
     MuSigAggCachePtr,
     PubKeyPtrPtr,
     int,
-  ) extMuSigPubkeyAgg;
-  late int Function(
+  )
+  get extMuSigPubkeyAgg;
+  int Function(
     CtxPtr,
     PubKeyPtr,
     MuSigAggCachePtr,
     UCharPtr,
-  ) extMuSigPubkeyXOnlyTweakAdd;
-  late int Function(
+  )
+  get extMuSigPubkeyXOnlyTweakAdd;
+  int Function(
     CtxPtr,
     MuSigSecNoncePtr,
     MuSigPubNoncePtr,
@@ -192,69 +203,79 @@ abstract class Secp256k1Base<
     NullPtr,
     NullPtr,
     NullPtr,
-  ) extMuSigNonceGen;
-  late int Function(CtxPtr, MuSigPubNoncePtr, UCharPtr) extMuSigPubNonceParse;
-  late int Function(
+  )
+  get extMuSigNonceGen;
+  int Function(CtxPtr, MuSigPubNoncePtr, UCharPtr) get extMuSigPubNonceParse;
+  int Function(
     CtxPtr,
     UCharPtr,
     MuSigPubNoncePtr,
-  ) extMuSigPubNonceSerialize;
-  late int Function(
+  )
+  get extMuSigPubNonceSerialize;
+  int Function(
     CtxPtr,
     MuSigAggNoncePtr,
     MuSigPubNoncePtrPtr,
     int,
-  ) extMuSigNonceAgg;
-  late int Function(
+  )
+  get extMuSigNonceAgg;
+  int Function(
     CtxPtr,
     MuSigSessionPtr,
     MuSigAggNoncePtr,
     UCharPtr,
     MuSigAggCachePtr,
     NullPtr,
-  ) extMuSigNonceProcess;
-  late int Function(
+  )
+  get extMuSigNonceProcess;
+  int Function(
     CtxPtr,
     MuSigPartialSigPtr,
     MuSigSecNoncePtr,
     KeyPairPtr,
     MuSigAggCachePtr,
     MuSigSessionPtr,
-  ) extMuSigPartialSign;
-  late int Function(
+  )
+  get extMuSigPartialSign;
+  int Function(
     CtxPtr,
     MuSigPartialSigPtr,
     UCharPtr,
-  ) extMuSigPartialSigParse;
-  late int Function(
+  )
+  get extMuSigPartialSigParse;
+  int Function(
     CtxPtr,
     UCharPtr,
     MuSigPartialSigPtr,
-  ) extMuSigPartialSigSerialize;
-  late int Function(
+  )
+  get extMuSigPartialSigSerialize;
+  int Function(
     CtxPtr,
     MuSigPartialSigPtr,
     MuSigPubNoncePtr,
     PubKeyPtr,
     MuSigAggCachePtr,
     MuSigSessionPtr,
-  ) extMuSigPartialSigVerify;
-  late int Function(
+  )
+  get extMuSigPartialSigVerify;
+  int Function(
     CtxPtr,
     UCharPtr,
     MuSigSessionPtr,
     MuSigPartialSigPtrPtr,
     int,
-  ) extMuSigPartialSigAgg;
-  late int Function(CtxPtr, IntPtr, MuSigSessionPtr) extMuSigNonceParity;
-  late int Function(CtxPtr, UCharPtr, UCharPtr, UCharPtr, int) extMuSigAdapt;
-  late int Function(
+  )
+  get extMuSigPartialSigAgg;
+  int Function(CtxPtr, IntPtr, MuSigSessionPtr) get extMuSigNonceParity;
+  int Function(CtxPtr, UCharPtr, UCharPtr, UCharPtr, int) get extMuSigAdapt;
+  int Function(
     CtxPtr,
     UCharPtr,
     UCharPtr,
     UCharPtr,
     int,
-  ) extMuSigExtractAdaptor;
+  )
+  get extMuSigExtractAdaptor;
 
   // Heap arrays
 
@@ -494,7 +515,10 @@ abstract class Secp256k1Base<
 
     // Sign
     if (extEcdsaSign(
-          ctxPtr, sig.ptr, hashArray.ptr, key32Array.ptr,
+          ctxPtr,
+          sig.ptr,
+          hashArray.ptr,
+          key32Array.ptr,
           // Passing null will give secp256k1_nonce_function_rfc6979. If secp256k1
           // changes this default function in the future,
           // secp256k1_nonce_function_rfc6979 should be used directly.
@@ -772,7 +796,8 @@ abstract class Secp256k1Base<
   (
     OpaqueGeneric<MuSigSecNoncePtr>,
     OpaqueGeneric<MuSigPubNoncePtr>,
-  ) muSigGenerateNonce(
+  )
+  muSigGenerateNonce(
     Uint8List pubKeyBytes,
   ) {
     _requireLoad();
@@ -1068,7 +1093,7 @@ abstract class Secp256k1Base<
   /// secp256k1_musig_partial_sig pointers and then set the heap objects in
   /// [objs] as pointers in this array.
   HeapPointerArray<MuSigPartialSigPtrPtr, MuSigPartialSigPtr>
-      setMuSigPartialSigArray(Iterable<Heap<MuSigPartialSigPtr>> objs);
+  setMuSigPartialSigArray(Iterable<Heap<MuSigPartialSigPtr>> objs);
 
   /// Specialised sub-classes should override to allocate an
   /// secp256k1_musig_keyagg_cache on the heap.
