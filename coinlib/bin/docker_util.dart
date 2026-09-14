@@ -63,24 +63,3 @@ Future<bool> dockerRun(
 
   return true;
 }
-
-/// Runs the docker container and copies the [internalFile] to the build
-/// directory
-Future<bool> dockerBuild(
-  String dockerCmd,
-  String dockerScript,
-  String tag,
-  String internalFile,
-) async {
-  // Ensure build directory is created
-  final buildDir = "${Directory.current.path}/build";
-  Directory(buildDir).create();
-
-  return dockerRun(
-    dockerCmd,
-    dockerScript,
-    tag,
-    buildDir,
-    "cp $internalFile /host/",
-  );
-}
