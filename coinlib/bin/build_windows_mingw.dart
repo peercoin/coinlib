@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'util.dart';
 
 /// Follows peercoin/secp256k1-coinlib's "Cross compiling" instructions

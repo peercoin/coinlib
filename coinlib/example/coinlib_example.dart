@@ -101,15 +101,16 @@ void main() async {
     P2TR.fromTaproot(taproot),
   );
 
-  final trTx = Transaction(
-    inputs: [TaprootKeyInput(prevOut: OutPoint(prevHash, 1))],
-    outputs: [trOutput],
-  ).signTaproot(
-    inputN: 0,
-    // Private keys must be tweaked by the Taproot object
-    key: taproot.tweakPrivateKey(key1.privateKey),
-    prevOuts: [trOutput],
-  );
+  final trTx =
+      Transaction(
+        inputs: [TaprootKeyInput(prevOut: OutPoint(prevHash, 1))],
+        outputs: [trOutput],
+      ).signTaproot(
+        inputN: 0,
+        // Private keys must be tweaked by the Taproot object
+        key: taproot.tweakPrivateKey(key1.privateKey),
+        prevOuts: [trOutput],
+      );
 
   print("TR Tx hex = ${trTx.toHex()}");
 }

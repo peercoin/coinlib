@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'docker_util.dart';
 
 /// Build a Windows DLL for secp256k1 using a Dockerfile string.

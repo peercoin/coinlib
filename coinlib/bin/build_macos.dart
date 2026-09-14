@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'util.dart';
 
 /// Build a universal macOS framework for secp256k1 directly on a mac machine
