@@ -28,6 +28,10 @@ jobs:
         working-directory: coinlib_flutter/example
         run: flutter pub get
 
+      - name: Install iOS pods
+        working-directory: coinlib_flutter/example/ios
+        run: pod install
+
       - name: Build unsigned Flutter iOS release
         working-directory: coinlib_flutter/example
         run: flutter build ios --release --no-codesign --no-pub
