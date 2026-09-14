@@ -36,10 +36,6 @@ jobs:
         working-directory: coinlib_flutter/example
         run: flutter pub get
 
-      - name: Install macOS pods
-        working-directory: coinlib_flutter/example/macos
-        run: pod install
-
       - name: Build Flutter macOS release
         working-directory: coinlib_flutter/example
         run: flutter build macos --release --no-pub
