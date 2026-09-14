@@ -1,0 +1,33 @@
+name: Build iOS
+
+on:
+  push:
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Resolve Flutter example dependencies
+        working-directory: coinlib_flutter/example
+        run: flutter pub get
+
+      - name: Build unsigned Flutter iOS release
+        working-directory: coinlib_flutter/example
+        run: flutter build ios --release --no-codesign --no-pub
