@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'docker_util.dart';
 
 /// Build the linux shared library for secp256k1 using the Dockerfile string
