@@ -44,9 +44,10 @@ packages:
   coinlib:
     dependency: "direct main"
     description:
-      path: "../coinlib"
-      relative: true
-    source: path
+      name: coinlib
+      sha256: a3f83d28702f6221cd8b76a4b15a01f51b4ec284e3fe6baaa98068891a3cdf52
+      url: "https://pub.dev"
+    source: hosted
     version: "6.0.0"
   collection:
     dependency: transitive
