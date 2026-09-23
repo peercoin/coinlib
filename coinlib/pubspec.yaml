@@ -5,6 +5,21 @@ description:
 version: 5.0.0
 repository: https://github.com/peercoin/coinlib
 
+platforms:
+  android:
+  ios:
+  linux:
+  macos:
+  web:
+  windows:
+
+topics:
+  - peercoin
+  - cryptocurrency
+  - wallet
+  - blockchain
+  - utxo
+
 environment:
   sdk: '>=3.13.0 <4.0.0'
 
