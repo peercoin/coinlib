@@ -1,3 +1,7 @@
+## 6.0.1
+
+Update donation address
+
 ## 6.0.0
 
 Move to Dart 3.13 hooks for native assets. The secp256k1 library will now be
