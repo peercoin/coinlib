@@ -30,7 +30,11 @@ jobs:
 
       - name: Build Dart CLI release bundle
         working-directory: coinlib
-        run: dart build cli --target example/coinlib_example.dart
+        run: dart build cli --target example/coinlib_example.dart --output build/coinlib_cli
+
+      - name: Run Dart CLI release bundle
+        working-directory: coinlib
+        run: ./build/coinlib_cli/bundle/bin/coinlib_example
 
       - name: Resolve Flutter example dependencies
         working-directory: example
