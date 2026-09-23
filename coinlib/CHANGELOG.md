@@ -1,3 +1,8 @@
+## 6.0.0
+
+Move to Dart 3.13 hooks for native assets. The secp256k1 library will now be
+built automatically.
+
 ## 5.0.0
 
 Requires a rebuild of the secp256k1 library as it has moved to the
