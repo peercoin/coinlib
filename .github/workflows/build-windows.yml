@@ -33,9 +33,9 @@ jobs:
         run: dart build cli --target example/coinlib_example.dart
 
       - name: Resolve Flutter example dependencies
-        working-directory: coinlib_flutter/example
+        working-directory: example
         run: flutter pub get
 
       - name: Build Flutter Windows release
-        working-directory: coinlib_flutter/example
+        working-directory: example
         run: flutter build windows --release --no-pub

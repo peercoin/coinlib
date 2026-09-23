@@ -1,9 +1,8 @@
 import "package:coinlib/coinlib.dart";
 
 void main() async {
-  // Always remember to load the library for web use
-  // Flutter applications should use the coinlib_flutter plugin with the
-  // CoinlibLoader widget instead.
+  // Always load the library before use. Flutter applications should do this
+  // before calling runApp().
   await loadCoinlib();
 
   // Create a HD Key from a seed

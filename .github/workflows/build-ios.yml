@@ -25,9 +25,9 @@ jobs:
           cache: true
 
       - name: Resolve Flutter example dependencies
-        working-directory: coinlib_flutter/example
+        working-directory: example
         run: flutter pub get
 
       - name: Build unsigned Flutter iOS release
-        working-directory: coinlib_flutter/example
+        working-directory: example
         run: flutter build ios --release --no-codesign --no-pub

@@ -31,9 +31,9 @@ jobs:
           cache: true
 
       - name: Resolve Flutter example dependencies
-        working-directory: coinlib_flutter/example
+        working-directory: example
         run: flutter pub get
 
       - name: Build Flutter Android release APK
-        working-directory: coinlib_flutter/example
+        working-directory: example
         run: flutter build apk --release --no-pub

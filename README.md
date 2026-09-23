@@ -18,11 +18,8 @@ Coinlib is a straight-forward and modular library for Peercoin and other similar
 cryptocoins including Taproot support. This library allows for the construction
 and signing of transactions and management of BIP32 wallets.
 
-This repository contains the dart-only library in the `coinlib` directory and a
-flutter wrapper in the `coinlib_flutter` directory which includes support for
-flutter platforms.
+The `coinlib` package supports Dart and Flutter on Android, iOS, Linux, macOS,
+web, and Windows. This repository also contains a Flutter application in
+`example/` that demonstrates direct use of the package.
 
-The packages [coinlib](https://pub.dev/packages/coinlib) and
-[coinlib_flutter](https://pub.dev/packages/coinlib_flutter) are available on
-pub.dev.
-
+The [coinlib](https://pub.dev/packages/coinlib) package is available on pub.dev.

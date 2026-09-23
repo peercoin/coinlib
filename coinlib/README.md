@@ -23,9 +23,7 @@ and signing of transactions and management of BIP32 wallets.
 
 ## Installation and Usage
 
-If you are using flutter, please see
-[coinlib_flutter](https://pub.dev/packages/coinlib_flutter) instead. Otherwise
-you may add `coinlib` to your project via:
+Add `coinlib` to a Dart or Flutter project via:
 
 ```
 dart pub add coinlib
@@ -42,7 +40,15 @@ import 'package:coinlib/coinlib.dart';
 ```
 
 The library must be asynchronously loaded by awaiting the `loadCoinlib()`
-function before any part of the library is used.
+function before any part of the library is used. In Flutter, do this before
+calling `runApp()`:
+
+```dart
+Future<void> main() async {
+  await loadCoinlib();
+  runApp(const MyApp());
+}
+```
 
 The library uses a functional-style of OOP. With some exceptions, objects are
 immutable. New modified objects are returned from methods. For example, signing
