@@ -12,7 +12,6 @@ dependencies:
     sdk: flutter
   coinlib:
     path: ../coinlib
-  cupertino_icons: ^1.0.2
 
 dev_dependencies:
   flutter_test:
