@@ -1,3 +1,7 @@
+## 6.1.0
+
+Remove dependency on pointycastle with internal RIPEMD160 implementation.
+
 ## 6.0.1
 
 Update donation address
